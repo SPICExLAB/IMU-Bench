@@ -1,3 +1,0 @@
-core
-imu_lm
-scripts
