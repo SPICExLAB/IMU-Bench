@@ -1,0 +1,52 @@
+# Linear probe config for models pretrained on Nymeria IMU (MAE or wrist pose).
+#
+# The frozen encoder is loaded automatically from runs/<run>/artifacts/encoder_meta.json
+# + runs/<run>/checkpoints/best.pt — no extra setup required.
+#
+# Probe evaluation is on the parquet dataset (paths.dataset_path = base.yaml).
+# The split defined by splits.probe_dataset is used for train/val/test.
+#
+# Usage:
+#   python scripts/run_probe_train.py \
+#       --config configs/base.yaml \
+#       --probe-config configs/nymeria_probe.yaml \
+#       --run vit1d_mae_nymeria          # or vit1d_nymeria_pose
+#
+#   python scripts/run_probe_eval.py \
+#       --config configs/base.yaml \
+#       --probe-config configs/nymeria_probe.yaml \
+#       --run vit1d_mae_nymeria
+
+splits:
+  probe_dataset: prism               # dataset split to probe on (excluded from pretraining)
+  probe_ratios: [0.7, 0.1, 0.2]     # train / val / test fractions within probe_dataset
+  probe_stratify_by_label: false
+
+probe:
+  probe_dirname: "linear_probe_nymeria"  # saved under runs/<run>/linear_probe_nymeria/
+
+  # ---- Classification task ------------------------------------------------
+  probe_task: null                   # null = all activity labels; restrict e.g. "MakeCereal"
+  drop_unknown: true
+  min_count_per_class: 5             # skip classes with fewer than N probe windows
+
+  # ---- Training -----------------------------------------------------------
+  num_epochs: 1000000                # early-stopped; set high
+  batch_size: 256
+  lr: 0.001
+  weight_decay: 0.0001
+  grad_clip_norm: 1.0
+  early_stop_patience: 30
+  amp: true
+  selection_metric: bal_acc          # metric used to pick best checkpoint
+  class_weighted_loss: true          # recommended for imbalanced probe sets
+  log_every_steps: 20
+
+  # ---- Split strategy -----------------------------------------------------
+  stratified_by_class: true          # per-class stratified 70/10/20 split
+
+  # ---- Few-shot (optional) ------------------------------------------------
+  fewshot_enabled: false
+  fewshot_shots_per_class: 10
+  fewshot_seed: 42
+  fewshot_probe_dirname: "fewshot_probe_nymeria"

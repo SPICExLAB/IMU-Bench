@@ -100,6 +100,85 @@ class PositionalEmbedding2D(nn.Module):
         return pos_embed
 
 
+class SinusoidalPositionalEmbedding2D(nn.Module):
+    """2D positional embedding: sinusoidal for time, learned for channel.
+
+    The time embedding uses fixed sinusoidal encoding (generalises to any
+    sequence length at test time without re-training).  The channel embedding
+    stays learned because the number of sensor channels is small and fixed.
+
+    The forward API is identical to PositionalEmbedding2D, so the two classes
+    are drop-in replacements for each other.  Select via config key::
+
+        vit1d:
+          pos_embed_type: sinusoidal   # default: "learned"
+    """
+
+    def __init__(
+        self,
+        max_patches_per_channel: int,
+        max_channels: int,
+        embed_dim: int,
+    ):
+        super().__init__()
+        self.embed_dim = embed_dim
+        self.max_patches_per_channel = max_patches_per_channel
+
+        # Learned channel embedding (bounded by number of sensor channels)
+        self.channel_embed = nn.Embedding(max_channels, embed_dim)
+
+        # Pre-compute sinusoidal time table; stored as a non-trainable buffer
+        # so it moves with the module when .cuda() / .to(device) is called.
+        self.register_buffer(
+            "time_embed_table",
+            self._build_sinusoidal(max_patches_per_channel, embed_dim),
+        )  # [max_patches_per_channel, embed_dim]
+
+    @staticmethod
+    def _build_sinusoidal(max_len: int, d_model: int) -> torch.Tensor:
+        """Standard transformer sinusoidal encoding [max_len, d_model]."""
+        pe = torch.zeros(max_len, d_model)
+        position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)  # [L, 1]
+        half_d = d_model // 2
+        div_term = torch.exp(
+            torch.arange(0, half_d, dtype=torch.float) * (-math.log(10000.0) / half_d)
+        )  # [half_d]
+        pe[:, 0::2] = torch.sin(position * div_term)                    # even dims
+        pe[:, 1::2] = torch.cos(position * div_term[: d_model - half_d])  # odd dims
+        return pe
+
+    def forward(
+        self, num_patches_per_channel: int, num_channels: int, device: torch.device
+    ) -> torch.Tensor:
+        """Return [N, D] positional embeddings; N = num_channels * num_patches_per_channel."""
+        # -- time embedding -----------------------------------------------
+        if num_patches_per_channel <= self.time_embed_table.shape[0]:
+            time_pe = self.time_embed_table[:num_patches_per_channel]  # [P, D]
+        else:
+            # Sequence longer than pre-computed table: compute on-the-fly
+            time_pe = self._build_sinusoidal(
+                num_patches_per_channel, self.embed_dim
+            ).to(device)
+
+        # Expand to channel-major layout [C0_P0, C0_P1, ..., C1_P0, ...]
+        time_pos_embed = (
+            time_pe.unsqueeze(0)                      # [1, P, D]
+            .expand(num_channels, -1, -1)             # [C, P, D]
+            .reshape(num_channels * num_patches_per_channel, self.embed_dim)
+        )  # [C*P, D]
+
+        # -- channel embedding --------------------------------------------
+        channel_pos = torch.arange(num_channels, device=device)  # [C]
+        ch_embed = self.channel_embed(channel_pos)                # [C, D]
+        channel_pos_embed = (
+            ch_embed.unsqueeze(1)                     # [C, 1, D]
+            .expand(-1, num_patches_per_channel, -1)  # [C, P, D]
+            .reshape(num_channels * num_patches_per_channel, self.embed_dim)
+        )  # [C*P, D]
+
+        return time_pos_embed + channel_pos_embed  # [N, D]
+
+
 class ViT1DEncoder(nn.Module):
     """ViT-1D Encoder: [B, C, T] → [B, embed_dim].
     
@@ -150,12 +229,20 @@ class ViT1DEncoder(nn.Module):
             shared_kernel=shared_kernel,
         )
         
-        self.pos_embed = PositionalEmbedding2D(
-            max_patches_per_channel=max_patches,
-            max_channels=max_channels,
-            embed_dim=self.embed_dim,
-        )
-        
+        pos_embed_type = str(vit_cfg.get("pos_embed_type", "learned"))
+        if pos_embed_type == "sinusoidal":
+            self.pos_embed = SinusoidalPositionalEmbedding2D(
+                max_patches_per_channel=max_patches,
+                max_channels=max_channels,
+                embed_dim=self.embed_dim,
+            )
+        else:
+            self.pos_embed = PositionalEmbedding2D(
+                max_patches_per_channel=max_patches,
+                max_channels=max_channels,
+                embed_dim=self.embed_dim,
+            )
+
         # Use PyTorch's built-in transformer encoder
         encoder_layer = nn.TransformerEncoderLayer(
             d_model=self.embed_dim,
@@ -217,6 +304,31 @@ class ViT1DEncoder(nn.Module):
         
         return out
 
+    def forward_tokens(self, x: torch.Tensor) -> torch.Tensor:
+        """Return full per-token encoder output (no pooling).
+
+        Used by ViT1DPoseDecoder, which needs the complete token grid rather
+        than a single pooled vector.
+
+        Args:
+            x: [B, C, T] raw input signal
+
+        Returns:
+            tokens: [B, C * num_patches_per_channel, D]
+                    Token layout: [C0_P0, C0_P1, ..., C1_P0, ..., CC-1_Pt-1]
+            num_patches_per_channel: int  (= T // patch_size)
+        """
+        B, C, T = x.shape
+        num_patches_per_channel = T // self.patch_size
+
+        tokens = self.patch_embed(x)
+        pos_embed = self.pos_embed(num_patches_per_channel, C, x.device)
+        tokens = tokens + pos_embed.unsqueeze(0)
+        tokens = self.encoder(tokens)
+        tokens = self.norm(tokens)
+
+        return tokens, num_patches_per_channel
+
 
 class ViT1DDecoder(nn.Module):
     """ViT-1D MAE Decoder: visible encoder tokens + mask → [B, C, T].
@@ -261,7 +373,11 @@ class ViT1DDecoder(nn.Module):
         # Positional embedding for full sequence
         max_patches = int(vit_cfg.get("max_patches_per_channel", 256))
         max_channels = int(vit_cfg.get("max_channels", 32))
-        self.pos_embed = PositionalEmbedding2D(max_patches, max_channels, hidden_size)
+        pos_embed_type = str(vit_cfg.get("pos_embed_type", "learned"))
+        if pos_embed_type == "sinusoidal":
+            self.pos_embed = SinusoidalPositionalEmbedding2D(max_patches, max_channels, hidden_size)
+        else:
+            self.pos_embed = PositionalEmbedding2D(max_patches, max_channels, hidden_size)
         
         decoder_layer = nn.TransformerEncoderLayer(
             d_model=hidden_size,
@@ -335,7 +451,234 @@ class ViT1DDecoder(nn.Module):
         patch_values = patch_values.view(B, num_channels, num_patches_per_channel, self.patch_size)
         out = patch_values.reshape(B, num_channels, num_patches_per_channel * self.patch_size)
         
-        if out.shape[-1] != self.target_T:
+        if self.target_T > 0 and out.shape[-1] != self.target_T:
             out = torch.nn.functional.interpolate(out, size=self.target_T, mode='linear', align_corners=False)
         
         return out
+
+
+class ViT1DPoseDecoder(nn.Module):
+    """ViT-1D Pose Decoder: encoder token grid → [B, P_t, num_joints * 6].
+
+    Predicts one 6D rotation vector per time patch for each joint in a
+    kinematic chain (e.g. the right arm chain with 5 joints → 30 dims).
+
+    Architecture
+    ------------
+    1. Receive full encoder tokens  [B, C * P_t, D]
+    2. Reshape to                   [B, C, P_t, D]
+    3. Mean-pool over channels  →   [B, P_t, D]
+    4. Lightweight transformer over the P_t time-patch sequence
+    5. Per-token linear head     →  [B, P_t, num_joints * 6]
+
+    Token layout assumption (from PatchEmbed1D + ViT1DEncoder):
+        index = channel_idx * P_t + time_patch_idx
+
+    This decoder is **throwaway** after pretraining; only the encoder is
+    kept for downstream probing.
+
+    Args:
+        embed_dim:   Encoder hidden size (D).
+        num_patches_per_channel: P_t (= T // patch_size).
+        in_channels: C (number of IMU sensor channels).
+        num_joints:  Number of joints in the target kinematic chain (default 5).
+        cfg:         Config dict (reads vit1d.pose_decoder.* keys).
+    """
+
+    def __init__(
+        self,
+        embed_dim: int,
+        num_patches_per_channel: int,
+        in_channels: int,
+        num_joints: int = 5,
+        cfg: Any = None,
+    ):
+        super().__init__()
+
+        self.embed_dim = embed_dim
+        self.num_patches_per_channel = num_patches_per_channel
+        self.in_channels = in_channels
+        self.num_joints = num_joints
+        self.out_dim = num_joints * 6  # 6D rotation per joint
+
+        # Read decoder hyper-params from cfg (vit1d.pose_decoder.*)
+        vit_cfg = cfg_get(cfg, ["vit1d"], {}) or {} if cfg is not None else {}
+        dec_cfg = vit_cfg.get("pose_decoder", {}) or {}
+
+        hidden_size   = int(dec_cfg.get("hidden_size",         192))
+        num_layers    = int(dec_cfg.get("num_hidden_layers",     2))
+        num_heads     = int(dec_cfg.get("num_attention_heads",   4))
+        mlp_ratio     = float(dec_cfg.get("mlp_ratio",          4.0))
+        dropout       = float(dec_cfg.get("dropout",            0.0))
+
+        self.hidden_size = hidden_size
+
+        # Project encoder dim → decoder dim
+        self.encoder_to_decoder = nn.Linear(embed_dim, hidden_size)
+
+        # Learnable positional embeddings over the P_t time patches
+        self.time_pos_embed = nn.Embedding(num_patches_per_channel, hidden_size)
+
+        # Lightweight transformer over the P_t time positions
+        dec_layer = nn.TransformerEncoderLayer(
+            d_model=hidden_size,
+            nhead=num_heads,
+            dim_feedforward=int(hidden_size * mlp_ratio),
+            dropout=dropout,
+            batch_first=True,
+            activation="gelu",
+            norm_first=True,
+        )
+        self.transformer = nn.TransformerEncoder(dec_layer, num_layers=num_layers)
+        self.norm = nn.LayerNorm(hidden_size)
+
+        # Per-patch linear prediction head: hidden → num_joints * 6
+        self.head = nn.Linear(hidden_size, self.out_dim)
+
+        self._init_weights()
+
+    def _init_weights(self):
+        nn.init.trunc_normal_(self.time_pos_embed.weight, std=0.02)
+        nn.init.trunc_normal_(self.head.weight, std=0.02)
+        nn.init.zeros_(self.head.bias)
+
+    def forward(self, tokens: torch.Tensor) -> torch.Tensor:
+        """Decode encoder token grid to per-patch pose predictions.
+
+        Args:
+            tokens: [B, C * P_t, D]  full encoder output from
+                    ``ViT1DEncoder.forward_tokens(x)``
+
+        Returns:
+            [B, P_t, num_joints * 6]  — one 6D-rotation vector per time patch
+                                        per joint (flattened), e.g. [B, 8, 30]
+        """
+        B, N, D = tokens.shape
+        C  = self.in_channels
+        Pt = self.num_patches_per_channel
+        assert N == C * Pt, (
+            f"ViT1DPoseDecoder: expected {C * Pt} tokens (C={C} x Pt={Pt}), "
+            f"got {N}"
+        )
+
+        # Reshape: [B, C * Pt, D] → [B, C, Pt, D]
+        x = tokens.view(B, C, Pt, D)
+
+        # Mean-pool across channels → [B, Pt, D]
+        x = x.mean(dim=1)
+
+        # Project to decoder dim
+        x = self.encoder_to_decoder(x)  # [B, Pt, hidden_size]
+
+        # Add time positional embedding
+        time_idx = torch.arange(Pt, device=tokens.device)
+        x = x + self.time_pos_embed(time_idx).unsqueeze(0)  # [B, Pt, H]
+
+        # Transformer over P_t positions
+        x = self.transformer(x)      # [B, Pt, H]
+        x = self.norm(x)
+
+        # Per-patch prediction → [B, Pt, num_joints * 6]
+        out = self.head(x)
+        return out
+
+
+class ViT1DOdomDecoder(nn.Module):
+    """ViT-1D Odometry Decoder: encoder token grid → [B, P_t, 3].
+
+    Predicts the root (pelvis) XYZ displacement over each time-patch interval.
+    Architecture is identical to ViT1DPoseDecoder but the output head produces
+    3-dimensional translations instead of joint rotations.
+
+    Architecture
+    ------------
+    1. Receive full encoder tokens  [B, C * P_t, D]
+    2. Reshape to                   [B, C, P_t, D]
+    3. Mean-pool over channels  →   [B, P_t, D]
+    4. Lightweight transformer over the P_t time-patch sequence
+    5. Per-token linear head     →  [B, P_t, 3]
+
+    Config keys read from ``cfg["vit1d"]["odom_decoder"]``::
+
+        hidden_size           int    192
+        num_hidden_layers     int    2
+        num_attention_heads   int    4
+        mlp_ratio             float  4.0
+        dropout               float  0.0
+    """
+
+    def __init__(
+        self,
+        embed_dim: int,
+        num_patches_per_channel: int,
+        in_channels: int,
+        cfg: Any,
+    ):
+        super().__init__()
+
+        vit_cfg  = cfg_get(cfg, ["vit1d"], {}) or {}
+        dec_cfg  = vit_cfg.get("odom_decoder", {}) or {}
+
+        self.num_patches_per_channel = num_patches_per_channel
+        self.in_channels             = in_channels
+        self.embed_dim               = embed_dim
+
+        hidden_size = int(dec_cfg.get("hidden_size",           192))
+        num_layers  = int(dec_cfg.get("num_hidden_layers",       2))
+        num_heads   = int(dec_cfg.get("num_attention_heads",     4))
+        mlp_ratio   = float(dec_cfg.get("mlp_ratio",           4.0))
+        dropout     = float(dec_cfg.get("dropout",             0.0))
+
+        # Project encoder dim → lightweight decoder dim
+        self.encoder_to_decoder = nn.Linear(embed_dim, hidden_size)
+
+        # Time positional embedding (one entry per time patch)
+        self.time_pos_embed = nn.Embedding(num_patches_per_channel, hidden_size)
+
+        decoder_layer = nn.TransformerEncoderLayer(
+            d_model=hidden_size,
+            nhead=num_heads,
+            dim_feedforward=int(hidden_size * mlp_ratio),
+            dropout=dropout,
+            batch_first=True,
+            activation="gelu",
+            norm_first=True,
+        )
+        self.transformer = nn.TransformerEncoder(decoder_layer, num_layers=num_layers)
+        self.norm = nn.LayerNorm(hidden_size)
+
+        # Per-patch head → XYZ displacement
+        self.head = nn.Linear(hidden_size, 3)
+
+    def forward(self, tokens: torch.Tensor) -> torch.Tensor:
+        """Predict per-patch root displacement.
+
+        Args:
+            tokens: [B, C * P_t, D]  — full encoder token grid.
+
+        Returns:
+            [B, P_t, 3]  — XYZ displacement per time patch.
+        """
+        B  = tokens.shape[0]
+        C  = self.in_channels
+        Pt = self.num_patches_per_channel
+
+        # Reshape → [B, C, Pt, D]
+        x = tokens.view(B, C, Pt, self.embed_dim)
+
+        # Mean-pool channels → [B, Pt, D]
+        x = x.mean(dim=1)
+
+        # Project to hidden size
+        x = self.encoder_to_decoder(x)  # [B, Pt, hidden_size]
+
+        # Add time positional embedding
+        time_idx = torch.arange(Pt, device=tokens.device)
+        x = x + self.time_pos_embed(time_idx).unsqueeze(0)  # [B, Pt, H]
+
+        # Lightweight transformer over P_t positions
+        x = self.transformer(x)  # [B, Pt, H]
+        x = self.norm(x)
+
+        # Per-patch displacement prediction → [B, Pt, 3]
+        return self.head(x)

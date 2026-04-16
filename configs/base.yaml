@@ -1,6 +1,6 @@
 paths:
-  runs_root: "/shared/imu_lm/TransfHAR/runs/"
-  dataset_path: "/shared/imu_lm/IMULM_master_dataset_v2.parquet"
+  runs_root: "/home/yiquan/TransfHAR/runs/"
+  dataset_path: "/mnt/nas2/yiquan_data/IMULM_master_dataset_v2.parquet"
 
 logging:
   log_every_steps: 5
@@ -8,7 +8,7 @@ logging:
 
 wandb:
   project: TransfHAR_project
-  entity: aidanbradshaw2025-northwestern-university
+  entity: yli32258-northwestern-university
 
 data:
   dataset_column: dataset
@@ -18,9 +18,12 @@ data:
   label_column: dataset_activity_id
   label_name_column: dataset_activity_label  # string activity name for metrics display
   sensor_columns: [acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z] 
-  train_on_datasets: ["wear"]          # null = all datasets (minus probe); or list e.g. [capture24, opportunity_plus_plus]
+  # train_on_datasets: ["wear"]          # null = all datasets (minus probe); or list e.g. [capture24, opportunity_plus_plus]
+  train_on_datasets: ["pamap2", "recofit", "samosa", "shoaib", "ut_watch", "utd_mhad", "wisdm"] # ~153.9 hours
+  # 6D datasets (acc+gyro): pamap2, recofit, samosa, shoaib, ut_watch, utd_mhad, wisdm  (~155h total, prism excluded as probe)
+  # 3D datasets (acc only): wear, capture24, opportunity++
   drop_na: false
-  num_workers: 8
+  num_workers: 8  # workers prefetch while GPU trains; parquet is in OS page-cache after epoch 1 so no NAS stampede
   pin_memory: true
   batch_size: 256
   eval_batch_size: 256

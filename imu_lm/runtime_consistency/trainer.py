@@ -11,6 +11,11 @@ import torch
 from torch.amp import GradScaler, autocast
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
+try:
+    from tqdm import tqdm
+except ImportError:
+    tqdm = None
+
 from imu_lm.utils.helpers import cfg_get
 
 try:
@@ -49,6 +54,9 @@ class Trainer:
         self.grad_clip_norm = float(cfg_get(cfg, ["trainer", "grad_clip_norm"], 0.0))
         self.grad_accum_steps = max(1, int(cfg_get(cfg, ["trainer", "grad_accum_steps"], 1)))
         self.val_every = int(cfg_get(cfg, ["trainer", "val_every_steps"], 0))
+        # Max batches to consume per validation pass; 0 = no limit (use for finite datasets).
+        # Set > 0 when val_loader is an infinite IterableDataset (e.g. var-len MAE, CLIP).
+        self.val_max_batches = int(cfg_get(cfg, ["trainer", "val_max_batches"], 0))
 
         # Early stopping config
         es_cfg = cfg_get(cfg, ["trainer", "early_stopping"], {}) or {}
@@ -96,8 +104,29 @@ class Trainer:
         metrics_f = open(self.metrics_path, "a", buffering=1)
 
         stop = False
+        # Compute total epochs so tqdm can show "X/Y ep" and an ETA.
+        try:
+            batches_per_epoch = len(train_loader)
+        except TypeError:
+            batches_per_epoch = None  # IterableDataset with no __len__
+        remaining_steps = max(0, self.max_steps - step)
+        if batches_per_epoch and batches_per_epoch > 0:
+            import math
+            total_epochs = self._epoch + math.ceil(remaining_steps / batches_per_epoch)
+        else:
+            total_epochs = None
+        epoch_bar = (
+            tqdm(total=total_epochs, initial=self._epoch, unit="ep",
+                 dynamic_ncols=True, desc="training")
+            if tqdm is not None else None
+        )
+        _last_loss = float("nan")
+
         while step < self.max_steps and not stop:
             self._epoch += 1
+            if epoch_bar is not None:
+                epoch_bar.set_description(f"epoch {self._epoch}")
+
             for batch in train_loader:
                 if batch is None:
                     continue
@@ -138,6 +167,9 @@ class Trainer:
                     metrics_f.write(line + "\n")
                     print(line)
                     self._wandb_log("train", logs, step, lr=lr)
+                    _last_loss = logs.get("loss", _last_loss)
+                    if epoch_bar is not None:
+                        epoch_bar.set_postfix(loss=f"{_last_loss:.4f}", step=step)
 
                 if step % self.ckpt_every == 0:
                     self._save_ckpt(model, optimizer, scheduler, step)
@@ -151,12 +183,18 @@ class Trainer:
                 if step >= self.max_steps:
                     break
 
+            # Advance the epoch bar by one tick at the end of each epoch
+            if epoch_bar is not None:
+                epoch_bar.update(1)
+
             # Epoch-end validation (only if val_every_steps is not set)
             if not stop and val_loader is not None and self.val_every <= 0:
                 if self._run_val(val_loader, model, objective_step, optimizer, scheduler, step, metrics_f):
                     stop = True
 
         metrics_f.close()
+        if epoch_bar is not None:
+            epoch_bar.close()
         # final checkpoint
         self._save_ckpt(model, optimizer, scheduler, step)
         reason = "early stopping" if stop else ("max_steps reached" if step >= self.max_steps else "data exhausted")
@@ -203,6 +241,8 @@ class Trainer:
                     if isinstance(v, (int, float)) and k != "loss":
                         accum_logs[k] = accum_logs.get(k, 0.0) + float(v)
                         all_logs_keys.add(k)
+                if self.val_max_batches > 0 and count >= self.val_max_batches:
+                    break
         if count == 0:
             return None
         avg_loss = total_loss / count

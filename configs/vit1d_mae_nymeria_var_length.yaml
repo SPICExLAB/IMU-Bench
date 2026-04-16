@@ -1,0 +1,64 @@
+vit1d:
+  patch_size: 16
+  shared_kernel: true
+  pos_embed_type: sinusoidal        # generalises to unseen lengths at test time
+  max_patches_per_channel: 64       # = T_max / patch_size = 512 / 16 (for buffer)
+  max_channels: 32
+  pooling: "mean"
+
+  encoder:
+    hidden_size: 384
+    num_hidden_layers: 12
+    num_attention_heads: 6
+    intermediate_size: 1536
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-6
+
+  decoder:
+    hidden_size: 192
+    num_hidden_layers: 4
+    num_attention_heads: 4
+
+objective:
+  type: mae_nymeria_var_len
+  mask_ratio: 0.75
+  mask_strategy: composite        # random | temporal | signal | composite
+  mae_nymeria_var_len:
+    train_pkl_root: /mnt/nas2/processed_data_body_Ty
+    train_files: all
+    val_pkl_root: /mnt/nas2/processed_data_test_body_Ty   # test set used for validation monitoring
+    val_files: all
+
+windowing:
+  min_window_seconds: 1.28    # T_min =  64 frames =  4 patches at 50 Hz, patch_size 16
+  max_window_seconds: 10.24   # T_max = 512 frames = 32 patches at 50 Hz, patch_size 16
+
+data:
+  batch_size: 32
+  num_workers: 4
+
+trainer:
+  val_max_batches: 100   # cap val at 100 batches (~3200 windows) — val loader is infinite
+  seed: 42
+  amp: true
+  max_steps: 10000000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 1000
+
+  optim:
+    name: adamw
+    lr: 0.0001
+    weight_decay: 0.0001
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+
+  sched:
+    name: cosine
+    warmup_steps: 500
+
+  early_stopping:
+    enabled: true
+    monitor: val_loss
+    patience: 20

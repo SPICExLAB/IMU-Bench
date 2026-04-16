@@ -1,6 +1,6 @@
 # ViT-1D for raw 1D IMU/sensor data (LSM-2 style architecture) 
 vit1d:
-  patch_size: 4            # 1D patch size (timesteps per patch)
+  patch_size: 16            # 1D patch size (timesteps per patch)
   shared_kernel: true       # Same conv kernel across all channels (LSM-2 style)
   encoder:
     hidden_size: 384

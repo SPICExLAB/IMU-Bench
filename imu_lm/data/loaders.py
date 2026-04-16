@@ -66,11 +66,10 @@ def _build_window_specs(
 
 
 @dataclass
-class _SessionCache:
-    key: Optional[SessionKey] = None
-    X: Optional[np.ndarray] = None
-    y: Optional[np.ndarray] = None
-    t: Optional[np.ndarray] = None
+class _SessionData:
+    X: np.ndarray
+    y: np.ndarray
+    t: Optional[np.ndarray]
 
 
 class WindowDataset(Dataset):
@@ -78,9 +77,7 @@ class WindowDataset(Dataset):
         self.parquet_path = parquet_path
         self.cfg = cfg
         self.split_name = split_name
-        self.cache = _SessionCache()
         self.stats = PreprocessStats()
-        self._pa_dataset = None  # lazily opened per-worker
 
         # Cache config values read on every __getitem__
         self._dataset_col = cfg_get(cfg, ["data", "dataset_column"], "dataset")
@@ -124,44 +121,50 @@ class WindowDataset(Dataset):
             len(session_keys) - len(filtered_keys),
         )
 
+        # Preload all sessions into RAM once at construction time.
+        # Total raw sensor data is small (~80 MB for 3.3M rows × 6 channels),
+        # so this eliminates all parquet I/O during training.
+        import time as _time
+        pa_ds = ds.dataset(self.parquet_path, format="parquet")
+        self._session_store: Dict[SessionKey, _SessionData] = {}
+        for i, key in enumerate(self._keys):
+            t0 = _time.perf_counter()
+            filt = (
+                (ds.field(self._dataset_col) == key.dataset)
+                & (ds.field(self._subject_col) == key.subject_id)
+                & (ds.field(self._session_col) == key.session_id)
+            )
+            table = pa_ds.to_table(columns=self._load_cols, filter=filt)
+            df = table.to_pandas()
+            if self._time_col:
+                df = df.sort_values(self._time_col).reset_index(drop=True)
+            if self._drop_na:
+                df = df.dropna(subset=self._sensor_cols)
+            X = df[self._sensor_cols].to_numpy(dtype=np.float32)
+            y = df[self._label_col].to_numpy()
+            t = df[self._time_col].to_numpy() if self._time_col else None
+            self._session_store[key] = _SessionData(X=X, y=y, t=t)
+            elapsed = _time.perf_counter() - t0
+            logger.info(
+                "[preload %d/%d] %s/%s/%s  rows=%d  %.1fs",
+                i + 1, len(self._keys),
+                key.dataset, key.subject_id, key.session_id,
+                len(X), elapsed,
+            )
+        total_mb = sum(s.X.nbytes for s in self._session_store.values()) / 1e6
+        logger.info(
+            "WindowDataset split=%s preloaded %d sessions into RAM (%.1f MB)",
+            split_name, len(self._session_store), total_mb,
+        )
+
     def __len__(self) -> int:
         return len(self._starts)
-
-    def _get_pa_dataset(self):
-        """Lazily open the pyarrow dataset once per worker process."""
-        if self._pa_dataset is None:
-            self._pa_dataset = ds.dataset(self.parquet_path, format="parquet")
-        return self._pa_dataset
-
-    def _load_session(self, key: SessionKey) -> Tuple[np.ndarray, np.ndarray, Optional[np.ndarray]]:
-        if self.cache.key == key and self.cache.X is not None:
-            return self.cache.X, self.cache.y, self.cache.t
-
-        pa_ds = self._get_pa_dataset()
-        filt = (
-            (ds.field(self._dataset_col) == key.dataset)
-            & (ds.field(self._subject_col) == key.subject_id)
-            & (ds.field(self._session_col) == key.session_id)
-        )
-        table = pa_ds.to_table(columns=self._load_cols, filter=filt)
-        df = table.to_pandas()
-
-        if self._time_col:
-            df = df.sort_values(self._time_col).reset_index(drop=True)
-        if self._drop_na:
-            df = df.dropna(subset=self._sensor_cols)
-
-        X = df[self._sensor_cols].to_numpy(dtype=np.float32)
-        y = df[self._label_col].to_numpy()
-        t = df[self._time_col].to_numpy() if self._time_col else None
-
-        self.cache = _SessionCache(key=key, X=X, y=y, t=t)
-        return X, y, t
 
     def __getitem__(self, idx: int):
         key = self._keys[self._sess_idx[idx]]
         start = int(self._starts[idx])
-        X, y, t = self._load_session(key)
+        sd = self._session_store[key]
+        X, y, t = sd.X, sd.y, sd.t
         T = self._T
         Xw = X[start : start + T]
         yw = y[start : start + T]
