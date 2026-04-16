@@ -17,3 +17,4 @@ Figs/
 
 pyproject.toml 
 .data_vis/
+*.egg-info/
