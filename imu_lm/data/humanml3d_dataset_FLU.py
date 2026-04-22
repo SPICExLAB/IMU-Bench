@@ -5,19 +5,22 @@ Identical to humanml3d_dataset.py **except** the synthetic right-wrist IMU is
 expressed in the FLU (Forward-Left-Up) body frame, matching the convention of
 ``imu_lm/data/nymeria_wrist_loader_FLU.py``.
 
-FLU frame definition (T-pose, right wrist, SMPL convention)
-------------------------------------------------------------
-The FLU frame X is attached to the right wrist and defined by:
+FLU frame definition (T-pose, right wrist, geometric arm-chain frame)
+----------------------------------------------------------------------
+_build_wrist_rotation builds a frame from shoulder→elbow→wrist positions:
 
-    Forward (FLU x)  =  −x_smpl_wrist   (pointing toward thumb)
-    Left    (FLU y)  =  +z_smpl_wrist   (pointing out of back of hand)
-    Up      (FLU z)  =  +y_smpl_wrist   (pointing toward elbow)
+    col 0 (x_geom) = normalize(z × upper_arm)  — lateral (≈ thumb side)
+    col 1 (y_geom) = normalize(z × x)           — dorsal  (out of watch face)
+    col 2 (z_geom) = normalize(wrist − elbow)   — toward fingertips
 
-which gives the constant T-pose rotation matrix::
+The FLU mapping from this geometric frame:
 
-    R_wrist_from_flu = [[-1, 0, 0],
-                        [ 0, 0, 1],
-                        [ 0, 1, 0]]
+    Forward (FLU x)  =  +z_geom  (toward fingertips, away from arm)
+    Left    (FLU y)  =  +x_geom  (toward thumb side of right wrist)
+    Up      (FLU z)  =  +y_geom  (out of watch face, dorsal, away from skin)
+
+Note: this is a DIFFERENT R_WRIST_FROM_FLU than nymeria_wrist_loader_FLU.py,
+which uses the SMPL FK joint frame (x=proximal, y=dorsal, z=thumb).
 
 IMU derivation pipeline (per frame, world frame → FLU)
 -------------------------------------------------------
@@ -75,26 +78,36 @@ from imu_lm.data.humanml3d_dataset import (
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
-# FLU frame definition  (identical to nymeria_wrist_loader_FLU.py)
+# FLU frame definition — SMPL FK joint frame (same as nymeria_wrist_loader_FLU.py)
 # ---------------------------------------------------------------------------
-# The columns of R_WRIST_FROM_FLU are the FLU axes expressed in wrist-local coords:
-#   col 0 = F axis = -x_smpl
-#   col 1 = L axis = +z_smpl
-#   col 2 = U axis = +y_smpl
+# R_world_from_wrist(t) is taken from SMPL FK pose_global[:, 21].
+# In the SMPL T-pose the right-wrist local axes are:
+#   x_smpl  = proximal direction (toward elbow)
+#   y_smpl  = dorsal  (out of watch face)
+#   z_smpl  = thumb side (lateral)
+#
+# FLU mapping (identical constants to nymeria_wrist_loader_FLU.py):
+#   F (forward / fingertips) = −x_smpl
+#   L (left    / thumb side) = +z_smpl
+#   U (up      / watch face) = +y_smpl
+#
+# Columns of R_WRIST_FROM_FLU are the F, L, U axes in SMPL wrist-local coords:
 R_WRIST_FROM_FLU: np.ndarray = np.array(
-    [[-1.0, 0.0, 0.0],
-     [ 0.0, 0.0, 1.0],
-     [ 0.0, 1.0, 0.0]],
+    [[-1.0,  0.0,  0.0],   # F
+     [ 0.0,  0.0,  1.0],   # L
+     [ 0.0,  1.0,  0.0]],  # U
     dtype=np.float64,
 )
 
-# Sanity checks (same as nymeria_wrist_loader_FLU.py)
 assert np.allclose(R_WRIST_FROM_FLU.T @ R_WRIST_FROM_FLU, np.eye(3), atol=1e-6)
 assert np.isclose(np.linalg.det(R_WRIST_FROM_FLU), 1.0, atol=1e-6)
 
+# SMPL right wrist joint index (same as nymeria_wrist_loader_FLU.py)
+_SMPL_R_WRIST = 21
+
 
 # ---------------------------------------------------------------------------
-# Core helper: build R_world_from_wrist from joint positions
+# Geometric arm-chain helper (kept for external / visualisation use)
 # ---------------------------------------------------------------------------
 
 def _build_wrist_rotation(
@@ -102,111 +115,205 @@ def _build_wrist_rotation(
     elbow:    np.ndarray,   # [N, 3]
     wrist:    np.ndarray,   # [N, 3]
 ) -> np.ndarray:
-    """Construct world-frame wrist rotation matrix from arm-chain geometry.
+    """Geometric wrist frame from arm-chain joint positions [N, 3, 3].
 
-    Matches the local arm-frame used in humanml3d_dataset.py but returns the
-    full [N, 3, 3] rotation matrix instead of just the axes:
-
-        z_axis = normalize(wrist  - elbow)      # forearm direction (up in SMPL)
-        x_axis = normalize(z × upper_arm)       # lateral
-        y_axis = z × x                          # completes RH frame
-
-    Returns
-    -------
-    R : np.ndarray [N, 3, 3]  — R_world_from_wrist per frame
+    Not used in the FLU IMU derivation pipeline (which uses SMPL FK rotation
+    matrices from _load_wrist_rotmat_20hz). Kept for external / visualisation use.
     """
     eps = 1e-8
-
     z = wrist - elbow
     z = z / (np.linalg.norm(z, axis=-1, keepdims=True) + eps)
-
     upper = elbow - shoulder
     upper = upper / (np.linalg.norm(upper, axis=-1, keepdims=True) + eps)
-
     x = np.cross(z, upper)
     x = x / (np.linalg.norm(x, axis=-1, keepdims=True) + eps)
-
     y = np.cross(z, x)
     y = y / (np.linalg.norm(y, axis=-1, keepdims=True) + eps)
-
-    # columns: x, y, z  →  shape [N, 3, 3]
-    R = np.stack([x, y, z], axis=-1).astype(np.float64)   # [N, 3, 3]
-    return R
+    return np.stack([x, y, z], axis=-1).astype(np.float64)
 
 
 # ---------------------------------------------------------------------------
-# Core IMU derivation — FLU frame
+# SMPL FK helpers — load wrist rotation matrices from AMASS data
+# ---------------------------------------------------------------------------
+
+def _rot_a_to_b(a: np.ndarray, b: np.ndarray) -> np.ndarray:
+    """Rotation matrix mapping unit vector a → b (Rodrigues formula)."""
+    a = a / np.linalg.norm(a);  b = b / np.linalg.norm(b)
+    v = np.cross(a, b);  s = np.linalg.norm(v);  c = float(a @ b)
+    if s < 1e-9:
+        return np.eye(3) if c > 0 else np.diag([1., -1., -1.])
+    vx = np.array([[0, -v[2], v[1]], [v[2], 0, -v[0]], [-v[1], v[0], 0]])
+    return np.eye(3) + vx + vx @ vx * (1.0 - c) / (s * s)
+
+
+# Module-level AMASS clip index cache  {root: {"clip.npy": (npz_path, s, e)}}
+_amass_index_cache: Dict[str, Dict[str, Tuple[str, int, int]]] = {}
+
+
+def _get_amass_index(root: str) -> Dict[str, Tuple[str, int, int]]:
+    """Build (once per process) and return the AMASS clip index for this root."""
+    if root in _amass_index_cache:
+        return _amass_index_cache[root]
+    index: Dict[str, Tuple[str, int, int]] = {}
+    index_csv = pjoin(root, "index.csv")
+    if os.path.exists(index_csv):
+        with open(index_csv) as fh:
+            for line in fh:
+                parts = line.strip().split(",")
+                if len(parts) != 4:
+                    continue
+                src, s, e, name = parts
+                try:
+                    s, e = int(s), int(e)
+                except ValueError:
+                    continue
+                pose_npy  = pjoin(root, src.lstrip("./ "))
+                amass_npz = (pose_npy
+                             .replace("/pose_data/", "/amass_data/")
+                             .replace(".npy", ".npz"))
+                index[name] = (amass_npz, s, e)
+    _amass_index_cache[root] = index
+    return index
+
+
+# Lazy SMPL body model singleton (loaded once per process / DataLoader worker)
+_smpl_body_model = None
+
+
+def _get_smpl_body_model():
+    global _smpl_body_model
+    if _smpl_body_model is None:
+        import torch
+        import core.articulate as art
+        from core.paths import Paths
+        _smpl_body_model = art.model.ParametricModel(
+            str(Paths.SMPL_FILE), device=torch.device("cpu")
+        )
+    return _smpl_body_model
+
+
+def _resample_rotmat(R: np.ndarray, N_out: int) -> np.ndarray:
+    """Resample [N_in, 3, 3] rotation matrices to [N_out, 3, 3] via SLERP."""
+    from scipy.spatial.transform import Rotation as ScipyRot, Slerp
+    N_in = R.shape[0]
+    if N_in == N_out:
+        return R
+    t_in  = np.linspace(0.0, 1.0, N_in)
+    t_out = np.linspace(0.0, 1.0, N_out)
+    return Slerp(t_in, ScipyRot.from_matrix(R))(t_out).as_matrix().astype(np.float64)
+
+
+def _load_wrist_rotmat_20hz(
+    amass_path: str,
+    start_f:    int,
+    end_f:      int,
+    target_N:   int,
+) -> Optional[np.ndarray]:
+    """Run SMPL FK on an AMASS clip; return canonical wrist rotation [N, 3, 3] at 20 Hz.
+
+    Pipeline (mirrors nymeria_wrist_loader_FLU.py steps 2-4):
+      1. Load AMASS poses, resample to 20 Hz, slice to [start_f : end_f].
+      2. SMPL FK (no root translation) → pose_global[:, 21].
+      3. Apply canonical Y-rotation (face +Z) matching HumanML3D.
+      4. Return [min(N_amass, target_N), 3, 3].
+    """
+    if not os.path.exists(amass_path):
+        return None
+    try:
+        d = np.load(amass_path)
+    except Exception:
+        return None
+
+    import torch
+    from core.articulate.math import axis_angle_to_rotation_matrix
+
+    a_fps   = float(d["mocap_framerate"])
+    stride  = max(1, int(round(a_fps / _HML3D_FPS)))
+    poses20 = d["poses"][::stride]
+    end     = end_f if end_f >= 0 else len(poses20)
+    poses_c = poses20[start_f:end].astype(np.float32)
+    N       = min(poses_c.shape[0], target_N)
+    if N < 3:
+        return None
+    poses_c = poses_c[:N]
+
+    body    = _get_smpl_body_model()
+    pose_aa = torch.from_numpy(poses_c[:, :72].reshape(N, 24, 3))
+    R_local = axis_angle_to_rotation_matrix(pose_aa.reshape(-1, 3)).reshape(N, 24, 3, 3)
+
+    # Global rotations from FK
+    R_global = body.forward_kinematics_R(R_local).detach().cpu().numpy()   # [N, 24, 3, 3]
+
+    # Canonical Y-rotation: make person face +Z at frame 0 (same as HumanML3D)
+    _, jnt_t = body.forward_kinematics_masked(R_local, tran=None, calc_mesh=False)
+    jnt = jnt_t.detach().cpu().numpy()   # [N, 24, 3]
+    r_hip = jnt[0, 2];  l_hip = jnt[0, 1]
+    r_sdr = jnt[0, 17]; l_sdr = jnt[0, 16]
+    across  = (r_hip - l_hip) + (r_sdr - l_sdr);  across[1] = 0.
+    forward = np.cross(np.array([0., 1., 0.]), across)
+    R_y     = _rot_a_to_b(forward, np.array([0., 0., 1.]))
+
+    # R_canon = R_y @ R_world_from_wrist
+    R_wrist = R_global[:, _SMPL_R_WRIST]                   # [N, 3, 3]
+    return np.einsum("ij,njk->nik", R_y, R_wrist)          # [N, 3, 3]
+
+
+# ---------------------------------------------------------------------------
+# Core IMU derivation — FLU frame via SMPL FK (mirrors nymeria_wrist_loader_FLU.py)
 # ---------------------------------------------------------------------------
 
 def _joints_to_imu_flu(
-    joints: np.ndarray,
-    fps: float = _TARGET_FPS,
+    joints:        np.ndarray,   # [N, 22, 3]  canonical joint positions at target fps
+    R_wrist_world: np.ndarray,   # [N, 3, 3]   SMPL FK wrist rotation at target fps
+    fps:           float = _TARGET_FPS,
 ) -> np.ndarray:
-    """Derive right-wrist synthetic IMU in the FLU body frame.
+    """Derive right-wrist IMU in the FLU body frame.
 
-    Replicates the nymeria_wrist_loader_FLU.py pipeline using joint positions
-    instead of SMPL FK rotation matrices:
+    Follows nymeria_wrist_loader_FLU.py exactly:
 
-    1.  Build R_world_from_wrist(t) from arm-chain geometry.
-    2.  Propagate FLU frame: R_world_from_X(t) = R_world_from_wrist(t) @ R_WRIST_FROM_FLU
-    3.  World-frame linear acc of wrist origin.
-    4.  Angular velocity: ω_wrist_local → ω_world via R_world_from_wrist.
-    5.  Project both into FLU via R_X_from_world(t).
+    1.  R_world_from_X(t) = R_wrist_world(t) @ R_WRIST_FROM_FLU
+    2.  Linear acc from second derivative of canonical wrist position (from joints.npy).
+    3.  Angular velocity: SO3 log of consecutive R_wrist_world, rotated to world.
+    4.  Project both into FLU via R_X_from_world(t).
 
     Args:
-        joints: [N, 22, 3]  joint positions (world frame, already at target fps)
-        fps:    frame rate (should equal _TARGET_FPS = 50 Hz)
+        joints:        [N, 22, 3]  canonical joint positions (target fps)
+        R_wrist_world: [N, 3, 3]   SMPL FK global wrist rotation (canonical, target fps)
+        fps:           frame rate (default _TARGET_FPS = 50 Hz)
 
     Returns:
-        X: [N, 6]  float32  — (acc_F, acc_L, acc_U, gyro_F, gyro_L, gyro_U)
+        [N, 6]  float32 — (acc_F, acc_L, acc_U, gyro_F, gyro_L, gyro_U)
     """
     from scipy.spatial.transform import Rotation as ScipyRot
 
-    N = joints.shape[0]
+    N     = joints.shape[0]
+    wrist = joints[:, _R_WRIST].astype(np.float64)   # [N, 3]
 
-    shoulder = joints[:, _R_SHOULDER].astype(np.float64)  # [N, 3]
-    elbow    = joints[:, _R_ELBOW   ].astype(np.float64)  # [N, 3]
-    wrist    = joints[:, _R_WRIST   ].astype(np.float64)  # [N, 3]
+    # ── Step 1: FLU frame in world ──────────────────────────────────────────
+    R_world_from_X = np.einsum("nij,jk->nik", R_wrist_world, R_WRIST_FROM_FLU)  # [N, 3, 3]
+    R_X_from_world = R_world_from_X.transpose(0, 2, 1)                            # [N, 3, 3]
 
-    # ── Step 1: R_world_from_wrist  [N, 3, 3] ──────────────────────────────
-    R_world_from_wrist = _build_wrist_rotation(shoulder, elbow, wrist)  # [N, 3, 3]
-
-    # ── Step 2: propagate FLU frame to world ────────────────────────────────
-    # R_world_from_X(t) = R_world_from_wrist(t) @ R_WRIST_FROM_FLU
-    R_world_from_X = np.einsum("nij,jk->nik", R_world_from_wrist, R_WRIST_FROM_FLU)  # [N, 3, 3]
-    R_X_from_world = R_world_from_X.transpose(0, 2, 1)                                # [N, 3, 3]
-
-    # ── Step 3: world-frame linear acceleration of wrist ────────────────────
+    # ── Step 2: world-frame linear acceleration of wrist joint ──────────────
     a_world = np.zeros((N, 3), dtype=np.float64)
     a_world[1:-1] = (wrist[2:] - 2.0 * wrist[1:-1] + wrist[:-2]) * (fps ** 2)
     a_world[0]    = a_world[1]
     a_world[-1]   = a_world[-2]
 
-    # ── Step 4: angular velocity in wrist local frame → world ───────────────
-    # dR[t] = R_world_from_wrist[t]^T @ R_world_from_wrist[t+1]
+    # ── Step 3: angular velocity in wrist local frame → world ───────────────
     dR = np.einsum(
         "nij,njk->nik",
-        R_world_from_wrist[:-1].transpose(0, 2, 1),
-        R_world_from_wrist[1:],
+        R_wrist_world[:-1].transpose(0, 2, 1),
+        R_wrist_world[1:],
     )  # [N-1, 3, 3]
+    omega_wl       = np.zeros((N, 3), dtype=np.float64)
+    omega_wl[:-1]  = (ScipyRot.from_matrix(dR.reshape(-1, 3, 3))
+                      .as_rotvec().astype(np.float64) * fps)
+    omega_wl[-1]   = omega_wl[-2]
+    omega_world    = np.einsum("nij,nj->ni", R_wrist_world, omega_wl)  # [N, 3]
 
-    omega_wrist_local = (
-        ScipyRot.from_matrix(dR.reshape(-1, 3, 3))
-        .as_rotvec()
-        .astype(np.float64) * fps
-    ).reshape(N - 1, 3)  # [N-1, 3]
-
-    # Pad to length N (copy last value)
-    omega_wl = np.zeros((N, 3), dtype=np.float64)
-    omega_wl[:-1] = omega_wrist_local
-    omega_wl[-1]  = omega_wrist_local[-1]
-
-    # Rotate to world frame
-    omega_world = np.einsum("nij,nj->ni", R_world_from_wrist, omega_wl)  # [N, 3]
-
-    # ── Step 5: project into FLU ────────────────────────────────────────────
-    acc_flu  = np.einsum("nij,nj->ni", R_X_from_world, a_world).astype(np.float32)   # [N, 3]
-    gyro_flu = np.einsum("nij,nj->ni", R_X_from_world, omega_world).astype(np.float32)  # [N, 3]
+    # ── Step 4: project into FLU ────────────────────────────────────────────
+    acc_flu  = np.einsum("nij,nj->ni", R_X_from_world, a_world).astype(np.float32)
+    gyro_flu = np.einsum("nij,nj->ni", R_X_from_world, omega_world).astype(np.float32)
 
     return np.concatenate([acc_flu, gyro_flu], axis=1)   # [N, 6]
 
@@ -251,8 +358,23 @@ def _load_clip_imu_flu(
 
     joints_50hz = joints_50hz[:T]                        # [T, 22, 3]
 
-    # ── FLU IMU derivation ────────────────────────────────────────────────
-    imu = _joints_to_imu_flu(joints_50hz, fps=_TARGET_FPS)  # [T, 6]
+    # ── SMPL FK wrist rotation at 20 Hz via AMASS (same approach as nymeria) ─
+    amass_index = _get_amass_index(root)
+    amass_entry = amass_index.get(f"{clip_id}.npy")
+    if amass_entry is None:
+        return None
+    amass_path_clip, start_f, end_f = amass_entry
+    R_wrist_20hz = _load_wrist_rotmat_20hz(
+        amass_path_clip, start_f, end_f, target_N=joints_raw.shape[0]
+    )
+    if R_wrist_20hz is None:
+        return None
+
+    # Resample wrist rotation matrices 20 Hz → 50 Hz (SLERP), truncate to T
+    R_wrist_50hz = _resample_rotmat(R_wrist_20hz, N_raw)[:T]   # [T, 3, 3]
+
+    # ── FLU IMU derivation via SMPL FK (matches nymeria_wrist_loader_FLU.py) ─
+    imu = _joints_to_imu_flu(joints_50hz, R_wrist_50hz, fps=_TARGET_FPS)  # [T, 6]
 
     # ── captions ─────────────────────────────────────────────────────────
     captions: List[str] = []
