@@ -1,0 +1,45 @@
+# RNN1D: Recurrent (GRU/LSTM) encoder for 1D IMU signals
+rnn1d:
+  encoder:
+    hidden_size: 256        # RNN hidden state size
+    num_layers: 2           # number of stacked RNN layers
+    rnn_type: gru           # gru | lstm
+    bidirectional: false    # true doubles rnn_out_dim
+    dropout: 0.1            # inter-layer dropout (ignored when num_layers == 1)
+    pooling: mean           # mean | last | max
+    # embed_dim: 256        # optional projection head; defaults to hidden_size
+
+  decoder:
+    hidden_size: 256        # decoder GRU hidden size
+    num_layers: 1           # decoder layers
+    dropout: 0.0
+
+# Objective: "mae" (self-supervised) or "supervised" (classification)
+objective:
+  type: mae
+  mask_ratio: 0.75
+  mask_strategy: composite
+
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 100000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 2500
+
+  optim:
+    name: adamw
+    lr: 0.001
+    weight_decay: 0.0001
+    betas: [0.9, 0.999]
+    eps: 1.0e-8
+
+  sched:
+    name: cosine
+    warmup_steps: 100
+
+  early_stopping:
+    enabled: true
+    monitor: val_loss
+    patience: 5

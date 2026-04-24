@@ -97,8 +97,14 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
         _loader_type = str(pose_cfg.get("loader", "")).lower()
         if _loader_type == "flu":
             from imu_lm.data.nymeria_wrist_loader_FLU import make_nymeria_loaders_flu as _make_pose_loaders
+        elif _loader_type == "nymeria_real_wrist_flu":
+            from imu_lm.data.nymeria_real_wrist_loader_FLU import make_nymeria_real_wrist_loaders_flu as _make_pose_loaders
         elif _loader_type == "imuposer_flu":
             from imu_lm.data.imuposer_wrist_loader_FLU import make_imuposer_wrist_flu_loaders as _make_pose_loaders
+        elif _loader_type == "imuposer_flu_16hz_to_50hz":
+            from imu_lm.data.imuposer_wrist_16hz_to_50hz_loader_FLU import make_imuposer_wrist_16hz_to_50hz_flu_loaders as _make_pose_loaders
+        elif _loader_type == "imuposer_full_body_flu":
+            from imu_lm.data.imuposer_wrist_full_body_loader_FLU import make_imuposer_wrist_full_body_flu_loaders as _make_pose_loaders
         elif num_joints == 24:
             from imu_lm.data.nymeria_wrist_full_body_loader import make_nymeria_loaders as _make_pose_loaders
         else:
@@ -156,18 +162,23 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
         def objective_fn(batch, model, cfg):
             return pose_1d_obj.forward_loss(batch, encoder, pose_decoder, cfg)
         all_params = list(encoder.parameters()) + list(pose_decoder.parameters())
-        if _loader_type == "imuposer_flu":
+        if _loader_type in ("imuposer_flu", "imuposer_flu_16hz_to_50hz", "imuposer_full_body_flu"):
             loaders = _make_pose_loaders(
                 cfg=cfg,
                 train_files=train_files,
                 val_files=val_files,
+                add_gravity=bool(pose_cfg.get("add_gravity", False)),
             )
         else:
+            _flu_gyro_w = float(pose_cfg.get("gyro_white_noise_std", 0.0))
+            _flu_gyro_b = float(pose_cfg.get("gyro_bias_drift_std",  0.0))
             loaders = _make_pose_loaders(
                 cfg=cfg,
                 pkl_root=pkl_root,          # ignored; files are absolute
                 train_files=train_files,
                 val_files=val_files,
+                gyro_white_noise_std=_flu_gyro_w,
+                gyro_bias_drift_std =_flu_gyro_b,
             )
     elif objective_type == "pose_probe":
         # Frozen pretrained encoder + trainable ViT1DPoseDecoder.
@@ -209,8 +220,14 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
         _probe_loader_type = str(probe_cfg.get("loader", "")).lower()
         if _probe_loader_type == "flu":
             from imu_lm.data.nymeria_wrist_loader_FLU import make_nymeria_loaders_flu as _make_loaders
+        elif _probe_loader_type == "nymeria_real_wrist_flu":
+            from imu_lm.data.nymeria_real_wrist_loader_FLU import make_nymeria_real_wrist_loaders_flu as _make_loaders
         elif _probe_loader_type == "imuposer_flu":
             from imu_lm.data.imuposer_wrist_loader_FLU import make_imuposer_wrist_flu_loaders as _make_loaders
+        elif _probe_loader_type == "imuposer_flu_16hz_to_50hz":
+            from imu_lm.data.imuposer_wrist_16hz_to_50hz_loader_FLU import make_imuposer_wrist_16hz_to_50hz_flu_loaders as _make_loaders
+        elif _probe_loader_type == "imuposer_full_body_flu":
+            from imu_lm.data.imuposer_wrist_full_body_loader_FLU import make_imuposer_wrist_full_body_flu_loaders as _make_loaders
         elif num_joints == 24:
             from imu_lm.data.nymeria_wrist_full_body_loader import make_nymeria_loaders as _make_loaders
         else:
@@ -252,18 +269,23 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
 
         # Only decoder parameters are trainable
         all_params = list(pose_decoder.parameters())
-        if _probe_loader_type == "imuposer_flu":
+        if _probe_loader_type in ("imuposer_flu", "imuposer_flu_16hz_to_50hz", "imuposer_full_body_flu"):
             loaders = _make_loaders(
                 cfg=cfg,
                 train_files=train_files,
                 val_files=val_files,
+                add_gravity=bool(probe_cfg.get("add_gravity", False)),
             )
         else:
+            _flu_gyro_w = float(probe_cfg.get("gyro_white_noise_std", 0.0))
+            _flu_gyro_b = float(probe_cfg.get("gyro_bias_drift_std",  0.0))
             loaders = _make_loaders(
                 cfg=cfg,
                 pkl_root="/",
                 train_files=train_files,
                 val_files=val_files,
+                gyro_white_noise_std=_flu_gyro_w,
+                gyro_bias_drift_std =_flu_gyro_b,
             )
 
     elif objective_type == "odom_probe":
@@ -406,6 +428,145 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
             val_files=val_files,
         )
 
+    elif objective_type == "odom_probe_imuposer_flu":
+        # Frozen pretrained encoder + trainable ViT1DOdomDecoder on IMUPoser FLU data.
+        # Real right-wrist MEMS IMU in FLU body frame → per-patch pelvis root displacement [3].
+        import glob as _glob
+        odom_probe_ip_cfg = cfg_get(cfg, ["objective", "odom_probe_imuposer_flu"], {}) or {}
+        vit_cfg_  = cfg_get(cfg, ["vit1d"], {}) or {}
+        patch_size              = int(vit_cfg_.get("patch_size", 16))
+        num_patches_per_channel = T // patch_size
+
+        # ---- load & freeze pretrained encoder --------------------------------
+        pretrained_run  = odom_probe_ip_cfg.get("pretrained_run")
+        pretrained_ckpt = odom_probe_ip_cfg.get("pretrained_ckpt", "best")
+        runs_root = cfg_get(cfg, ["paths", "runs_root"], "runs")
+        if pretrained_ckpt in ("best", "latest"):
+            enc_ckpt_path = os.path.join(runs_root, pretrained_run,
+                                         "checkpoints", f"{pretrained_ckpt}.pt")
+        else:
+            enc_ckpt_path = pretrained_ckpt
+
+        if not os.path.exists(enc_ckpt_path):
+            raise FileNotFoundError(
+                f"[odom_probe_imuposer_flu] pretrained encoder checkpoint not found: {enc_ckpt_path}"
+            )
+
+        import logging as _logging
+        _log = _logging.getLogger(__name__)
+        _log.info("[odom_probe_imuposer_flu] loading pretrained encoder from %s", enc_ckpt_path)
+        enc_state = torch.load(enc_ckpt_path, map_location="cpu", weights_only=False)
+        encoder.load_state_dict(enc_state["model"], strict=True)
+        _log.info("[odom_probe_imuposer_flu] encoder loaded — freezing all encoder parameters")
+        encoder.requires_grad_(False)
+        encoder.eval()
+
+        from imu_lm.data.imuposer_wrist_odom_loader_FLU import make_imuposer_odom_flu_loaders
+
+        train_pkl_root = odom_probe_ip_cfg.get("train_pkl_root")
+        val_pkl_root   = odom_probe_ip_cfg.get("val_pkl_root") or train_pkl_root
+
+        def _expand_files(root, files_cfg):
+            if files_cfg is None or files_cfg == "all":
+                return sorted(_glob.glob(os.path.join(root, "*.pkl")))
+            if isinstance(files_cfg, list):
+                return [f if os.path.isabs(f) else os.path.join(root, f) for f in files_cfg]
+            return [files_cfg if os.path.isabs(files_cfg) else os.path.join(root, files_cfg)]
+
+        train_files = _expand_files(train_pkl_root, odom_probe_ip_cfg.get("train_files"))
+        val_files   = _expand_files(val_pkl_root,   odom_probe_ip_cfg.get("val_files"))
+
+        odom_decoder = ViT1DOdomDecoder(
+            embed_dim=encoder.embed_dim,
+            num_patches_per_channel=num_patches_per_channel,
+            in_channels=encoder.in_channels,
+            cfg=cfg,
+        )
+
+        def objective_fn(batch, model, cfg):
+            encoder.eval()
+            x_b, y_b = batch
+            with torch.no_grad():
+                tokens, _ = encoder.forward_tokens(x_b.float())
+            pred = odom_decoder(tokens)
+            loss = torch.nn.functional.mse_loss(pred, y_b.float())
+            with torch.no_grad():
+                mae = (pred.detach() - y_b.float()).abs().mean()
+            return loss, {"loss": float(loss.detach()),
+                          "odom_mse": float(loss.detach()),
+                          "odom_mae": float(mae)}
+
+        all_params = list(odom_decoder.parameters())
+        loaders = make_imuposer_odom_flu_loaders(
+            cfg=cfg,
+            train_files=train_files,
+            val_files=val_files,
+            add_gravity=bool(odom_probe_ip_cfg.get("add_gravity", False)),
+        )
+
+    elif objective_type == "odom_finetune_imuposer_flu":
+        # Warm-started encoder (stays trainable) + trainable ViT1DOdomDecoder on IMUPoser FLU data.
+        # Both encoder and decoder are updated jointly from a pretrained MAE checkpoint.
+        import glob as _glob
+        odom_ft_ip_cfg = cfg_get(cfg, ["objective", "odom_finetune_imuposer_flu"], {}) or {}
+        vit_cfg_  = cfg_get(cfg, ["vit1d"], {}) or {}
+        patch_size              = int(vit_cfg_.get("patch_size", 16))
+        num_patches_per_channel = T // patch_size
+
+        # ---- warm-start encoder (stays trainable) ----------------------------
+        pretrained_run  = odom_ft_ip_cfg.get("pretrained_run")
+        pretrained_ckpt = odom_ft_ip_cfg.get("pretrained_ckpt", "best")
+        runs_root = cfg_get(cfg, ["paths", "runs_root"], "runs")
+        if pretrained_ckpt in ("best", "latest"):
+            enc_ckpt_path = os.path.join(runs_root, pretrained_run,
+                                         "checkpoints", f"{pretrained_ckpt}.pt")
+        else:
+            enc_ckpt_path = pretrained_ckpt
+
+        if not os.path.exists(enc_ckpt_path):
+            raise FileNotFoundError(
+                f"[odom_finetune_imuposer_flu] pretrained encoder checkpoint not found: {enc_ckpt_path}"
+            )
+
+        import logging as _logging
+        _log = _logging.getLogger(__name__)
+        _log.info("[odom_finetune_imuposer_flu] warm-starting encoder from %s (encoder stays trainable)", enc_ckpt_path)
+        enc_state = torch.load(enc_ckpt_path, map_location="cpu", weights_only=False)
+        encoder.load_state_dict(enc_state["model"], strict=True)
+
+        from imu_lm.data.imuposer_wrist_odom_loader_FLU import make_imuposer_odom_flu_loaders
+
+        train_pkl_root = odom_ft_ip_cfg.get("train_pkl_root")
+        val_pkl_root   = odom_ft_ip_cfg.get("val_pkl_root") or train_pkl_root
+
+        def _expand_files(root, files_cfg):
+            if files_cfg is None or files_cfg == "all":
+                return sorted(_glob.glob(os.path.join(root, "*.pkl")))
+            if isinstance(files_cfg, list):
+                return [f if os.path.isabs(f) else os.path.join(root, f) for f in files_cfg]
+            return [files_cfg if os.path.isabs(files_cfg) else os.path.join(root, files_cfg)]
+
+        train_files = _expand_files(train_pkl_root, odom_ft_ip_cfg.get("train_files"))
+        val_files   = _expand_files(val_pkl_root,   odom_ft_ip_cfg.get("val_files"))
+
+        odom_decoder = ViT1DOdomDecoder(
+            embed_dim=encoder.embed_dim,
+            num_patches_per_channel=num_patches_per_channel,
+            in_channels=encoder.in_channels,
+            cfg=cfg,
+        )
+
+        def objective_fn(batch, model, cfg):
+            return odom_1d_obj.forward_loss(batch, encoder, odom_decoder, cfg)
+
+        all_params = list(encoder.parameters()) + list(odom_decoder.parameters())
+        loaders = make_imuposer_odom_flu_loaders(
+            cfg=cfg,
+            train_files=train_files,
+            val_files=val_files,
+            add_gravity=bool(odom_ft_ip_cfg.get("add_gravity", False)),
+        )
+
     elif objective_type == "odom_nymeria":
         # Odometry regression: sensor-frame wrist IMU → per-patch root displacement [B, Pt, 3]
         import glob as _glob
@@ -479,6 +640,48 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
             cfg=cfg,
             train_files=train_files,
             val_files=val_files,
+            add_gravity=bool(mae_ip_cfg.get("add_gravity", False)),
+        )
+
+    elif objective_type == "odom_imuposer_flu":
+        # Odometry regression on IMUPoser pkl files in the right-wrist FLU body frame.
+        # Loader yields (x [6,T], y [N_patches,3]); supervised displacement regression.
+        from imu_lm.data.imuposer_wrist_odom_loader_FLU import make_imuposer_odom_flu_loaders
+        import glob as _glob
+        odom_ip_cfg = cfg_get(cfg, ["objective", "odom_imuposer_flu"], {}) or {}
+        vit_cfg_  = cfg_get(cfg, ["vit1d"], {}) or {}
+        patch_size              = int(vit_cfg_.get("patch_size", 16))
+        num_patches_per_channel = T // patch_size
+
+        train_pkl_root = odom_ip_cfg.get("train_pkl_root")
+        val_pkl_root   = odom_ip_cfg.get("val_pkl_root") or train_pkl_root
+
+        def _expand_files(root, files_cfg):
+            if files_cfg is None or files_cfg == "all":
+                return sorted(_glob.glob(os.path.join(root, "*.pkl")))
+            if isinstance(files_cfg, list):
+                return [f if os.path.isabs(f) else os.path.join(root, f) for f in files_cfg]
+            return [files_cfg if os.path.isabs(files_cfg) else os.path.join(root, files_cfg)]
+
+        train_files = _expand_files(train_pkl_root, odom_ip_cfg.get("train_files"))
+        val_files   = _expand_files(val_pkl_root,   odom_ip_cfg.get("val_files"))
+
+        odom_decoder = ViT1DOdomDecoder(
+            embed_dim=encoder.embed_dim,
+            num_patches_per_channel=num_patches_per_channel,
+            in_channels=encoder.in_channels,
+            cfg=cfg,
+        )
+
+        def objective_fn(batch, model, cfg):
+            return odom_1d_obj.forward_loss(batch, encoder, odom_decoder, cfg)
+
+        all_params = list(encoder.parameters()) + list(odom_decoder.parameters())
+        loaders = make_imuposer_odom_flu_loaders(
+            cfg=cfg,
+            train_files=train_files,
+            val_files=val_files,
+            add_gravity=bool(odom_ip_cfg.get("add_gravity", False)),
         )
 
     elif objective_type == "mae_nymeria":
@@ -547,12 +750,169 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
         def objective_fn(batch, model, cfg):
             return masked_1d_obj.forward_loss(batch, encoder, decoder, cfg)
         all_params = list(encoder.parameters()) + list(decoder.parameters())
+        _mae_flu_gyro_w = float(mae_flu_cfg.get("gyro_white_noise_std", 0.0))
+        _mae_flu_gyro_b = float(mae_flu_cfg.get("gyro_bias_drift_std",  0.0))
         loaders = make_nymeria_loaders_flu(
             cfg=cfg,
             pkl_root="/",           # ignored — files are absolute
             train_files=train_files,
             val_files=val_files,
+            gyro_white_noise_std=_mae_flu_gyro_w,
+            gyro_bias_drift_std =_mae_flu_gyro_b,
         )
+
+    elif objective_type == "mae_nymeria_real_wrist_flu":
+        # MAE pretraining on Nymeria REAL wrist IMU data (FLU frame).
+        # Pipeline: wrist IMU local CPF → global CPF (world) → local FLU.
+        # Uses NymeriaRealWristDatasetFLU — requires has_wrist_imu=True pkl files.
+        # Pose labels from the loader are discarded — only x is used.
+        from imu_lm.data.nymeria_real_wrist_loader_FLU import make_nymeria_real_wrist_loaders_flu
+        import glob as _glob
+
+        mae_rw_cfg     = cfg_get(cfg, ["objective", "mae_nymeria_real_wrist_flu"], {}) or {}
+        train_pkl_root = mae_rw_cfg.get("train_pkl_root")
+        val_pkl_root   = mae_rw_cfg.get("val_pkl_root") or train_pkl_root
+
+        def _expand_files(root, files_cfg):
+            if files_cfg is None or files_cfg == "all":
+                return sorted(_glob.glob(os.path.join(root, "*.pkl")))
+            if isinstance(files_cfg, list):
+                return [f if os.path.isabs(f) else os.path.join(root, f) for f in files_cfg]
+            return [files_cfg if os.path.isabs(files_cfg) else os.path.join(root, files_cfg)]
+
+        train_files = _expand_files(train_pkl_root, mae_rw_cfg.get("train_files"))
+        val_files   = _expand_files(val_pkl_root,   mae_rw_cfg.get("val_files"))
+        _add_gravity = bool(mae_rw_cfg.get("add_gravity", True))
+
+        decoder = ViT1DDecoder(
+            embed_dim=encoder.embed_dim,
+            out_channels=encoder.in_channels,
+            target_T=T,
+            cfg=cfg,
+        )
+        def objective_fn(batch, model, cfg):
+            return masked_1d_obj.forward_loss(batch, encoder, decoder, cfg)
+        all_params = list(encoder.parameters()) + list(decoder.parameters())
+        loaders = make_nymeria_real_wrist_loaders_flu(
+            cfg=cfg,
+            pkl_root="/",           # ignored — files are absolute
+            train_files=train_files,
+            val_files=val_files,
+            add_gravity=_add_gravity,
+        )
+
+    elif objective_type == "mae_realdata_nymeria_real_wrist_flu":
+        # MAE pretraining on the union of:
+        #   (a) Nymeria REAL wrist IMU windows (pkl, FLU frame)   [real sensor data]
+        #   (b) Real 6D parquet windows (pamap2/recofit/…)        [~154 h labelled]
+        # Both datasets yield (x [6, T], y) 2-tuples; y shapes differ so we strip
+        # labels with XOnlyDataset before ConcatDataset, same as mae_combined_flu.
+        from imu_lm.data.nymeria_real_wrist_loader_FLU import (
+            NymeriaRealWristDatasetFLU,
+        )
+        from imu_lm.data.loaders import (
+            WindowDataset, collate_skip_none as parquet_collate_skip_none,
+            build_session_index, make_splits,
+        )
+        from torch.utils.data import ConcatDataset, DataLoader as _DL
+        import glob as _glob
+        import logging as _logging
+        _log = _logging.getLogger(__name__)
+
+        rw_cfl_cfg     = cfg_get(cfg, ["objective", "mae_realdata_nymeria_real_wrist_flu"], {}) or {}
+        train_pkl_root = rw_cfl_cfg.get("train_pkl_root")
+        val_pkl_root   = rw_cfl_cfg.get("val_pkl_root") or train_pkl_root
+
+        def _expand_rw_files(root, files_cfg):
+            if files_cfg is None or files_cfg == "all":
+                return sorted(_glob.glob(os.path.join(root, "*.pkl")))
+            if isinstance(files_cfg, list):
+                return [f if os.path.isabs(f) else os.path.join(root, f) for f in files_cfg]
+            return [files_cfg if os.path.isabs(files_cfg) else os.path.join(root, files_cfg)]
+
+        train_pkl_files = _expand_rw_files(train_pkl_root, rw_cfl_cfg.get("train_files"))
+        val_pkl_files   = _expand_rw_files(val_pkl_root,   rw_cfl_cfg.get("val_files"))
+        _rw_add_gravity = bool(rw_cfl_cfg.get("add_gravity", True))
+
+        # Thin wrapper: strips pose label y, returns uniform (x, dummy) tuples
+        # so ConcatDataset items can be stacked regardless of source.
+        class _XOnlyDataset(torch.utils.data.Dataset):
+            def __init__(self, ds):
+                self._ds = ds
+            def __len__(self):
+                return len(self._ds)
+            def __getitem__(self, idx):
+                item = self._ds[idx]
+                if item is None:
+                    return None
+                return item[0], torch.empty(0)   # (x [6,T], dummy)
+
+        def _collate_rw_combined(batch):
+            batch = [b for b in batch if b is not None]
+            if not batch:
+                return None
+            xs = torch.stack([b[0] for b in batch], 0)
+            return xs, torch.empty(0)   # MAE only uses xs
+
+        # Build Nymeria real-wrist datasets
+        rw_train_ds = _XOnlyDataset(NymeriaRealWristDatasetFLU(
+            pkl_paths=train_pkl_files, cfg=cfg, split_name="train",
+            add_gravity=_rw_add_gravity,
+        ))
+        rw_val_ds = _XOnlyDataset(NymeriaRealWristDatasetFLU(
+            pkl_paths=val_pkl_files, cfg=cfg, split_name="val",
+            add_gravity=_rw_add_gravity,
+        ))
+
+        # Build parquet datasets
+        parquet_path  = cfg_get(cfg, ["paths", "dataset_path"])
+        train_on      = cfg_get(cfg, ["data", "train_on_datasets"], None)
+        parquet_si    = build_session_index(parquet_path, cfg,
+                                            dataset_filter=list(train_on) if train_on else None)
+        parquet_splits = make_splits(parquet_si, cfg)
+        parq_train_ds = _XOnlyDataset(WindowDataset(
+            parquet_path, parquet_si, parquet_splits["train_keys"], cfg, split_name="train"
+        ))
+        parq_val_ds = _XOnlyDataset(WindowDataset(
+            parquet_path, parquet_si, parquet_splits["val_keys"], cfg, split_name="val"
+        ))
+
+        combined_train = ConcatDataset([rw_train_ds, parq_train_ds])
+        combined_val   = ConcatDataset([rw_val_ds,   parq_val_ds])
+
+        _log.info(
+            "[mae_realdata_nymeria_real_wrist_flu] train=%d val=%d "
+            "(rw_train=%d parq_train=%d rw_val=%d parq_val=%d)",
+            len(combined_train), len(combined_val),
+            len(rw_train_ds), len(parq_train_ds),
+            len(rw_val_ds),   len(parq_val_ds),
+        )
+
+        num_workers_  = int(cfg_get(cfg, ["data", "num_workers"], 0))
+        pin_memory_   = bool(cfg_get(cfg, ["data", "pin_memory"], False))
+        batch_size_   = int(cfg_get(cfg, ["data", "batch_size"], 256))
+        eval_bs_      = int(cfg_get(cfg, ["data", "eval_batch_size"], batch_size_))
+        persistent_   = num_workers_ > 0
+
+        decoder = ViT1DDecoder(
+            embed_dim=encoder.embed_dim,
+            out_channels=encoder.in_channels,
+            target_T=T,
+            cfg=cfg,
+        )
+        def objective_fn(batch, model, cfg):
+            return masked_1d_obj.forward_loss(batch, encoder, decoder, cfg)
+        all_params = list(encoder.parameters()) + list(decoder.parameters())
+        loaders = {
+            "train_loader": _DL(combined_train, batch_size=batch_size_,  shuffle=True,
+                                num_workers=num_workers_, pin_memory=pin_memory_,
+                                drop_last=True,  persistent_workers=persistent_,
+                                collate_fn=_collate_rw_combined),
+            "val_loader":   _DL(combined_val,   batch_size=eval_bs_,     shuffle=False,
+                                num_workers=num_workers_, pin_memory=pin_memory_,
+                                drop_last=False, persistent_workers=persistent_,
+                                collate_fn=_collate_rw_combined),
+        }
 
     elif objective_type == "mae_nymeria_var_len":
         # Variable-length MAE on Nymeria pkl files.
@@ -705,6 +1065,41 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
                                 drop_last=False, persistent_workers=persistent_,
                                 collate_fn=_collate_combined),
         }
+
+    elif objective_type == "mae_combined_flu_var_len":
+        from imu_lm.data.combined_flu_var_len_loader import make_combined_flu_var_len_loaders
+        import glob as _glob
+
+        cfl_cfg = cfg_get(cfg, ["objective", "mae_combined_flu_var_len"], {}) or {}
+        train_pkl_root = cfl_cfg.get("train_pkl_root")
+        val_pkl_root = cfl_cfg.get("val_pkl_root") or train_pkl_root
+
+        def _expand_files(root, files_cfg):
+            if files_cfg is None or files_cfg == "all":
+                return sorted(_glob.glob(os.path.join(root, "*.pkl")))
+            if isinstance(files_cfg, list):
+                return [f if os.path.isabs(f) else os.path.join(root, f) for f in files_cfg]
+            return [files_cfg if os.path.isabs(files_cfg) else os.path.join(root, files_cfg)]
+
+        train_pkl_files = _expand_files(train_pkl_root, cfl_cfg.get("train_files"))
+        val_pkl_files = _expand_files(val_pkl_root, cfl_cfg.get("val_files"))
+
+        decoder = ViT1DDecoder(
+            embed_dim=encoder.embed_dim,
+            out_channels=encoder.in_channels,
+            target_T=T,
+            cfg=cfg,
+        )
+
+        def objective_fn(batch, model, cfg):
+            return masked_1d_obj.forward_loss(batch, encoder, decoder, cfg)
+
+        all_params = list(encoder.parameters()) + list(decoder.parameters())
+        loaders = make_combined_flu_var_len_loaders(
+            cfg=cfg,
+            train_pkl_files=train_pkl_files,
+            val_pkl_files=val_pkl_files,
+        )
 
     elif objective_type == "imu_text_clip":
         # CLIP-style contrastive pretraining: IMU ↔ text on HumanML3D.
@@ -897,6 +1292,233 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
             text_emb_cache = text_emb_cache,
         )
 
+    elif objective_type == "mae_realdata_16hz_to_50hz":
+        # MAE on real 6D parquet data with 50→16Hz→50Hz frequency degradation applied
+        # to every session at load time (downsample + band-limited upsample).
+        from imu_lm.data.realdata_16hz_to_50hz_loader import make_realdata_16hz_to_50hz_loaders
+        decoder = ViT1DDecoder(
+            embed_dim=encoder.embed_dim,
+            out_channels=encoder.in_channels,
+            target_T=T,
+            cfg=cfg,
+        )
+        def objective_fn(batch, model, cfg):
+            return masked_1d_obj.forward_loss(batch, encoder, decoder, cfg)
+        all_params = list(encoder.parameters()) + list(decoder.parameters())
+        loaders = make_realdata_16hz_to_50hz_loaders(cfg)
+
+    elif objective_type == "mae_realdata_30hz_to_50hz":
+        # MAE on real 6D parquet data with 50→30Hz→50Hz frequency degradation applied
+        # to every session at load time (downsample + band-limited upsample).
+        from imu_lm.data.realdata_30hz_to_50hz_loader import make_realdata_30hz_to_50hz_loaders
+        decoder = ViT1DDecoder(
+            embed_dim=encoder.embed_dim,
+            out_channels=encoder.in_channels,
+            target_T=T,
+            cfg=cfg,
+        )
+        def objective_fn(batch, model, cfg):
+            return masked_1d_obj.forward_loss(batch, encoder, decoder, cfg)
+        all_params = list(encoder.parameters()) + list(decoder.parameters())
+        loaders = make_realdata_30hz_to_50hz_loaders(cfg)
+
+    elif objective_type == "watchhand_gesture_supervised":
+        # Fully-supervised gesture classification on WatchHand IMU data.
+        # Encoder (ViT1D) + LinearHead trained end-to-end (or warm-started from a pretrained run).
+        # Supports three pose groups: simple (5 classes), asl (10 classes), wrist (3 classes).
+        from imu_lm.data.watchhand_loader import (
+            WatchHandDataset,
+            make_watchhand_loaders,
+            SIMPLE_POSE_IDS,
+            ASL_POSE_IDS,
+            WRIST_POSE_IDS,
+        )
+        import logging as _logging
+        _wh_log = _logging.getLogger(__name__)
+
+        wh_cfg = cfg_get(cfg, ["objective", "watchhand_gesture_supervised"], {}) or {}
+
+        # Select pose group
+        pose_group = str(wh_cfg.get("pose_group", "all")).lower()
+        if pose_group == "simple":
+            pose_ids = SIMPLE_POSE_IDS
+        elif pose_group == "asl":
+            pose_ids = ASL_POSE_IDS
+        elif pose_group == "wrist":
+            pose_ids = WRIST_POSE_IDS
+        else:
+            pose_ids = None  # all 18 classes
+
+        watchhand_root = wh_cfg.get("watchhand_root", "WatchHand")
+        train_subjects = wh_cfg.get("train_subjects", None)
+        val_subjects   = wh_cfg.get("val_subjects",   None)
+        studies        = wh_cfg.get("studies",        None)   # None → default ["Study-1"]
+        target_hz      = int(wh_cfg.get("target_hz",  50))
+
+        # window_size is driven by T (from windowing.window_seconds @ 50 Hz)
+        window_size = T
+
+        train_ds = WatchHandDataset(
+            watchhand_root=watchhand_root,
+            window_size=window_size,
+            subjects=train_subjects,
+            studies=studies,
+            pose_ids=pose_ids,
+            target_hz=target_hz,
+        )
+        val_ds = WatchHandDataset(
+            watchhand_root=watchhand_root,
+            window_size=window_size,
+            subjects=val_subjects,
+            studies=studies,
+            pose_ids=pose_ids,
+            target_hz=target_hz,
+        ) if val_subjects else None
+
+        batch_size_  = int(cfg_get(cfg, ["data", "batch_size"],       64))
+        eval_bs_     = int(cfg_get(cfg, ["data", "eval_batch_size"],  batch_size_))
+        n_workers_   = int(cfg_get(cfg, ["data", "num_workers"],       4))
+        pin_mem_     = bool(cfg_get(cfg, ["data", "pin_memory"],    True))
+
+        from torch.utils.data import DataLoader as _DL
+        _train_loader_wh = _DL(train_ds, batch_size=batch_size_, shuffle=True,
+                                num_workers=n_workers_, pin_memory=pin_mem_, drop_last=True)
+        _val_loader_wh   = (_DL(val_ds, batch_size=eval_bs_, shuffle=False,
+                                num_workers=n_workers_, pin_memory=pin_mem_)
+                            if val_ds is not None else None)
+        loaders = {"train_loader": _train_loader_wh, "val_loader": _val_loader_wh}
+
+        num_classes = train_ds.num_classes
+        _wh_log.info("[watchhand_gesture_supervised] pose_group=%s  num_classes=%d  train=%d  val=%s",
+                     pose_group, num_classes, len(train_ds),
+                     len(val_ds) if val_ds else "none")
+
+        head = LinearHead(encoder.embed_dim, num_classes)
+
+        # Optional: warm-start encoder from a pretrained MAE/supervised run
+        pretrained_run  = wh_cfg.get("pretrained_run",  None)
+        pretrained_ckpt = wh_cfg.get("pretrained_ckpt", "best")
+        if pretrained_run:
+            runs_root = cfg_get(cfg, ["paths", "runs_root"], "runs")
+            if pretrained_ckpt in ("best", "latest"):
+                enc_ckpt_path = os.path.join(runs_root, pretrained_run,
+                                             "checkpoints", f"{pretrained_ckpt}.pt")
+            else:
+                enc_ckpt_path = pretrained_ckpt
+            if not os.path.exists(enc_ckpt_path):
+                raise FileNotFoundError(
+                    f"[watchhand_gesture_supervised] pretrained encoder not found: {enc_ckpt_path}"
+                )
+            _wh_log.info("[watchhand_gesture_supervised] warm-starting encoder from %s", enc_ckpt_path)
+            enc_state = torch.load(enc_ckpt_path, map_location="cpu", weights_only=False)
+            encoder.load_state_dict(enc_state["model"], strict=True)
+
+        # Labels are already remapped to 0-based by WatchHandDataset; no raw_to_idx needed
+        def objective_fn(batch, model, cfg):
+            return supervised_obj.forward_loss(batch, encoder, head, cfg, raw_to_idx=None)
+
+        all_params = list(encoder.parameters()) + list(head.parameters())
+
+    elif objective_type == "watchhand_gesture_supervised_within_subject":
+        # Fully-supervised gesture classification — within-subject split.
+        # Both train and val come from the SAME subjects, split by session block index.
+        # Default: blocks 0–7 = train, blocks 8–9 = val (Study-1 has 10 blocks per subject).
+        from imu_lm.data.watchhand_loader import (
+            WatchHandDataset,
+            SIMPLE_POSE_IDS,
+            ASL_POSE_IDS,
+            WRIST_POSE_IDS,
+            WITHIN_SUBJECT_TRAIN_BLOCKS,
+            WITHIN_SUBJECT_VAL_BLOCKS,
+        )
+        import logging as _logging
+        _wh_log = _logging.getLogger(__name__)
+
+        wh_cfg = cfg_get(cfg, ["objective", "watchhand_gesture_supervised_within_subject"], {}) or {}
+
+        # Select pose group
+        pose_group = str(wh_cfg.get("pose_group", "all")).lower()
+        if pose_group == "simple":
+            pose_ids = SIMPLE_POSE_IDS
+        elif pose_group == "asl":
+            pose_ids = ASL_POSE_IDS
+        elif pose_group == "wrist":
+            pose_ids = WRIST_POSE_IDS
+        else:
+            pose_ids = None  # all 18 classes
+
+        watchhand_root  = wh_cfg.get("watchhand_root", "WatchHand")
+        subjects        = wh_cfg.get("subjects",    None)   # None → all subjects
+        studies         = wh_cfg.get("studies",     None)   # None → default ["Study-1"]
+        target_hz       = int(wh_cfg.get("target_hz", 50))
+        train_block_nums = wh_cfg.get("train_block_nums", WITHIN_SUBJECT_TRAIN_BLOCKS)
+        val_block_nums   = wh_cfg.get("val_block_nums",   WITHIN_SUBJECT_VAL_BLOCKS)
+
+        window_size = T
+
+        train_ds = WatchHandDataset(
+            watchhand_root=watchhand_root,
+            window_size=window_size,
+            subjects=subjects,
+            studies=studies,
+            pose_ids=pose_ids,
+            target_hz=target_hz,
+            block_nums=train_block_nums,
+        )
+        val_ds = WatchHandDataset(
+            watchhand_root=watchhand_root,
+            window_size=window_size,
+            subjects=subjects,
+            studies=studies,
+            pose_ids=pose_ids,
+            target_hz=target_hz,
+            block_nums=val_block_nums,
+        )
+
+        batch_size_  = int(cfg_get(cfg, ["data", "batch_size"],       64))
+        eval_bs_     = int(cfg_get(cfg, ["data", "eval_batch_size"],  batch_size_))
+        n_workers_   = int(cfg_get(cfg, ["data", "num_workers"],       4))
+        pin_mem_     = bool(cfg_get(cfg, ["data", "pin_memory"],    True))
+
+        from torch.utils.data import DataLoader as _DL
+        _train_loader_wh = _DL(train_ds, batch_size=batch_size_, shuffle=True,
+                                num_workers=n_workers_, pin_memory=pin_mem_, drop_last=True)
+        _val_loader_wh   = _DL(val_ds,   batch_size=eval_bs_,   shuffle=False,
+                                num_workers=n_workers_, pin_memory=pin_mem_)
+        loaders = {"train_loader": _train_loader_wh, "val_loader": _val_loader_wh}
+
+        num_classes = train_ds.num_classes
+        _wh_log.info(
+            "[watchhand_gesture_supervised_within_subject] pose_group=%s  num_classes=%d  "
+            "train=%d (blocks %s)  val=%d (blocks %s)",
+            pose_group, num_classes, len(train_ds), train_block_nums, len(val_ds), val_block_nums,
+        )
+
+        head = LinearHead(encoder.embed_dim, num_classes)
+
+        # Optional: warm-start encoder from a pretrained run
+        pretrained_run  = wh_cfg.get("pretrained_run",  None)
+        pretrained_ckpt = wh_cfg.get("pretrained_ckpt", "best")
+        if pretrained_run:
+            runs_root = cfg_get(cfg, ["paths", "runs_root"], "runs")
+            if pretrained_ckpt in ("best", "latest"):
+                enc_ckpt_path = os.path.join(runs_root, pretrained_run,
+                                             "checkpoints", f"{pretrained_ckpt}.pt")
+            else:
+                enc_ckpt_path = pretrained_ckpt
+            if not os.path.exists(enc_ckpt_path):
+                raise FileNotFoundError(
+                    f"[watchhand_gesture_supervised_within_subject] pretrained encoder not found: {enc_ckpt_path}"
+                )
+            _wh_log.info("[watchhand_gesture_supervised_within_subject] warm-starting encoder from %s", enc_ckpt_path)
+            enc_state = torch.load(enc_ckpt_path, map_location="cpu", weights_only=False)
+            encoder.load_state_dict(enc_state["model"], strict=True)
+
+        def objective_fn(batch, model, cfg):
+            return supervised_obj.forward_loss(batch, encoder, head, cfg, raw_to_idx=None)
+
+        all_params = list(encoder.parameters()) + list(head.parameters())
+
     else:
         # MAE: encoder + decoder, self-supervised (parquet data)
         decoder = ViT1DDecoder(
@@ -909,7 +1531,7 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
             return masked_1d_obj.forward_loss(batch, encoder, decoder, cfg)
         all_params = list(encoder.parameters()) + list(decoder.parameters())
         loaders = make_loaders(cfg)
-    
+
     train_loader = loaders.get("train_loader")
     val_loader = loaders.get("val_loader")
     
@@ -917,11 +1539,13 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
     scheduler = build_scheduler(optimizer, cfg)
     
     # Build extra_modules dict for checkpointing head or decoder
-    if objective_type == "supervised":
+    if objective_type in ("supervised", "watchhand_gesture_supervised",
+                          "watchhand_gesture_supervised_within_subject"):
         extra_modules = {"head": head}
     elif objective_type in ("pose", "pose_probe"):
         extra_modules = {"pose_decoder": pose_decoder}
-    elif objective_type in ("odom_nymeria", "odom_probe", "odom_finetune"):
+    elif objective_type in ("odom_nymeria", "odom_probe", "odom_finetune", "odom_imuposer_flu",
+                            "odom_probe_imuposer_flu", "odom_finetune_imuposer_flu"):
         extra_modules = {"odom_decoder": odom_decoder}
     elif objective_type in ("imu_text_clip", "imu_text_clip_flu"):
         # Save projection head + logit_scale; text encoder can be reloaded from HuggingFace

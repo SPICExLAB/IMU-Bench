@@ -1,0 +1,55 @@
+vit1d:
+  patch_size: 16
+  shared_kernel: true
+  encoder:
+    hidden_size: 384
+    num_hidden_layers: 12
+    num_attention_heads: 6
+    intermediate_size: 1536
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-6
+  pose_decoder:
+    hidden_size: 192
+    num_hidden_layers: 2
+    num_attention_heads: 4
+    mlp_ratio: 4.0
+    dropout: 0.0
+  max_patches_per_channel: 256
+  pooling: "mean"
+
+objective:
+  type: pose_probe                              # frozen encoder + trainable pose decoder
+  pose_probe:
+    pretrained_run: vit1d_mae_combined_flu      # MAE encoder trained on Nymeria FLU + real 6D data
+    pretrained_ckpt: best
+    loader: imuposer_flu                        # use imuposer_wrist_loader_FLU
+    train_pkl_root: /mnt/nas2/yiquan_data/IMUPoser/ioposer_with_hip_30hz_2/train
+    train_files: all
+    val_pkl_root: /mnt/nas2/yiquan_data/IMUPoser/ioposer_with_hip_30hz_2/test
+    val_files: all
+    num_joints: 5                               # right-arm chain (5 × 6D = 30 dims)
+
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 10000000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 1000
+
+  optim:
+    name: adamw
+    lr: 0.0003
+    weight_decay: 0.01
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+
+  sched:
+    name: cosine
+    warmup_steps: 200
+
+  early_stopping:
+    enabled: true
+    monitor: val_loss
+    patience: 20

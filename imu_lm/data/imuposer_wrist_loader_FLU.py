@@ -90,6 +90,7 @@ assert np.isclose(np.linalg.det(R_WRIST_FROM_FLU), 1.0, atol=1e-6)
 def load_session_flu(
     pkl_path: str,
     target_hz: int = 50,
+    add_gravity: bool = False,
 ) -> tuple[np.ndarray, np.ndarray] | None:
     """Load one IMUPoser pkl and return **(X, y)** in the FLU frame.
 
@@ -99,8 +100,18 @@ def load_session_flu(
 
     Parameters
     ----------
-    pkl_path  : str   Path to an IMUPoser ``.pkl`` sequence file.
-    target_hz : int   Target sampling rate; data is resampled if needed.
+    pkl_path    : str   Path to an IMUPoser ``.pkl`` sequence file.
+    target_hz   : int   Target sampling rate; data is resampled if needed.
+    add_gravity : bool
+        If True, add back the gravity vector to the (gravity-subtracted) real_acc
+        so the signal matches the full specific-force reading of a MEMS accelerometer.
+        The IMUPoser world frame is Z-up, so g_world = [0, 0, -9.81] m/s² and the
+        accelerometer model gives::
+
+            a_measured = a_kinematic - g_world
+                       = a_kinematic + [0, 0, 9.81]
+
+        Default: False (keep the gravity-subtracted signal as-is).
 
     Returns
     -------
@@ -201,6 +212,14 @@ def load_session_flu(
     # Step 3 — real accelerometer: already in Z-up world frame → FLU
     # ------------------------------------------------------------------
     acc_world = real_acc[:, 1].numpy().astype(np.float64)            # [N, 3]
+
+    if add_gravity:
+        # real_acc is gravity-subtracted (linear acc only); add gravity back so the
+        # signal matches a real MEMS accelerometer reading (specific force).
+        # World frame is Z-up: g_world = [0, 0, -9.81],  a_meas = a_kin - g_world
+        g_world = np.array([0.0, 0.0, -9.81], dtype=np.float64)
+        acc_world = acc_world - g_world   # equivalent to acc_world + [0, 0, 9.81]
+
     acc_flu   = np.einsum("nij,nj->ni", R_X_from_world, acc_world)  # [N, 3]
 
     # ------------------------------------------------------------------
@@ -252,18 +271,20 @@ class IMUPoserWristFLUDataset(torch.utils.data.Dataset):
 
     def __init__(
         self,
-        pkl_paths:  list[str],
-        cfg:        dict,
-        split_name: str = "train",
-        target_hz:  int = 50,
+        pkl_paths:   list[str],
+        cfg:         dict,
+        split_name:  str  = "train",
+        target_hz:   int  = 50,
+        add_gravity: bool = False,
     ):
         from imu_lm.data.augmentations.preprocess import PreprocessStats
         from imu_lm.data.windowing import compute_T_and_hop
         from imu_lm.utils.helpers import cfg_get
 
-        self.cfg        = cfg
-        self.split_name = split_name
-        self.stats      = PreprocessStats()
+        self.cfg         = cfg
+        self.split_name  = split_name
+        self.add_gravity = add_gravity
+        self.stats       = PreprocessStats()
 
         vit_cfg              = cfg_get(cfg, ["vit1d"], {}) or {}
         self._patch_size     = int(vit_cfg.get("patch_size", 16))
@@ -278,7 +299,7 @@ class IMUPoserWristFLUDataset(torch.utils.data.Dataset):
         self._starts:   list[int] = []
 
         for pkl in tqdm(pkl_paths, desc=f"[imuposer_flu] loading {split_name}"):
-            result = load_session_flu(pkl, target_hz=target_hz)
+            result = load_session_flu(pkl, target_hz=target_hz, add_gravity=add_gravity)
             if result is None:
                 continue
             X, y = result          # X: [N, 6],  y: [N, 5, 6]
@@ -350,11 +371,12 @@ def collate_skip_none(batch):
 # ---------------------------------------------------------------------------
 
 def make_imuposer_wrist_flu_loaders(
-    cfg:         dict,
-    train_files: list[str],
-    val_files:   list[str] | None = None,
-    test_files:  list[str] | None = None,
-    target_hz:   int = 50,
+    cfg:          dict,
+    train_files:  list[str],
+    val_files:    list[str] | None = None,
+    test_files:   list[str] | None = None,
+    target_hz:    int  = 50,
+    add_gravity:  bool = False,
 ) -> dict[str, torch.utils.data.DataLoader]:
     """Build train / val / test DataLoaders with right-wrist FLU IMU from IMUPoser.
 
@@ -384,6 +406,7 @@ def make_imuposer_wrist_flu_loaders(
             return None
         ds = IMUPoserWristFLUDataset(
             pkl_paths=files, cfg=cfg, split_name=name, target_hz=target_hz,
+            add_gravity=add_gravity,
         )
         return torch.utils.data.DataLoader(
             ds,

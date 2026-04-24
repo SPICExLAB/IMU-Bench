@@ -1,0 +1,55 @@
+# GRU encoder — MAE pretrain on realdata + Nymeria REAL wrist IMU (FLU frame)
+# Comparison baseline for vit1d_mae_realdata_nymeria_real_wrist_flu.
+# Dispatch: run_pretrain.py sees 'rnn1d' key → routes to RNN1D/run.py
+rnn1d:
+  encoder:
+    hidden_size: 384        # match ViT1D embed_dim for fair comparison
+    num_layers: 4
+    rnn_type: gru
+    bidirectional: false
+    dropout: 0.1
+    pooling: mean
+
+  decoder:
+    hidden_size: 384
+    num_layers: 2
+    dropout: 0.0
+
+objective:
+  type: mae_realdata_nymeria_real_wrist_flu
+  mask_ratio: 0.75
+  mask_strategy: composite        # random | temporal | signal | composite
+  mae_realdata_nymeria_real_wrist_flu:
+    # Nymeria REAL wrist pkl sessions (FLU frame, real sensor readings)
+    train_pkl_root: /mnt/nas2/processed_data_body_Ty_rwrist
+    train_files: all
+    val_pkl_root: /mnt/nas2/processed_data_test_body_Ty_rwrist
+    val_files: all
+    add_gravity: true             # keep real IMU gravity component in output acc
+    # Real parquet data pulled from paths.dataset_path filtered by
+    # data.train_on_datasets (set in base.yaml):
+    #   ["pamap2", "recofit", "samosa", "shoaib", "ut_watch", "utd_mhad", "wisdm"]
+
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 10000000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 1000
+
+  optim:
+    name: adamw
+    lr: 0.0001
+    weight_decay: 0.0001
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+
+  sched:
+    name: cosine
+    warmup_steps: 500
+
+  early_stopping:
+    enabled: true
+    monitor: val_loss
+    patience: 20

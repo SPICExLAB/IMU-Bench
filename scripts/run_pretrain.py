@@ -17,6 +17,7 @@ from imu_lm.models.ViT2D import run as vit_run
 from imu_lm.models.ViT1D import run as vit1d_run
 from imu_lm.models.CNN1D import run as cnn_run
 from imu_lm.models.TSTransformer1D import run as tstransformer1d_run
+from imu_lm.models.RNN1D import run as rnn1d_run
 from imu_lm.utils.helpers import deep_update, load_yaml
 try:
     import wandb
@@ -77,6 +78,8 @@ def main():
     # Detect model type by config keys
     if "cnn1d" in cfg:
         cnn_run.main(cfg, run_dir, resume_ckpt=args.resume)
+    elif "rnn1d" in cfg:
+        rnn1d_run.main(cfg, run_dir, resume_ckpt=args.resume)
     elif "vit1d" in cfg:
         vit1d_run.main(cfg, run_dir, resume_ckpt=args.resume)
     elif "tstransformer1d" in cfg:
@@ -84,7 +87,7 @@ def main():
     elif "vit" in cfg:
         vit_run.main(cfg, run_dir, resume_ckpt=args.resume)
     else:
-        raise ValueError("No supported model config found (expected 'vit', 'vit1d', 'tstransformer1d', or 'cnn1d' section)")
+        raise ValueError("No supported model config found (expected 'vit', 'vit1d', 'tstransformer1d', 'rnn1d', or 'cnn1d' section)")
 
 
 if __name__ == "__main__":

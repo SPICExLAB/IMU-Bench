@@ -31,17 +31,20 @@ ROT6D_DIM = 6
 _SMPL_RIGHT_WRIST = 21
 
 # ---------------------------------------------------------------------------
-# Your T-pose wrist-local FLU definition
+# Watch-mounted FLU coordinate system on the right wrist (T-pose)
 # ---------------------------------------------------------------------------
-# Forward (FLU x) = -x_smpl
-# Left    (FLU y) = +z_smpl
-# Up      (FLU z) = +y_smpl
+# Forward (FLU x) = -x_smpl  →  toward fingertips (away from arm)
+# Left    (FLU y) = +z_smpl  →  toward thumb side of right wrist
+# Up      (FLU z) = +y_smpl  →  out of watch face (dorsal, away from skin)
 #
-# Columns are FLU axes expressed in WRIST-LOCAL coordinates.
+# In SMPL T-pose right-wrist local frame:
+#   +x points toward the elbow (proximal), +y points dorsal (out of watch face),
+#   +z points toward the thumb (lateral on right wrist).
+# Columns are FLU axes expressed in SMPL WRIST-LOCAL coordinates.
 R_WRIST_FROM_FLU = np.array([
-    [-1.0, 0.0, 0.0],   # F
-    [ 0.0, 0.0, 1.0],   # L
-    [ 0.0, 1.0, 0.0],   # U
+    [-1.0, 0.0, 0.0],   # F = -x_smpl  (fingertips)
+    [ 0.0, 0.0, 1.0],   # L = +z_smpl  (thumb side)
+    [ 0.0, 1.0, 0.0],   # U = +y_smpl  (watch face / dorsal)
 ], dtype=np.float64)
 
 # sanity: should be a proper rotation
@@ -85,6 +88,55 @@ def xsens_to_SMPL(xsens_rotmat: np.ndarray) -> np.ndarray:
         smpl_rotmat[:, smpl_idx] = xsens_t[:, xsens_idx]
 
     return smpl_rotmat.numpy()  # [N,24,3,3]
+
+
+def _add_mems_gyro_noise(
+    gyro: np.ndarray,
+    fps: float,
+    white_noise_std: float = 0.02,
+    bias_drift_std: float  = 0.002,
+    rng: Optional[np.random.RandomState] = None,
+) -> np.ndarray:
+    """
+    Add two-component MEMS gyroscope noise to a clean synthetic gyro signal.
+
+    Standard IMU error model (IEEE Std 952):
+        omega_measured(t) = omega_true(t) + b(t) + n_w(t)
+
+    Where:
+      n_w  ~ N(0, white_noise_std²) per sample    [Angle Random Walk]
+             Typical wrist IMU: 0.01–0.05 rad/s RMS
+      b(t) = integrated random walk               [Rate Random Walk / Bias Instability]
+             b(t+dt) = b(t) + N(0, bias_drift_std² * dt),  dt = 1/fps
+             Typical wrist IMU: 0.001–0.005 rad/s/√s
+
+    Args:
+        gyro:            [N, 3] clean angular velocity in rad/s
+        fps:             sampling rate in Hz
+        white_noise_std: std of additive white noise (rad/s).  Default 0.02 rad/s.
+        bias_drift_std:  std of bias random-walk per √second (rad/s/√s).  Default 0.002.
+        rng:             optional RandomState for reproducibility
+
+    Returns:
+        [N, 3] noisy gyro signal, same dtype as input
+    """
+    if rng is None:
+        rng = np.random.RandomState()
+
+    N = gyro.shape[0]
+    dt = 1.0 / fps
+    out = gyro.copy()
+
+    # --- 1) White noise (Angle Random Walk) ---
+    out = out + rng.normal(0.0, white_noise_std, size=(N, 3))
+
+    # --- 2) Bias drift (Rate Random Walk) ---
+    # Each sample the bias steps by N(0, bias_drift_std² * dt)
+    bias_steps = rng.normal(0.0, bias_drift_std * np.sqrt(dt), size=(N, 3))
+    bias = np.cumsum(bias_steps, axis=0)          # integrated walk
+    out = out + bias
+
+    return out.astype(gyro.dtype)
 
 
 def _compute_acc_world(pos_world: np.ndarray, fps: float) -> np.ndarray:
@@ -132,8 +184,9 @@ def _compute_omega_local_from_global_rot(R_world_from_joint: np.ndarray, fps: fl
 def _load_nymeria_session_flu(
     pkl_path: str,
     target_hz: int,
-    add_gravity: bool = False,
-) -> Optional[Tuple[np.ndarray, np.ndarray]]:
+    add_gravity: bool = True,    gyro_white_noise_std: float = 0.3,
+    gyro_bias_drift_std:  float = 0.1,
+    rng: Optional[np.random.RandomState] = None,) -> Optional[Tuple[np.ndarray, np.ndarray]]:
     """
     Pipeline (follows the user's FK → world → FLU idea):
 
@@ -235,7 +288,7 @@ def _load_nymeria_session_flu(
     # ------------------------------------------------------------------
     # 6a) linear acceleration of wrist origin in world
     a_world = _compute_acc_world(p_world_wrist, fps)            # [N,3]
-    
+
     if add_gravity:
         # subtract gravity so the signal matches what a real accelerometer reads
         # (Nymeria is Y-up: gravity = [0, -9.81, 0])
@@ -255,6 +308,15 @@ def _load_nymeria_session_flu(
     # ------------------------------------------------------------------
     acc_flu  = np.einsum("nij,nj->ni", R_X_from_world, a_world)    # [N,3]
     gyro_flu = np.einsum("nij,nj->ni", R_X_from_world, omega_world) # [N,3]
+
+    # -- Optional: add MEMS-style gyro noise to close the sim-to-real gap --
+    if gyro_white_noise_std > 0.0 or gyro_bias_drift_std > 0.0:
+        gyro_flu = _add_mems_gyro_noise(
+            gyro_flu, fps,
+            white_noise_std = gyro_white_noise_std,
+            bias_drift_std  = gyro_bias_drift_std,
+            rng             = rng,
+        )
 
     X_imu = np.concatenate([acc_flu, gyro_flu], axis=1).astype(np.float32)  # [N,6]
 
@@ -305,14 +367,20 @@ class NymeriaWristDatasetFLU(Dataset):
         cfg: Any,
         split_name: str = "train",
         target_hz: int = 50,
-        add_gravity: bool = False,
+        add_gravity: bool = True,
+        gyro_white_noise_std: float = 0.0,
+        gyro_bias_drift_std:  float = 0.0,
+        noise_seed: int = 0,
     ):
         super().__init__()
         self.cfg = cfg
         self.split_name = split_name
         self.target_hz = target_hz
         self.add_gravity = add_gravity
+        self.gyro_white_noise_std = gyro_white_noise_std
+        self.gyro_bias_drift_std  = gyro_bias_drift_std
         self.stats = PreprocessStats()
+        rng = np.random.RandomState(noise_seed) if (gyro_white_noise_std > 0.0 or gyro_bias_drift_std > 0.0) else None
 
         self._T, self._hop = compute_T_and_hop(cfg)
 
@@ -333,6 +401,9 @@ class NymeriaWristDatasetFLU(Dataset):
                 path,
                 target_hz=target_hz,
                 add_gravity=add_gravity,
+                gyro_white_noise_std=gyro_white_noise_std,
+                gyro_bias_drift_std =gyro_bias_drift_std,
+                rng=rng,
             )
             if result is None:
                 logger.warning("[nymeria_wrist_flu] skipping: %s", path)
@@ -398,13 +469,15 @@ def make_nymeria_loaders_flu(
     val_files: Optional[List[str]] = None,
     test_files: Optional[List[str]] = None,
     target_hz: int = 50,
-    add_gravity: bool = False,
+    add_gravity: bool = True,
+    gyro_white_noise_std: float = 0.0,
+    gyro_bias_drift_std:  float = 0.0,
+    noise_seed: int = 0,
 ) -> Dict[str, DataLoader]:
     batch_size      = int(cfg_get(cfg, ["data", "batch_size"],      256))
     eval_batch_size = int(cfg_get(cfg, ["data", "eval_batch_size"], batch_size))
     num_workers     = int(cfg_get(cfg, ["data", "num_workers"],       0))
     pin_memory      = bool(cfg_get(cfg, ["data", "pin_memory"],    False))
-
     def _abs(files: List[str]) -> List[str]:
         return [f if os.path.isabs(f) else os.path.join(pkl_root, f)
                 for f in files]
@@ -418,6 +491,9 @@ def make_nymeria_loaders_flu(
             split_name=name,
             target_hz=target_hz,
             add_gravity=add_gravity,
+            gyro_white_noise_std=gyro_white_noise_std,
+            gyro_bias_drift_std =gyro_bias_drift_std,
+            noise_seed=noise_seed,
         )
         persistent = num_workers > 0
         return DataLoader(

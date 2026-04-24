@@ -21,7 +21,7 @@ vit1d:
 objective:
   type: pose                                    # encoder + pose decoder both trainable
   pose:
-    pretrained_run: vit1d_mae_nymeria           # warm-start encoder from Nymeria MAE (stays trainable)
+    pretrained_run: vit1d_mae_nymeria_flu           # warm-start encoder from Nymeria MAE (stays trainable)
     pretrained_ckpt: best
     loader: imuposer_flu                        # use imuposer_wrist_loader_FLU
     train_pkl_root: /mnt/nas2/yiquan_data/IMUPoser/ioposer_with_hip_30hz_2/train

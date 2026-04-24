@@ -1,0 +1,50 @@
+# ViT-1D MAE pretrain on real 6D parquet data with 50→30Hz→50Hz frequency degradation.
+# Identical hyper-parameters to vit1d_realdata_pretrain (vit1d.yaml),
+# but the WindowDataset applies downsample→upsample so the model learns to denoise
+# 30 Hz aliased signals, which may transfer better to 30 Hz devices (e.g. IMUPoser).
+#
+# Encoder saved to: runs/vit1d_mae_realdata_30hz_to_50hz/checkpoints/best.pt
+vit1d:
+  patch_size: 16
+  shared_kernel: true
+  encoder:
+    hidden_size: 384
+    num_hidden_layers: 12
+    num_attention_heads: 6
+    intermediate_size: 1536
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-6
+  decoder:
+    hidden_size: 192
+    num_hidden_layers: 4
+    num_attention_heads: 4
+    intermediate_size: 768
+
+  pos_embed_type: "2d"
+  max_patches_per_channel: 256
+  pooling: "mean"
+
+objective:
+  type: mae_realdata_30hz_to_50hz   # custom loader key
+  mask_ratio: 0.65
+  mask_strategy: composite
+
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 10000000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 1000
+
+  optim:
+    name: adamw
+    lr: 0.00015
+    weight_decay: 0.0001
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+
+  sched:
+    name: cosine
+    warmup_steps: 1000

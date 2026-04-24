@@ -18,7 +18,7 @@ Architecture-specific components live here; objective is architecture-agnostic.
 from __future__ import annotations
 
 import math
-from typing import Any
+from typing import Any, Optional, Tuple
 
 import torch
 import torch.nn as nn
@@ -257,7 +257,13 @@ class ViT1DEncoder(nn.Module):
         
         self.norm = nn.LayerNorm(self.embed_dim)
     
-    def forward(self, x: torch.Tensor, mask: torch.Tensor = None) -> torch.Tensor:
+    def forward(
+        self,
+        x: torch.Tensor,
+        mask: torch.Tensor = None,
+        padding_mask: torch.Tensor = None,
+        return_keep_padding_mask: bool = False,
+    ) -> torch.Tensor | Tuple[torch.Tensor, torch.Tensor]:
         """Forward pass with optional MAE masking.
         
         Args:
@@ -266,8 +272,8 @@ class ViT1DEncoder(nn.Module):
                   If None, process all tokens and return mean-pooled [B, D].
                   
         Returns:
-            If mask is None: [B, D] mean-pooled embedding (for probing/eval)
-            If mask given:   [B, N_vis, D] per-token visible outputs (for MAE decoder)
+            If mask/padding_mask is None: [B, D] mean-pooled embedding (for probing/eval)
+            If mask or padding_mask given: [B, N_keep_max, D] padded visible-token outputs
         """
         B, C, T = x.shape
         num_patches_per_channel = T // self.patch_size
@@ -279,20 +285,41 @@ class ViT1DEncoder(nn.Module):
         pos_embed = self.pos_embed(num_patches_per_channel, C, x.device)
         tokens = tokens + pos_embed.unsqueeze(0)
         
-        if mask is not None:
-            # Dropout removal: keep only visible tokens
-            # Sort so visible (False=0) come first, then masked (True=1)
-            ids_shuffle = torch.argsort(mask.int(), dim=1)
-            N_vis = (~mask[0]).sum().item()
-            ids_keep = ids_shuffle[:, :N_vis]  # [B, N_vis]
-            tokens = torch.gather(tokens, 1, ids_keep.unsqueeze(-1).expand(-1, -1, self.embed_dim))
+        keep_padding_mask = None
+        if mask is not None or padding_mask is not None:
+            token_drop_mask = torch.zeros(tokens.shape[:2], dtype=torch.bool, device=x.device)
+            if mask is not None:
+                token_drop_mask |= mask
+            if padding_mask is not None:
+                token_drop_mask |= padding_mask
+
+            ids_shuffle = torch.argsort(token_drop_mask.int(), dim=1)
+            keep_counts = (~token_drop_mask).sum(dim=1)
+            max_keep = int(keep_counts.max().item())
+            if max_keep <= 0:
+                raise ValueError("ViT1DEncoder.forward: no visible non-padding tokens in batch")
+            ids_keep = ids_shuffle[:, :max_keep]
+            tokens = torch.gather(
+                tokens, 1, ids_keep.unsqueeze(-1).expand(-1, -1, self.embed_dim)
+            )
+            keep_padding_mask = (
+                torch.arange(max_keep, device=x.device).unsqueeze(0).expand(B, -1)
+                >= keep_counts.unsqueeze(1)
+            )
         
         # Transformer encoder
-        tokens = self.encoder(tokens)
+        src_key_padding_mask = None
+        if keep_padding_mask is not None and bool(keep_padding_mask.any()):
+            src_key_padding_mask = keep_padding_mask
+        tokens = self.encoder(tokens, src_key_padding_mask=src_key_padding_mask)
         tokens = self.norm(tokens)
+        if keep_padding_mask is not None:
+            tokens = tokens.masked_fill(keep_padding_mask.unsqueeze(-1), 0.0)
         
-        if mask is not None:
-            return tokens  # [B, N_vis, D] for MAE decoder
+        if mask is not None or padding_mask is not None:
+            if return_keep_padding_mask:
+                return tokens, keep_padding_mask
+            return tokens
         
         # Pooling: [B, N, D] → [B, D] for probing
         if self.pooling == "mean":
@@ -401,6 +428,8 @@ class ViT1DDecoder(nn.Module):
         mask: torch.Tensor,
         num_patches_per_channel: int,
         num_channels: int,
+        padding_mask: Optional[torch.Tensor] = None,
+        visible_padding_mask: Optional[torch.Tensor] = None,
     ) -> torch.Tensor:
         """Reconstruct full signal from visible encoder tokens + mask.
         
@@ -415,33 +444,34 @@ class ViT1DDecoder(nn.Module):
         """
         B = visible_tokens.shape[0]
         N = mask.shape[1]
-        N_vis = visible_tokens.shape[1]
-        N_mask = N - N_vis
-        
-        # Project visible tokens to decoder dim
-        visible_dec = self.encoder_to_decoder(visible_tokens)  # [B, N_vis, D_dec]
-        
-        # Expand mask tokens
-        mask_tokens = self.mask_token.expand(B, N_mask, -1)  # [B, N_mask, D_dec]
-        
-        # Combine visible + mask tokens, then unshuffle to original positions
-        # ids_shuffle puts visible indices first (same sorting as encoder)
-        ids_shuffle = torch.argsort(mask.int(), dim=1)
-        ids_restore = torch.argsort(ids_shuffle, dim=1)  # maps shuffled → original
-        
-        combined = torch.cat([visible_dec, mask_tokens], dim=1)  # [B, N, D_dec]
-        full_tokens = torch.gather(
-            combined, 1,
-            ids_restore.unsqueeze(-1).expand(-1, -1, self.hidden_size),
-        )  # [B, N, D_dec] in original token order
+        visible_dec = self.encoder_to_decoder(visible_tokens)  # [B, N_vis_max, D_dec]
+        full_tokens = self.mask_token.to(dtype=visible_dec.dtype, device=visible_dec.device).expand(B, N, -1).clone()
+        keep_mask = ~mask
+        if padding_mask is not None:
+            keep_mask = keep_mask & ~padding_mask
+
+        for b in range(B):
+            keep_positions = torch.nonzero(keep_mask[b], as_tuple=False).squeeze(-1)
+            if visible_padding_mask is None:
+                num_keep = keep_positions.numel()
+            else:
+                num_keep = int((~visible_padding_mask[b]).sum().item())
+            if num_keep > 0:
+                full_tokens[b, keep_positions] = visible_dec[b, :num_keep]
         
         # Add positional embedding
         pos_embed = self.pos_embed(num_patches_per_channel, num_channels, visible_tokens.device)
+        pos_embed = pos_embed.to(dtype=full_tokens.dtype, device=full_tokens.device)
         full_tokens = full_tokens + pos_embed.unsqueeze(0)
         
         # Transformer decoder
-        full_tokens = self.decoder(full_tokens)
+        decoder_padding_mask = None
+        if padding_mask is not None and bool(padding_mask.any()):
+            decoder_padding_mask = padding_mask
+        full_tokens = self.decoder(full_tokens, src_key_padding_mask=decoder_padding_mask)
         full_tokens = self.norm(full_tokens)
+        if padding_mask is not None:
+            full_tokens = full_tokens.masked_fill(padding_mask.unsqueeze(-1), 0.0)
         
         # Predict patch values: [B, N, D_dec] → [B, N, patch_size]
         patch_values = self.head(full_tokens)
