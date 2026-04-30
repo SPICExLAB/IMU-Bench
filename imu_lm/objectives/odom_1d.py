@@ -1,7 +1,11 @@
 """Odometry regression objective for ViT-1D.
 
-Target: per-patch root (pelvis) XYZ displacement in the global/world frame.
-Loss:   mean squared error on [B, P_t, 3] predictions.
+Target: per-patch root displacement labels.
+  - out_dim=3 : global-frame XYZ displacement  [B, P_t, 3]
+  - out_dim=4 : local-frame displacement + delta yaw  [B, P_t, 4]
+               [..., 0:3] = body-frame [dx, dy, dz]  (metres)
+               [...,   3] = delta yaw Δψ              (radians, Z-up world)
+Loss:   mean squared error over all output dimensions.
 """
 
 from __future__ import annotations
@@ -18,12 +22,13 @@ def forward_loss(
     odom_decoder: "ViT1DOdomDecoder",  # noqa: F821
     cfg: Any,
 ) -> Tuple[torch.Tensor, dict]:
-    """Compute MSE loss for per-patch root displacement regression.
+    """Compute MSE loss for per-patch displacement regression.
 
     Args:
         batch:        (x, y) where
-                        x : [B, 6, T]          global-frame wrist IMU
-                        y : [B, N_patches, 3]  root displacement labels (metres)
+                        x : [B, 6, T]          wrist FLU IMU
+                        y : [B, N_patches, 3]  global XYZ displacement  OR
+                            [B, N_patches, 4]  [dx,dy,dz,dψ] local disp + delta yaw
         encoder:      ViT1DEncoder
         odom_decoder: ViT1DOdomDecoder
         cfg:          experiment config dict
@@ -38,7 +43,7 @@ def forward_loss(
     # Encoder → full token grid [B, C*Pt, D]
     tokens, _num_patches_per_channel = encoder.forward_tokens(x)
 
-    # Decoder → [B, Pt, 3]
+    # Decoder → [B, Pt, out_dim]
     pred = odom_decoder(tokens)
 
     loss = F.mse_loss(pred, y)
@@ -51,4 +56,13 @@ def forward_loss(
         "odom_mse":  float(loss.detach()),
         "odom_mae":  float(mae),
     }
+
+    # Split metrics when out_dim=4 (local displacement + delta yaw)
+    if y.shape[-1] == 4:
+        with torch.no_grad():
+            disp_mse = F.mse_loss(pred[..., :3], y[..., :3])
+            yaw_mse  = F.mse_loss(pred[..., 3:], y[..., 3:])
+            metrics["disp_mse"] = float(disp_mse.detach())
+            metrics["yaw_mse"]  = float(yaw_mse.detach())
+
     return loss, metrics

@@ -13,15 +13,33 @@ logger = logging.getLogger(__name__)
 CANONICAL_SAMPLE_RATE_HZ = 50.0
 
 
+def get_sample_rate_hz(cfg: Any) -> float:
+    """Resolve the sample rate used to convert window seconds to samples.
+
+    Defaults to the canonical 50 Hz used across the existing codebase, but
+    allows dataset-specific configs to opt into another rate when a loader
+    emits a different temporal resolution.
+    """
+
+    return float(
+        cfg_get(
+            cfg,
+            ["windowing", "sample_rate_hz"],
+            cfg_get(cfg, ["data", "sample_rate_hz"], CANONICAL_SAMPLE_RATE_HZ),
+        )
+    )
+
+
 def compute_T_and_hop(cfg: Any) -> Tuple[int, int]:
     """Compute window length (T) and hop in samples.
 
-    Uses canonical 50Hz sample rate (no config rate field per spec).
+    Uses the configured sample rate when present, otherwise defaults to 50 Hz.
     """
 
     window_seconds = float(cfg_get(cfg, ["windowing", "window_seconds"], 2.56))
     hop_ratio = float(cfg_get(cfg, ["windowing", "window_hop_ratio"], 0.5))
-    T = int(round(window_seconds * CANONICAL_SAMPLE_RATE_HZ))
+    sample_rate_hz = get_sample_rate_hz(cfg)
+    T = int(round(window_seconds * sample_rate_hz))
     hop = max(1, int(round(T * hop_ratio)))
     return T, hop
 

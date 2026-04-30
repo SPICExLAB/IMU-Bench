@@ -400,7 +400,7 @@ python scripts/run_pose_eval_dataset.py \
 # Encoder + pose decoder trained end-to-end from random init on IMUPoser FLU data.
 # No pretrained encoder is used (baseline for comparing transfer-learning benefit).
 
-CUDA_VISIBLE_DEVICES=0 python scripts/run_pretrain.py \
+CUDA_VISIBLE_DEVICES=1 python scripts/run_pretrain.py \
   --config       configs/base.yaml \
   --model-config configs/vit1d_pose_supervised_imuposer_flu.yaml \
   --run-name     vit1d_pose_supervised_imuposer_flu
@@ -510,6 +510,40 @@ python scripts/run_pose_eval_dataset.py \
   --ckpt         best \
   --out-dir      data_vis/pose_finetune_imuposer_nymeria_eval_dataset
 
+############################# IMUPoser FLU: pose probe — OCDetect FLU MAE encoder ####
+# Frozen vit1d_mae_ocdetect_flu encoder; only pose decoder trains.
+# Requires: runs/vit1d_mae_ocdetect_flu/checkpoints/best.pt
+
+CUDA_VISIBLE_DEVICES=0 python scripts/run_pretrain.py \
+  --config       configs/base.yaml \
+  --model-config configs/vit1d_pose_probe_imuposer_ocdetect_flu.yaml \
+  --run-name     vit1d_pose_probe_imuposer_ocdetect_flu
+
+python scripts/run_pose_eval_dataset.py \
+  --config       configs/base.yaml \
+  --model-config configs/vit1d_pose_probe_imuposer_ocdetect_flu.yaml \
+  --run          vit1d_pose_probe_imuposer_ocdetect_flu \
+  --test-dir     /mnt/nas2/yiquan_data/IMUPoser/ioposer_with_hip_30hz_2/test \
+  --ckpt         best \
+  --out-dir      data_vis/pose_probe_imuposer_ocdetect_flu_eval_dataset
+
+############################# IMUPoser FLU: pose finetune — OCDetect FLU MAE encoder #
+# Encoder warm-started from vit1d_mae_ocdetect_flu and kept trainable (lower LR).
+# Requires: runs/vit1d_mae_ocdetect_flu/checkpoints/best.pt
+
+CUDA_VISIBLE_DEVICES=0 python scripts/run_pretrain.py \
+  --config       configs/base.yaml \
+  --model-config configs/vit1d_pose_finetune_imuposer_ocdetect_flu.yaml \
+  --run-name     vit1d_pose_finetune_imuposer_ocdetect_flu
+
+python scripts/run_pose_eval_dataset.py \
+  --config       configs/base.yaml \
+  --model-config configs/vit1d_pose_finetune_imuposer_ocdetect_flu.yaml \
+  --run          vit1d_pose_finetune_imuposer_ocdetect_flu \
+  --test-dir     /mnt/nas2/yiquan_data/IMUPoser/ioposer_with_hip_30hz_2/test \
+  --ckpt         best \
+  --out-dir      data_vis/pose_finetune_imuposer_ocdetect_flu_eval_dataset
+
 
 # Visualize FLU sequence (sanity check)
 python scripts/vis_wrist_flu.py \
@@ -580,7 +614,7 @@ CUDA_VISIBLE_DEVICES=0 python scripts/run_pretrain.py \
 # Fixed 10.24 s window (32 patches per channel).
 # Requires: runs/vit1d_mae_realdata_nymeria_real_wrist_flu_10s/checkpoints/best.pt
 
-CUDA_VISIBLE_DEVICES=1 python scripts/run_pretrain.py \
+CUDA_VISIBLE_DEVICES=0 python scripts/run_pretrain.py \
   --config       configs/base.yaml \
   --model-config configs/vit1d_clip_humanml3d_flu_finetune_10s.yaml \
   --run-name     vit1d_clip_humanml3d_flu_finetune_10s
@@ -807,6 +841,19 @@ CUDA_VISIBLE_DEVICES=1 python scripts/run_pretrain.py \
   --config       configs/base.yaml \
   --model-config configs/vit1d_pose_finetune_imuposer_realdata_nymeria_real_wrist_flu.yaml \
   --run-name     vit1d_pose_finetune_imuposer_realdata_nymeria_real_wrist_flu
+
+# Single-sequence arm pose visualization (pred vs GT)
+# Replace --pkl with one file from:
+#   /mnt/nas2/yiquan_data/IMUPoser/ioposer_with_hip_30hz_2/test
+python scripts/run_pose_eval_imuposer.py \
+  --config       configs/base.yaml \
+  --model-config configs/vit1d_pose_finetune_imuposer_ocdetect_flu.yaml \
+  --run          vit1d_pose_finetune_imuposer_ocdetect_flu \
+  --pkl          /mnt/nas2/yiquan_data/IMUPoser/ioposer_with_hip_30hz_2/test/imuposer_seq_00000.pkl  \
+  --ckpt         best \
+  --max-frames   5000 \
+  --fps          50 \
+  --out-dir      data_vis/pose_finetune_imuposer_ocdetect_flu_single_eval
 
 python scripts/run_pose_eval_dataset.py \
   --config       configs/base.yaml \
@@ -1112,10 +1159,282 @@ python scripts/run_pose_eval_dataset.py \
   --ckpt         best \
   --out-dir      data_vis/full_body_pose_finetune_imuposer_combined_flu_var_length_eval_dataset
 
+############################# Nymeria real wrist FLU: fully supervised baselines ################
+# All three tasks trained from scratch (no pretrained encoder) using REAL wrist IMU
+# from Nymeria _rwrist pkl files. Data paths: processed_data_body_Ty_rwrist (train/val).
+
+# 1. Arm pose (5-joint right-arm chain, 30 dims)
+CUDA_VISIBLE_DEVICES=0 python scripts/run_pretrain.py \
+  --config       configs/base.yaml \
+  --model-config configs/vit1d_arm_pose_supervised_nymeria_real_wrist_flu.yaml \
+  --run-name     vit1d_arm_pose_supervised_nymeria_real_wrist_flu
+
+# 2. Full body pose (24 SMPL joints, 144 dims)
+CUDA_VISIBLE_DEVICES=1 python scripts/run_pretrain.py \
+  --config       configs/base.yaml \
+  --model-config configs/vit1d_full_body_pose_supervised_nymeria_real_wrist_flu.yaml \
+  --run-name     vit1d_full_body_pose_supervised_nymeria_real_wrist_flu
+
+# 3. Odometry (root displacement, 3 dims per patch)
+CUDA_VISIBLE_DEVICES=1 python scripts/run_pretrain.py \
+  --config       configs/base.yaml \
+  --model-config configs/vit1d_odom_supervised_nymeria_real_wrist_flu.yaml \
+  --run-name     vit1d_odom_supervised_nymeria_real_wrist_flu
+
+############################# Nymeria real wrist FLU: arm pose probe — OCDetect FLU MAE encoder ####
+# Frozen vit1d_mae_ocdetect_flu encoder; only arm pose decoder trains.
+# Data: Nymeria real right-wrist IMU → right-arm chain labels (5 joints × 6D = 30 dims)
+# Requires: runs/vit1d_mae_ocdetect_flu/checkpoints/best.pt
+
+CUDA_VISIBLE_DEVICES=0 python scripts/run_pretrain.py \
+  --config       configs/base.yaml \
+  --model-config configs/vit1d_arm_pose_probe_nymeria_real_wrist_ocdetect_flu.yaml \
+  --run-name     vit1d_arm_pose_probe_nymeria_real_wrist_ocdetect_flu
+
+python scripts/run_pose_eval_dataset.py \
+  --config       configs/base.yaml \
+  --model-config configs/vit1d_arm_pose_probe_nymeria_real_wrist_ocdetect_flu.yaml \
+  --run          vit1d_arm_pose_probe_nymeria_real_wrist_ocdetect_flu \
+  --test-dir     /mnt/nas2/processed_data_test_body_Ty_rwrist \
+  --ckpt         best \
+  --out-dir      data_vis/arm_pose_probe_nymeria_real_wrist_ocdetect_flu_eval_dataset
+
+python scripts/run_pose_eval.py \
+  --config       configs/base.yaml \
+  --model-config configs/vit1d_arm_pose_probe_nymeria_real_wrist_ocdetect_flu.yaml \
+  --run          vit1d_arm_pose_probe_nymeria_real_wrist_ocdetect_flu \
+  --pkl          /mnt/nas2/processed_data_test_body_Ty_rwrist/20230607_s0_james_johnson_act3_ifj2gc_cpfbody_rwrist_imu50hz_wristimu50hz_pose50hz.pkl \
+  --ckpt         best \
+  --max-frames   5000 \
+  --fps          50 \
+  --out-dir      data_vis/arm_pose_probe_nymeria_real_wrist_ocdetect_flu_single_eval
+
+############################# Nymeria real wrist FLU: arm pose finetune — OCDetect FLU MAE encoder ####
+# Encoder warm-started from vit1d_mae_ocdetect_flu and kept trainable (lower LR).
+# Data: Nymeria real right-wrist IMU → right-arm chain labels (5 joints × 6D = 30 dims)
+# Requires: runs/vit1d_mae_ocdetect_flu/checkpoints/best.pt
+
+CUDA_VISIBLE_DEVICES=1 python scripts/run_pretrain.py \
+  --config       configs/base.yaml \
+  --model-config configs/vit1d_arm_pose_finetune_nymeria_real_wrist_ocdetect_flu.yaml \
+  --run-name     vit1d_arm_pose_finetune_nymeria_real_wrist_ocdetect_flu
+
+python scripts/run_pose_eval_dataset.py \
+  --config       configs/base.yaml \
+  --model-config configs/vit1d_arm_pose_finetune_nymeria_real_wrist_ocdetect_flu.yaml \
+  --run          vit1d_arm_pose_finetune_nymeria_real_wrist_ocdetect_flu \
+  --test-dir     /mnt/nas2/processed_data_test_body_Ty_rwrist \
+  --ckpt         best \
+  --out-dir      data_vis/arm_pose_finetune_nymeria_real_wrist_ocdetect_flu_eval_dataset
+
+python scripts/run_pose_eval.py \
+  --config       configs/base.yaml \
+  --model-config configs/vit1d_arm_pose_finetune_nymeria_real_wrist_ocdetect_flu.yaml \
+  --run          vit1d_arm_pose_finetune_nymeria_real_wrist_ocdetect_flu \
+  --pkl          /mnt/nas2/processed_data_test_body_Ty_rwrist/20230607_s0_james_johnson_act3_ifj2gc_cpfbody_rwrist_imu50hz_wristimu50hz_pose50hz.pkl \
+  --ckpt         best \
+  --max-frames   5000 \
+  --fps          50 \
+  --out-dir      data_vis/arm_pose_finetune_nymeria_real_wrist_ocdetect_flu_single_eval
+
+############################# Nymeria real wrist FLU: arm pose probe — realdata MAE encoder ####
+# Frozen vit1d_realdata_pretrain encoder; only arm pose decoder trains.
+# Data: Nymeria real right-wrist IMU → right-arm chain labels (5 joints × 6D = 30 dims)
+# Requires: runs/vit1d_realdata_pretrain/checkpoints/best.pt
+
+CUDA_VISIBLE_DEVICES=0 python scripts/run_pretrain.py \
+  --config       configs/base.yaml \
+  --model-config configs/vit1d_arm_pose_probe_nymeria_real_wrist_realdata.yaml \
+  --run-name     vit1d_arm_pose_probe_nymeria_real_wrist_realdata
+
+python scripts/run_pose_eval_dataset.py \
+  --config       configs/base.yaml \
+  --model-config configs/vit1d_arm_pose_probe_nymeria_real_wrist_realdata.yaml \
+  --run          vit1d_arm_pose_probe_nymeria_real_wrist_realdata \
+  --test-dir     /mnt/nas2/processed_data_test_body_Ty_rwrist \
+  --ckpt         best \
+  --out-dir      data_vis/arm_pose_probe_nymeria_real_wrist_realdata_eval_dataset
+
+python scripts/run_pose_eval.py \
+  --config       configs/base.yaml \
+  --model-config configs/vit1d_arm_pose_probe_nymeria_real_wrist_realdata.yaml \
+  --run          vit1d_arm_pose_probe_nymeria_real_wrist_realdata \
+  --pkl          /mnt/nas2/processed_data_test_body_Ty_rwrist/20230607_s0_james_johnson_act3_ifj2gc_cpfbody_rwrist_imu50hz_wristimu50hz_pose50hz.pkl \
+  --ckpt         best \
+  --max-frames   5000 \
+  --fps          50 \
+  --out-dir      data_vis/arm_pose_probe_nymeria_real_wrist_realdata_single_eval
+
+############################# Nymeria real wrist FLU: arm pose finetune — realdata MAE encoder ####
+# Encoder warm-started from vit1d_realdata_pretrain and kept trainable (lower LR).
+# Data: Nymeria real right-wrist IMU → right-arm chain labels (5 joints × 6D = 30 dims)
+# Requires: runs/vit1d_realdata_pretrain/checkpoints/best.pt
+
+CUDA_VISIBLE_DEVICES=1 python scripts/run_pretrain.py \
+  --config       configs/base.yaml \
+  --model-config configs/vit1d_arm_pose_finetune_nymeria_real_wrist_realdata.yaml \
+  --run-name     vit1d_arm_pose_finetune_nymeria_real_wrist_realdata
+
+python scripts/run_pose_eval_dataset.py \
+  --config       configs/base.yaml \
+  --model-config configs/vit1d_arm_pose_finetune_nymeria_real_wrist_realdata.yaml \
+  --run          vit1d_arm_pose_finetune_nymeria_real_wrist_realdata \
+  --test-dir     /mnt/nas2/processed_data_test_body_Ty_rwrist \
+  --ckpt         best \
+  --out-dir      data_vis/arm_pose_finetune_nymeria_real_wrist_realdata_eval_dataset
+
+python scripts/run_pose_eval.py \
+  --config       configs/base.yaml \
+  --model-config configs/vit1d_arm_pose_finetune_nymeria_real_wrist_realdata.yaml \
+  --run          vit1d_arm_pose_finetune_nymeria_real_wrist_realdata \
+  --pkl          /mnt/nas2/processed_data_test_body_Ty_rwrist/20230607_s0_james_johnson_act3_ifj2gc_cpfbody_rwrist_imu50hz_wristimu50hz_pose50hz.pkl \
+  --ckpt         best \
+  --max-frames   5000 \
+  --fps          50 \
+  --out-dir      data_vis/arm_pose_finetune_nymeria_real_wrist_realdata_single_eval
+
+############################# Nymeria real wrist FLU: odom probe — OCDetect FLU MAE encoder ####
+# Frozen vit1d_mae_ocdetect_flu encoder; only odom decoder trains.
+# Data: Nymeria real right-wrist IMU → per-patch pelvis root displacement [3]
+# Requires: runs/vit1d_mae_ocdetect_flu/checkpoints/best.pt
+
+CUDA_VISIBLE_DEVICES=1 python scripts/run_pretrain.py \
+  --config       configs/base.yaml \
+  --model-config configs/vit1d_odom_probe_nymeria_real_wrist_ocdetect_flu.yaml \
+  --run-name     vit1d_odom_probe_nymeria_real_wrist_ocdetect_flu
+
+python scripts/run_odom_eval_dataset.py \
+  --config       configs/base.yaml \
+  --model-config configs/vit1d_odom_probe_nymeria_real_wrist_ocdetect_flu.yaml \
+  --run          vit1d_odom_probe_nymeria_real_wrist_ocdetect_flu \
+  --test-dir     /mnt/nas2/processed_data_test_body_Ty_rwrist \
+  --ckpt         best \
+  --out-dir      data_vis/odom_probe_nymeria_real_wrist_ocdetect_flu_eval_dataset
+
+############################# Nymeria real wrist FLU: odom finetune — OCDetect FLU MAE encoder ####
+# Encoder warm-started from vit1d_mae_ocdetect_flu and kept trainable (lower LR).
+# Data: Nymeria real right-wrist IMU → per-patch pelvis root displacement [3]
+# Requires: runs/vit1d_mae_ocdetect_flu/checkpoints/best.pt
+
+CUDA_VISIBLE_DEVICES=0 python scripts/run_pretrain.py \
+  --config       configs/base.yaml \
+  --model-config configs/vit1d_odom_finetune_nymeria_real_wrist_ocdetect_flu.yaml \
+  --run-name     vit1d_odom_finetune_nymeria_real_wrist_ocdetect_flu
+
+python scripts/run_odom_eval_dataset.py \
+  --config       configs/base.yaml \
+  --model-config configs/vit1d_odom_finetune_nymeria_real_wrist_ocdetect_flu.yaml \
+  --run          vit1d_odom_finetune_nymeria_real_wrist_ocdetect_flu \
+  --test-dir     /mnt/nas2/processed_data_test_body_Ty_rwrist \
+  --ckpt         best \
+  --out-dir      data_vis/odom_finetune_nymeria_real_wrist_ocdetect_flu_eval_dataset
+
+############################# Nymeria real wrist FLU: odom probe — realdata MAE encoder ####
+# Frozen vit1d_realdata_pretrain encoder; only odom decoder trains.
+# Data: Nymeria real right-wrist IMU → per-patch pelvis root displacement [3]
+# Requires: runs/vit1d_realdata_pretrain/checkpoints/best.pt
+
+CUDA_VISIBLE_DEVICES=0 python scripts/run_pretrain.py \
+  --config       configs/base.yaml \
+  --model-config configs/vit1d_odom_probe_nymeria_real_wrist_realdata.yaml \
+  --run-name     vit1d_odom_probe_nymeria_real_wrist_realdata
+
+python scripts/run_odom_eval_dataset.py \
+  --config       configs/base.yaml \
+  --model-config configs/vit1d_odom_probe_nymeria_real_wrist_realdata.yaml \
+  --run          vit1d_odom_probe_nymeria_real_wrist_realdata \
+  --test-dir     /mnt/nas2/processed_data_test_body_Ty_rwrist \
+  --ckpt         best \
+  --out-dir      data_vis/odom_probe_nymeria_real_wrist_realdata_eval_dataset
+
+############################# Nymeria real wrist FLU: odom finetune — realdata MAE encoder ####
+# Encoder warm-started from vit1d_realdata_pretrain and kept trainable (lower LR).
+# Data: Nymeria real right-wrist IMU → per-patch pelvis root displacement [3]
+# Requires: runs/vit1d_realdata_pretrain/checkpoints/best.pt
+
+CUDA_VISIBLE_DEVICES=1 python scripts/run_pretrain.py \
+  --config       configs/base.yaml \
+  --model-config configs/vit1d_odom_finetune_nymeria_real_wrist_realdata.yaml \
+  --run-name     vit1d_odom_finetune_nymeria_real_wrist_realdata
+
+python scripts/run_odom_eval_dataset.py \
+  --config       configs/base.yaml \
+  --model-config configs/vit1d_odom_finetune_nymeria_real_wrist_realdata.yaml \
+  --run          vit1d_odom_finetune_nymeria_real_wrist_realdata \
+  --test-dir     /mnt/nas2/processed_data_test_body_Ty_rwrist \
+  --ckpt         best \
+  --out-dir      data_vis/odom_finetune_nymeria_real_wrist_realdata_eval_dataset
+
+############################# Odom probe: encoder from IMUPoser full-body pose supervised ####
+# Frozen encoder (from vit1d_full_body_pose_supervised_imuposer_flu) + trainable odom decoder.
+# Tests whether a pose-supervised encoder transfers to odometry on IMUPoser FLU data.
+# Requires: runs/vit1d_full_body_pose_supervised_imuposer_flu/checkpoints/best.pt
+
+CUDA_VISIBLE_DEVICES=0 python scripts/run_pretrain.py \
+  --config       configs/base.yaml \
+  --model-config configs/vit1d_odom_probe_imuposer_flu_from_pose_supervised.yaml \
+  --run-name     vit1d_odom_probe_imuposer_flu_from_pose_supervised
+
+############################# Odom finetune: encoder from IMUPoser full-body pose supervised ####
+# Encoder warm-started from vit1d_full_body_pose_supervised_imuposer_flu (stays trainable) + odom decoder.
+# Tests whether a pose-supervised encoder can be adapted to odometry on IMUPoser FLU data.
+# Requires: runs/vit1d_full_body_pose_supervised_imuposer_flu/checkpoints/best.pt
+
+CUDA_VISIBLE_DEVICES=1 python scripts/run_pretrain.py \
+  --config       configs/base.yaml \
+  --model-config configs/vit1d_odom_finetune_imuposer_flu_from_pose_supervised.yaml \
+  --run-name     vit1d_odom_finetune_imuposer_flu_from_pose_supervised
+
+############################# Nymeria real wrist FLU: odom probe — encoder from full-body pose supervised ####
+# Frozen encoder (from vit1d_full_body_pose_supervised_nymeria_real_wrist_flu) + trainable odom decoder.
+# Tests whether a pose-supervised Nymeria real-wrist encoder transfers to odometry on same dataset.
+# Requires: runs/vit1d_full_body_pose_supervised_nymeria_real_wrist_flu/checkpoints/best.pt
+
+CUDA_VISIBLE_DEVICES=1 python scripts/run_pretrain.py \
+  --config       configs/base.yaml \
+  --model-config configs/vit1d_odom_probe_nymeria_real_wrist_flu_from_pose_supervised.yaml \
+  --run-name     vit1d_odom_probe_nymeria_real_wrist_flu_from_pose_supervised
+
+############################# Nymeria real wrist FLU: odom finetune — encoder from full-body pose supervised ####
+# Encoder warm-started from vit1d_full_body_pose_supervised_nymeria_real_wrist_flu (stays trainable) + odom decoder.
+# Tests whether a pose-supervised Nymeria real-wrist encoder can be adapted to odometry on same dataset.
+# Requires: runs/vit1d_full_body_pose_supervised_nymeria_real_wrist_flu/checkpoints/best.pt
+
+CUDA_VISIBLE_DEVICES=0 python scripts/run_pretrain.py \
+  --config       configs/base.yaml \
+  --model-config configs/vit1d_odom_finetune_nymeria_real_wrist_flu_from_pose_supervised.yaml \
+  --run-name     vit1d_odom_finetune_nymeria_real_wrist_flu_from_pose_supervised
+
+############################# SurfaceXR: 9-class gesture — fully supervised (LOPO) ####
+# ViT1D encoder (in_channels=24, patch_size=25) + LinearHead trained end-to-end.
+# Dataset: Google Pixel Watch 3, 200 Hz, 24 Butterworth channels, FLU frame.
+# LOPO split: run once per held-out user; update --run-name and test_user in config accordingly.
+# Change CUDA_VISIBLE_DEVICES and test_user as needed for each user.
+
+CUDA_VISIBLE_DEVICES=1 python scripts/run_pretrain.py \
+  --config       configs/base.yaml \
+  --model-config configs/vit1d_gesture_supervised_surfaceXR.yaml \
+  --run-name     vit1d_gesture_supervised_surfaceXR_lopoTimmy
+
+############################# SurfaceXR: 9-class gesture — linear probe (LOPO) ####
+# Frozen encoder loaded from a pretrained run + trainable LinearHead.
+# Update pretrained_run in the config to point to the desired pretrained encoder.
+# Requires: runs/<pretrained_run>/checkpoints/best.pt
+
+CUDA_VISIBLE_DEVICES=1 python scripts/run_pretrain.py \
+  --config       configs/base.yaml \
+  --model-config configs/vit1d_gesture_probe_surfaceXR.yaml \
+  --run-name     vit1d_gesture_probe_surfaceXR_lopoTimmy
 
 
 
 
 
+
+
+CUDA_VISIBLE_DEVICES=1 python scripts/run_pretrain.py \
+  --config       configs/base.yaml \
+  --model-config configs/vit1d_gesture_supervised_surfaceXR.yaml \
+  --run-name     vit1d_gesture_supervised_surfaceXR
 
 

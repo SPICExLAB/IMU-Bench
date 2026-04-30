@@ -1,0 +1,68 @@
+##############################################################################
+# Fully-supervised gesture classification — SurfaceXR smartwatch (9 classes)
+# Finetune variant: warm-start encoder from MAE run
+#   vit1d_mae_realdata_nymeria_real_wrist_flu (checkpoint: best)
+##############################################################################
+
+vit1d:
+  patch_size: 16
+  shared_kernel: true
+  encoder:
+    hidden_size: 384
+    num_hidden_layers: 12
+    num_attention_heads: 6
+    intermediate_size: 1536
+    hidden_dropout_prob: 0.1
+    attention_probs_dropout_prob: 0.1
+    layer_norm_eps: 1.0e-6
+  max_patches_per_channel: 256
+  pooling: "mean"
+
+objective:
+  type: surfaceXR_gesture_supervised
+  surfaceXR_gesture_supervised:
+    pkl_path: /mnt/nas2/vasco/SurfaceXR/dataset_raw_imu.pkl
+    test_user: Timmy
+    num_classes: 9
+    apply_flu: true
+    split: lopo
+    pretrained_run: vit1d_mae_realdata_nymeria_real_wrist_flu
+    pretrained_ckpt: best
+
+windowing:
+  window_seconds: 2.56
+
+data:
+  sensor_columns: [acc_F, acc_L, acc_U, gyro_F, gyro_L, gyro_U]
+  batch_size: 256
+  eval_batch_size: 256
+  num_workers: 0
+  pin_memory: false
+
+preprocess:
+  impute:
+    enabled: true
+  filter:
+    enabled: true
+  normalize:
+    enabled: true
+
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 50000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 500
+  patience: 20
+
+  optim:
+    name: adamw
+    lr: 3.0e-5
+    weight_decay: 0.01
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+
+  sched:
+    name: cosine
+    warmup_steps: 500

@@ -39,7 +39,7 @@ trainer:
 
   optim:
     name: adamw
-    lr: 0.00005                           # lower LR to preserve pretrained encoder features
+    lr: 0.000001                            # lower LR to preserve pretrained encoder features
     weight_decay: 0.01
     betas: [0.9, 0.95]
     eps: 1.0e-8

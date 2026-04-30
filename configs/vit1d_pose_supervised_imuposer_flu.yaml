@@ -39,7 +39,7 @@ trainer:
 
   optim:
     name: adamw
-    lr: 0.0003                            # higher LR — no pretrained weights to preserve
+    lr: 0.0001                            # higher LR — no pretrained weights to preserve
     weight_decay: 0.01
     betas: [0.9, 0.95]
     eps: 1.0e-8

@@ -1,0 +1,68 @@
+vit1d:
+  patch_size: 16            # 128 / 16 = 8 time patches → y shape [B, 8, 3]
+  shared_kernel: true
+  encoder:
+    hidden_size: 384
+    num_hidden_layers: 12
+    num_attention_heads: 6
+    intermediate_size: 1536
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-6
+  odom_decoder:
+    hidden_size: 192
+    num_hidden_layers: 2
+    num_attention_heads: 4
+    mlp_ratio: 4.0
+    dropout: 0.1
+  max_patches_per_channel: 256
+  pooling: "mean"
+
+objective:
+  type: odom_probe_nymeria_real_wrist_flu   # frozen encoder + trainable odom decoder
+  odom_probe_nymeria_real_wrist_flu:
+    pretrained_run: vit1d_mae_ocdetect_flu
+    pretrained_ckpt: best
+    train_pkl_root: /mnt/nas2/processed_data_body_Ty_rwrist
+    train_files: all
+    train_fraction: 0.01              # use first 1% of training sessions (≈9/867)
+    val_pkl_root: /mnt/nas2/processed_data_test_body_Ty_rwrist
+    val_files: all
+    add_gravity: true
+
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 10000000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 1000
+
+  optim:
+    name: adamw
+    lr: 0.000001
+    weight_decay: 0.01
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+
+  sched:
+    name: cosine
+    warmup_steps: 200
+
+  early_stopping:
+    enabled: true
+    monitor: val_loss
+    patience: 15
+
+gaussian_noise:
+  enabled: true
+  sigma: 0.05
+
+gain_jitter:
+  enabled: true
+  min_scale: 0.9
+  max_scale: 1.1
+
+axis_bias:
+  enabled: true
+  max_bias: 0.02

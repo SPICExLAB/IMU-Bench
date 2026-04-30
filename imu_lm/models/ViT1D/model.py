@@ -643,6 +643,7 @@ class ViT1DOdomDecoder(nn.Module):
         num_patches_per_channel: int,
         in_channels: int,
         cfg: Any,
+        out_dim: int = 3,
     ):
         super().__init__()
 
@@ -652,6 +653,7 @@ class ViT1DOdomDecoder(nn.Module):
         self.num_patches_per_channel = num_patches_per_channel
         self.in_channels             = in_channels
         self.embed_dim               = embed_dim
+        self.out_dim                 = out_dim
 
         hidden_size = int(dec_cfg.get("hidden_size",           192))
         num_layers  = int(dec_cfg.get("num_hidden_layers",       2))
@@ -677,8 +679,8 @@ class ViT1DOdomDecoder(nn.Module):
         self.transformer = nn.TransformerEncoder(decoder_layer, num_layers=num_layers)
         self.norm = nn.LayerNorm(hidden_size)
 
-        # Per-patch head → XYZ displacement
-        self.head = nn.Linear(hidden_size, 3)
+        # Per-patch head → out_dim values (3 for XYZ displacement, 4 for [dx,dy,dz,dψ])
+        self.head = nn.Linear(hidden_size, out_dim)
 
     def forward(self, tokens: torch.Tensor) -> torch.Tensor:
         """Predict per-patch root displacement.
@@ -687,7 +689,9 @@ class ViT1DOdomDecoder(nn.Module):
             tokens: [B, C * P_t, D]  — full encoder token grid.
 
         Returns:
-            [B, P_t, 3]  — XYZ displacement per time patch.
+            [B, P_t, out_dim]  — per-patch prediction.
+              out_dim=3: XYZ displacement
+              out_dim=4: [dx, dy, dz, dψ] local displacement + delta yaw
         """
         B  = tokens.shape[0]
         C  = self.in_channels

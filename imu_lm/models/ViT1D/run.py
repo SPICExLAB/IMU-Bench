@@ -99,6 +99,12 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
             from imu_lm.data.nymeria_wrist_loader_FLU import make_nymeria_loaders_flu as _make_pose_loaders
         elif _loader_type == "nymeria_real_wrist_flu":
             from imu_lm.data.nymeria_real_wrist_loader_FLU import make_nymeria_real_wrist_loaders_flu as _make_pose_loaders
+        elif _loader_type == "nymeria_real_wrist_full_body_flu":
+            from imu_lm.data.nymeria_real_wrist_full_body_loader_FLU import make_nymeria_real_wrist_full_body_loaders_flu as _make_pose_loaders
+        elif _loader_type == "nymeria_real_wrist_full_body_global":
+            from imu_lm.data.nymeria_real_wrist_full_body_loader_global import make_nymeria_real_wrist_full_body_loaders_global as _make_pose_loaders
+        elif _loader_type == "nymeria_syn_wrist_full_body_global":
+            from imu_lm.data.nymeria_syn_wrist_full_body_loader_global import make_nymeria_syn_wrist_full_body_loaders_global as _make_pose_loaders
         elif _loader_type == "imuposer_flu":
             from imu_lm.data.imuposer_wrist_loader_FLU import make_imuposer_wrist_flu_loaders as _make_pose_loaders
         elif _loader_type == "imuposer_flu_16hz_to_50hz":
@@ -127,6 +133,9 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
                     else os.path.join(root, files_cfg)]
 
         train_files = _expand_files(train_pkl_root, pose_cfg.get("train_files"))
+        _frac = pose_cfg.get("train_fraction")
+        if _frac is not None:
+            train_files = train_files[:max(1, int(len(train_files) * float(_frac)))]
         val_files   = _expand_files(val_pkl_root,   pose_cfg.get("val_files"))
 
         # pkl_root is unused when files are absolute, but required by the API
@@ -159,15 +168,76 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
             enc_state = torch.load(enc_ckpt_path, map_location="cpu", weights_only=False)
             encoder.load_state_dict(enc_state["model"], strict=True)
 
+        _pose_num_joints = num_joints  # capture for closure
         def objective_fn(batch, model, cfg):
-            return pose_1d_obj.forward_loss(batch, encoder, pose_decoder, cfg)
+            x, y_full = batch
+            # If num_joints < full label (e.g. 23 vs 24), skip root joint (first 6 dims)
+            label_joints = y_full.shape[-1] // 6
+            if _pose_num_joints < label_joints:
+                skip = (label_joints - _pose_num_joints) * 6
+                y_pose = y_full[:, :, skip:]
+            else:
+                y_pose = y_full
+            return pose_1d_obj.forward_loss((x, y_pose), encoder, pose_decoder, cfg)
         all_params = list(encoder.parameters()) + list(pose_decoder.parameters())
-        if _loader_type in ("imuposer_flu", "imuposer_flu_16hz_to_50hz", "imuposer_full_body_flu"):
+        if _loader_type == "totalcapture_real_wrist_flu":
+            from imu_lm.data.totalcapture_wrist_loader_FLU import make_totalcapture_real_wrist_loaders_flu as _make_tc
+            _tc_root = pose_cfg.get("pkl_root") or train_pkl_root or "/mnt/nas2/DIP_recalculate"
+            def _expand_tc_subjects(subjects):
+                return [f for s in (subjects or [])
+                        for f in sorted(_glob.glob(os.path.join(_tc_root, f"{s}_*.pkl")))]
+            _tc_train = (train_files if pose_cfg.get("train_files")
+                         else _expand_tc_subjects(pose_cfg.get("train_subjects")))
+            _tc_val   = (val_files   if pose_cfg.get("val_files")
+                         else _expand_tc_subjects(pose_cfg.get("val_subjects")))
+            loaders = _make_tc(
+                cfg=cfg,
+                pkl_root=_tc_root,
+                train_files=_tc_train,
+                val_files=_tc_val,
+                target_hz=int(pose_cfg.get("target_hz", 60)),
+                add_gravity=bool(pose_cfg.get("add_gravity", True)),
+                use_gt_ori=bool(pose_cfg.get("use_gt_ori", False)),
+                num_joints=num_joints,
+            )
+        elif _loader_type == "totalcapture_syn_wrist_flu":
+            from imu_lm.data.totalcapture_wrist_loader_FLU_syn import make_totalcapture_syn_wrist_loaders_flu as _make_tc_syn
+            _tc_root = pose_cfg.get("pkl_root") or train_pkl_root or "/mnt/nas2/DIP_recalculate"
+            def _expand_tc_subjects(subjects):
+                return [f for s in (subjects or [])
+                        for f in sorted(_glob.glob(os.path.join(_tc_root, f"{s}_*.pkl")))]
+            _tc_train = (train_files if pose_cfg.get("train_files")
+                         else _expand_tc_subjects(pose_cfg.get("train_subjects")))
+            _tc_val   = (val_files   if pose_cfg.get("val_files")
+                         else _expand_tc_subjects(pose_cfg.get("val_subjects")))
+            loaders = _make_tc_syn(
+                cfg=cfg,
+                pkl_root=_tc_root,
+                train_files=_tc_train,
+                val_files=_tc_val,
+                target_hz=int(pose_cfg.get("target_hz", 60)),
+                add_gravity=bool(pose_cfg.get("add_gravity", True)),
+                official_dir=pose_cfg.get("official_dir"),
+                gyro_white_noise_std=float(pose_cfg.get("gyro_white_noise_std", 0.0)),
+                gyro_bias_drift_std=float(pose_cfg.get("gyro_bias_drift_std", 0.0)),
+                num_joints=num_joints,
+            )
+        elif _loader_type in ("imuposer_flu", "imuposer_flu_16hz_to_50hz", "imuposer_full_body_flu"):
             loaders = _make_pose_loaders(
                 cfg=cfg,
                 train_files=train_files,
                 val_files=val_files,
                 add_gravity=bool(pose_cfg.get("add_gravity", False)),
+            )
+        elif _loader_type in ("nymeria_real_wrist_flu", "nymeria_real_wrist_full_body_flu",
+                               "nymeria_real_wrist_full_body_global",
+                               "nymeria_syn_wrist_full_body_global"):
+            loaders = _make_pose_loaders(
+                cfg=cfg,
+                pkl_root=pkl_root,
+                train_files=train_files,
+                val_files=val_files,
+                add_gravity=bool(pose_cfg.get("add_gravity", True)),
             )
         else:
             _flu_gyro_w = float(pose_cfg.get("gyro_white_noise_std", 0.0))
@@ -222,6 +292,12 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
             from imu_lm.data.nymeria_wrist_loader_FLU import make_nymeria_loaders_flu as _make_loaders
         elif _probe_loader_type == "nymeria_real_wrist_flu":
             from imu_lm.data.nymeria_real_wrist_loader_FLU import make_nymeria_real_wrist_loaders_flu as _make_loaders
+        elif _probe_loader_type == "nymeria_real_wrist_full_body_flu":
+            from imu_lm.data.nymeria_real_wrist_full_body_loader_FLU import make_nymeria_real_wrist_full_body_loaders_flu as _make_loaders
+        elif _probe_loader_type == "nymeria_real_wrist_full_body_global":
+            from imu_lm.data.nymeria_real_wrist_full_body_loader_global import make_nymeria_real_wrist_full_body_loaders_global as _make_loaders
+        elif _probe_loader_type == "nymeria_syn_wrist_full_body_global":
+            from imu_lm.data.nymeria_syn_wrist_full_body_loader_global import make_nymeria_syn_wrist_full_body_loaders_global as _make_loaders
         elif _probe_loader_type == "imuposer_flu":
             from imu_lm.data.imuposer_wrist_loader_FLU import make_imuposer_wrist_flu_loaders as _make_loaders
         elif _probe_loader_type == "imuposer_flu_16hz_to_50hz":
@@ -233,7 +309,7 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
         else:
             from imu_lm.data.nymeria_wrist_loader import make_nymeria_loaders as _make_loaders
 
-        train_pkl_root = probe_cfg.get("train_pkl_root")
+        train_pkl_root = probe_cfg.get("train_pkl_root") or probe_cfg.get("pkl_root")
         val_pkl_root   = probe_cfg.get("val_pkl_root") or train_pkl_root
 
         def _expand_files(root, files_cfg):
@@ -244,6 +320,9 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
             return [files_cfg if os.path.isabs(files_cfg) else os.path.join(root, files_cfg)]
 
         train_files = _expand_files(train_pkl_root, probe_cfg.get("train_files"))
+        _frac = probe_cfg.get("train_fraction")
+        if _frac is not None:
+            train_files = train_files[:max(1, int(len(train_files) * float(_frac)))]
         val_files   = _expand_files(val_pkl_root,   probe_cfg.get("val_files"))
 
         pose_decoder = ViT1DPoseDecoder(
@@ -254,27 +333,85 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
             cfg=cfg,
         )
 
+        _probe_num_joints = num_joints  # capture for closure
         def objective_fn(batch, model, cfg):
             # Ensure encoder stays in eval / no-grad mode each step
             encoder.eval()
             with torch.no_grad():
                 tokens, _ = encoder.forward_tokens(batch[0].float())
-            # Swap batch so pose_1d sees pre-computed tokens as if a fresh forward
-            # Instead, call decoder directly and compute MSE
             import torch.nn.functional as _F
-            y_pose = batch[1].float()
-            pred   = pose_decoder(tokens)
-            loss   = _F.mse_loss(pred, y_pose)
+            y_full = batch[1].float()
+            # If num_joints < full label (e.g. 23 vs 24), skip root joint (first 6 dims)
+            label_joints = y_full.shape[-1] // 6
+            if _probe_num_joints < label_joints:
+                skip = (label_joints - _probe_num_joints) * 6
+                y_pose = y_full[:, :, skip:]
+            else:
+                y_pose = y_full
+            pred = pose_decoder(tokens)
+            loss = _F.mse_loss(pred, y_pose)
             return loss, {"loss": float(loss.detach()), "pose_mse": float(loss.detach())}
 
         # Only decoder parameters are trainable
         all_params = list(pose_decoder.parameters())
-        if _probe_loader_type in ("imuposer_flu", "imuposer_flu_16hz_to_50hz", "imuposer_full_body_flu"):
+        if _probe_loader_type == "totalcapture_real_wrist_flu":
+            from imu_lm.data.totalcapture_wrist_loader_FLU import make_totalcapture_real_wrist_loaders_flu as _make_tc_p
+            _tc_root_p = probe_cfg.get("pkl_root") or train_pkl_root or "/mnt/nas2/DIP_recalculate"
+            def _expand_tc_subjects_p(subjects):
+                return [f for s in (subjects or [])
+                        for f in sorted(_glob.glob(os.path.join(_tc_root_p, f"{s}_*.pkl")))]
+            _tc_train_p = (train_files if probe_cfg.get("train_files")
+                           else _expand_tc_subjects_p(probe_cfg.get("train_subjects")))
+            _tc_val_p   = (val_files   if probe_cfg.get("val_files")
+                           else _expand_tc_subjects_p(probe_cfg.get("val_subjects")))
+            loaders = _make_tc_p(
+                cfg=cfg,
+                pkl_root=_tc_root_p,
+                train_files=_tc_train_p,
+                val_files=_tc_val_p,
+                target_hz=int(probe_cfg.get("target_hz", 60)),
+                add_gravity=bool(probe_cfg.get("add_gravity", True)),
+                use_gt_ori=bool(probe_cfg.get("use_gt_ori", False)),
+                num_joints=num_joints,
+            )
+        elif _probe_loader_type == "totalcapture_syn_wrist_flu":
+            from imu_lm.data.totalcapture_wrist_loader_FLU_syn import make_totalcapture_syn_wrist_loaders_flu as _make_tc_syn_p
+            _tc_root_p = probe_cfg.get("pkl_root") or train_pkl_root or "/mnt/nas2/DIP_recalculate"
+            def _expand_tc_subjects_p(subjects):
+                return [f for s in (subjects or [])
+                        for f in sorted(_glob.glob(os.path.join(_tc_root_p, f"{s}_*.pkl")))]
+            _tc_train_p = (train_files if probe_cfg.get("train_files")
+                           else _expand_tc_subjects_p(probe_cfg.get("train_subjects")))
+            _tc_val_p   = (val_files   if probe_cfg.get("val_files")
+                           else _expand_tc_subjects_p(probe_cfg.get("val_subjects")))
+            loaders = _make_tc_syn_p(
+                cfg=cfg,
+                pkl_root=_tc_root_p,
+                train_files=_tc_train_p,
+                val_files=_tc_val_p,
+                target_hz=int(probe_cfg.get("target_hz", 60)),
+                add_gravity=bool(probe_cfg.get("add_gravity", True)),
+                official_dir=probe_cfg.get("official_dir"),
+                gyro_white_noise_std=float(probe_cfg.get("gyro_white_noise_std", 0.0)),
+                gyro_bias_drift_std=float(probe_cfg.get("gyro_bias_drift_std", 0.0)),
+                num_joints=num_joints,
+            )
+        elif _probe_loader_type in ("imuposer_flu", "imuposer_flu_16hz_to_50hz", "imuposer_full_body_flu"):
             loaders = _make_loaders(
                 cfg=cfg,
                 train_files=train_files,
                 val_files=val_files,
                 add_gravity=bool(probe_cfg.get("add_gravity", False)),
+            )
+        elif _probe_loader_type in ("nymeria_real_wrist_flu", "nymeria_real_wrist_full_body_flu",
+                                     "nymeria_real_wrist_full_body_global",
+                                     "nymeria_syn_wrist_full_body_global"):
+            loaders = _make_loaders(
+                cfg=cfg,
+                pkl_root="/",
+                train_files=train_files,
+                val_files=val_files,
+                add_gravity=bool(probe_cfg.get("add_gravity", True)),
             )
         else:
             _flu_gyro_w = float(probe_cfg.get("gyro_white_noise_std", 0.0))
@@ -608,6 +745,211 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
             val_files=val_files,
         )
 
+    elif objective_type == "odom_nymeria_real_wrist_flu":
+        # Odometry regression using REAL wrist IMU (FLU frame) → per-patch FLU velocity [B, Pt, 4, 3]
+        # Label is flattened to [B, Pt, 12] before MSE (4 sub-patches × 3-D velocity).
+        # Encoder + odom decoder both trained from scratch (fully supervised).
+        import glob as _glob
+        odom_rw_cfg = cfg_get(cfg, ["objective", "odom_nymeria_real_wrist_flu"], {}) or {}
+        vit_cfg_    = cfg_get(cfg, ["vit1d"], {}) or {}
+        patch_size              = int(vit_cfg_.get("patch_size", 16))
+        num_patches_per_channel = T // patch_size
+
+        from imu_lm.data.nymeria_real_wrist_odom_loader_FLU import make_nymeria_real_wrist_odom_loaders_flu
+
+        train_pkl_root = odom_rw_cfg.get("train_pkl_root")
+        val_pkl_root   = odom_rw_cfg.get("val_pkl_root") or train_pkl_root
+
+        def _expand_files(root, files_cfg):
+            if files_cfg is None or files_cfg == "all":
+                return sorted(_glob.glob(os.path.join(root, "*.pkl")))
+            if isinstance(files_cfg, list):
+                return [f if os.path.isabs(f) else os.path.join(root, f) for f in files_cfg]
+            return [files_cfg if os.path.isabs(files_cfg) else os.path.join(root, files_cfg)]
+
+        train_files = _expand_files(train_pkl_root, odom_rw_cfg.get("train_files"))
+        _frac = odom_rw_cfg.get("train_fraction")
+        if _frac is not None:
+            train_files = train_files[:max(1, int(len(train_files) * float(_frac)))]
+        val_files   = _expand_files(val_pkl_root,   odom_rw_cfg.get("val_files"))
+
+        odom_decoder = ViT1DOdomDecoder(
+            embed_dim=encoder.embed_dim,
+            num_patches_per_channel=num_patches_per_channel,
+            in_channels=encoder.in_channels,
+            cfg=cfg,
+            out_dim=12,   # 4 sub-patches × 3D FLU velocity
+        )
+
+        def objective_fn(batch, model, cfg):
+            x, y = batch
+            # y: [B, N_patches, 4, 3] → [B, N_patches, 12]
+            y_flat = y.reshape(y.shape[0], y.shape[1], -1)
+            return odom_1d_obj.forward_loss((x, y_flat), encoder, odom_decoder, cfg)
+
+        all_params = list(encoder.parameters()) + list(odom_decoder.parameters())
+        loaders = make_nymeria_real_wrist_odom_loaders_flu(
+            cfg=cfg,
+            pkl_root="/",
+            train_files=train_files,
+            val_files=val_files,
+            add_gravity=bool(odom_rw_cfg.get("add_gravity", True)),
+        )
+
+    elif objective_type == "odom_probe_nymeria_real_wrist_flu":
+        # Frozen pretrained encoder + trainable ViT1DOdomDecoder on Nymeria real wrist FLU data.
+        # Encoder loaded from a pretrained run (e.g. full-body pose supervised); all encoder params frozen.
+        import glob as _glob
+        odom_probe_rw_cfg = cfg_get(cfg, ["objective", "odom_probe_nymeria_real_wrist_flu"], {}) or {}
+        vit_cfg_  = cfg_get(cfg, ["vit1d"], {}) or {}
+        patch_size              = int(vit_cfg_.get("patch_size", 16))
+        num_patches_per_channel = T // patch_size
+
+        # ---- load & freeze pretrained encoder --------------------------------
+        pretrained_run  = odom_probe_rw_cfg.get("pretrained_run")
+        pretrained_ckpt = odom_probe_rw_cfg.get("pretrained_ckpt", "best")
+        runs_root = cfg_get(cfg, ["paths", "runs_root"], "runs")
+        if pretrained_ckpt in ("best", "latest"):
+            enc_ckpt_path = os.path.join(runs_root, pretrained_run,
+                                         "checkpoints", f"{pretrained_ckpt}.pt")
+        else:
+            enc_ckpt_path = pretrained_ckpt
+
+        if not os.path.exists(enc_ckpt_path):
+            raise FileNotFoundError(
+                f"[odom_probe_nymeria_real_wrist_flu] pretrained encoder checkpoint not found: {enc_ckpt_path}"
+            )
+
+        import logging as _logging
+        _log = _logging.getLogger(__name__)
+        _log.info("[odom_probe_nymeria_real_wrist_flu] loading pretrained encoder from %s", enc_ckpt_path)
+        enc_state = torch.load(enc_ckpt_path, map_location="cpu", weights_only=False)
+        encoder.load_state_dict(enc_state["model"], strict=True)
+        _log.info("[odom_probe_nymeria_real_wrist_flu] encoder loaded — freezing all encoder parameters")
+        encoder.requires_grad_(False)
+        encoder.eval()
+
+        from imu_lm.data.nymeria_real_wrist_odom_loader_FLU import make_nymeria_real_wrist_odom_loaders_flu
+
+        train_pkl_root = odom_probe_rw_cfg.get("train_pkl_root")
+        val_pkl_root   = odom_probe_rw_cfg.get("val_pkl_root") or train_pkl_root
+
+        def _expand_files(root, files_cfg):
+            if files_cfg is None or files_cfg == "all":
+                return sorted(_glob.glob(os.path.join(root, "*.pkl")))
+            if isinstance(files_cfg, list):
+                return [f if os.path.isabs(f) else os.path.join(root, f) for f in files_cfg]
+            return [files_cfg if os.path.isabs(files_cfg) else os.path.join(root, files_cfg)]
+
+        train_files = _expand_files(train_pkl_root, odom_probe_rw_cfg.get("train_files"))
+        _frac = odom_probe_rw_cfg.get("train_fraction")
+        if _frac is not None:
+            train_files = train_files[:max(1, int(len(train_files) * float(_frac)))]
+        val_files   = _expand_files(val_pkl_root,   odom_probe_rw_cfg.get("val_files"))
+
+        odom_decoder = ViT1DOdomDecoder(
+            embed_dim=encoder.embed_dim,
+            num_patches_per_channel=num_patches_per_channel,
+            in_channels=encoder.in_channels,
+            cfg=cfg,
+            out_dim=12,   # 4 sub-patches × 3D FLU velocity
+        )
+
+        def objective_fn(batch, model, cfg):
+            encoder.eval()
+            x_b, y_b = batch
+            # y_b: [B, N_patches, 4, 3] → [B, N_patches, 12]
+            y_flat = y_b.reshape(y_b.shape[0], y_b.shape[1], -1).float()
+            with torch.no_grad():
+                tokens, _ = encoder.forward_tokens(x_b.float())
+            pred = odom_decoder(tokens)
+            loss = torch.nn.functional.mse_loss(pred, y_flat)
+            with torch.no_grad():
+                mae = (pred.detach() - y_flat).abs().mean()
+            return loss, {"loss": float(loss.detach()),
+                          "odom_mse": float(loss.detach()),
+                          "odom_mae": float(mae)}
+
+        all_params = list(odom_decoder.parameters())
+        loaders = make_nymeria_real_wrist_odom_loaders_flu(
+            cfg=cfg,
+            pkl_root="/",
+            train_files=train_files,
+            val_files=val_files,
+            add_gravity=bool(odom_probe_rw_cfg.get("add_gravity", True)),
+        )
+
+    elif objective_type == "odom_finetune_nymeria_real_wrist_flu":
+        # Warm-started encoder (stays trainable) + trainable ViT1DOdomDecoder on Nymeria real wrist FLU data.
+        # Encoder loaded from a pretrained run (e.g. full-body pose supervised); encoder remains trainable.
+        import glob as _glob
+        odom_ft_rw_cfg = cfg_get(cfg, ["objective", "odom_finetune_nymeria_real_wrist_flu"], {}) or {}
+        vit_cfg_  = cfg_get(cfg, ["vit1d"], {}) or {}
+        patch_size              = int(vit_cfg_.get("patch_size", 16))
+        num_patches_per_channel = T // patch_size
+
+        # ---- warm-start encoder (stays trainable) ----------------------------
+        pretrained_run  = odom_ft_rw_cfg.get("pretrained_run")
+        pretrained_ckpt = odom_ft_rw_cfg.get("pretrained_ckpt", "best")
+        runs_root = cfg_get(cfg, ["paths", "runs_root"], "runs")
+        if pretrained_ckpt in ("best", "latest"):
+            enc_ckpt_path = os.path.join(runs_root, pretrained_run,
+                                         "checkpoints", f"{pretrained_ckpt}.pt")
+        else:
+            enc_ckpt_path = pretrained_ckpt
+
+        if not os.path.exists(enc_ckpt_path):
+            raise FileNotFoundError(
+                f"[odom_finetune_nymeria_real_wrist_flu] pretrained encoder checkpoint not found: {enc_ckpt_path}"
+            )
+
+        import logging as _logging
+        _log = _logging.getLogger(__name__)
+        _log.info("[odom_finetune_nymeria_real_wrist_flu] warm-starting encoder from %s (encoder stays trainable)", enc_ckpt_path)
+        enc_state = torch.load(enc_ckpt_path, map_location="cpu", weights_only=False)
+        encoder.load_state_dict(enc_state["model"], strict=True)
+
+        from imu_lm.data.nymeria_real_wrist_odom_loader_FLU import make_nymeria_real_wrist_odom_loaders_flu
+
+        train_pkl_root = odom_ft_rw_cfg.get("train_pkl_root")
+        val_pkl_root   = odom_ft_rw_cfg.get("val_pkl_root") or train_pkl_root
+
+        def _expand_files(root, files_cfg):
+            if files_cfg is None or files_cfg == "all":
+                return sorted(_glob.glob(os.path.join(root, "*.pkl")))
+            if isinstance(files_cfg, list):
+                return [f if os.path.isabs(f) else os.path.join(root, f) for f in files_cfg]
+            return [files_cfg if os.path.isabs(files_cfg) else os.path.join(root, files_cfg)]
+
+        train_files = _expand_files(train_pkl_root, odom_ft_rw_cfg.get("train_files"))
+        _frac = odom_ft_rw_cfg.get("train_fraction")
+        if _frac is not None:
+            train_files = train_files[:max(1, int(len(train_files) * float(_frac)))]
+        val_files   = _expand_files(val_pkl_root,   odom_ft_rw_cfg.get("val_files"))
+
+        odom_decoder = ViT1DOdomDecoder(
+            embed_dim=encoder.embed_dim,
+            num_patches_per_channel=num_patches_per_channel,
+            in_channels=encoder.in_channels,
+            cfg=cfg,
+            out_dim=12,   # 4 sub-patches × 3D FLU velocity
+        )
+
+        def objective_fn(batch, model, cfg):
+            x, y = batch
+            # y: [B, N_patches, 4, 3] → [B, N_patches, 12]
+            y_flat = y.reshape(y.shape[0], y.shape[1], -1)
+            return odom_1d_obj.forward_loss((x, y_flat), encoder, odom_decoder, cfg)
+
+        all_params = list(encoder.parameters()) + list(odom_decoder.parameters())
+        loaders = make_nymeria_real_wrist_odom_loaders_flu(
+            cfg=cfg,
+            pkl_root="/",
+            train_files=train_files,
+            val_files=val_files,
+            add_gravity=bool(odom_ft_rw_cfg.get("add_gravity", True)),
+        )
+
     elif objective_type == "mae_imuposer_flu":
         # MAE pretraining on IMUPoser pkl files in the right-wrist FLU body frame.
         # Loader yields (x [6,T], y [N_patches,30]); MAE uses only x.
@@ -641,6 +983,52 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
             train_files=train_files,
             val_files=val_files,
             add_gravity=bool(mae_ip_cfg.get("add_gravity", False)),
+        )
+
+    elif objective_type == "mae_totalcapture_flu":
+        # MAE pretraining on TotalCapture DIP pkl files in the right-wrist FLU body frame.
+        # Loader yields (x [6,T], y [N_joints,N_patches,...]); MAE uses only x.
+        # Supports subject-based expansion (train_subjects / val_subjects) or explicit
+        # file lists (train_files / val_files) relative to pkl_root.
+        from imu_lm.data.totalcapture_wrist_loader_FLU import make_totalcapture_real_wrist_loaders_flu
+        import glob as _glob
+        mae_tc_cfg   = cfg_get(cfg, ["objective", "mae_totalcapture_flu"], {}) or {}
+        _tc_pkl_root = mae_tc_cfg.get("pkl_root") or "/mnt/nas2/DIP_recalculate"
+
+        def _expand_tc_subjects_mae(subjects, root):
+            paths = []
+            for subj in (subjects or []):
+                paths.extend(sorted(_glob.glob(os.path.join(root, f"{subj}_*.pkl"))))
+            return paths
+
+        def _abs_tc_mae(files):
+            return [f if os.path.isabs(f) else os.path.join(_tc_pkl_root, f)
+                    for f in (files or [])]
+
+        _train_subjs = mae_tc_cfg.get("train_subjects")
+        _val_subjs   = mae_tc_cfg.get("val_subjects")
+        _train_files = mae_tc_cfg.get("train_files")
+        _val_files   = mae_tc_cfg.get("val_files")
+
+        train_files = _abs_tc_mae(_train_files) if _train_files else _expand_tc_subjects_mae(_train_subjs, _tc_pkl_root)
+        val_files   = _abs_tc_mae(_val_files)   if _val_files   else _expand_tc_subjects_mae(_val_subjs,   _tc_pkl_root)
+
+        decoder = ViT1DDecoder(
+            embed_dim=encoder.embed_dim,
+            out_channels=encoder.in_channels,
+            target_T=T,
+            cfg=cfg,
+        )
+        def objective_fn(batch, model, cfg):
+            return masked_1d_obj.forward_loss(batch, encoder, decoder, cfg)
+        all_params = list(encoder.parameters()) + list(decoder.parameters())
+        loaders = make_totalcapture_real_wrist_loaders_flu(
+            cfg=cfg,
+            pkl_root=_tc_pkl_root,
+            train_files=train_files,
+            val_files=val_files,
+            target_hz=int(mae_tc_cfg.get("target_hz", 50)),
+            add_gravity=bool(mae_tc_cfg.get("add_gravity", True)),
         )
 
     elif objective_type == "odom_imuposer_flu":
@@ -682,6 +1070,454 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
             train_files=train_files,
             val_files=val_files,
             add_gravity=bool(odom_ip_cfg.get("add_gravity", False)),
+        )
+
+    elif objective_type == "local_disp_imuposer_flu":
+        # Local-frame displacement + delta yaw regression on IMUPoser pkls.
+        # Input : right-wrist FLU acc+gyro  [B, 6, T]
+        # Output: [B, N_patches, 4]  — [dx, dy, dz, dψ] per patch
+        #   [:, :, :3] = pelvis-body-frame displacement (metres, Y-up SMPL)
+        #   [:, :,  3] = delta yaw around world-up axis (radians, Z-up world)
+        # This avoids the global-yaw-unobservable problem of world-frame XYZ labels.
+        from imu_lm.data.imuposer_wrist_local_odom_loader_FLU import make_imuposer_local_disp_flu_loaders
+        import glob as _glob
+        ld_ip_cfg = cfg_get(cfg, ["objective", "local_disp_imuposer_flu"], {}) or {}
+        vit_cfg_  = cfg_get(cfg, ["vit1d"], {}) or {}
+        patch_size              = int(vit_cfg_.get("patch_size", 16))
+        num_patches_per_channel = T // patch_size
+
+        train_pkl_root = ld_ip_cfg.get("train_pkl_root")
+        val_pkl_root   = ld_ip_cfg.get("val_pkl_root") or train_pkl_root
+
+        def _expand_ld_files(root, files_cfg):
+            if files_cfg is None or files_cfg == "all":
+                return sorted(_glob.glob(os.path.join(root, "*.pkl")))
+            if isinstance(files_cfg, list):
+                return [f if os.path.isabs(f) else os.path.join(root, f) for f in files_cfg]
+            return [files_cfg if os.path.isabs(files_cfg) else os.path.join(root, files_cfg)]
+
+        train_files = _expand_ld_files(train_pkl_root, ld_ip_cfg.get("train_files"))
+        val_files   = _expand_ld_files(val_pkl_root,   ld_ip_cfg.get("val_files"))
+
+        odom_decoder = ViT1DOdomDecoder(
+            embed_dim=encoder.embed_dim,
+            num_patches_per_channel=num_patches_per_channel,
+            in_channels=encoder.in_channels,
+            cfg=cfg,
+            out_dim=4,   # [dx, dy, dz, dψ]
+        )
+
+        def objective_fn(batch, model, cfg):
+            return odom_1d_obj.forward_loss(batch, encoder, odom_decoder, cfg)
+
+        all_params = list(encoder.parameters()) + list(odom_decoder.parameters())
+        loaders = make_imuposer_local_disp_flu_loaders(
+            cfg=cfg,
+            train_files=train_files,
+            val_files=val_files,
+            add_gravity=bool(ld_ip_cfg.get("add_gravity", False)),
+        )
+
+    elif objective_type == "local_vel_imuposer_flu":
+        # Fully-supervised FLU-velocity regression on IMUPoser pkls.
+        # Input : right-wrist FLU acc+gyro  [B, 6, T]
+        # Output: per-patch 4×3-D pelvis velocity in wrist FLU frame [B, N_patches, 4, 3]
+        #   4 sub-patches per patch, each Q = patch_size // 4 frames (0.08 s @ 50 Hz).
+        #   v_flu[p, k] = R_X_from_world[t_mid] @ v_world   (m/s)
+        # Decoder produces [B, N_patches, 12]; y is flattened to the same shape for MSE.
+        from imu_lm.data.imuposer_wrist_local_odom_loader_FLU import make_imuposer_local_disp_flu_loaders
+        import glob as _glob
+        lv_ip_cfg = cfg_get(cfg, ["objective", "local_vel_imuposer_flu"], {}) or {}
+        vit_cfg_  = cfg_get(cfg, ["vit1d"], {}) or {}
+        patch_size              = int(vit_cfg_.get("patch_size", 16))
+        num_patches_per_channel = T // patch_size
+
+        train_pkl_root = lv_ip_cfg.get("train_pkl_root")
+        val_pkl_root   = lv_ip_cfg.get("val_pkl_root") or train_pkl_root
+
+        def _expand_lv_files(root, files_cfg):
+            if files_cfg is None or files_cfg == "all":
+                return sorted(_glob.glob(os.path.join(root, "*.pkl")))
+            if isinstance(files_cfg, list):
+                return [f if os.path.isabs(f) else os.path.join(root, f) for f in files_cfg]
+            return [files_cfg if os.path.isabs(files_cfg) else os.path.join(root, files_cfg)]
+
+        train_files = _expand_lv_files(train_pkl_root, lv_ip_cfg.get("train_files"))
+        val_files   = _expand_lv_files(val_pkl_root,   lv_ip_cfg.get("val_files"))
+
+        # Decoder: [B, N_patches, 12]  (12 = 4 sub-patches × 3 velocity components)
+        odom_decoder = ViT1DOdomDecoder(
+            embed_dim=encoder.embed_dim,
+            num_patches_per_channel=num_patches_per_channel,
+            in_channels=encoder.in_channels,
+            cfg=cfg,
+            out_dim=12,   # 4 sub-patches × 3D FLU velocity
+        )
+
+        def objective_fn(batch, model, cfg):
+            x, y = batch
+            # y: [B, N_patches, 4, 3] → [B, N_patches, 12] for MSE
+            y_flat = y.reshape(y.shape[0], y.shape[1], -1)
+            return odom_1d_obj.forward_loss((x, y_flat), encoder, odom_decoder, cfg)
+
+        all_params = list(encoder.parameters()) + list(odom_decoder.parameters())
+        loaders = make_imuposer_local_disp_flu_loaders(
+            cfg=cfg,
+            train_files=train_files,
+            val_files=val_files,
+            add_gravity=bool(lv_ip_cfg.get("add_gravity", False)),
+        )
+
+    elif objective_type == "local_vel_probe_imuposer_flu":
+        # Frozen pretrained encoder + trainable ViT1DOdomDecoder (out_dim=12).
+        # Input : right-wrist FLU acc+gyro  [B, 6, T]
+        # Output: per-patch 4×3-D pelvis velocity in wrist FLU frame [B, N_patches, 12]
+        from imu_lm.data.imuposer_wrist_local_odom_loader_FLU import make_imuposer_local_disp_flu_loaders
+        import glob as _glob
+        import logging as _logging
+        lv_probe_cfg = cfg_get(cfg, ["objective", "local_vel_probe_imuposer_flu"], {}) or {}
+        vit_cfg_  = cfg_get(cfg, ["vit1d"], {}) or {}
+        patch_size              = int(vit_cfg_.get("patch_size", 16))
+        num_patches_per_channel = T // patch_size
+
+        # ---- load & freeze pretrained encoder --------------------------------
+        pretrained_run  = lv_probe_cfg.get("pretrained_run")
+        pretrained_ckpt = lv_probe_cfg.get("pretrained_ckpt", "best")
+        runs_root = cfg_get(cfg, ["paths", "runs_root"], "runs")
+        if pretrained_ckpt in ("best", "latest"):
+            enc_ckpt_path = os.path.join(runs_root, pretrained_run,
+                                         "checkpoints", f"{pretrained_ckpt}.pt")
+        else:
+            enc_ckpt_path = pretrained_ckpt
+
+        if not os.path.exists(enc_ckpt_path):
+            raise FileNotFoundError(
+                f"[local_vel_probe_imuposer_flu] pretrained encoder checkpoint not found: {enc_ckpt_path}"
+            )
+
+        _log = _logging.getLogger(__name__)
+        _log.info("[local_vel_probe_imuposer_flu] loading pretrained encoder from %s", enc_ckpt_path)
+        enc_state = torch.load(enc_ckpt_path, map_location="cpu", weights_only=False)
+        encoder.load_state_dict(enc_state["model"], strict=True)
+        _log.info("[local_vel_probe_imuposer_flu] encoder loaded — freezing all encoder parameters")
+        encoder.requires_grad_(False)
+        encoder.eval()
+
+        train_pkl_root = lv_probe_cfg.get("train_pkl_root")
+        val_pkl_root   = lv_probe_cfg.get("val_pkl_root") or train_pkl_root
+
+        def _expand_lvp_files(root, files_cfg):
+            if files_cfg is None or files_cfg == "all":
+                return sorted(_glob.glob(os.path.join(root, "*.pkl")))
+            if isinstance(files_cfg, list):
+                return [f if os.path.isabs(f) else os.path.join(root, f) for f in files_cfg]
+            return [files_cfg if os.path.isabs(files_cfg) else os.path.join(root, files_cfg)]
+
+        train_files = _expand_lvp_files(train_pkl_root, lv_probe_cfg.get("train_files"))
+        val_files   = _expand_lvp_files(val_pkl_root,   lv_probe_cfg.get("val_files"))
+
+        odom_decoder = ViT1DOdomDecoder(
+            embed_dim=encoder.embed_dim,
+            num_patches_per_channel=num_patches_per_channel,
+            in_channels=encoder.in_channels,
+            cfg=cfg,
+            out_dim=12,   # 4 sub-patches × 3D FLU velocity
+        )
+
+        def objective_fn(batch, model, cfg):
+            encoder.eval()
+            x, y = batch
+            y_flat = y.reshape(y.shape[0], y.shape[1], -1)
+            with torch.no_grad():
+                tokens, _ = encoder.forward_tokens(x.float())
+            pred = odom_decoder(tokens)
+            loss = torch.nn.functional.mse_loss(pred, y_flat.float())
+            with torch.no_grad():
+                mae = (pred.detach() - y_flat.float()).abs().mean()
+            return loss, {"loss": float(loss.detach()),
+                          "odom_mse": float(loss.detach()),
+                          "odom_mae": float(mae)}
+
+        all_params = list(odom_decoder.parameters())
+        loaders = make_imuposer_local_disp_flu_loaders(
+            cfg=cfg,
+            train_files=train_files,
+            val_files=val_files,
+            add_gravity=bool(lv_probe_cfg.get("add_gravity", False)),
+        )
+
+    elif objective_type == "local_vel_finetune_imuposer_flu":
+        # Warm-started encoder (stays trainable) + trainable ViT1DOdomDecoder (out_dim=12).
+        # Both encoder and decoder are updated jointly from a pretrained MAE checkpoint.
+        from imu_lm.data.imuposer_wrist_local_odom_loader_FLU import make_imuposer_local_disp_flu_loaders
+        import glob as _glob
+        import logging as _logging
+        lv_ft_cfg = cfg_get(cfg, ["objective", "local_vel_finetune_imuposer_flu"], {}) or {}
+        vit_cfg_  = cfg_get(cfg, ["vit1d"], {}) or {}
+        patch_size              = int(vit_cfg_.get("patch_size", 16))
+        num_patches_per_channel = T // patch_size
+
+        # ---- warm-start encoder (stays trainable) ----------------------------
+        pretrained_run  = lv_ft_cfg.get("pretrained_run")
+        pretrained_ckpt = lv_ft_cfg.get("pretrained_ckpt", "best")
+        runs_root = cfg_get(cfg, ["paths", "runs_root"], "runs")
+        if pretrained_ckpt in ("best", "latest"):
+            enc_ckpt_path = os.path.join(runs_root, pretrained_run,
+                                         "checkpoints", f"{pretrained_ckpt}.pt")
+        else:
+            enc_ckpt_path = pretrained_ckpt
+
+        if not os.path.exists(enc_ckpt_path):
+            raise FileNotFoundError(
+                f"[local_vel_finetune_imuposer_flu] pretrained encoder checkpoint not found: {enc_ckpt_path}"
+            )
+
+        _log = _logging.getLogger(__name__)
+        _log.info("[local_vel_finetune_imuposer_flu] warm-starting encoder from %s (encoder stays trainable)", enc_ckpt_path)
+        enc_state = torch.load(enc_ckpt_path, map_location="cpu", weights_only=False)
+        encoder.load_state_dict(enc_state["model"], strict=True)
+
+        train_pkl_root = lv_ft_cfg.get("train_pkl_root")
+        val_pkl_root   = lv_ft_cfg.get("val_pkl_root") or train_pkl_root
+
+        def _expand_lvft_files(root, files_cfg):
+            if files_cfg is None or files_cfg == "all":
+                return sorted(_glob.glob(os.path.join(root, "*.pkl")))
+            if isinstance(files_cfg, list):
+                return [f if os.path.isabs(f) else os.path.join(root, f) for f in files_cfg]
+            return [files_cfg if os.path.isabs(files_cfg) else os.path.join(root, files_cfg)]
+
+        train_files = _expand_lvft_files(train_pkl_root, lv_ft_cfg.get("train_files"))
+        val_files   = _expand_lvft_files(val_pkl_root,   lv_ft_cfg.get("val_files"))
+
+        odom_decoder = ViT1DOdomDecoder(
+            embed_dim=encoder.embed_dim,
+            num_patches_per_channel=num_patches_per_channel,
+            in_channels=encoder.in_channels,
+            cfg=cfg,
+            out_dim=12,   # 4 sub-patches × 3D FLU velocity
+        )
+
+        def objective_fn(batch, model, cfg):
+            x, y = batch
+            y_flat = y.reshape(y.shape[0], y.shape[1], -1)
+            return odom_1d_obj.forward_loss((x, y_flat), encoder, odom_decoder, cfg)
+
+        all_params = list(encoder.parameters()) + list(odom_decoder.parameters())
+        loaders = make_imuposer_local_disp_flu_loaders(
+            cfg=cfg,
+            train_files=train_files,
+            val_files=val_files,
+            add_gravity=bool(lv_ft_cfg.get("add_gravity", False)),
+        )
+
+    elif objective_type == "odom_totalcapture_flu":
+        # Supervised odometry on TotalCapture DIP pkls, right-wrist FLU frame.
+        # No pretrained encoder — trained from scratch end-to-end.
+        # Per-patch root displacement is derived by double-integrating world-frame acc.
+        import glob as _glob
+        from imu_lm.data.totalcapture_wrist_odom_loader_FLU import make_totalcapture_odom_flu_loaders
+        odom_tc_cfg = cfg_get(cfg, ["objective", "odom_totalcapture_flu"], {}) or {}
+        vit_cfg_  = cfg_get(cfg, ["vit1d"], {}) or {}
+        patch_size              = int(vit_cfg_.get("patch_size", 16))
+        num_patches_per_channel = T // patch_size
+
+        _tc_pkl_root = odom_tc_cfg.get("pkl_root") or "/mnt/nas2/DIP_recalculate"
+
+        def _expand_tc_subjects(subjects, root):
+            """Expand subject IDs (e.g. ['s1','s2']) → sorted list of pkl paths."""
+            import re
+            paths = []
+            for subj in (subjects or []):
+                paths.extend(sorted(_glob.glob(os.path.join(root, f"{subj}_*.pkl"))))
+            return paths
+
+        _train_subjs  = odom_tc_cfg.get("train_subjects")
+        _val_subjs    = odom_tc_cfg.get("val_subjects")
+        _train_files  = odom_tc_cfg.get("train_files")
+        _val_files    = odom_tc_cfg.get("val_files")
+
+        def _abs_tc(files):
+            return [f if os.path.isabs(f) else os.path.join(_tc_pkl_root, f)
+                    for f in (files or [])]
+
+        train_files = _abs_tc(_train_files) if _train_files else _expand_tc_subjects(_train_subjs, _tc_pkl_root)
+        val_files   = _abs_tc(_val_files)   if _val_files   else _expand_tc_subjects(_val_subjs,   _tc_pkl_root)
+
+        odom_decoder = ViT1DOdomDecoder(
+            embed_dim=encoder.embed_dim,
+            num_patches_per_channel=num_patches_per_channel,
+            in_channels=encoder.in_channels,
+            cfg=cfg,
+        )
+
+        def objective_fn(batch, model, cfg):
+            return odom_1d_obj.forward_loss(batch, encoder, odom_decoder, cfg)
+
+        all_params = list(encoder.parameters()) + list(odom_decoder.parameters())
+        loaders = make_totalcapture_odom_flu_loaders(
+            cfg=cfg,
+            pkl_root=_tc_pkl_root,
+            train_files=train_files,
+            val_files=val_files,
+            target_hz=int(odom_tc_cfg.get("target_hz", 50)),
+            add_gravity=bool(odom_tc_cfg.get("add_gravity", True)),
+            use_gt_ori=bool(odom_tc_cfg.get("use_gt_ori", False)),
+        )
+
+    elif objective_type == "odom_probe_totalcapture_flu":
+        # Frozen pretrained encoder + trainable ViT1DOdomDecoder on TotalCapture FLU data.
+        import glob as _glob
+        from imu_lm.data.totalcapture_wrist_odom_loader_FLU import make_totalcapture_odom_flu_loaders
+        odom_probe_tc_cfg = cfg_get(cfg, ["objective", "odom_probe_totalcapture_flu"], {}) or {}
+        vit_cfg_  = cfg_get(cfg, ["vit1d"], {}) or {}
+        patch_size              = int(vit_cfg_.get("patch_size", 16))
+        num_patches_per_channel = T // patch_size
+
+        # ---- load & freeze pretrained encoder --------------------------------
+        pretrained_run  = odom_probe_tc_cfg.get("pretrained_run")
+        pretrained_ckpt = odom_probe_tc_cfg.get("pretrained_ckpt", "best")
+        runs_root = cfg_get(cfg, ["paths", "runs_root"], "runs")
+        if pretrained_ckpt in ("best", "latest"):
+            enc_ckpt_path = os.path.join(runs_root, pretrained_run,
+                                         "checkpoints", f"{pretrained_ckpt}.pt")
+        else:
+            enc_ckpt_path = pretrained_ckpt
+
+        if not os.path.exists(enc_ckpt_path):
+            raise FileNotFoundError(
+                f"[odom_probe_totalcapture_flu] pretrained encoder checkpoint not found: {enc_ckpt_path}"
+            )
+
+        import logging as _logging
+        _log = _logging.getLogger(__name__)
+        _log.info("[odom_probe_totalcapture_flu] loading pretrained encoder from %s", enc_ckpt_path)
+        enc_state = torch.load(enc_ckpt_path, map_location="cpu", weights_only=False)
+        encoder.load_state_dict(enc_state["model"], strict=True)
+        _log.info("[odom_probe_totalcapture_flu] encoder loaded — freezing all encoder parameters")
+        encoder.requires_grad_(False)
+        encoder.eval()
+
+        _tc_pkl_root = odom_probe_tc_cfg.get("pkl_root") or "/mnt/nas2/DIP_recalculate"
+
+        def _expand_tc_subjects_probe(subjects, root):
+            paths = []
+            for subj in (subjects or []):
+                paths.extend(sorted(_glob.glob(os.path.join(root, f"{subj}_*.pkl"))))
+            return paths
+
+        _train_subjs  = odom_probe_tc_cfg.get("train_subjects")
+        _val_subjs    = odom_probe_tc_cfg.get("val_subjects")
+        _train_files  = odom_probe_tc_cfg.get("train_files")
+        _val_files    = odom_probe_tc_cfg.get("val_files")
+
+        def _abs_tc_probe(files):
+            return [f if os.path.isabs(f) else os.path.join(_tc_pkl_root, f)
+                    for f in (files or [])]
+
+        train_files = _abs_tc_probe(_train_files) if _train_files else _expand_tc_subjects_probe(_train_subjs, _tc_pkl_root)
+        val_files   = _abs_tc_probe(_val_files)   if _val_files   else _expand_tc_subjects_probe(_val_subjs,   _tc_pkl_root)
+
+        odom_decoder = ViT1DOdomDecoder(
+            embed_dim=encoder.embed_dim,
+            num_patches_per_channel=num_patches_per_channel,
+            in_channels=encoder.in_channels,
+            cfg=cfg,
+        )
+
+        def objective_fn(batch, model, cfg):
+            encoder.eval()
+            x_b, y_b = batch
+            with torch.no_grad():
+                tokens, _ = encoder.forward_tokens(x_b.float())
+            pred = odom_decoder(tokens)
+            loss = torch.nn.functional.mse_loss(pred, y_b.float())
+            with torch.no_grad():
+                mae = (pred.detach() - y_b.float()).abs().mean()
+            return loss, {"loss": float(loss.detach()),
+                          "odom_mse": float(loss.detach()),
+                          "odom_mae": float(mae)}
+
+        all_params = list(odom_decoder.parameters())
+        loaders = make_totalcapture_odom_flu_loaders(
+            cfg=cfg,
+            pkl_root=_tc_pkl_root,
+            train_files=train_files,
+            val_files=val_files,
+            target_hz=int(odom_probe_tc_cfg.get("target_hz", 50)),
+            add_gravity=bool(odom_probe_tc_cfg.get("add_gravity", True)),
+            use_gt_ori=bool(odom_probe_tc_cfg.get("use_gt_ori", False)),
+        )
+
+    elif objective_type == "odom_finetune_totalcapture_flu":
+        # Warm-started encoder (stays trainable) + ViT1DOdomDecoder on TotalCapture FLU data.
+        import glob as _glob
+        from imu_lm.data.totalcapture_wrist_odom_loader_FLU import make_totalcapture_odom_flu_loaders
+        odom_ft_tc_cfg = cfg_get(cfg, ["objective", "odom_finetune_totalcapture_flu"], {}) or {}
+        vit_cfg_  = cfg_get(cfg, ["vit1d"], {}) or {}
+        patch_size              = int(vit_cfg_.get("patch_size", 16))
+        num_patches_per_channel = T // patch_size
+
+        # ---- warm-start encoder (stays trainable) ----------------------------
+        pretrained_run  = odom_ft_tc_cfg.get("pretrained_run")
+        pretrained_ckpt = odom_ft_tc_cfg.get("pretrained_ckpt", "best")
+        runs_root = cfg_get(cfg, ["paths", "runs_root"], "runs")
+        if pretrained_ckpt in ("best", "latest"):
+            enc_ckpt_path = os.path.join(runs_root, pretrained_run,
+                                         "checkpoints", f"{pretrained_ckpt}.pt")
+        else:
+            enc_ckpt_path = pretrained_ckpt
+
+        if not os.path.exists(enc_ckpt_path):
+            raise FileNotFoundError(
+                f"[odom_finetune_totalcapture_flu] pretrained encoder checkpoint not found: {enc_ckpt_path}"
+            )
+
+        import logging as _logging
+        _log = _logging.getLogger(__name__)
+        _log.info("[odom_finetune_totalcapture_flu] warm-starting encoder from %s (encoder stays trainable)", enc_ckpt_path)
+        enc_state = torch.load(enc_ckpt_path, map_location="cpu", weights_only=False)
+        encoder.load_state_dict(enc_state["model"], strict=True)
+
+        _tc_pkl_root = odom_ft_tc_cfg.get("pkl_root") or "/mnt/nas2/DIP_recalculate"
+
+        def _expand_tc_subjects_ft(subjects, root):
+            paths = []
+            for subj in (subjects or []):
+                paths.extend(sorted(_glob.glob(os.path.join(root, f"{subj}_*.pkl"))))
+            return paths
+
+        _train_subjs  = odom_ft_tc_cfg.get("train_subjects")
+        _val_subjs    = odom_ft_tc_cfg.get("val_subjects")
+        _train_files  = odom_ft_tc_cfg.get("train_files")
+        _val_files    = odom_ft_tc_cfg.get("val_files")
+
+        def _abs_tc_ft(files):
+            return [f if os.path.isabs(f) else os.path.join(_tc_pkl_root, f)
+                    for f in (files or [])]
+
+        train_files = _abs_tc_ft(_train_files) if _train_files else _expand_tc_subjects_ft(_train_subjs, _tc_pkl_root)
+        val_files   = _abs_tc_ft(_val_files)   if _val_files   else _expand_tc_subjects_ft(_val_subjs,   _tc_pkl_root)
+
+        odom_decoder = ViT1DOdomDecoder(
+            embed_dim=encoder.embed_dim,
+            num_patches_per_channel=num_patches_per_channel,
+            in_channels=encoder.in_channels,
+            cfg=cfg,
+        )
+
+        def objective_fn(batch, model, cfg):
+            return odom_1d_obj.forward_loss(batch, encoder, odom_decoder, cfg)
+
+        all_params = list(encoder.parameters()) + list(odom_decoder.parameters())
+        loaders = make_totalcapture_odom_flu_loaders(
+            cfg=cfg,
+            pkl_root=_tc_pkl_root,
+            train_files=train_files,
+            val_files=val_files,
+            target_hz=int(odom_ft_tc_cfg.get("target_hz", 50)),
+            add_gravity=bool(odom_ft_tc_cfg.get("add_gravity", True)),
+            use_gt_ori=bool(odom_ft_tc_cfg.get("use_gt_ori", False)),
         )
 
     elif objective_type == "mae_nymeria":
@@ -1204,7 +2040,7 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
         # body frame (linear acc, no gravity) — matching the Nymeria FLU pipeline.
         # Encoder warm-started from a pretrained checkpoint (e.g. vit1d_realdata_pretrain).
         from imu_lm.objectives.contrastive_clip_1d import (
-            ContrastiveCLIPHead, CLIPTextEncoder
+            ContrastiveCLIPHead, CLIPTextEncoder, TextProjectionMLP
         )
         import imu_lm.objectives.contrastive_clip_1d as clip_obj
         from imu_lm.data.humanml3d_dataset_FLU import make_humanml3d_imu_loaders_flu
@@ -1219,6 +2055,8 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
         freeze_imu      = bool(clip_cfg.get("freeze_imu_encoder", False))
         freeze_text     = bool(clip_cfg.get("freeze_text_encoder", True))
         text_cache_path = clip_cfg.get("text_cache_path", None)
+        use_text_mlp    = bool(clip_cfg.get("text_projection_mlp", False))
+        text_mlp_hidden = clip_cfg.get("text_mlp_hidden_dim", None)
 
         if not humanml3d_root:
             raise ValueError("[imu_text_clip_flu] 'humanml3d_root' must be set in objective.imu_text_clip_flu")
@@ -1276,8 +2114,17 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
                 local_files_only = local_files,
             )
 
+        # -- text-side MLP projection (trainable, optional) -----------------
+        text_mlp = None
+        if use_text_mlp:
+            text_mlp = TextProjectionMLP(
+                embed_dim  = clip_embed_dim,
+                hidden_dim = text_mlp_hidden,
+            )
+
         def objective_fn(batch, model, cfg):
-            return clip_obj.forward_loss(batch, encoder, clip_head, text_encoder, cfg)
+            return clip_obj.forward_loss(batch, encoder, clip_head, text_encoder, cfg,
+                                         text_mlp=text_mlp)
 
         if freeze_imu:
             all_params = list(clip_head.parameters())
@@ -1285,6 +2132,8 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
             all_params = list(encoder.parameters()) + list(clip_head.parameters())
         if not freeze_text and text_encoder is not None:
             all_params += list(text_encoder.model.parameters())
+        if text_mlp is not None:
+            all_params += list(text_mlp.parameters())
 
         loaders = make_humanml3d_imu_loaders_flu(
             root           = humanml3d_root,
@@ -1321,6 +2170,233 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
             return masked_1d_obj.forward_loss(batch, encoder, decoder, cfg)
         all_params = list(encoder.parameters()) + list(decoder.parameters())
         loaders = make_realdata_30hz_to_50hz_loaders(cfg)
+
+    elif objective_type == "mae_ocdetect_flu":
+        # MAE pretraining on OCDetect wrist-IMU data (FLU frame, 50 Hz, 2.56 s windows).
+        # 678 recordings, 22 OCD subjects; data converted Android → FLU in the loader.
+        # Labels (compulsive) are discarded — only x is used for reconstruction.
+        from imu_lm.data.OCDetect_dataloader import (
+            make_ocdetect_loaders_random,
+            DATA_DIR_DEFAULT as _OCDetect_DATA_DIR,
+        )
+        ocdetect_cfg = cfg_get(cfg, ["objective", "mae_ocdetect_flu"], {}) or {}
+        data_dir_    = ocdetect_cfg.get("data_dir", _OCDetect_DATA_DIR)
+        splits_      = tuple(ocdetect_cfg.get("splits", [0.8, 0.1, 0.1]))
+        num_workers_ = int(cfg_get(cfg, ["data", "num_workers"], 0))
+        pin_memory_  = bool(cfg_get(cfg, ["data", "pin_memory"], False))
+        batch_size_  = int(cfg_get(cfg, ["data", "batch_size"], 256))
+        eval_bs_     = int(cfg_get(cfg, ["data", "eval_batch_size"], batch_size_))
+
+        decoder = ViT1DDecoder(
+            embed_dim=encoder.embed_dim,
+            out_channels=encoder.in_channels,
+            target_T=T,
+            cfg=cfg,
+        )
+        def objective_fn(batch, model, cfg):
+            return masked_1d_obj.forward_loss(batch, encoder, decoder, cfg)
+        all_params = list(encoder.parameters()) + list(decoder.parameters())
+        loaders = make_ocdetect_loaders_random(
+            data_dir=data_dir_,
+            splits=splits_,
+            batch_size=batch_size_,
+            eval_batch_size=eval_bs_,
+            num_workers=num_workers_,
+            pin_memory=pin_memory_,
+            cfg=cfg,
+        )
+
+    elif objective_type == "surfacexr_gesture_supervised":
+        # Fully-supervised 9-class gesture classification on SurfaceXR smartwatch IMU.
+        # Encoder (ViT1D, in_channels=6) + LinearHead trained end-to-end.
+        # Data: Google Pixel Watch 3, raw acc/gyro downsampled 200→50 Hz, 2.56 s windows
+        #       (128 samples), 6 FLU channels — identical format to all other 50 Hz datasets.
+        # Labels: 0=no_gesture, 1=SINGLE_TAP, 2=DOUBLE_TAP, 3=PINCH_IN, 4=PINCH_OUT,
+        #          5=SWIPE_UP, 6=SWIPE_DOWN, 7=SWIPE_LEFT, 8=SWIPE_RIGHT
+        # Split: LOPO (leave-one-person-out) by test_user.
+        from imu_lm.data.surfaceXR_dataloader import (
+            make_surfaceXR_loaders_lopo_200hz,
+            make_surfaceXR_loaders_random_200hz,
+            make_surfaceXR_loaders_lopo_50hz,
+            make_surfaceXR_loaders_random_50hz,
+            ALL_USERS as _SXR_ALL_USERS,
+            RAW_IMU_PKL_DEFAULT as _SXR_RAW_PKL,
+        )
+        import logging as _logging
+        _sxr_log = _logging.getLogger(__name__)
+
+        sxr_cfg = cfg_get(cfg, ["objective", "surfaceXR_gesture_supervised"], {}) or {}  # key in YAML is mixed-case
+        pkl_path    = sxr_cfg.get("pkl_path", _SXR_RAW_PKL)
+        test_user   = sxr_cfg.get("test_user", None)
+        num_classes = int(sxr_cfg.get("num_classes", 9))
+        apply_flu   = bool(sxr_cfg.get("apply_flu", True))
+        split_type  = str(sxr_cfg.get("split", "lopo")).lower()
+        sample_rate_hz = int(sxr_cfg.get("sample_rate_hz", 50))
+
+        batch_size_  = int(cfg_get(cfg, ["data", "batch_size"],       256))
+        eval_bs_     = int(cfg_get(cfg, ["data", "eval_batch_size"],  batch_size_))
+        n_workers_   = int(cfg_get(cfg, ["data", "num_workers"],       0))
+        pin_mem_     = bool(cfg_get(cfg, ["data", "pin_memory"],    False))
+
+        if sample_rate_hz == 50:
+            make_lopo = make_surfaceXR_loaders_lopo_50hz
+            make_random = make_surfaceXR_loaders_random_50hz
+        elif sample_rate_hz == 200:
+            make_lopo = make_surfaceXR_loaders_lopo_200hz
+            make_random = make_surfaceXR_loaders_random_200hz
+        else:
+            raise ValueError(
+                f"[surfaceXR_gesture_supervised] unsupported sample_rate_hz={sample_rate_hz}; expected 50 or 200"
+            )
+
+        if split_type == "lopo":
+            if test_user is None:
+                raise ValueError(
+                    "[surfaceXR_gesture_supervised] 'test_user' must be set for LOPO split"
+                )
+            loaders = make_lopo(
+                pkl_path=pkl_path,
+                test_user=test_user,
+                label_type="gesture",
+                batch_size=batch_size_,
+                eval_batch_size=eval_bs_,
+                num_workers=n_workers_,
+                pin_memory=pin_mem_,
+                apply_flu=apply_flu,
+            )
+        else:
+            loaders = make_random(
+                pkl_path=pkl_path,
+                label_type="gesture",
+                batch_size=batch_size_,
+                eval_batch_size=eval_bs_,
+                num_workers=n_workers_,
+                pin_memory=pin_mem_,
+                apply_flu=apply_flu,
+            )
+
+        head = LinearHead(encoder.embed_dim, num_classes)
+
+        # Optional: warm-start encoder from a pretrained run
+        pretrained_run  = sxr_cfg.get("pretrained_run",  None)
+        pretrained_ckpt = sxr_cfg.get("pretrained_ckpt", "best")
+        if pretrained_run:
+            runs_root = cfg_get(cfg, ["paths", "runs_root"], "runs")
+            if pretrained_ckpt in ("best", "latest"):
+                enc_ckpt_path = os.path.join(runs_root, pretrained_run,
+                                             "checkpoints", f"{pretrained_ckpt}.pt")
+            else:
+                enc_ckpt_path = pretrained_ckpt
+            if not os.path.exists(enc_ckpt_path):
+                raise FileNotFoundError(
+                    f"[surfaceXR_gesture_supervised] pretrained encoder not found: {enc_ckpt_path}"
+                )
+            _sxr_log.info("[surfaceXR_gesture_supervised] warm-starting encoder from %s", enc_ckpt_path)
+            enc_state = torch.load(enc_ckpt_path, map_location="cpu", weights_only=False)
+            encoder.load_state_dict(enc_state["model"], strict=True)
+
+        _sxr_log.info(
+            "[surfaceXR_gesture_supervised] split=%s test_user=%s num_classes=%d sample_rate_hz=%d",
+            split_type, test_user, num_classes, sample_rate_hz,
+        )
+
+        def objective_fn(batch, model, cfg):
+            return supervised_obj.forward_loss(batch, encoder, head, cfg, raw_to_idx=None)
+
+        all_params = list(encoder.parameters()) + list(head.parameters())
+
+    elif objective_type == "surfacexr_gesture_probe":
+        # Linear probe: frozen pretrained encoder + trainable LinearHead.
+        # Same 50 Hz / 6-channel / 128-sample data as surfaceXR_gesture_supervised.
+        from imu_lm.data.surfaceXR_dataloader import (
+            make_surfaceXR_loaders_lopo_50hz,
+            make_surfaceXR_loaders_random_50hz,
+            RAW_IMU_PKL_DEFAULT as _SXR_RAW_PKL_PROBE,
+        )
+        import logging as _logging
+        _sxr_log = _logging.getLogger(__name__)
+
+        sxr_probe_cfg = cfg_get(cfg, ["objective", "surfaceXR_gesture_probe"], {}) or {}
+        pkl_path    = sxr_probe_cfg.get("pkl_path", _SXR_RAW_PKL_PROBE)
+        test_user   = sxr_probe_cfg.get("test_user", None)
+        num_classes = int(sxr_probe_cfg.get("num_classes", 9))
+        apply_flu   = bool(sxr_probe_cfg.get("apply_flu", True))
+        split_type  = str(sxr_probe_cfg.get("split", "lopo")).lower()
+
+        # Load & freeze pretrained encoder
+        pretrained_run  = sxr_probe_cfg.get("pretrained_run")
+        pretrained_ckpt = sxr_probe_cfg.get("pretrained_ckpt", "best")
+        if not pretrained_run:
+            raise ValueError(
+                "[surfaceXR_gesture_probe] 'pretrained_run' must be set for probing"
+            )
+        runs_root = cfg_get(cfg, ["paths", "runs_root"], "runs")
+        if pretrained_ckpt in ("best", "latest"):
+            enc_ckpt_path = os.path.join(runs_root, pretrained_run,
+                                         "checkpoints", f"{pretrained_ckpt}.pt")
+        else:
+            enc_ckpt_path = pretrained_ckpt
+        if not os.path.exists(enc_ckpt_path):
+            raise FileNotFoundError(
+                f"[surfaceXR_gesture_probe] pretrained encoder not found: {enc_ckpt_path}"
+            )
+        _sxr_log.info("[surfaceXR_gesture_probe] loading pretrained encoder from %s", enc_ckpt_path)
+        enc_state = torch.load(enc_ckpt_path, map_location="cpu", weights_only=False)
+        encoder.load_state_dict(enc_state["model"], strict=True)
+        _sxr_log.info("[surfaceXR_gesture_probe] encoder loaded — freezing all encoder parameters")
+        encoder.requires_grad_(False)
+        encoder.eval()
+
+        batch_size_  = int(cfg_get(cfg, ["data", "batch_size"],       256))
+        eval_bs_     = int(cfg_get(cfg, ["data", "eval_batch_size"],  batch_size_))
+        n_workers_   = int(cfg_get(cfg, ["data", "num_workers"],       0))
+        pin_mem_     = bool(cfg_get(cfg, ["data", "pin_memory"],    False))
+
+        if split_type == "lopo":
+            if test_user is None:
+                raise ValueError(
+                    "[surfaceXR_gesture_probe] 'test_user' must be set for LOPO split"
+                )
+            loaders = make_surfaceXR_loaders_lopo_50hz(
+                pkl_path=pkl_path,
+                test_user=test_user,
+                label_type="gesture",
+                batch_size=batch_size_,
+                eval_batch_size=eval_bs_,
+                num_workers=n_workers_,
+                pin_memory=pin_mem_,
+                apply_flu=apply_flu,
+            )
+        else:
+            loaders = make_surfaceXR_loaders_random_50hz(
+                pkl_path=pkl_path,
+                label_type="gesture",
+                batch_size=batch_size_,
+                eval_batch_size=eval_bs_,
+                num_workers=n_workers_,
+                pin_memory=pin_mem_,
+                apply_flu=apply_flu,
+            )
+
+        head = LinearHead(encoder.embed_dim, num_classes)
+
+        _sxr_log.info(
+            "[surfaceXR_gesture_probe] split=%s test_user=%s num_classes=%d pretrained_run=%s",
+            split_type, test_user, num_classes, pretrained_run,
+        )
+
+        def objective_fn(batch, model, cfg):
+            encoder.eval()
+            x_b, y_b = batch
+            with torch.no_grad():
+                z = encoder(x_b.float())
+            logits = head(z)
+            loss = torch.nn.functional.cross_entropy(logits, y_b.long())
+            preds = logits.argmax(dim=-1)
+            acc = float((preds == y_b).float().mean())
+            return loss, {"loss": float(loss.detach()), "acc": acc}
+
+        all_params = list(head.parameters())
 
     elif objective_type == "watchhand_gesture_supervised":
         # Fully-supervised gesture classification on WatchHand IMU data.
@@ -1540,16 +2616,26 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
     
     # Build extra_modules dict for checkpointing head or decoder
     if objective_type in ("supervised", "watchhand_gesture_supervised",
-                          "watchhand_gesture_supervised_within_subject"):
+                          "watchhand_gesture_supervised_within_subject",
+                          "surfacexr_gesture_supervised", "surfacexr_gesture_probe"):
         extra_modules = {"head": head}
     elif objective_type in ("pose", "pose_probe"):
         extra_modules = {"pose_decoder": pose_decoder}
-    elif objective_type in ("odom_nymeria", "odom_probe", "odom_finetune", "odom_imuposer_flu",
-                            "odom_probe_imuposer_flu", "odom_finetune_imuposer_flu"):
+    elif objective_type in ("odom_nymeria", "odom_nymeria_real_wrist_flu",
+                            "odom_probe_nymeria_real_wrist_flu",
+                            "odom_finetune_nymeria_real_wrist_flu",
+                            "odom_probe", "odom_finetune", "odom_imuposer_flu",
+                            "odom_probe_imuposer_flu", "odom_finetune_imuposer_flu",
+                            "odom_totalcapture_flu", "odom_probe_totalcapture_flu",
+                            "odom_finetune_totalcapture_flu", "local_disp_imuposer_flu",
+                            "local_vel_imuposer_flu",
+                            "local_vel_probe_imuposer_flu", "local_vel_finetune_imuposer_flu"):
         extra_modules = {"odom_decoder": odom_decoder}
     elif objective_type in ("imu_text_clip", "imu_text_clip_flu"):
         # Save projection head + logit_scale; text encoder can be reloaded from HuggingFace
         extra_modules = {"clip_head": clip_head}
+        if objective_type == "imu_text_clip_flu" and text_mlp is not None:
+            extra_modules["text_mlp"] = text_mlp
     else:
         extra_modules = {"decoder": decoder}
     

@@ -55,6 +55,11 @@ logger = logging.getLogger(__name__)
 _XSENS_RIGHT_WRIST_JOINT = 9
 _XSENS_ROOT_JOINT        = 0
 
+# FLU frame rotation matrix (right wrist T-pose)
+_R_WRIST_FROM_FLU = np.array(
+    [[-1.0, 0.0, 0.0], [0.0, 0.0, 1.0], [0.0, 1.0, 0.0]], dtype=np.float64
+)
+
 
 # ---------------------------------------------------------------------------
 # Data loading (mirrors run_odom_eval.py::load_pkl_odom)
@@ -99,6 +104,89 @@ def load_pkl_odom(pkl_path: str, fps: int = 50, max_frames: int = 0):
     X        = np.concatenate([acc_global, gyro], axis=1)
     pos_root = xsens_pose[:, _XSENS_ROOT_JOINT, :3, 3].astype(np.float32)
     return X, pos_root, actual_fps
+
+
+# ---------------------------------------------------------------------------
+# Data loading — Nymeria real wrist FLU (for local-velocity model, out_dim=12)
+# ---------------------------------------------------------------------------
+
+def load_pkl_odom_flu(pkl_path: str, target_hz: int = 50,
+                      add_gravity: bool = True, max_frames: int = 0):
+    """Load Nymeria pkl for the local-velocity FLU model.
+
+    Returns
+    -------
+    X_flu          : [N, 6]    float32  -- FLU acc + gyro (real wrist IMU)
+    pos_root       : [N, 3]    float32  -- pelvis world position
+    R_world_from_X : [N, 3, 3] float32  -- wrist FLU orientation in world
+    target_hz      : float
+    """
+    with open(pkl_path, "rb") as f:
+        raw = pickle.load(f)
+
+    wrist_imu  = raw.get("wrist_imu_data", {})
+    wrist_gt   = raw.get("wrist_gt_data",  {})
+    xsens_pose = raw["gt_data"]["xsens_pose"]
+
+    if hasattr(xsens_pose, "numpy"):
+        xsens_pose = xsens_pose.detach().cpu().numpy()
+    xsens_pose = np.asarray(xsens_pose, dtype=np.float64)
+
+    body_fps_raw  = float(
+        raw.get("pose_sampling_rate_hz") or raw.get("imu_sampling_rate_hz") or target_hz
+    )
+    wrist_fps_raw = float(raw.get("wrist_imu_sampling_rate_hz", body_fps_raw))
+    body_ds  = max(1, round(body_fps_raw  / target_hz))
+    wrist_ds = max(1, round(wrist_fps_raw / target_hz))
+
+    xsens_pose = xsens_pose[::body_ds]
+
+    def _to_np(x):
+        if hasattr(x, "detach"):
+            return x.detach().cpu().numpy()
+        return np.asarray(x)
+
+    acc_local  = _to_np(wrist_imu["accel"]).astype(np.float64)[::wrist_ds]
+    gyro_local = _to_np(wrist_imu["gyro"]).astype(np.float64)[::wrist_ds]
+    orient_raw = wrist_gt["orientation"]
+
+    try:
+        import pypose as pp
+        _is_lietensor = isinstance(orient_raw, pp.LieTensor)
+    except ImportError:
+        _is_lietensor = False
+
+    if _is_lietensor:
+        R_world_from_wrist = (
+            orient_raw.matrix().detach().cpu().numpy().astype(np.float64)[::wrist_ds]
+        )
+    else:
+        orient_np          = _to_np(orient_raw).astype(np.float64)[::wrist_ds]
+        R_world_from_wrist = ScipyRot.from_quat(orient_np).as_matrix().astype(np.float64)
+
+    N = min(xsens_pose.shape[0], acc_local.shape[0])
+    if max_frames > 0:
+        N = min(N, max_frames)
+
+    xsens_pose         = xsens_pose[:N]
+    acc_local          = acc_local[:N]
+    gyro_local         = gyro_local[:N]
+    R_world_from_wrist = R_world_from_wrist[:N]
+
+    R_world_from_X = np.einsum("nij,jk->nik", R_world_from_wrist, _R_WRIST_FROM_FLU)
+    R_X_from_world = R_world_from_X.transpose(0, 2, 1)
+
+    acc_world = np.einsum("nij,nj->ni", R_world_from_wrist, acc_local)
+    if not add_gravity:
+        acc_world = acc_world + np.array([0.0, -9.81, 0.0])
+    acc_flu  = np.einsum("nij,nj->ni", R_X_from_world, acc_world)
+
+    gyro_world = np.einsum("nij,nj->ni", R_world_from_wrist, gyro_local)
+    gyro_flu   = np.einsum("nij,nj->ni", R_X_from_world, gyro_world)
+
+    X_flu    = np.concatenate([acc_flu, gyro_flu], axis=1).astype(np.float32)
+    pos_root = xsens_pose[:, _XSENS_ROOT_JOINT, :3, 3].astype(np.float32)
+    return X_flu, pos_root, R_world_from_X.astype(np.float32), float(target_hz)
 
 
 # ---------------------------------------------------------------------------
@@ -158,6 +246,105 @@ def run_inference(X, pos_root, encoder, odom_decoder, cfg, device, fps):
 
 
 # ---------------------------------------------------------------------------
+# Inference — local-velocity model (out_dim=12)
+# ---------------------------------------------------------------------------
+
+@torch.no_grad()
+def run_inference_local_vel(
+    X_flu, pos_root, R_world_from_X_gt,
+    encoder, odom_decoder, cfg, device, fps,
+):
+    """Inference for the local-velocity model (out_dim=12).
+
+    Algorithm
+    ---------
+    1. Integrate gyro (FLU body frame) from the GT initial orientation to
+       estimate R_world_from_X at every frame (Euler integration).
+    2. For each predicted sub-patch velocity v_flu[p,k]:
+           delta_world = R_world_from_X[t_mid] @ v_flu[p,k] * (Q/fps)
+    3. Accumulate delta_world to build a trajectory at sub-patch resolution
+       (one step = Q frames, e.g. 4 frames = 0.08 s at 50 Hz).
+
+    Returns (pred_traj [M+1,3], gt_traj [M+1,3]) at sub-patch boundaries.
+    """
+    T, _       = compute_T_and_hop(cfg)
+    vit_cfg    = cfg_get(cfg, ["vit1d"], {}) or {}
+    patch_size = int(vit_cfg.get("patch_size", 16))
+    Q          = patch_size // 4          # frames per sub-patch
+    dt_Q       = Q / fps                  # seconds per sub-patch
+    dt         = 1.0 / fps
+    stats      = PreprocessStats()
+    N          = len(X_flu)
+
+    # --- Gyro integration -------------------------------------------------
+    # gyro_flu = X_flu[:, 3:6]  (body-frame angular velocity, rad/s)
+    gyro_flu = X_flu[:, 3:6].astype(np.float64)
+    R_int    = np.empty((N, 3, 3), dtype=np.float64)
+    R_int[0] = R_world_from_X_gt[0].astype(np.float64)   # GT initial orientation
+    for t in range(1, N):
+        # Body-frame integration: R[t] = R[t-1] @ exp(gyro_body * dt)
+        dR     = ScipyRot.from_rotvec(gyro_flu[t - 1] * dt).as_matrix()
+        R_int[t] = R_int[t - 1] @ dR
+
+    # --- Sliding-window inference -----------------------------------------
+    pad   = (T - N % T) % T
+    X_pad = np.concatenate([X_flu, np.zeros((pad, 6), dtype=np.float32)]) if pad else X_flu
+    P_t   = T // patch_size
+
+    pred_deltas = []
+    gt_deltas   = []
+
+    for w in range(len(X_pad) // T):
+        start  = w * T
+        Xw     = X_pad[start : start + T]
+        Xproc  = preprocess_window(Xw, cfg, stats)
+
+        if Xproc is None:
+            for p in range(P_t):
+                for k in range(4):
+                    pred_deltas.append(np.zeros(3, dtype=np.float32))
+                    t_s = start + p * patch_size + k * Q
+                    t_e = min(t_s + Q, N - 1)
+                    gt_deltas.append(
+                        (pos_root[t_e] - pos_root[max(0, t_s)]).astype(np.float32)
+                    )
+            continue
+
+        x        = torch.from_numpy(Xproc).float().unsqueeze(0).to(device)
+        tokens, _ = encoder.forward_tokens(x)
+        vel_pred  = odom_decoder(tokens).squeeze(0).cpu().numpy().reshape(P_t, 4, 3)
+        # [P_t, 4, 3] : vel_pred[p, k] = predicted velocity in FLU for sub-patch k of patch p
+
+        for p in range(P_t):
+            for k in range(4):
+                t_s   = start + p * patch_size + k * Q
+                t_e   = t_s + Q
+                t_mid = t_s + Q // 2
+
+                R_at_mid = R_int[min(t_mid, N - 1)]
+                v_flu_k  = vel_pred[p, k].astype(np.float64)
+                delta_pred = (R_at_mid @ v_flu_k * dt_Q).astype(np.float32)
+
+                pred_deltas.append(delta_pred)
+                if t_e < N and t_s < N:
+                    gt_deltas.append((pos_root[t_e] - pos_root[t_s]).astype(np.float32))
+                else:
+                    gt_deltas.append(np.zeros(3, dtype=np.float32))
+
+    # --- Integrate sub-patch deltas into trajectory -----------------------
+    origin   = pos_root[0]
+    M        = len(pred_deltas)
+    pred_traj = np.empty((M + 1, 3), dtype=np.float32)
+    gt_traj   = np.empty((M + 1, 3), dtype=np.float32)
+    pred_traj[0] = gt_traj[0] = origin
+    for i in range(M):
+        pred_traj[i + 1] = pred_traj[i] + pred_deltas[i]
+        gt_traj[i + 1]   = gt_traj[i]   + gt_deltas[i]
+
+    return pred_traj, gt_traj
+
+
+# ---------------------------------------------------------------------------
 # Metrics
 # ---------------------------------------------------------------------------
 
@@ -181,6 +368,20 @@ def compute_rte(
     pred_rel = pred_traj[delta:] - pred_traj[:-delta]   # [M+1-delta, 3]
     gt_rel   = gt_traj[delta:]   - gt_traj[:-delta]
     return np.linalg.norm(pred_rel - gt_rel, axis=1)    # [M+1-delta]
+
+
+def compute_drift_rate(pred_traj: np.ndarray, gt_traj: np.ndarray) -> float:
+    """Drift rate = mean_ATE / total_GT_path_length  (dimensionless, multiply by 100 for %).
+
+    Measures how much the trajectory drifts relative to the distance actually
+    traveled.  A value of 0.05 means the average position error is 5 % of the
+    total GT path length.
+    """
+    gt_path_len = float(np.linalg.norm(np.diff(gt_traj, axis=0), axis=1).sum())
+    if gt_path_len < 1e-6:
+        return float("nan")
+    mean_ate = float(np.linalg.norm(pred_traj - gt_traj, axis=1).mean())
+    return mean_ate / gt_path_len
 
 
 # ---------------------------------------------------------------------------
@@ -244,6 +445,22 @@ def plot_summary_bars(
     _save(fig, os.path.join(out_dir, "summary_metrics.png"))
 
 
+def plot_drift_rate_distribution(seq_drift_rates: np.ndarray, out_dir: str):
+    """Histogram of per-sequence drift rate (%)."""
+    vals = seq_drift_rates[~np.isnan(seq_drift_rates)] * 100
+    if len(vals) == 0:
+        return
+    fig, ax = plt.subplots(figsize=(8, 5))
+    ax.hist(vals, bins=30, color="mediumseagreen", edgecolor="white", alpha=0.85)
+    ax.axvline(float(vals.mean()), color="red", linestyle="--",
+               label=f"Mean = {vals.mean():.2f} %")
+    ax.set_xlabel("Drift rate (%)")
+    ax.set_ylabel("Count")
+    ax.set_title("Distribution of Drift Rate across Test Sequences")
+    ax.legend(); ax.grid(True, alpha=0.3)
+    _save(fig, os.path.join(out_dir, "drift_rate_distribution.png"))
+
+
 def plot_ate_vs_duration(
     seq_durations: np.ndarray, seq_ate_means: np.ndarray, out_dir: str
 ):
@@ -273,8 +490,8 @@ def main():
     ap.add_argument("--ckpt",         default="best", help="best | latest | abs path")
     ap.add_argument("--max-frames",   type=int,   default=0,   help="Per-sequence cap (0=all)")
     ap.add_argument("--fps",          type=int,   default=50)
-    ap.add_argument("--rte-window",   type=float, nargs="+", default=[1.0, 2.56],
-                    help="One or more RTE window durations in seconds (e.g. 1.0 2.56)")
+    ap.add_argument("--rte-window",   type=float, nargs="+", default=[1.0, 5.0],
+                    help="One or more RTE window durations in seconds (e.g. 1.0 5.0)")
     ap.add_argument("--out-dir",      default="data_vis/odom_eval_dataset")
     args = ap.parse_args()
 
@@ -308,14 +525,29 @@ def main():
     vit_cfg    = cfg_get(ckpt_cfg, ["vit1d"], {}) or {}
     patch_size = int(vit_cfg.get("patch_size", 16))
 
+    # Auto-detect out_dim from checkpoint (3 = global disp, 12 = local vel 4×3)
+    out_dim = int(state["odom_decoder"]["head.weight"].shape[0])
     odom_decoder = ViT1DOdomDecoder(
         embed_dim=encoder.embed_dim,
         num_patches_per_channel=T_win // patch_size,
         in_channels=encoder.in_channels,
         cfg=ckpt_cfg,
+        out_dim=out_dim,
     ).to(device)
     odom_decoder.load_state_dict(state["odom_decoder"])
     odom_decoder.eval()
+
+    # Local-velocity model: out_dim=12 → FLU loader + gyro-integrated trajectory
+    use_local_vel = (out_dim == 12)
+    step_frames   = patch_size // 4 if use_local_vel else patch_size
+    if use_local_vel:
+        _obj_type    = cfg_get(ckpt_cfg, ["objective", "type"], "odom_nymeria_real_wrist_flu")
+        _ocfg        = cfg_get(ckpt_cfg, ["objective", _obj_type], {}) or {}
+        _add_gravity = bool(_ocfg.get("add_gravity", True))
+        logger.info(
+            "Local-velocity model (out_dim=12): FLU loader + gyro integration. "
+            "step_frames=%d  add_gravity=%s", step_frames, _add_gravity,
+        )
 
     # ---- Gather pkl files -------------------------------------------------
     pkl_files = sorted(glob.glob(os.path.join(args.test_dir, "*.pkl")))
@@ -329,8 +561,9 @@ def main():
     rte_windows  = args.rte_window          # list of floats, e.g. [1.0, 2.56]
 
     # ---- Per-sequence evaluation ------------------------------------------
-    seq_names     = []
-    seq_ate_means = []
+    seq_names       = []
+    seq_ate_means   = []
+    seq_drift_rates = []
     # rte_accum[i] = list of per-sequence mean RTE for window rte_windows[i]
     rte_seq_means = [[] for _ in rte_windows]
     seq_durations = []
@@ -344,7 +577,15 @@ def main():
     for pkl_path in tqdm(pkl_files, desc="Evaluating sequences", unit="seq"):
         seq_name = os.path.basename(pkl_path).replace(".pkl", "")
         try:
-            X, pos_root, actual_fps = load_pkl_odom(pkl_path, args.fps, args.max_frames)
+            if use_local_vel:
+                X_data, pos_root, R_world_from_X, actual_fps = load_pkl_odom_flu(
+                    pkl_path, target_hz=args.fps, add_gravity=_add_gravity,
+                    max_frames=args.max_frames,
+                )
+            else:
+                X_data, pos_root, actual_fps = load_pkl_odom(
+                    pkl_path, args.fps, args.max_frames
+                )
         except Exception as exc:
             logger.warning("Skipping %s: %s", seq_name, exc)
             seq_failed.append(seq_name)
@@ -353,19 +594,25 @@ def main():
         fps      = int(round(actual_fps))
         fps_used = fps
 
-        pred_traj, gt_traj = run_inference(
-            X, pos_root, encoder, odom_decoder, cfg, device, fps
-        )
+        if use_local_vel:
+            pred_traj, gt_traj = run_inference_local_vel(
+                X_data, pos_root, R_world_from_X, encoder, odom_decoder, cfg, device, fps
+            )
+        else:
+            pred_traj, gt_traj = run_inference(
+                X_data, pos_root, encoder, odom_decoder, cfg, device, fps
+            )
 
         ate_seq = compute_ate(pred_traj, gt_traj)   # [M+1]
 
         seq_names.append(seq_name)
         seq_ate_means.append(float(ate_seq.mean()))
-        seq_durations.append(len(X) / fps)
+        seq_drift_rates.append(compute_drift_rate(pred_traj, gt_traj))
+        seq_durations.append(len(X_data) / fps)
         all_ate_vals.append(ate_seq)
 
         for wi, win_s in enumerate(rte_windows):
-            delta   = max(1, round(win_s * fps / patch_size))
+            delta   = max(1, round(win_s * fps / step_frames))
             rte_seq = compute_rte(pred_traj, gt_traj, delta)
             if len(rte_seq) > 0:
                 rte_seq_means[wi].append(float(rte_seq.mean()))
@@ -374,8 +621,9 @@ def main():
     if not seq_names:
         raise SystemExit("No sequences evaluated successfully.")
 
-    seq_ate_means = np.array(seq_ate_means)
-    seq_durations = np.array(seq_durations)
+    seq_ate_means   = np.array(seq_ate_means)
+    seq_drift_rates = np.array(seq_drift_rates, dtype=np.float64)
+    seq_durations   = np.array(seq_durations)
 
     all_ate_flat    = np.concatenate(all_ate_vals)
     ate_global_mean = float(all_ate_flat.mean())
@@ -383,7 +631,7 @@ def main():
 
     # Actual window durations (may differ slightly from target due to rounding)
     rte_actual_s = [
-        max(1, round(w * fps_used / patch_size)) * patch_size / fps_used
+        max(1, round(w * fps_used / step_frames)) * step_frames / fps_used
         for w in rte_windows
     ]
 
@@ -406,11 +654,16 @@ def main():
     win_str = "  ".join(f"{a:.3f} s" for a in rte_actual_s)
     print(f"  RTE windows: {win_str}")
     print(hdr)
+    drift_valid = seq_drift_rates[~np.isnan(seq_drift_rates)]
+    drift_mean  = float(np.nanmean(seq_drift_rates)) if len(drift_valid) else float("nan")
+    drift_std   = float(np.nanstd(seq_drift_rates))  if len(drift_valid) else float("nan")
+
     print(f"\n  {'Metric':<32} {'Global mean':>14}  {'Global std':>12}")
     print(f"  {'-'*62}")
     print(f"  {'ATE (cm)':<32} {ate_global_mean*100:>14.2f}  {ate_global_std*100:>12.2f}")
     for label, g_mean, g_std, seq_arr in rte_stats:
         print(f"  {f'{label} (cm)':<32} {g_mean*100:>14.2f}  {g_std*100:>12.2f}")
+    print(f"  {'Drift rate (%)':<32} {drift_mean*100:>14.3f}  {drift_std*100:>12.3f}")
     print(f"\n  Per-sequence stats:")
     print(f"    ATE:  mean={seq_ate_means.mean()*100:.2f} cm  "
           f"std={seq_ate_means.std()*100:.2f} cm  "
@@ -422,6 +675,11 @@ def main():
                   f"std={np.nanstd(seq_arr)*100:.2f} cm  "
                   f"min={np.nanmin(seq_arr)*100:.2f} cm  "
                   f"max={np.nanmax(seq_arr)*100:.2f} cm")
+    if len(drift_valid):
+        print(f"    Drift rate: mean={drift_mean*100:.3f} %  "
+              f"std={drift_std*100:.3f} %  "
+              f"min={np.nanmin(seq_drift_rates)*100:.3f} %  "
+              f"max={np.nanmax(seq_drift_rates)*100:.3f} %")
 
     if seq_failed:
         print(f"\n  ⚠ Skipped {len(seq_failed)} sequences: "
@@ -434,6 +692,7 @@ def main():
         if seq_arr.size and not np.isnan(seq_arr).all():
             plot_rte_distribution(seq_arr, float(label.replace('RTE-','').replace('s','')),
                                   args.out_dir)
+    plot_drift_rate_distribution(seq_drift_rates, args.out_dir)
     plot_summary_bars(
         ate_mean=seq_ate_means.mean(),
         ate_std=seq_ate_means.std(),

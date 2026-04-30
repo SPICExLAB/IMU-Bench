@@ -240,6 +240,78 @@ def _plot_signals(acc_flu: np.ndarray, gyro_flu: np.ndarray, fps: float,
 
 
 # ---------------------------------------------------------------------------
+# T-pose visualization
+# ---------------------------------------------------------------------------
+
+def _show_tpose(axis_len: float):
+    """Render a static SMPL T-pose with the FLU frame arrows at the right wrist.
+
+    In T-pose all SMPL local rotations are identity, so:
+        R_world_from_wrist = I  →  R_world_from_FLU = R_WRIST_FROM_FLU
+    The three columns of R_WRIST_FROM_FLU give the F/L/U directions directly
+    in SMPL world space (Y-up).
+    """
+    import meshcat
+    import meshcat.geometry as mcg
+    import meshcat.transformations as mct
+
+    logger.info("Computing SMPL T-pose ...")
+    # All local rotations = identity → T-pose
+    gt_aa_tpose = np.zeros((1, 24, 3), dtype=np.float32)
+    verts, joints, _, faces = _smpl_fk(gt_aa_tpose)
+
+    p_wrist = joints[0, _SMPL_RIGHT_WRIST]   # [3] wrist origin in Y-up world
+
+    vis = meshcat.Visualizer()
+    print("\nMeshCat at:", vis.url())
+    print("Open the URL above in a browser to see the T-pose.")
+    print("  RED   = F (forward / finger direction = −x_smpl)")
+    print("  GREEN = L (left / thumb side          = +z_smpl)")
+    print("  BLUE  = U (up / watch-face dorsal     = +y_smpl)\n")
+
+    vis["/Background"].set_property("top_color",    [1, 1, 1])
+    vis["/Background"].set_property("bottom_color", [1, 1, 1])
+    vis["/Grid"].set_transform(mct.translation_matrix([0, 0, -1]))
+
+    ROOT = "scene"
+    try:
+        vis[ROOT].delete()
+    except Exception:
+        pass
+
+    # Y-up → Z-up for MeshCat
+    vis[ROOT].set_transform(mct.rotation_matrix(np.pi / 2.0, [1, 0, 0]))
+
+    # Body mesh
+    vis[f"{ROOT}/body"].set_object(
+        mcg.TriangularMeshGeometry(verts[0], faces),
+        mcg.MeshLambertMaterial(color=0x6699FF, opacity=0.90),
+    )
+
+    # Wrist origin sphere
+    vis[f"{ROOT}/wrist_origin"].set_object(
+        mcg.Sphere(0.012),
+        mcg.MeshLambertMaterial(color=0xFFFF00),
+    )
+    vis[f"{ROOT}/wrist_origin"].set_transform(mct.translation_matrix(p_wrist.tolist()))
+
+    # FLU axes — in T-pose R_world_from_wrist=I, so columns of R_WRIST_FROM_FLU
+    # give axis directions directly in world space.
+    for ci, (name, color) in enumerate(zip(AXIS_NAMES, AXIS_COLORS)):
+        direction = R_WRIST_FROM_FLU[:, ci]          # column ci = FLU basis vector in wrist frame = world frame in T-pose
+        tip = p_wrist + direction * axis_len
+        pts = np.stack([p_wrist, tip], axis=1).astype(np.float32)   # (3, 2)
+        vis[f"{ROOT}/flu/{name}"].set_object(
+            mcg.Line(
+                mcg.PointsGeometry(pts),
+                mcg.LineBasicMaterial(color=color, linewidth=12),
+            )
+        )
+
+    input("Press Enter to exit ...")
+
+
+# ---------------------------------------------------------------------------
 # MeshCat animation
 # ---------------------------------------------------------------------------
 
@@ -330,19 +402,19 @@ def main():
     ap = argparse.ArgumentParser(
         description="Visualize TotalCapture session with FLU wrist frame in MeshCat"
     )
-    ap.add_argument("--pkl",          required=True,
-                    help="Path to DIP-format TotalCapture .pkl file")
+    ap.add_argument("--pkl",          default="",
+                    help="Path to DIP-format TotalCapture .pkl file (not needed with --tpose)")
     ap.add_argument("--fps",          type=float, default=60.0,
                     help="Target FPS (raw TotalCapture is 60 Hz)")
     ap.add_argument("--max-frames",   type=int,   default=0,
                     help="Max frames to animate (0 = full sequence)")
-    ap.add_argument("--axis-len",     type=float, default=0.15,
+    ap.add_argument("--axis-len",     type=float, default=0.55,
                     help="Length of each FLU axis arrow in metres")
     ap.add_argument("--add-gravity",  action="store_true", default=True,
                     help="Simulate real MEMS accelerometer (add gravity to acc_world)")
     ap.add_argument("--no-gravity",   dest="add_gravity", action="store_false",
                     help="Keep gravity-subtracted kinematic acceleration")
-    ap.add_argument("--use-gt-ori",   action="store_true", default=False,
+    ap.add_argument("--use-gt-ori",   action="store_true", default=True,
                     help="Derive FLU frame from GT SMPL FK (joint 21) instead of ori field")
     ap.add_argument("--plot-seconds", type=float, default=10.0,
                     help="Seconds of signal to plot (0 = skip)")
@@ -350,7 +422,14 @@ def main():
                     help="Directory for saving signal plots")
     ap.add_argument("--no-vis",       action="store_true",
                     help="Skip MeshCat 3-D animation (signal plot only)")
+    ap.add_argument("--tpose",        action="store_true",
+                    help="Show a static SMPL T-pose with FLU axes (no pkl required)")
     args = ap.parse_args()
+
+    # T-pose mode — no pkl needed
+    if args.tpose:
+        _show_tpose(args.axis_len)
+        return
 
     pkl_name = os.path.splitext(os.path.basename(args.pkl))[0]
     logger.info("Loading: %s  (add_gravity=%s)", pkl_name, args.add_gravity)

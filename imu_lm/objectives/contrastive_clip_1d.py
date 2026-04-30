@@ -181,6 +181,47 @@ class CLIPTextEncoder(nn.Module):
 
 
 # --------------------------------------------------------------------------- #
+# Trainable text-side MLP projection                                          #
+# --------------------------------------------------------------------------- #
+
+class TextProjectionMLP(nn.Module):
+    """2-layer MLP applied on top of (frozen) CLIP text embeddings.
+
+    Keeps the CLIP text encoder frozen but adds a small trainable network on
+    top so the text branch can adapt to the IMU domain without paying the cost
+    of fine-tuning the full 63 M-parameter text model.
+
+    Architecture:  LayerNorm → Linear(D, hidden) → GELU → Linear(hidden, D)
+    The output is L2-normalised so it stays on the unit hypersphere, consistent
+    with the contrastive loss geometry.
+
+    Args:
+        embed_dim:  CLIP embedding dimension (default 512).
+        hidden_dim: Width of the hidden layer (defaults to embed_dim).
+    """
+
+    def __init__(self, embed_dim: int = 512, hidden_dim: Optional[int] = None):
+        super().__init__()
+        hidden_dim = hidden_dim or embed_dim
+        self.net = nn.Sequential(
+            nn.LayerNorm(embed_dim),
+            nn.Linear(embed_dim, hidden_dim),
+            nn.GELU(),
+            nn.Linear(hidden_dim, embed_dim),
+        )
+        # Output projection: start near-identity so training is stable at init
+        nn.init.zeros_(self.net[-1].bias)
+        if embed_dim == hidden_dim:
+            nn.init.eye_(self.net[-1].weight)
+        else:
+            nn.init.normal_(self.net[-1].weight, std=embed_dim ** -0.5)
+
+    def forward(self, z: torch.Tensor) -> torch.Tensor:
+        """[B, D] → [B, D]  (L2-normalised)."""
+        return F.normalize(self.net(z), dim=-1)
+
+
+# --------------------------------------------------------------------------- #
 # Contrastive loss                                                             #
 # --------------------------------------------------------------------------- #
 
@@ -237,6 +278,7 @@ def forward_loss(
     clip_head: ContrastiveCLIPHead,
     text_encoder: Optional[CLIPTextEncoder],
     cfg: Any,
+    text_mlp: Optional[TextProjectionMLP] = None,
 ) -> Tuple[torch.Tensor, Dict[str, float]]:
     """CLIP-style contrastive forward pass.
 
@@ -257,6 +299,9 @@ def forward_loss(
         text_encoder: CLIPTextEncoder or None (None is allowed when batch contains
                       pre-cached embedding tensors)
         cfg:          config dict (unused currently; reserved for future options)
+        text_mlp:     Optional TextProjectionMLP applied on top of the (frozen)
+                      CLIP text embeddings.  Gives the text branch trainable
+                      capacity without unfreezing the large CLIP model.
 
     Returns:
         (loss, logs)
@@ -278,12 +323,11 @@ def forward_loss(
                 "Either pass a CLIPTextEncoder or use a pre-cached embedding file "
                 "(scripts/cache_clip_text_embeddings.py + text_cache_path in config)."
             )
-        if isinstance(texts_or_embs, torch.Tensor):
-            raise TypeError(
-                "batch[1] should be a list of strings, not a Tensor. "
-                "Make sure you are using HumanML3DIMUVarLenDataset with batch_size=None."
-            )
         texts  = list(texts_or_embs)
         z_text = text_encoder(texts, device=x.device)  # [B, D_clip] L2-normed
+
+    # Optional trainable MLP on the text side
+    if text_mlp is not None:
+        z_text = text_mlp(z_text)   # [B, D_clip] re-normalised inside MLP
 
     return info_nce_loss(z_imu, z_text, clip_head.logit_scale)

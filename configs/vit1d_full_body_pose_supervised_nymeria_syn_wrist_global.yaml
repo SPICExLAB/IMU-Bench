@@ -1,0 +1,63 @@
+vit1d:
+  patch_size: 16
+  shared_kernel: true
+  encoder:
+    hidden_size: 384
+    num_hidden_layers: 12
+    num_attention_heads: 6
+    intermediate_size: 1536
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-6
+  pose_decoder:
+    hidden_size: 192
+    num_hidden_layers: 2
+    num_attention_heads: 4
+    mlp_ratio: 4.0
+    dropout: 0.0
+  max_patches_per_channel: 256
+  pooling: "mean"
+
+objective:
+  type: pose                                        # encoder + pose decoder both trained from scratch
+  pose:
+    # No pretrained_run — fully supervised from random init
+    loader: nymeria_syn_wrist_full_body_global      # synthesized wrist IMU in world (global) frame → 24-joint SMPL body
+    train_pkl_root: /mnt/nas2/processed_data_body_Ty_rwrist
+    train_files: all
+    val_pkl_root: /mnt/nas2/processed_data_test_body_Ty_rwrist
+    val_files: all
+    num_joints: 23                                  # SMPL body without root (joints 1-23; root dropped)
+    add_gravity: true                               # add +9.81 in Y to mimic real IMU (Y-up world)
+
+data:
+  window_size: 2.56         # seconds → T = 2.56 × 50 = 128 frames
+  hop_size: 0.64            # seconds
+  batch_size: 256
+  eval_batch_size: 256
+  num_workers: 4
+  pin_memory: true
+
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 10000000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 1000
+
+  optim:
+    name: adamw
+    lr: 0.0003
+    weight_decay: 0.01
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+
+  sched:
+    name: cosine
+    warmup_steps: 500
+
+  early_stopping:
+    enabled: true
+    monitor: val_loss
+    patience: 20

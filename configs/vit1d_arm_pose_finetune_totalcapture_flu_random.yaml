@@ -1,0 +1,112 @@
+vit1d:
+  patch_size: 16
+  shared_kernel: true
+  encoder:
+    hidden_size: 384
+    num_hidden_layers: 12
+    num_attention_heads: 6
+    intermediate_size: 1536
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-6
+  pose_decoder:
+    hidden_size: 192
+    num_hidden_layers: 2
+    num_attention_heads: 4
+    mlp_ratio: 4.0
+    dropout: 0.0
+  max_patches_per_channel: 256
+  pooling: "mean"
+
+objective:
+  type: pose                        # encoder + pose decoder both trainable (lower LR)
+  pose:
+    # Warm-start encoder from realdata MAE pretrain; encoder stays trainable.
+    pretrained_run:  vit1d_mae_ocdetect_flu
+    pretrained_ckpt: best
+    loader: totalcapture_real_wrist_flu
+
+    # TotalCapture DIP pkl directory
+    pkl_root: /mnt/nas2/DIP_recalculate
+
+    # Random 80/20 sequence split (seed=42) — all 5 subjects mixed across train/val
+    train_files:
+      - s1_acting1.pkl
+      - s1_acting3.pkl
+      - s1_freestyle1.pkl
+      - s1_freestyle2.pkl
+      - s1_freestyle3.pkl
+      - s1_walking1.pkl
+      - s1_walking2.pkl
+      - s1_walking3.pkl
+      - s2_acting1.pkl
+      - s2_acting2.pkl
+      - s2_freestyle2.pkl
+      - s2_rom1.pkl
+      - s2_rom2.pkl
+      - s2_rom3.pkl
+      - s2_walking1.pkl
+      - s2_walking2.pkl
+      - s2_walking3.pkl
+      - s3_acting1.pkl
+      - s3_acting2.pkl
+      - s3_acting3.pkl
+      - s3_freestyle1.pkl
+      - s3_freestyle2.pkl
+      - s3_freestyle3.pkl
+      - s3_rom1.pkl
+      - s3_rom2.pkl
+      - s3_rom3.pkl
+      - s3_walking1.pkl
+      - s3_walking3.pkl
+      - s4_acting3.pkl
+      - s4_freestyle1.pkl
+      - s4_freestyle3.pkl
+      - s4_rom3.pkl
+      - s5_freestyle1.pkl
+      - s5_freestyle3.pkl
+      - s5_rom3.pkl
+      - s5_walking2.pkl
+    val_files:
+      - s1_acting2.pkl
+      - s1_rom1.pkl
+      - s1_rom2.pkl
+      - s1_rom3.pkl
+      - s2_acting3.pkl
+      - s2_freestyle1.pkl
+      - s2_freestyle3.pkl
+      - s3_walking2.pkl
+      - s4_walking2.pkl
+
+    num_joints:  5          # right-arm chain: [R_Collar, R_Shoulder, R_Elbow, R_Wrist, R_Hand]
+    target_hz:   50         # resample raw 60 Hz → 50 Hz (matches pretrained encoder)
+    add_gravity: true       # add [0, -9.81, 0] to acc_world to simulate real MEMS reading
+
+data:
+  sensor_columns: ["acc_x", "acc_y", "acc_z", "gyro_x", "gyro_y", "gyro_z"]
+  batch_size: 256
+  num_workers: 4
+
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 5000000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 500
+
+  optim:
+    name: adamw
+    lr: 0.000001              # lower LR to preserve pretrained encoder features
+    weight_decay: 0.01
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+
+  sched:
+    name: cosine
+    warmup_steps: 500
+
+  early_stopping:
+    enabled: true
+    monitor: val_loss
+    patience: 20

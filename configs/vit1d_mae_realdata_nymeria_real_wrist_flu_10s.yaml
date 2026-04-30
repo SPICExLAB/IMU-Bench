@@ -1,6 +1,7 @@
 vit1d:
   patch_size: 16
   shared_kernel: true
+  pos_embed_type: learned           # default; CLIP 10s configs must match this
   encoder:
     hidden_size: 384
     num_hidden_layers: 12

@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import os
 import pickle
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
@@ -360,17 +361,18 @@ class NymeriaRealWristDatasetFLU(Dataset):
         self._sessions: List[Tuple[np.ndarray, np.ndarray]] = []
         session_lengths: List[int] = []
 
-        for path in tqdm(
-            pkl_paths,
-            desc=f"Loading {split_name} sessions (real wrist FLU)",
-            unit="session",
-            dynamic_ncols=True,
-        ):
-            result = _load_nymeria_real_wrist_session_flu(
-                path,
-                target_hz=target_hz,
-                add_gravity=add_gravity,
-            )
+        _n_workers = min(32, (os.cpu_count() or 4) * 2)
+        _load = lambda p: _load_nymeria_real_wrist_session_flu(
+            p, target_hz=target_hz, add_gravity=add_gravity
+        )
+        _ordered: List = [None] * len(pkl_paths)
+        with ThreadPoolExecutor(max_workers=_n_workers) as _pool:
+            _fut_to_idx = {_pool.submit(_load, p): i for i, p in enumerate(pkl_paths)}
+            with tqdm(total=len(pkl_paths), desc=f"Loading {split_name} sessions (real wrist FLU)", unit="session", dynamic_ncols=True) as _pbar:
+                for _fut in as_completed(_fut_to_idx):
+                    _ordered[_fut_to_idx[_fut]] = _fut.result()
+                    _pbar.update(1)
+        for path, result in zip(pkl_paths, _ordered):
             if result is None:
                 logger.warning("[nymeria_real_wrist_flu] skipping: %s", path)
                 continue
@@ -403,7 +405,8 @@ class NymeriaRealWristDatasetFLU(Dataset):
         if Xproc is None:
             return None
 
-        Xproc    = apply_augment(Xproc.T, self.cfg).T
+        if self.split_name == "train":
+            Xproc = apply_augment(Xproc.T, self.cfg).T
         x_tensor = torch.from_numpy(Xproc).float()
 
         P = self._patch_size

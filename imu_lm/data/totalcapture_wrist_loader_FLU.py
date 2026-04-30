@@ -78,9 +78,9 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 # Sensor reorder: DIP raw → standard order.
-# After this indexing: [right_wrist, left_wrist, head, sternum, right_leg, left_leg]
+# After this indexing: left wrist, right wrist, left thigh, right thigh, head, pelvis
 _SENSOR_REORDER    = [2, 3, 0, 1, 4, 5]
-_RIGHT_WRIST_IDX   = 0   # index after reordering
+_RIGHT_WRIST_IDX   = 1   # index after reordering
 
 # SMPL right-arm chain joint indices
 RIGHT_WRIST_CHAIN_JOINTS = [14, 17, 19, 21, 23]
@@ -176,8 +176,14 @@ def load_session_flu(
     target_hz: int = 60,
     add_gravity: bool = True,
     use_gt_ori: bool = False,
+    num_joints: int = 5,
 ) -> Optional[Tuple[np.ndarray, np.ndarray]]:
     """Load one TotalCapture DIP pkl and return **(X, y)** in the FLU frame.
+
+    Parameters
+    ----------
+    num_joints : 5  → right-arm chain [14,17,19,21,23] (30 dims per patch)
+                24 → all SMPL joints (144 dims per patch)
 
     Parameters
     ----------
@@ -252,12 +258,13 @@ def load_session_flu(
     # ------------------------------------------------------------------
     # Select right-wrist sensor
     # ------------------------------------------------------------------
-    # Reorder: DIP raw [0..5] → [right_wrist, left_wrist, head, sternum, rleg, lleg]
+    # Reorder: DIP raw [0..5]
     acc_all = acc_raw[:, _SENSOR_REORDER]   # [N, 6, 3]
     ori_all = ori_raw[:, _SENSOR_REORDER]   # [N, 6, 3, 3]
 
     acc_world_raw  = acc_all[:, _RIGHT_WRIST_IDX]   # [N, 3]  kinematic, world frame, Y-up
-
+    
+    use_gt_ori = True
     if use_gt_ori:
         # Use GT SMPL FK (joint 21) as the wrist world orientation.
         # This is cleaner than IMU fusion and avoids sensor-drift artefacts.
@@ -336,10 +343,13 @@ def load_session_flu(
         .reshape(N, 24, 3, 3)
         .astype(np.float32)
     )                                                                            # [N, 24, 3, 3]
-    chain_R = pose_R[:, RIGHT_WRIST_CHAIN_JOINTS]                               # [N, 5, 3, 3]
+    if num_joints == 24:
+        label_R = pose_R                                                         # [N, 24, 3, 3]
+    else:
+        label_R = pose_R[:, RIGHT_WRIST_CHAIN_JOINTS]                           # [N, 5, 3, 3]
     y = matrix_to_rotation_6d(
-        torch.from_numpy(chain_R)
-    ).numpy()                                                                    # [N, 5, 6]
+        torch.from_numpy(label_R)
+    ).numpy()                                                                    # [N, J, 6]
 
     logger.info(
         "[totalcapture_flu] loaded %s: N=%d fps=%.0f real-wrist-flu",
@@ -391,6 +401,7 @@ class TotalCaptureRealWristDatasetFLU(Dataset):
         target_hz: int = 60,
         add_gravity: bool = True,
         use_gt_ori: bool = False,
+        num_joints: int = 5,
     ):
         super().__init__()
         self.cfg         = cfg
@@ -398,6 +409,7 @@ class TotalCaptureRealWristDatasetFLU(Dataset):
         self.target_hz   = target_hz
         self.add_gravity = add_gravity
         self.use_gt_ori  = use_gt_ori
+        self.num_joints  = num_joints
         self.stats       = PreprocessStats()
 
         self._T, self._hop = compute_T_and_hop(cfg)
@@ -420,6 +432,7 @@ class TotalCaptureRealWristDatasetFLU(Dataset):
                 target_hz=target_hz,
                 add_gravity=add_gravity,
                 use_gt_ori=use_gt_ori,
+                num_joints=num_joints,
             )
             if result is None:
                 logger.warning("[totalcapture_flu] skipping: %s", path)
@@ -463,12 +476,13 @@ class TotalCaptureRealWristDatasetFLU(Dataset):
         x_tensor = torch.from_numpy(Xproc).float()      # [6, T]
 
         P = self._patch_size
+        n_joints = self.num_joints
         patch_labels = np.empty(
-            (self._num_patches, NUM_CHAIN_JOINTS * ROT6D_DIM), dtype=np.float32
+            (self._num_patches, n_joints * ROT6D_DIM), dtype=np.float32
         )
         for p in range(self._num_patches):
             frame = start + p * P + P // 2
-            patch_labels[p] = y_arr[frame].reshape(-1)   # [5, 6] → [30]
+            patch_labels[p] = y_arr[frame].reshape(-1)   # [J, 6] → [J*6]
 
         y_tensor = torch.from_numpy(patch_labels).float()   # [P, 30]
         return x_tensor, y_tensor
@@ -501,6 +515,7 @@ def make_totalcapture_real_wrist_loaders_flu(
     target_hz: int = 60,
     add_gravity: bool = True,
     use_gt_ori: bool = False,
+    num_joints: int = 5,
 ) -> Dict[str, DataLoader]:
     """Build train / val / test DataLoaders for TotalCapture real-wrist-FLU.
 
@@ -544,6 +559,7 @@ def make_totalcapture_real_wrist_loaders_flu(
             target_hz=target_hz,
             add_gravity=add_gravity,
             use_gt_ori=use_gt_ori,
+            num_joints=num_joints,
         )
         persistent = num_workers > 0
         return DataLoader(

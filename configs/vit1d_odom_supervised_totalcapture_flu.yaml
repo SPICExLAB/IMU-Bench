@@ -1,0 +1,66 @@
+vit1d:
+  patch_size: 16            # 128 / 16 = 8 time patches  →  y shape [B, 8, 3]
+  shared_kernel: true
+  encoder:
+    hidden_size: 384
+    num_hidden_layers: 12
+    num_attention_heads: 6
+    intermediate_size: 1536
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-6
+  odom_decoder:
+    hidden_size: 192
+    num_hidden_layers: 2
+    num_attention_heads: 4
+    mlp_ratio: 4.0
+    dropout: 0.0
+  max_patches_per_channel: 256
+  pooling: "mean"
+
+objective:
+  type: odom_totalcapture_flu     # encoder + odom decoder trained end-to-end from scratch
+  odom_totalcapture_flu:
+    # No pretrained_run → random encoder initialisation; fully supervised.
+    pkl_root: /mnt/nas2/DIP_recalculate
+
+    # Standard DIP/TotalCapture split: s1-s4 train, s5 val/test
+    train_subjects: [s1, s2, s3, s4]
+    val_subjects:   [s5]
+
+    target_hz:   50       # resample raw 60 Hz → 50 Hz (matches pretrained encoder)
+    add_gravity: true     # add [0, -9.81, 0] to acc_world to simulate real MEMS reading
+
+    # NOTE: TotalCapture DIP pkls do not contain root translation.
+    # Per-patch displacement labels are derived by double-integrating the
+    # world-frame kinematic acceleration within each window (v0=0 at window start).
+
+data:
+  sensor_columns: ["acc_x", "acc_y", "acc_z", "gyro_x", "gyro_y", "gyro_z"]
+  batch_size: 256
+  num_workers: 4
+  target_hz: 50
+
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 5000000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 500
+
+  optim:
+    name: adamw
+    lr: 0.000001
+    weight_decay: 0.01
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+
+  sched:
+    name: cosine
+    warmup_steps: 500
+
+  early_stopping:
+    enabled: true
+    monitor: val_loss
+    patience: 20

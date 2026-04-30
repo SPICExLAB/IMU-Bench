@@ -93,11 +93,15 @@ def geodesic_error_deg(R_pred: torch.Tensor, R_gt: torch.Tensor) -> torch.Tensor
 # Per-sequence data loading
 # ---------------------------------------------------------------------------
 
-def load_sequence(pkl_path: str, fps: int, max_frames: int, num_joints: int):
+def load_sequence(pkl_path: str, fps: int, max_frames: int, num_joints: int,
+                  add_gravity: bool = False, loader_type: str = ""):
     """Load IMU, GT 6D rotations, and full SMPL local rotation matrices.
 
+    Supports both Nymeria pkls (``gt_data["xsens_pose"]``) and IMUPoser pkls
+    (``gt_data["pose"]`` + ``real_imu_data``).
+
     Returns (X, gt_6d, smpl_R_local, actual_fps) or raises on failure.
-      X             : [N, 6]             — right-wrist body-frame IMU
+      X             : [N, 6]             — right-wrist FLU-frame IMU
       gt_6d         : [N, num_joints, 6] — GT 6D rotations for queried joints
       smpl_R_local  : [N, 24, 3, 3]     — full SMPL local rotmats (for FK)
       actual_fps    : float
@@ -108,48 +112,181 @@ def load_sequence(pkl_path: str, fps: int, max_frames: int, num_joints: int):
     with open(pkl_path, "rb") as f:
         raw = pickle.load(f)
 
-    xsens_pose = raw["gt_data"]["xsens_pose"]
-    if hasattr(xsens_pose, "numpy"):
-        xsens_pose = xsens_pose.detach().cpu().numpy()
-    xsens_pose = np.asarray(xsens_pose, dtype=np.float32)   # [N, 23, 4, 4]
+    gt_data = raw.get("gt_data", {})
 
-    actual_fps = float(
-        raw.get("imu_sampling_rate_hz") or raw.get("pose_sampling_rate_hz") or fps
-    )
-    N = xsens_pose.shape[0]
-    if max_frames > 0:
-        N = min(N, max_frames)
-        xsens_pose = xsens_pose[:N]
+    # ------------------------------------------------------------------
+    # IMUPoser format: gt_data["pose"] = [N, 24, 3, 3] SMPL local rotmats
+    # ------------------------------------------------------------------
+    if "pose" in gt_data and "xsens_pose" not in gt_data:
+        # R_WRIST_FROM_FLU (Z-up world, same as imuposer_wrist_loader_FLU.py)
+        R_WRIST_FROM_FLU_ZUP = np.array(
+            [[-1., 0., 0.],
+             [ 0., 0., 1.],
+             [ 0., 1., 0.]], dtype=np.float64,
+        )
 
-    # ---- Body-frame wrist IMU (same as training) ---- #
-    j   = _XSENS_RIGHT_WRIST_JOINT
-    pos = xsens_pose[:, j, :3, 3]
-    rot = xsens_pose[:, j, :3, :3]
+        actual_fps = float(raw.get("sampling_rate_hz", fps))
 
-    acc       = np.zeros((N, 3), dtype=np.float32)
-    acc[1:-1] = (pos[2:] - 2 * pos[1:-1] + pos[:-2]) * (actual_fps ** 2)
-    acc[0]    = acc[1];  acc[-1] = acc[-2]
+        pose_local = np.asarray(gt_data["pose"], dtype=np.float32)   # [N, 24, 3, 3]
+        N_raw = pose_local.shape[0]
 
-    dR       = np.einsum("nij,njk->nik", rot[:-1].transpose(0, 2, 1), rot[1:])
-    gyro_raw = (ScipyRot.from_matrix(dR.reshape(-1, 3, 3)).as_rotvec() * actual_fps)
-    gyro     = np.zeros((N, 3), dtype=np.float32)
-    gyro[:-1] = gyro_raw.astype(np.float32);  gyro[-1] = gyro[-2]
-    X = np.concatenate([acc, gyro], axis=1)   # [N, 6]
+        ri         = raw.get("real_imu_data", {})
+        real_acc   = np.asarray(ri["real_acc"],  dtype=np.float64)   # [N, 5, 3]  Z-up world
+        real_ori   = np.asarray(ri["real_ori"],  dtype=np.float64)   # [N, 5, 3, 3]  R_world_from_sensor
+        joint_pos  = np.asarray(gt_data["joint_pos"], dtype=np.float32)   # [N, 24, 3]
 
-    # ---- GT SMPL local rotations via IK ---- #
-    smpl_R_global = torch.from_numpy(
-        _xsens_to_smpl_rotmat(xsens_pose[:, :, :3, :3])
-    )  # [N, 24, 3, 3]
-    body_model = art.model.ParametricModel(Paths.SMPL_FILE, device=torch.device("cpu"))
-    smpl_R_local = (
-        body_model
-        .inverse_kinematics_R(smpl_R_global.reshape(N, -1))
-        .view(N, 24, 3, 3)
-        .contiguous().clone().cpu().numpy()
-    )  # [N, 24, 3, 3]  local rotations
+        N = N_raw
+        if max_frames > 0:
+            N = min(N, max_frames)
+        pose_local = pose_local[:N]
+        real_acc   = real_acc[:N]
+        real_ori   = real_ori[:N]
+        joint_pos  = joint_pos[:N]
 
+        smpl_R_local = pose_local   # already local rotations
+
+        # FK to get world-frame wrist rotation (needed for FLU frame)
+        body_model = art.model.ParametricModel(Paths.SMPL_FILE, device=torch.device("cpu"))
+        root_trans = torch.from_numpy(joint_pos[:, 0])   # [N, 3]
+        pose_global_t, _ = body_model.forward_kinematics_masked(
+            torch.from_numpy(pose_local), tran=root_trans, calc_mesh=False,
+        )   # [N, 24, 3, 3]
+        R_world_from_wrist = pose_global_t[:, 21].cpu().numpy().astype(np.float64)   # [N,3,3]
+
+        # FLU frame transform
+        R_world_from_X = np.einsum("nij,jk->nik", R_world_from_wrist, R_WRIST_FROM_FLU_ZUP)
+        R_X_from_world = R_world_from_X.transpose(0, 2, 1)
+
+        # Accelerometer: right-wrist sensor is index 1 in real_imu_data
+        acc_world = real_acc[:, 1]   # [N, 3]  Z-up world, gravity-subtracted
+        if add_gravity:
+            acc_world = acc_world + np.array([0., 0., 9.81])   # Z-up specific force
+        acc_flu = np.einsum("nij,nj->ni", R_X_from_world, acc_world).astype(np.float32)
+
+        # Gyroscope from consecutive sensor orientations
+        R_world_from_sensor = real_ori[:, 1]   # [N, 3, 3]
+        dR = np.einsum("nij,njk->nik",
+                       R_world_from_sensor[:-1].transpose(0, 2, 1),
+                       R_world_from_sensor[1:])   # [N-1, 3, 3]
+        omega_sensor = np.zeros((N, 3), dtype=np.float64)
+        omega_sensor[:-1] = (
+            ScipyRot.from_matrix(dR.reshape(-1, 3, 3)).as_rotvec() * actual_fps
+        )
+        omega_sensor[-1] = omega_sensor[-2]
+        omega_world = np.einsum("nij,nj->ni", R_world_from_sensor, omega_sensor)
+        gyro_flu = np.einsum("nij,nj->ni", R_X_from_world, omega_world).astype(np.float32)
+
+        X = np.concatenate([acc_flu, gyro_flu], axis=1)   # [N, 6]
+
+    # ------------------------------------------------------------------
+    # Nymeria format: gt_data["xsens_pose"] = [N, 23, 4, 4]
+    # ------------------------------------------------------------------
+    else:
+        xsens_pose = gt_data["xsens_pose"]
+        if hasattr(xsens_pose, "numpy"):
+            xsens_pose = xsens_pose.detach().cpu().numpy()
+        xsens_pose = np.asarray(xsens_pose, dtype=np.float32)   # [N, 23, 4, 4]
+
+        body_fps_raw = float(
+            raw.get("imu_sampling_rate_hz") or raw.get("pose_sampling_rate_hz") or fps
+        )
+        actual_fps = float(fps)
+
+        if loader_type == "nymeria_real_wrist_flu":
+            # --- Real wrist IMU in FLU frame (matches training loader) ---
+            _R_WRIST_FROM_FLU_EVAL = np.array(
+                [[-1., 0., 0.], [0., 0., 1.], [0., 1., 0.]], dtype=np.float64
+            )
+            wrist_fps_raw = float(raw.get("wrist_imu_sampling_rate_hz", body_fps_raw))
+            body_ds  = max(1, round(body_fps_raw  / fps))
+            wrist_ds = max(1, round(wrist_fps_raw / fps))
+
+            xsens_pose = xsens_pose[::body_ds]
+
+            wrist_imu_d = raw.get("wrist_imu_data", {})
+            wrist_gt_d  = raw.get("wrist_gt_data",  {})
+
+            def _to_np64(x):
+                if hasattr(x, "detach"):
+                    return x.detach().cpu().numpy().astype(np.float64)
+                return np.asarray(x, dtype=np.float64)
+
+            acc_local  = _to_np64(wrist_imu_d["accel"])[::wrist_ds]
+            gyro_local = _to_np64(wrist_imu_d["gyro"])[::wrist_ds]
+
+            orient_raw = wrist_gt_d["orientation"]
+            try:
+                import pypose as pp
+                _is_lt = isinstance(orient_raw, pp.LieTensor)
+            except ImportError:
+                _is_lt = False
+            if _is_lt:
+                R_world_from_wrist = (
+                    orient_raw.matrix().detach().cpu().numpy().astype(np.float64)[::wrist_ds]
+                )
+            else:
+                orient_np = _to_np64(orient_raw)[::wrist_ds]
+                R_world_from_wrist = (
+                    ScipyRot.from_quat(orient_np).as_matrix().astype(np.float64)
+                )
+
+            N = min(xsens_pose.shape[0], acc_local.shape[0])
+            if max_frames > 0:
+                N = min(N, max_frames)
+            xsens_pose         = xsens_pose[:N]
+            acc_local          = acc_local[:N]
+            gyro_local         = gyro_local[:N]
+            R_world_from_wrist = R_world_from_wrist[:N]
+
+            acc_world  = np.einsum("nij,nj->ni", R_world_from_wrist, acc_local)
+            gyro_world = np.einsum("nij,nj->ni", R_world_from_wrist, gyro_local)
+            if not add_gravity:
+                acc_world = acc_world + np.array([0., -9.81, 0.])
+
+            R_world_from_X = np.einsum("nij,jk->nik", R_world_from_wrist, _R_WRIST_FROM_FLU_EVAL)
+            R_X_from_world = R_world_from_X.transpose(0, 2, 1)
+            acc_flu  = np.einsum("nij,nj->ni", R_X_from_world, acc_world)
+            gyro_flu = np.einsum("nij,nj->ni", R_X_from_world, gyro_world)
+            X = np.concatenate([acc_flu, gyro_flu], axis=1).astype(np.float32)
+
+        else:
+            # --- Synthetic IMU from Xsens pose (global frame) ---
+            actual_fps = body_fps_raw
+            N = xsens_pose.shape[0]
+            if max_frames > 0:
+                N = min(N, max_frames)
+                xsens_pose = xsens_pose[:N]
+
+            j   = _XSENS_RIGHT_WRIST_JOINT
+            pos = xsens_pose[:, j, :3, 3]
+            rot = xsens_pose[:, j, :3, :3]
+
+            acc       = np.zeros((N, 3), dtype=np.float32)
+            acc[1:-1] = (pos[2:] - 2 * pos[1:-1] + pos[:-2]) * (actual_fps ** 2)
+            acc[0]    = acc[1];  acc[-1] = acc[-2]
+
+            dR       = np.einsum("nij,njk->nik", rot[:-1].transpose(0, 2, 1), rot[1:])
+            gyro_raw = (ScipyRot.from_matrix(dR.reshape(-1, 3, 3)).as_rotvec() * actual_fps)
+            gyro     = np.zeros((N, 3), dtype=np.float32)
+            gyro[:-1] = gyro_raw.astype(np.float32);  gyro[-1] = gyro[-2]
+            X = np.concatenate([acc, gyro], axis=1)   # [N, 6]
+
+        smpl_R_global = torch.from_numpy(
+            _xsens_to_smpl_rotmat(xsens_pose[:, :, :3, :3])
+        )  # [N, 24, 3, 3]
+        body_model = art.model.ParametricModel(Paths.SMPL_FILE, device=torch.device("cpu"))
+        smpl_R_local = (
+            body_model
+            .inverse_kinematics_R(smpl_R_global.reshape(N, -1))
+            .view(N, 24, 3, 3)
+            .contiguous().clone().cpu().numpy()
+        )  # [N, 24, 3, 3]
+
+    # ---- GT 6D for selected joints ---- #
     if num_joints == 24:
         sel_R = smpl_R_local
+    elif num_joints == 23:
+        sel_R = smpl_R_local[:, 1:]   # drop root (joint 0)
     else:
         sel_R = smpl_R_local[:, RIGHT_WRIST_CHAIN_JOINTS]   # [N, 5, 3, 3]
 
@@ -402,8 +539,34 @@ def main():
         return None
 
     num_joints = args.num_joints or _resolve_num_joints(ckpt_cfg) or _resolve_num_joints(cfg) or 5
-    joint_names = SMPL_JOINT_NAMES if num_joints == 24 else JOINT_NAMES_5
+    if num_joints == 24:
+        joint_names = SMPL_JOINT_NAMES
+    elif num_joints == 23:
+        joint_names = SMPL_JOINT_NAMES[1:]   # drop Pelvis (root)
+    else:
+        joint_names = JOINT_NAMES_5
     logger.info("num_joints=%d  joint_names=%s", num_joints, joint_names)
+
+    # Resolve add_gravity from checkpoint config
+    def _resolve_add_gravity(c):
+        for section in ("pose", "pose_probe", "pose_finetune"):
+            v = cfg_get(c, ["objective", section, "add_gravity"], None)
+            if v is not None:
+                return bool(v)
+        return False
+
+    add_gravity = _resolve_add_gravity(ckpt_cfg) or _resolve_add_gravity(cfg)
+    logger.info("add_gravity=%s", add_gravity)
+
+    def _resolve_loader_type(c):
+        for section in ("pose", "pose_probe", "pose_finetune"):
+            v = cfg_get(c, ["objective", section, "loader"], None)
+            if v is not None:
+                return str(v).lower()
+        return ""
+
+    loader_type = _resolve_loader_type(ckpt_cfg) or _resolve_loader_type(cfg)
+    logger.info("loader_type=%s", loader_type)
 
     pose_decoder = ViT1DPoseDecoder(
         embed_dim=encoder.embed_dim,
@@ -437,7 +600,8 @@ def main():
         seq_name = os.path.basename(pkl_path).replace(".pkl", "")
         try:
             X, gt_6d, smpl_R_local, actual_fps = load_sequence(
-                pkl_path, args.fps, args.max_frames, num_joints
+                pkl_path, args.fps, args.max_frames, num_joints,
+                add_gravity=add_gravity, loader_type=loader_type,
             )
         except Exception as exc:
             logger.warning("Skipping %s: %s", seq_name, exc)

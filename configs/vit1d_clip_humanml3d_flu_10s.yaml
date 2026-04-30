@@ -1,7 +1,7 @@
 vit1d:
   patch_size: 16
   shared_kernel: true
-  pos_embed_type: sinusoidal        # sinusoidal supports up to max_patches_per_channel
+  pos_embed_type: learned           # must match the 10s MAE pretrain checkpoint
   # Fixed 10.24 s window: 10.24 s × 50 Hz / patch_size 16 = 32 patches per channel
   max_patches_per_channel: 32
   max_channels: 32
@@ -29,8 +29,9 @@ objective:
     # CLIP text encoder (HuggingFace identifier or local path).
     clip_model:        openai/clip-vit-base-patch32
     clip_embed_dim:    512
-    freeze_text_encoder: true    # text encoder always frozen
+    freeze_text_encoder: false   # text encoder is trainable (unfrozen)
     freeze_imu_encoder:  false   # train IMU encoder end-to-end from scratch
+    text_projection_mlp: true    # trainable 2-layer MLP on frozen text embeddings
 
     # Set to true if the CLIP model has been downloaded and should not be re-fetched.
     local_files_only: true
@@ -39,7 +40,8 @@ objective:
     #   python scripts/cache_clip_text_embeddings.py \
     #       --humanml3d-root /home/yiquan/HumanML3D \
     #       --out            /home/yiquan/HumanML3D/clip_text_emb_cache.pt
-    text_cache_path: /home/yiquan/HumanML3D/clip_text_emb_cache.pt
+    # text_cache_path disabled: encoder runs on-the-fly since text encoder is trainable
+    # text_cache_path: /home/yiquan/HumanML3D/clip_text_emb_cache.pt
 
 # Fixed 10.24 s window (32 patches × 16 samples = 512 frames @ 50 Hz).
 windowing:
@@ -61,7 +63,7 @@ trainer:
 
   optim:
     name: adamw
-    lr: 0.0001           # higher LR for from-scratch training
+    lr: 0.0003           # higher LR for from-scratch training
     weight_decay: 0.0001
     betas: [0.9, 0.98]   # CLIP uses higher β₂
     eps: 1.0e-8

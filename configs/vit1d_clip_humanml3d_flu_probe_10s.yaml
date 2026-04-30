@@ -1,7 +1,7 @@
 vit1d:
   patch_size: 16
   shared_kernel: true
-  pos_embed_type: sinusoidal
+  pos_embed_type: learned
   # Fixed 10.24 s window: 10.24 s × 50 Hz / patch_size 16 = 32 patches per channel
   max_patches_per_channel: 32
   max_channels: 32
@@ -32,6 +32,7 @@ objective:
     clip_embed_dim:    512
     freeze_text_encoder: true   # text encoder always frozen
     freeze_imu_encoder:  true   # PROBE: encoder is frozen, only projection is trained
+    text_projection_mlp: true   # trainable 2-layer MLP on frozen text embeddings
 
     # Set to true if the CLIP model has been downloaded and should not be re-fetched.
     local_files_only: true

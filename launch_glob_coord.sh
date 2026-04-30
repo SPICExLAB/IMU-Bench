@@ -313,3 +313,11 @@ CUDA_VISIBLE_DEVICES=1 python scripts/run_odom_eval_dataset.py \
 
 ############################# ViT1D realdata pretrain ###
 CUDA_VISIBLE_DEVICES=1 python scripts/run_pretrain.py --config configs/base.yaml --model-config configs/vit1d.yaml --run-name vit1d_realdata_pretrain
+
+
+
+
+CUDA_VISIBLE_DEVICES=1 python scripts/run_pretrain.py \
+  --config configs/base.yaml \
+  --model-config configs/vit1d_full_body_pose_finetune_totalcapture_flu.yaml \
+  --run-name vit1d_full_body_pose_finetune_totalcapture_flu
