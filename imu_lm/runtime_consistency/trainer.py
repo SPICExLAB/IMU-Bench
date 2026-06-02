@@ -63,8 +63,10 @@ class Trainer:
         self.early_stopping_enabled = bool(es_cfg.get("enabled", False))
         self.early_stopping_patience = int(es_cfg.get("patience", 5))
         self.best_val_loss = float("inf")
+        self.best_val_mpjpe = float("inf")
         self.epochs_without_improvement = 0
         self.ckpt_best = os.path.join(run_dir, "checkpoints", "best.pt")
+        self.ckpt_best_mpjpe = os.path.join(run_dir, "checkpoints", "best_mpjpe.pt")
 
     def fit(
         self,
@@ -98,6 +100,7 @@ class Trainer:
             if os.path.exists(ckpt_path):
                 ckpt = torch.load(ckpt_path, map_location="cpu", weights_only=False)
                 self.best_val_loss = ckpt.get("best_val_loss", float("inf"))
+                self.best_val_mpjpe = ckpt.get("best_val_mpjpe", float("inf"))
                 self.epochs_without_improvement = ckpt.get("epochs_without_improvement", 0)
                 self._epoch = ckpt.get("epoch", 0)
                 print(f"[resume] epoch={self._epoch} best_val_loss={self.best_val_loss:.6f} patience_count={self.epochs_without_improvement}")
@@ -172,6 +175,11 @@ class Trainer:
                         epoch_bar.set_postfix(loss=f"{_last_loss:.4f}", step=step)
 
                 if step % self.ckpt_every == 0:
+                    step_path = os.path.join(
+                        os.path.dirname(self.ckpt_latest),
+                        f"step_{step:07d}.pt",
+                    )
+                    self._save_ckpt(model, optimizer, scheduler, step, path=step_path)
                     self._save_ckpt(model, optimizer, scheduler, step)
 
                 # Periodic in-training validation
@@ -203,9 +211,16 @@ class Trainer:
     def _run_val(self, val_loader, model, objective_step, optimizer, scheduler, step, metrics_f):
         """Run validation, update scheduler/early-stopping. Returns True if early stopping triggered."""
         print(f"[train] eval at step {step}")
-        val_loss = self._eval(val_loader, model, objective_step, step, metrics_f)
+        val_loss, avg_logs = self._eval(val_loader, model, objective_step, step, metrics_f)
         if scheduler is not None and isinstance(scheduler, ReduceLROnPlateau) and val_loss is not None:
             scheduler.step(val_loss)
+        # Save best_mpjpe.pt whenever val mpjpe_mm improves (independent of early stopping)
+        if avg_logs is not None and "mpjpe_mm" in avg_logs:
+            mpjpe = avg_logs["mpjpe_mm"]
+            if mpjpe < self.best_val_mpjpe:
+                self.best_val_mpjpe = mpjpe
+                self._save_ckpt(model, optimizer, scheduler, step, path=self.ckpt_best_mpjpe)
+                print(f"[train] new best val mpjpe={mpjpe:.2f} mm")
         if self.early_stopping_enabled and val_loss is not None:
             if val_loss < self.best_val_loss:
                 self.best_val_loss = val_loss
@@ -244,7 +259,7 @@ class Trainer:
                 if self.val_max_batches > 0 and count >= self.val_max_batches:
                     break
         if count == 0:
-            return None
+            return None, None
         avg_loss = total_loss / count
         avg_logs: Dict[str, float] = {"loss": avg_loss, "epoch": self._epoch}
         for k in sorted(all_logs_keys):
@@ -253,7 +268,7 @@ class Trainer:
         metrics_f.write(line + "\n")
         print(line)
         self._wandb_log("val", avg_logs, step)
-        return avg_loss
+        return avg_loss, avg_logs
 
     def _wandb_log(self, split: str, logs: Dict[str, float], step: int, lr: float = None):
         if wandb is None or wandb.run is None:
@@ -287,6 +302,7 @@ class Trainer:
             "scheduler": scheduler.state_dict() if scheduler is not None else None,
             "cfg": self.cfg,
             "best_val_loss": self.best_val_loss,
+            "best_val_mpjpe": self.best_val_mpjpe,
             "epochs_without_improvement": self.epochs_without_improvement,
             "epoch": self._epoch,
         }

@@ -1,0 +1,95 @@
+# BEiT v2 style IMU pretraining on OCDetect wrist-IMU (any orientation).
+#
+# Objective: predict discrete RVQ token indices (from a frozen RVQ tokenizer)
+#            on 65%-masked patches using cross-entropy loss.
+#
+# Tokenizer: loaded from runs/vit1d_rvq_tokenizer_ocdetect_anyrot (frozen).
+#            4 levels × 512 codes → 4 target indices per temporal patch.
+#
+# Encoder: ViT1D-Base (12 layers, hidden_size=384) with CLS token.
+#   - All positions processed (CLS + visible + [MASK] tokens), same as BERT.
+#   - CLS token: global representation for downstream tasks (not directly supervised).
+#   - Patch token outputs at masked positions → K linear prediction heads.
+#
+# Masking: 65% ratio, composite strategy (random / temporal / signal).
+# Same SO(3) random-rotation augmentation as the tokenizer training.
+
+vit1d:
+  patch_size: 16
+  shared_kernel: "acc_gyro"
+  use_cls_token: true           # BEiT needs CLS for global representation
+
+  encoder:
+    hidden_size: 384
+    num_hidden_layers: 12
+    num_attention_heads: 6
+    intermediate_size: 1536
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-6
+    drop_path_rate: 0.1
+
+objective:
+  type: beit_ocdetect_anyrot
+  beit_ocdetect_anyrot:
+    # Frozen tokenizer (RVQ trained with pool_channels=true, anyrot augmentation)
+    tokenizer_run: runs/vit1d_rvq_tokenizer_ocdetect_anyrot
+    tokenizer_ckpt: latest
+
+    # RVQ vocab size — must match tokenizer checkpoint
+    num_levels: 4
+    num_codes:  512             # vocabulary size per level
+
+    # Masking
+    mask_ratio:    0.65
+    mask_strategy: composite    # random / temporal / signal, chosen uniformly
+
+    # OCDetect data
+    data_dir: /mnt/nas2/yiquan_data/preprocessed
+    splits: [0.8, 0.1, 0.1]
+    apply_flu_transform: false  # keep raw Android frame; SO(3) rotation covers all orientations
+
+# Augmentations (same as tokenizer training for domain consistency)
+random_rotation:
+  enabled: true
+
+time_crop:
+  enabled: true
+  min_crop_ratio: 0.90
+
+gaussian_noise:
+  enabled: true
+  sigma: 0.01
+
+data:
+  batch_size: 256
+  eval_batch_size: 256
+  num_workers: 4
+  pin_memory: true
+
+logging:
+  ckpt_every_steps: 5000
+
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 300000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 500
+
+  optim:
+    name: adamw
+    lr: 0.0003
+    weight_decay: 0.05          # slightly higher weight decay for BEiT (transformer pretraining)
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+
+  sched:
+    name: cosine
+    warmup_steps: 5000          # longer warmup for BEiT (more parameters)
+
+  early_stopping:
+    enabled: false
+    monitor: val_loss
+    patience: 20

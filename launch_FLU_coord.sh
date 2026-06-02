@@ -531,7 +531,7 @@ python scripts/run_pose_eval_dataset.py \
 # Encoder warm-started from vit1d_mae_ocdetect_flu and kept trainable (lower LR).
 # Requires: runs/vit1d_mae_ocdetect_flu/checkpoints/best.pt
 
-CUDA_VISIBLE_DEVICES=0 python scripts/run_pretrain.py \
+CUDA_VISIBLE_DEVICES=1 python scripts/run_pretrain.py \
   --config       configs/base.yaml \
   --model-config configs/vit1d_pose_finetune_imuposer_ocdetect_flu.yaml \
   --run-name     vit1d_pose_finetune_imuposer_ocdetect_flu
@@ -1438,3 +1438,7 @@ CUDA_VISIBLE_DEVICES=1 python scripts/run_pretrain.py \
   --run-name     vit1d_gesture_supervised_surfaceXR
 
 
+CUDA_VISIBLE_DEVICES=1 python scripts/run_pretrain.py \
+  --config       configs/base.yaml \
+  --model-config configs/vit1d_mae_ocdetect_flu.yaml \
+  --run-name     vit1d_mae_ocdetect_flu_v2

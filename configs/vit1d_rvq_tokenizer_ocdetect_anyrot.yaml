@@ -1,0 +1,100 @@
+# Discrete IMU tokenizer: frequency-progressive RVQ on OCDetect wrist-IMU (any orientation).
+#
+# Encoder:  ViT1D-Small (no CLS token, 6 layers) — lighter than the 12-layer SSL encoders
+#           because the tokenizer is used as a feature extractor, not a downstream head.
+# RVQ:      4 levels × 512 codes × 256 dims, EMA codebook updates
+# Decoders: 4 per-level MLPs: code_dim(256) → 512 → patch_size(16)
+# Targets:  Level 1 → lowpass 2 Hz, Level 2 → 5 Hz, Level 3 → 12 Hz, Level 4 → full
+#
+# To inspect codebook utilisation: watch avg_code_util and code_util_l{k} in logs.
+# Healthy utilisation > 0.1 (>50 out of 512 codes used per batch) by step 5K.
+
+vit1d:
+  patch_size: 16
+  shared_kernel: "acc_gyro"
+  use_cls_token: false          # tokenizer does not need CLS token
+  encoder:
+    hidden_size: 256
+    num_hidden_layers: 6
+    num_attention_heads: 4
+    intermediate_size: 1024
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-6
+    drop_path_rate: 0.05
+
+objective:
+  type: rvq_tokenizer_ocdetect_anyrot
+  rvq_tokenizer_ocdetect_anyrot:
+    # RVQ hyperparameters
+    num_levels:         4
+    num_codes:          512         # codebook size per level
+    code_dim:           256         # code vector dimension (= encoder hidden_size, no projection)
+    ema_decay:          0.95        # faster codebook tracking (was 0.99 — too slow)
+    commitment_weight:  0.05        # reduced: L2-norm before VQ removes scale drift
+    decoder_hidden_dim: 512         # hidden dim of per-level PatchDecoder MLPs
+
+    # Frequency-band targets for each RVQ level
+    cutoff_hz:    [2.0, 5.0, 12.0, 999.0]    # Hz; 999 = full signal (no filtering)
+    lambda_levels: [1.0, 1.0, 1.0, 1.0]      # per-level MSE weight
+
+    # Spectral loss on final level (full-signal reconstruction)
+    lambda_spec:  0.1
+    fs:           50.0
+
+    # Channel pooling: pool 6 channel tokens per temporal patch → 1 temporal token
+    # Result: 8 temporal positions × 4 RVQ levels = 32 token indices per 2.56s window
+    pool_channels: true
+    num_channels:  6                # number of IMU channels (acc+gyro = 6)
+
+    # Data
+    splits: [0.8, 0.1, 0.1]
+    apply_flu_transform: false      # OCDetect CSV already in FLU frame
+
+# Augmentations — declared at top level so apply_augment() finds them via cfg_get(cfg, [...])
+# apply_flu_transform: false means raw Android frame is kept; SO(3) rotation then covers
+# all orientations, making the tokenizer orientation-invariant.
+
+random_rotation:
+  enabled: true             # uniform SO(3) applied to acc (ch0-2) + gyro (ch3-5) together
+
+time_crop:
+  enabled: true
+  min_crop_ratio: 0.90
+
+gaussian_noise:
+  enabled: true
+  sigma: 0.01
+
+data:
+  batch_size: 256
+  eval_batch_size: 256
+  num_workers: 4
+  pin_memory: true
+
+logging:
+  ckpt_every_steps: 5000
+
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 300000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 500
+
+  optim:
+    name: adamw
+    lr: 0.0003
+    weight_decay: 0.01
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+
+  sched:
+    name: cosine
+    warmup_steps: 2000
+
+  early_stopping:
+    enabled: false
+    monitor: val_loss
+    patience: 20

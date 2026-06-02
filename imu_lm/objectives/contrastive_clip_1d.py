@@ -232,31 +232,58 @@ def info_nce_loss(
 ) -> Tuple[torch.Tensor, Dict[str, float]]:
     """Symmetric InfoNCE (CLIP-style).
 
+    When text embeddings contain duplicates (frozen pre-computed embeddings with
+    multiple same-activity samples per batch), automatically switches to
+    multi-positive InfoNCE so same-label pairs are treated as positives instead
+    of false negatives.  Detection is via cosine similarity > 0.999 between text
+    embeddings — exact for frozen embeddings, harmless otherwise.
+
     Args:
         z_imu:        [B, D]  L2-normalised IMU embeddings
         z_text:       [B, D]  L2-normalised text embeddings
         logit_scale:  scalar Parameter (log of the temperature inverse)
-
-    Returns:
-        loss:  scalar
-        logs:  dict with loss, logit_scale, and retrieval accuracy
     """
-    B    = z_imu.shape[0]
+    B     = z_imu.shape[0]
     scale = logit_scale.exp().clamp(max=math.exp(_MAX_LOGIT_SCALE))
-    labels = torch.arange(B, device=z_imu.device)
 
-    # logit matrices [B, B]
+    # [B, B] similarity matrices
     logits_per_imu  = scale * z_imu @ z_text.T
     logits_per_text = logits_per_imu.T
 
-    loss_i2t = F.cross_entropy(logits_per_imu,  labels)
-    loss_t2i = F.cross_entropy(logits_per_text, labels)
-    loss     = (loss_i2t + loss_t2i) / 2.0
-
-    # Top-1 retrieval accuracy (diagonal = correct pair)
+    # Detect duplicate text embeddings (same activity → same frozen embedding).
+    # cosine sim > 0.999 reliably identifies identical L2-normed vectors.
     with torch.no_grad():
-        acc_i2t = (logits_per_imu.argmax(dim=1)  == labels).float().mean().item()
-        acc_t2i = (logits_per_text.argmax(dim=1) == labels).float().mean().item()
+        text_sim = z_text @ z_text.T          # [B, B]
+        pos_mask = (text_sim > 0.999).float() # [B, B]  1 where same activity
+        has_duplicates = (pos_mask.sum(dim=1) > 1).any()
+
+    if has_duplicates:
+        # Multi-positive InfoNCE: every same-activity pair is a positive.
+        # Loss = mean over anchors of:  -1/|P_i| * sum_{j in P_i} log_softmax(logits)[j]
+        log_sm_i2t = F.log_softmax(logits_per_imu,  dim=1)  # [B, B]
+        log_sm_t2i = F.log_softmax(logits_per_text, dim=1)
+
+        num_pos = pos_mask.sum(dim=1).clamp(min=1)           # [B]
+        loss_i2t = -(pos_mask * log_sm_i2t).sum(dim=1) / num_pos
+        loss_t2i = -(pos_mask * log_sm_t2i).sum(dim=1) / num_pos
+        loss_i2t = loss_i2t.mean()
+        loss_t2i = loss_t2i.mean()
+
+        # Accuracy: top-1 prediction lands on any positive
+        with torch.no_grad():
+            top1_i2t = logits_per_imu.argmax(dim=1)
+            top1_t2i = logits_per_text.argmax(dim=1)
+            acc_i2t = pos_mask[torch.arange(B, device=z_imu.device), top1_i2t].mean().item()
+            acc_t2i = pos_mask[torch.arange(B, device=z_imu.device), top1_t2i].mean().item()
+    else:
+        labels = torch.arange(B, device=z_imu.device)
+        loss_i2t = F.cross_entropy(logits_per_imu,  labels)
+        loss_t2i = F.cross_entropy(logits_per_text, labels)
+        with torch.no_grad():
+            acc_i2t = (logits_per_imu.argmax(dim=1)  == labels).float().mean().item()
+            acc_t2i = (logits_per_text.argmax(dim=1) == labels).float().mean().item()
+
+    loss = (loss_i2t + loss_t2i) / 2.0
 
     return loss, {
         "loss":            float(loss.item()),

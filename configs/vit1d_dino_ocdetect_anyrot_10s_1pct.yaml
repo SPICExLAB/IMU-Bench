@@ -1,0 +1,90 @@
+# Quick smoke-test: DINO 10.24 s on 2 OCDetect files (~a few hundred windows).
+# max_files=2 means only 2 CSV files are parsed → data loads in seconds, not 18 min.
+# Stops after 200 steps; no meaningful learning expected — just verifies end-to-end.
+
+vit1d:
+  patch_size: 16
+  shared_kernel: true
+  use_cls_token: true
+  encoder:
+    hidden_size: 384
+    num_hidden_layers: 12
+    num_attention_heads: 6
+    intermediate_size: 1536
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-6
+    drop_path_rate: 0.1
+  dino_head:
+    out_dim: 4096
+    hidden_dim: 2048
+    bottleneck_dim: 256
+  max_patches_per_channel: 32
+  pooling: "cls"
+
+windowing:
+  window_seconds: 10.24
+  window_hop_ratio: 0.5
+
+objective:
+  type: dino_ocdetect_anyrot
+  mask_ratio: 0.40
+  mask_strategy: "random,temporal"
+  dino_ocdetect_anyrot:
+    data_dir: /mnt/nas2/yiquan_data/preprocessed
+    splits: [0.8, 0.1, 0.1]
+    apply_flu_transform: false
+    ema_momentum: 0.996
+    max_files: 2                   # parse only 2 CSV files → loads in seconds
+    loss:
+      teacher_temp: 0.04
+      student_temp: 0.10
+      center_momentum: 0.90
+      lambda_patch: 1.0
+
+preprocess:
+  impute:
+    enabled: true
+  filter:
+    enabled: true
+  normalize:
+    enabled: false
+
+random_rotation:
+  enabled: true
+
+gaussian_noise:
+  enabled: true
+  sigma: 0.01
+
+jitter:
+  enabled: true
+  sigma: 0.005
+
+data:
+  batch_size: 64
+  eval_batch_size: 64
+  num_workers: 4
+  pin_memory: true
+
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 200                   # just enough to verify forward + backward pass
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 100
+
+  optim:
+    name: adamw
+    lr: 0.0001
+    weight_decay: 0.0001
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+
+  sched:
+    name: cosine
+    warmup_steps: 50
+
+  early_stopping:
+    enabled: false

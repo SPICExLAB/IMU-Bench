@@ -195,10 +195,14 @@ def load_pkl_odom_flu(pkl_path: str, target_hz: int = 50,
 
 @torch.no_grad()
 def run_inference(X, pos_root, encoder, odom_decoder, cfg, device, fps):
-    """Return (pred_traj [M+1,3], gt_traj [M+1,3]) patch-boundary trajectories."""
+    """Return (pred_traj [M+1,3], gt_traj [M+1,3], pred_vels [M,3], gt_vels [M,3]).
+
+    pred_vels / gt_vels are world-frame velocities in m/s (displacement / patch_duration).
+    """
     T, _       = compute_T_and_hop(cfg)
     vit_cfg    = cfg_get(cfg, ["vit1d"], {}) or {}
     patch_size = int(vit_cfg.get("patch_size", 16))
+    dt_patch   = patch_size / fps
     stats      = PreprocessStats()
     N          = len(X)
 
@@ -242,7 +246,9 @@ def run_inference(X, pos_root, encoder, odom_decoder, cfg, device, fps):
         pred_traj[i + 1] = pred_traj[i] + pred_d[i]
         gt_traj[i + 1]   = gt_traj[i]   + gt_d[i]
 
-    return pred_traj, gt_traj
+    pred_vels = pred_d / dt_patch   # [M, 3] m/s
+    gt_vels   = gt_d   / dt_patch   # [M, 3] m/s
+    return pred_traj, gt_traj, pred_vels, gt_vels
 
 
 # ---------------------------------------------------------------------------
@@ -265,7 +271,8 @@ def run_inference_local_vel(
     3. Accumulate delta_world to build a trajectory at sub-patch resolution
        (one step = Q frames, e.g. 4 frames = 0.08 s at 50 Hz).
 
-    Returns (pred_traj [M+1,3], gt_traj [M+1,3]) at sub-patch boundaries.
+    Returns (pred_traj [M+1,3], gt_traj [M+1,3], pred_vels [M,3], gt_vels [M,3])
+    at sub-patch boundaries.  pred_vels / gt_vels are world-frame velocities (m/s).
     """
     T, _       = compute_T_and_hop(cfg)
     vit_cfg    = cfg_get(cfg, ["vit1d"], {}) or {}
@@ -291,8 +298,10 @@ def run_inference_local_vel(
     X_pad = np.concatenate([X_flu, np.zeros((pad, 6), dtype=np.float32)]) if pad else X_flu
     P_t   = T // patch_size
 
-    pred_deltas = []
-    gt_deltas   = []
+    pred_deltas      = []
+    gt_deltas        = []
+    pred_vels_world  = []   # world-frame velocity predictions (m/s)
+    gt_vels_world    = []   # world-frame velocity GT (m/s)
 
     for w in range(len(X_pad) // T):
         start  = w * T
@@ -303,11 +312,12 @@ def run_inference_local_vel(
             for p in range(P_t):
                 for k in range(4):
                     pred_deltas.append(np.zeros(3, dtype=np.float32))
+                    pred_vels_world.append(np.zeros(3, dtype=np.float32))
                     t_s = start + p * patch_size + k * Q
                     t_e = min(t_s + Q, N - 1)
-                    gt_deltas.append(
-                        (pos_root[t_e] - pos_root[max(0, t_s)]).astype(np.float32)
-                    )
+                    gt_d = (pos_root[t_e] - pos_root[max(0, t_s)]).astype(np.float32)
+                    gt_deltas.append(gt_d)
+                    gt_vels_world.append(gt_d / dt_Q)
             continue
 
         x        = torch.from_numpy(Xproc).float().unsqueeze(0).to(device)
@@ -323,13 +333,18 @@ def run_inference_local_vel(
 
                 R_at_mid = R_int[min(t_mid, N - 1)]
                 v_flu_k  = vel_pred[p, k].astype(np.float64)
-                delta_pred = (R_at_mid @ v_flu_k * dt_Q).astype(np.float32)
+                v_world_pred = (R_at_mid @ v_flu_k).astype(np.float32)   # m/s world frame
+                delta_pred   = (v_world_pred * dt_Q).astype(np.float32)
 
                 pred_deltas.append(delta_pred)
+                pred_vels_world.append(v_world_pred)
+
                 if t_e < N and t_s < N:
-                    gt_deltas.append((pos_root[t_e] - pos_root[t_s]).astype(np.float32))
+                    gt_d = (pos_root[t_e] - pos_root[t_s]).astype(np.float32)
                 else:
-                    gt_deltas.append(np.zeros(3, dtype=np.float32))
+                    gt_d = np.zeros(3, dtype=np.float32)
+                gt_deltas.append(gt_d)
+                gt_vels_world.append((gt_d / dt_Q).astype(np.float32))
 
     # --- Integrate sub-patch deltas into trajectory -----------------------
     origin   = pos_root[0]
@@ -341,7 +356,9 @@ def run_inference_local_vel(
         pred_traj[i + 1] = pred_traj[i] + pred_deltas[i]
         gt_traj[i + 1]   = gt_traj[i]   + gt_deltas[i]
 
-    return pred_traj, gt_traj
+    pred_vels = np.array(pred_vels_world, dtype=np.float32)  # [M, 3]
+    gt_vels   = np.array(gt_vels_world,   dtype=np.float32)  # [M, 3]
+    return pred_traj, gt_traj, pred_vels, gt_vels
 
 
 # ---------------------------------------------------------------------------
@@ -382,6 +399,23 @@ def compute_drift_rate(pred_traj: np.ndarray, gt_traj: np.ndarray) -> float:
         return float("nan")
     mean_ate = float(np.linalg.norm(pred_traj - gt_traj, axis=1).mean())
     return mean_ate / gt_path_len
+
+
+def compute_vel_metrics(
+    pred_vels: np.ndarray, gt_vels: np.ndarray
+) -> tuple:
+    """Velocity error metrics (world-frame, m/s).
+
+    Returns (mse, rmse, mean_L2) where:
+      mse     : mean squared error averaged over all steps and all 3 axes
+      rmse    : sqrt(mse)
+      mean_L2 : mean L2 norm of the per-step velocity error vector
+    """
+    err    = pred_vels - gt_vels          # [M, 3]
+    mse    = float((err ** 2).mean())
+    rmse   = float(np.sqrt(mse))
+    mean_l2 = float(np.linalg.norm(err, axis=1).mean())
+    return mse, rmse, mean_l2
 
 
 # ---------------------------------------------------------------------------
@@ -459,6 +493,22 @@ def plot_drift_rate_distribution(seq_drift_rates: np.ndarray, out_dir: str):
     ax.set_title("Distribution of Drift Rate across Test Sequences")
     ax.legend(); ax.grid(True, alpha=0.3)
     _save(fig, os.path.join(out_dir, "drift_rate_distribution.png"))
+
+
+def plot_vel_error_distribution(
+    pred_vels: np.ndarray, gt_vels: np.ndarray, out_dir: str
+):
+    """Histogram of per-step velocity L2 error (m/s)."""
+    l2_err = np.linalg.norm(pred_vels - gt_vels, axis=1)
+    fig, ax = plt.subplots(figsize=(8, 5))
+    ax.hist(l2_err, bins=50, color="darkorchid", edgecolor="white", alpha=0.85)
+    ax.axvline(float(l2_err.mean()), color="red", linestyle="--",
+               label=f"Mean = {l2_err.mean():.3f} m/s")
+    ax.set_xlabel("Per-step velocity L2 error (m/s)")
+    ax.set_ylabel("Count")
+    ax.set_title("Distribution of Velocity Error across All Steps")
+    ax.legend(); ax.grid(True, alpha=0.3)
+    _save(fig, os.path.join(out_dir, "vel_error_distribution.png"))
 
 
 def plot_ate_vs_duration(
@@ -571,6 +621,8 @@ def main():
 
     all_ate_vals  = []
     all_rte_vals  = [[] for _ in rte_windows]
+    all_pred_vels = []   # world-frame velocity predictions (m/s) for all sequences
+    all_gt_vels   = []   # world-frame velocity GT (m/s) for all sequences
 
     fps_used = args.fps   # will be updated from the first sequence
 
@@ -595,12 +647,12 @@ def main():
         fps_used = fps
 
         if use_local_vel:
-            pred_traj, gt_traj = run_inference_local_vel(
-                X_data, pos_root, R_world_from_X, encoder, odom_decoder, cfg, device, fps
+            pred_traj, gt_traj, pred_vels, gt_vels = run_inference_local_vel(
+                X_data, pos_root, R_world_from_X, encoder, odom_decoder, ckpt_cfg, device, fps
             )
         else:
-            pred_traj, gt_traj = run_inference(
-                X_data, pos_root, encoder, odom_decoder, cfg, device, fps
+            pred_traj, gt_traj, pred_vels, gt_vels = run_inference(
+                X_data, pos_root, encoder, odom_decoder, ckpt_cfg, device, fps
             )
 
         ate_seq = compute_ate(pred_traj, gt_traj)   # [M+1]
@@ -610,6 +662,8 @@ def main():
         seq_drift_rates.append(compute_drift_rate(pred_traj, gt_traj))
         seq_durations.append(len(X_data) / fps)
         all_ate_vals.append(ate_seq)
+        all_pred_vels.append(pred_vels)
+        all_gt_vels.append(gt_vels)
 
         for wi, win_s in enumerate(rte_windows):
             delta   = max(1, round(win_s * fps / step_frames))
@@ -628,6 +682,11 @@ def main():
     all_ate_flat    = np.concatenate(all_ate_vals)
     ate_global_mean = float(all_ate_flat.mean())
     ate_global_std  = float(all_ate_flat.std())
+
+    # Velocity metrics
+    all_pred_vels_flat = np.concatenate(all_pred_vels)   # [total_steps, 3]
+    all_gt_vels_flat   = np.concatenate(all_gt_vels)     # [total_steps, 3]
+    vel_mse, vel_rmse, vel_mean_l2 = compute_vel_metrics(all_pred_vels_flat, all_gt_vels_flat)
 
     # Actual window durations (may differ slightly from target due to rounding)
     rte_actual_s = [
@@ -658,12 +717,16 @@ def main():
     drift_mean  = float(np.nanmean(seq_drift_rates)) if len(drift_valid) else float("nan")
     drift_std   = float(np.nanstd(seq_drift_rates))  if len(drift_valid) else float("nan")
 
-    print(f"\n  {'Metric':<32} {'Global mean':>14}  {'Global std':>12}")
-    print(f"  {'-'*62}")
-    print(f"  {'ATE (cm)':<32} {ate_global_mean*100:>14.2f}  {ate_global_std*100:>12.2f}")
+    print(f"\n  {'Metric':<36} {'Value':>14}")
+    print(f"  {'-'*52}")
+    print(f"  {'ATE (cm)':<36} {ate_global_mean*100:>14.2f}  ± {ate_global_std*100:.2f}")
     for label, g_mean, g_std, seq_arr in rte_stats:
-        print(f"  {f'{label} (cm)':<32} {g_mean*100:>14.2f}  {g_std*100:>12.2f}")
-    print(f"  {'Drift rate (%)':<32} {drift_mean*100:>14.3f}  {drift_std*100:>12.3f}")
+        print(f"  {f'{label} (cm)':<36} {g_mean*100:>14.2f}  ± {g_std*100:.2f}")
+    print(f"  {'Drift rate (%)':<36} {drift_mean*100:>14.3f}  ± {drift_std*100:.3f}")
+    print(f"  {'-'*52}")
+    print(f"  {'Velocity MSE (m²/s²)':<36} {vel_mse:>14.6f}")
+    print(f"  {'Velocity RMSE (m/s)':<36} {vel_rmse:>14.6f}")
+    print(f"  {'Velocity mean-L2 (m/s)':<36} {vel_mean_l2:>14.6f}")
     print(f"\n  Per-sequence stats:")
     print(f"    ATE:  mean={seq_ate_means.mean()*100:.2f} cm  "
           f"std={seq_ate_means.std()*100:.2f} cm  "
@@ -700,6 +763,7 @@ def main():
         out_dir=args.out_dir,
     )
     plot_ate_vs_duration(seq_durations, seq_ate_means, args.out_dir)
+    plot_vel_error_distribution(all_pred_vels_flat, all_gt_vels_flat, args.out_dir)
 
     logger.info("All plots written to %s", args.out_dir)
 

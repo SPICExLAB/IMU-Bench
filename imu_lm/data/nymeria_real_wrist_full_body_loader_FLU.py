@@ -93,6 +93,22 @@ def matrix_to_rotation_6d(matrix: torch.Tensor) -> torch.Tensor:
     return matrix[..., :2, :].clone().reshape(batch_dim + (6,))
 
 
+def _rot6d_to_mat(r6d: np.ndarray) -> np.ndarray:
+    """6D rotation (first two rows stored as float32[6]) → [3, 3] rotation matrix."""
+    a1 = r6d[:3].astype(np.float64)
+    a2 = r6d[3:6].astype(np.float64)
+    b1 = a1 / (np.linalg.norm(a1) + 1e-8)
+    b2 = a2 - np.dot(b1, a2) * b1
+    b2 = b2 / (np.linalg.norm(b2) + 1e-8)
+    b3 = np.cross(b1, b2)
+    return np.stack([b1, b2, b3], axis=0).astype(np.float32)  # [3, 3]
+
+
+def _mat_to_rot6d(mat: np.ndarray) -> np.ndarray:
+    """[3, 3] rotation matrix → 6D (first two rows) float32[6]."""
+    return mat[:2, :].flatten().astype(np.float32)
+
+
 def xsens_to_SMPL(xsens_rotmat: np.ndarray) -> np.ndarray:
     """Convert Xsens global rotation matrices [N,23,3,3] → SMPL global [N,24,3,3]."""
     perm = [1, 2, 0]
@@ -262,7 +278,8 @@ def _load_nymeria_real_wrist_full_body_session_flu(
     X_imu = np.concatenate([acc_flu, gyro_flu], axis=1).astype(np.float32)  # [N, 6]
 
     # ------------------------------------------------------------------
-    # Step 7: SMPL IK/FK → all 24 joint local rotations (6D)
+    # Step 7: SMPL IK → all 24 joint local rotations (6D)
+    #         FK      → all 24 joint world positions (metres, zero-shape)
     # ------------------------------------------------------------------
     body_model = art.model.ParametricModel(Paths.SMPL_FILE, device=torch.device("cpu"))
 
@@ -278,11 +295,15 @@ def _load_nymeria_real_wrist_full_body_session_flu(
         torch.from_numpy(smpl_local_R.astype(np.float32))
     ).numpy()   # [N, 24, 6]
 
+    # FK: local rotations → world joint positions (root at origin, zero shape)
+    _, joint_pos = body_model.forward_kinematics(smpl_local_t)   # [N, 24, 3]
+    joint_pos = joint_pos.cpu().numpy().astype(np.float32)       # [N, 24, 3]
+
     logger.info(
         "[nymeria_real_wrist_full_body_flu] loaded %s: N=%d fps=%.0f",
         os.path.basename(pkl_path), N, target_hz,
     )
-    return X_imu, y
+    return X_imu, y, joint_pos
 
 
 # ---------------------------------------------------------------------------
@@ -337,11 +358,20 @@ class NymeriaRealWristFullBodyDatasetFLU(Dataset):
 
         self._T, self._hop = compute_T_and_hop(cfg)
 
-        vit_cfg = cfg_get(cfg, ["vit1d"], {}) or {}
+        vit_cfg  = cfg_get(cfg, ["vit1d"],           {}) or {}
+        dec_cfg  = (vit_cfg.get("pose_decoder") or {})
+        pose_cfg = cfg_get(cfg, ["objective", "pose"], {}) or {}
         self._patch_size  = int(vit_cfg.get("patch_size", 16))
         self._num_patches = self._T // self._patch_size
+        # sub_patches: number of fine-grained predictions per ViT patch.
+        # 1 = one prediction per patch (existing behaviour).
+        # 4 = four predictions at patch_size//4 intervals (0.08 s @ 50 Hz for patch=16).
+        self._sub_patches = int(dec_cfg.get("sub_patches", 1))
+        # T-pose reset: normalize the root (joint 0) rotation of every window's first
+        # sub-patch label to identity so all windows start from a canonical pelvis orientation.
+        self._reset_root = bool(pose_cfg.get("reset_root_orientation", False))
 
-        self._sessions: List[Tuple[np.ndarray, np.ndarray]] = []
+        self._sessions: List[Tuple[np.ndarray, np.ndarray, np.ndarray]] = []
         session_lengths: List[int] = []
 
         _n_workers = min(32, (os.cpu_count() or 4) * 2)
@@ -359,8 +389,8 @@ class NymeriaRealWristFullBodyDatasetFLU(Dataset):
             if result is None:
                 logger.warning("[nymeria_real_wrist_full_body_flu] skipping: %s", path)
                 continue
-            X, y = result
-            self._sessions.append((X, y))
+            X, y, joint_pos = result
+            self._sessions.append((X, y, joint_pos))
             session_lengths.append(len(X))
 
         if not self._sessions:
@@ -381,12 +411,12 @@ class NymeriaRealWristFullBodyDatasetFLU(Dataset):
     def __len__(self) -> int:
         return len(self._starts)
 
-    def __getitem__(self, idx: int) -> Optional[Tuple[torch.Tensor, torch.Tensor]]:
+    def __getitem__(self, idx: int) -> Optional[Tuple[torch.Tensor, torch.Tensor, torch.Tensor]]:
         si    = int(self._sess_idx[idx])
         start = int(self._starts[idx])
         T     = self._T
 
-        X_raw, y_arr = self._sessions[si]
+        X_raw, y_arr, pos_arr = self._sessions[si]
         Xw = X_raw[start : start + T]
 
         Xproc = preprocess_window(Xw, self.cfg, self.stats)
@@ -397,28 +427,53 @@ class NymeriaRealWristFullBodyDatasetFLU(Dataset):
             Xproc = apply_augment(Xproc.T, self.cfg).T
         x_tensor = torch.from_numpy(Xproc).float()
 
-        P = self._patch_size
-        patch_labels = np.empty(
-            (self._num_patches, BODY_ROT6D_DIM), dtype=np.float32
-        )
-        for p in range(self._num_patches):
-            frame = start + p * P + P // 2
-            patch_labels[p] = y_arr[frame].reshape(-1)   # [24, 6] → [144]
+        P  = self._patch_size
+        K  = self._sub_patches
+        Q  = P // K   # sub-patch size in samples (e.g. 16//4 = 4 → 0.08 s)
+        out_dim     = K * BODY_ROT6D_DIM           # dims per patch row in rotation label
+        out_pos_dim = K * NUM_BODY_JOINTS * 3       # dims per patch row in position label
+        patch_labels     = np.empty((self._num_patches, out_dim),     dtype=np.float32)
+        patch_pos_labels = np.empty((self._num_patches, out_pos_dim), dtype=np.float32)
 
-        y_tensor = torch.from_numpy(patch_labels).float()
-        return x_tensor, y_tensor
+        for p in range(self._num_patches):
+            for k in range(K):
+                frame = start + p * P + k * Q + Q // 2
+                patch_labels[p, k * BODY_ROT6D_DIM : (k + 1) * BODY_ROT6D_DIM] = (
+                    y_arr[frame].reshape(-1)
+                )
+                pos_frame = pos_arr[frame]          # [24, 3]
+                pos_rel   = pos_frame - pos_frame[0:1]  # root-relative: pelvis at origin
+                patch_pos_labels[p, k * NUM_BODY_JOINTS * 3 : (k + 1) * NUM_BODY_JOINTS * 3] = (
+                    pos_rel.reshape(-1)
+                )
+
+        if self._reset_root:
+            # Normalise joint-0 (root/pelvis, dims 0:6 of the first sub-patch of
+            # the first patch) to identity so every window starts from T-pose.
+            R0     = _rot6d_to_mat(patch_labels[0, :6])
+            R0_inv = R0.T
+            for p in range(self._num_patches):
+                for k in range(K):
+                    base = k * BODY_ROT6D_DIM
+                    Ri = _rot6d_to_mat(patch_labels[p, base : base + 6])
+                    patch_labels[p, base : base + 6] = _mat_to_rot6d(R0_inv @ Ri)
+
+        y_tensor   = torch.from_numpy(patch_labels).float()
+        pos_tensor = torch.from_numpy(patch_pos_labels).float()
+        return x_tensor, y_tensor, pos_tensor
 
 
 # ---------------------------------------------------------------------------
 # Collate
 # ---------------------------------------------------------------------------
 
-def collate_skip_none(
-    batch: List[Optional[Tuple[torch.Tensor, torch.Tensor]]]
-) -> Optional[Tuple[torch.Tensor, torch.Tensor]]:
+def collate_skip_none(batch):
     batch = [b for b in batch if b is not None]
     if not batch:
         return None
+    if len(batch[0]) == 3:
+        xs, ys, ps = zip(*batch)
+        return torch.stack(xs, 0), torch.stack(ys, 0), torch.stack(ps, 0)
     xs, ys = zip(*batch)
     return torch.stack(xs, 0), torch.stack(ys, 0)
 

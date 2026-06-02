@@ -1,0 +1,101 @@
+# Discrete IMU tokenizer: frequency-progressive RVQ on OCDetect wrist-IMU (any orientation).
+# NO channel pooling — each (channel, patch) is its own token.
+# Result: 6 channels × 8 patches × 4 RVQ levels = 192 token indices per 2.56s window.
+#
+# Use this instead of the pooled version when anyrot is needed:
+# channel pooling + anyrot is a very hard reconstruction task because random rotation
+# mixes channels so the pooled representation loses orientation cues.
+# Without pooling each channel reconstructs independently → much easier with anyrot.
+#
+# Trade-off: 192 indices vs 32 (pooled). Downstream GPT-style models will need to
+# handle longer sequences, but each token is more informative per channel.
+
+vit1d:
+  patch_size: 16
+  shared_kernel: "acc_gyro"
+  use_cls_token: false          # tokenizer does not need CLS token
+  encoder:
+    hidden_size: 256
+    num_hidden_layers: 6
+    num_attention_heads: 4
+    intermediate_size: 1024
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-6
+    drop_path_rate: 0.05
+
+objective:
+  type: rvq_tokenizer_ocdetect_anyrot
+  rvq_tokenizer_ocdetect_anyrot:
+    # RVQ hyperparameters
+    num_levels:         4
+    num_codes:          1024        # larger codebook: high-freq space needs more codes
+    code_dim:           256         # code vector dimension (= encoder hidden_size, no projection)
+    ema_decay:          0.95        # faster codebook tracking (was 0.99 — too slow)
+    commitment_weight:  0.05        # reduced: L2-norm before VQ removes scale drift
+    decoder_hidden_dim: 512         # hidden dim of per-level PatchDecoder MLPs
+
+    # Frequency-band targets for each RVQ level
+    cutoff_hz:    [2.0, 5.0, 12.0, 999.0]    # Hz; 999 = full signal (no filtering)
+    lambda_levels: [1.0, 1.0, 2.0, 3.0]      # up-weight L3/L4 to push high-freq learning
+
+    # Spectral loss on final level (full-signal reconstruction)
+    lambda_spec:  0.1
+    fs:           50.0
+
+    # No channel pooling — each (channel, patch) is its own token
+    # Result: 6 × 8 temporal positions × 4 RVQ levels = 192 token indices per 2.56s window
+    pool_channels: false
+    num_channels:  6
+
+    # Data
+    splits: [0.8, 0.1, 0.1]
+    apply_flu_transform: false      # OCDetect CSV already in FLU frame
+
+# Augmentations — declared at top level so apply_augment() finds them via cfg_get(cfg, [...])
+# apply_flu_transform: false means raw Android frame is kept; SO(3) rotation then covers
+# all orientations, making the tokenizer orientation-invariant.
+
+random_rotation:
+  enabled: true             # uniform SO(3) applied to acc (ch0-2) + gyro (ch3-5) together
+
+time_crop:
+  enabled: true
+  min_crop_ratio: 0.90
+
+gaussian_noise:
+  enabled: true
+  sigma: 0.01
+
+data:
+  batch_size: 256
+  eval_batch_size: 256
+  num_workers: 4
+  pin_memory: true
+
+logging:
+  ckpt_every_steps: 5000
+
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 300000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 500
+
+  optim:
+    name: adamw
+    lr: 0.0003
+    weight_decay: 0.01
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+
+  sched:
+    name: cosine
+    warmup_steps: 2000
+
+  early_stopping:
+    enabled: false
+    monitor: val_loss
+    patience: 20

@@ -22,12 +22,12 @@ objective:
   type: pose                              # encoder + pose decoder both trained from scratch
   pose:
     # No pretrained_run → random initialisation; fully supervised end-to-end
-    loader: imuposer_full_body_flu        # use imuposer_wrist_full_body_loader_FLU
+    loader: imuposer_full_body_23_flu      # use imuposer_wrist_full_body_loader_FLU (23 joints, no pelvis root)
     train_pkl_root: /mnt/nas2/yiquan_data/IMUPoser/ioposer_with_hip_30hz_2/train
     train_files: all
     val_pkl_root: /mnt/nas2/yiquan_data/IMUPoser/ioposer_with_hip_30hz_2/test   # no val split; use test for monitoring
     val_files: all
-    num_joints: 24                        # full SMPL body (24 × 6D = 144 dims)
+    num_joints: 23                        # SMPL joints 1–23 (no pelvis global rotation)
 
 trainer:
   seed: 42

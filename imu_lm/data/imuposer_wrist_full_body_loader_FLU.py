@@ -347,6 +347,92 @@ def collate_skip_none(batch):
 # DataLoader factory
 # ---------------------------------------------------------------------------
 
+class IMUPoserWristFullBody23FLUDataset(IMUPoserWristFullBodyFLUDataset):
+    """Like IMUPoserWristFullBodyFLUDataset but drops the root (pelvis) joint.
+
+    Labels are 23 joints × 6D = 138 dims per patch (SMPL joints 1–23).
+    """
+
+    _NUM_JOINTS_23 = 23
+
+    def __getitem__(self, idx: int):
+        from imu_lm.data.augmentations.preprocess import preprocess_window
+        from imu_lm.data.augmentations.transform  import apply_augment
+
+        si    = int(self._sess_idx[idx])
+        start = int(self._starts[idx])
+        T     = self._T
+        X, y  = self._sessions[si]          # [N, 6], [N, 24, 6]
+
+        Xw = X[start : start + T]
+
+        Xproc = preprocess_window(Xw, self.cfg, self.stats)
+        if Xproc is None:
+            return None
+
+        Xproc    = apply_augment(Xproc.T, self.cfg).T
+        x_tensor = torch.from_numpy(Xproc).float()
+
+        P = self._patch_size
+        patch_labels = np.empty(
+            (self._num_patches, self._NUM_JOINTS_23 * ROT6D_DIM), dtype=np.float32
+        )
+        for p in range(self._num_patches):
+            frame = start + p * P + P // 2
+            patch_labels[p] = y[frame, 1:].reshape(-1)   # drop joint 0 (pelvis root)
+
+        y_tensor = torch.from_numpy(patch_labels).float()
+        return x_tensor, y_tensor
+
+
+def make_imuposer_wrist_full_body_23_flu_loaders(
+    cfg:          dict,
+    train_files:  list[str],
+    val_files:    list[str] | None = None,
+    test_files:   list[str] | None = None,
+    target_hz:    int  = 50,
+    add_gravity:  bool = False,
+) -> dict[str, torch.utils.data.DataLoader]:
+    """Build train / val / test DataLoaders — 23 SMPL joints (no pelvis) in FLU frame.
+
+    Each batch yields::
+
+        x : [B, 6, T]            float32  – right-wrist IMU in FLU body frame
+        y : [B, N_patches, 138]  float32  – joints 1–23 6D rotations per patch
+    """
+    from imu_lm.utils.helpers import cfg_get
+
+    batch_size      = int(cfg_get(cfg, ["data", "batch_size"],       256))
+    eval_batch_size = int(cfg_get(cfg, ["data", "eval_batch_size"],  batch_size))
+    num_workers     = int(cfg_get(cfg, ["data", "num_workers"],        0))
+    pin_memory      = bool(cfg_get(cfg, ["data", "pin_memory"],     False))
+    persistent      = num_workers > 0
+
+    def _make(name: str, files: list[str], bs: int, shuffle: bool):
+        if not files:
+            return None
+        ds = IMUPoserWristFullBody23FLUDataset(
+            pkl_paths=files, cfg=cfg, split_name=name, target_hz=target_hz,
+            add_gravity=add_gravity,
+        )
+        return torch.utils.data.DataLoader(
+            ds,
+            batch_size=bs,
+            shuffle=shuffle,
+            num_workers=num_workers,
+            pin_memory=pin_memory,
+            drop_last=shuffle,
+            persistent_workers=persistent,
+            collate_fn=collate_skip_none,
+        )
+
+    return {
+        "train_loader": _make("train", train_files,       batch_size,      True),
+        "val_loader":   _make("val",   val_files  or [],  eval_batch_size, False),
+        "test_loader":  _make("test",  test_files or [],  eval_batch_size, False),
+    }
+
+
 def make_imuposer_wrist_full_body_flu_loaders(
     cfg:          dict,
     train_files:  list[str],

@@ -34,7 +34,7 @@ objective:
     apply_flu:      true
     split:          lopo
     # Pretrained encoder to freeze (required for probing):
-    pretrained_run:  vit1d_gesture_supervised_surfaceXR_lopoTimmy  # ← update
+    pretrained_run:  vit1d_mae_ocdetect_flu_v2
     pretrained_ckpt: best
 
 windowing:

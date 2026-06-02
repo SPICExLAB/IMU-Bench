@@ -67,9 +67,16 @@ def generate_patch_mask(
         num_mask = int(mask_ratio * valid_N)
         num_mask = max(1, min(num_mask, valid_N - 1))
 
-        # Pick strategy for this sample
-        if strategy == "composite":
+        # Pick strategy for this sample.
+        # Accepts: "random" | "temporal" | "signal" | "composite" (all three)
+        #          or a comma-separated list e.g. "random,temporal"
+        #          or a Python list passed directly.
+        if isinstance(strategy, (list, tuple)):
+            strat = pyrandom.choice(list(strategy))
+        elif strategy == "composite":
             strat = pyrandom.choice(["random", "temporal", "signal"])
+        elif "," in strategy:
+            strat = pyrandom.choice([s.strip() for s in strategy.split(",")])
         else:
             strat = strategy
         

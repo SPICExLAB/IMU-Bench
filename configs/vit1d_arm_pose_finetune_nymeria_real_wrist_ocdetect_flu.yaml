@@ -21,7 +21,7 @@ vit1d:
 objective:
   type: pose
   pose:
-    pretrained_run: vit1d_mae_ocdetect_flu
+    pretrained_run: vit1d_mae_ocdetect_flu_v2
     pretrained_ckpt: best
     loader: nymeria_real_wrist_flu
     train_pkl_root: /mnt/nas2/processed_data_body_Ty_rwrist

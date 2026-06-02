@@ -23,12 +23,12 @@ objective:
   pose_probe:
     pretrained_run: vit1d_mae_ocdetect_flu
     pretrained_ckpt: best
-    loader: imuposer_full_body_flu
+    loader: imuposer_full_body_23_flu
     train_pkl_root: /mnt/nas2/yiquan_data/IMUPoser/ioposer_with_hip_30hz_2/train
     train_files: all
     val_pkl_root: /mnt/nas2/yiquan_data/IMUPoser/ioposer_with_hip_30hz_2/test
     val_files: all
-    num_joints: 24
+    num_joints: 23
 
 trainer:
   seed: 42

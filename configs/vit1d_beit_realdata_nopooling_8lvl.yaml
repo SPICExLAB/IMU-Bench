@@ -1,0 +1,92 @@
+# BEiT v2 pretraining using the 8-level no-pooling RVQ tokenizer trained on realdata.
+#
+# Target tokenizer: vit1d_rvq_tokenizer_realdata_nopooling_8lvl
+#   - pool_channels=False → one code per (channel, temporal patch) position
+#   - 8 levels × 1024 codes × 6 channels × 8 patches = 384 discrete targets per window
+#   - Frequency-progressive: L1 ≤1 Hz … L8 = full signal
+#   - No anyrot augmentation (orientation-aware)
+#
+# BEiT encoder: ViT-Small (12 layers, 384 dim) with CLS token
+#   - All patch positions processed (visible + [MASK] tokens + CLS)
+#   - 8 linear heads: Linear(384, 1024), one per RVQ level
+#   - Cross-entropy loss on masked patches only (65% masking, composite strategy)
+# Data: master parquet (pamap2, recofit, samosa, shoaib, ut_watch, utd_mhad, wisdm)
+
+vit1d:
+  patch_size: 16
+  shared_kernel: "acc_gyro"
+  use_cls_token: true
+  encoder:
+    hidden_size: 384
+    num_hidden_layers: 12
+    num_attention_heads: 6
+    intermediate_size: 1536
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-6
+    drop_path_rate: 0.1
+
+objective:
+  type: beit_realdata_nopooling_8lvl
+  beit_realdata_nopooling_8lvl:
+    tokenizer_run: runs/vit1d_rvq_tokenizer_realdata_nopooling_8lvl
+    num_levels: 8
+    num_codes: 1024
+    mask_ratio: 0.65
+    mask_strategy: composite
+
+random_rotation:
+  enabled: false
+
+time_crop:
+  enabled: true
+  min_crop_ratio: 0.90
+
+gaussian_noise:
+  enabled: true
+  sigma: 0.01
+
+preprocess:
+  normalize:
+    enabled: false
+
+windowing:
+  window_seconds: 2.56
+
+data:
+  train_on_datasets: ["pamap2", "recofit", "samosa", "shoaib", "ut_watch", "utd_mhad", "wisdm"]
+  sensor_columns: [acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z]
+  batch_size: 256
+  eval_batch_size: 256
+  num_workers: 4
+  pin_memory: true
+
+splits:
+  val_ratio: 0.1
+
+logging:
+  ckpt_every_steps: 5000
+
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 300000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 500
+
+  optim:
+    name: adamw
+    lr: 0.0003
+    weight_decay: 0.05
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+
+  sched:
+    name: cosine
+    warmup_steps: 5000
+
+  early_stopping:
+    enabled: false
+    monitor: val_loss
+    patience: 20

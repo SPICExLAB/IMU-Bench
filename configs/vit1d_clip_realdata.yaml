@@ -1,0 +1,128 @@
+# CLIP-style contrastive pretraining: IMU ↔ "The person is <activity>" on real parquet data.
+#
+# Architecture mirrors vit1d_clip_humanml3d.yaml (ViT-384, 12-layer, 6-head,
+# sinusoidal positional embeddings, mean-pool → linear projection → unit sphere).
+#
+# The text side is a trainable CLIP text encoder (openai/clip-vit-base-patch32).
+# Text embeddings are computed on-the-fly each step so gradients flow through
+# both the IMU encoder and the text encoder jointly.
+#
+# Datasets used: pamap2, recofit, samosa, shoaib, ut_watch, utd_mhad, wisdm
+# (same set as the MAE pretraining baseline; ~154 hours of labeled wrist IMU).
+#
+# Checkpoint saved to: runs/vit1d_clip_realdata/checkpoints/best.pt
+
+vit1d:
+  patch_size: 16
+  shared_kernel: true
+  pos_embed_type: sinusoidal          # variable-length compatible
+  max_patches_per_channel: 64         # headroom for up to 1024-sample windows
+  max_channels: 32
+  pooling: "mean"                     # mean-pool tokens → [B, D_enc]
+
+  encoder:
+    hidden_size: 384
+    num_hidden_layers: 12
+    num_attention_heads: 6
+    intermediate_size: 1536
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-6
+
+objective:
+  type: imu_text_clip_realdata
+  imu_text_clip_realdata:
+    clip_model:        openai/clip-vit-base-patch32
+    clip_embed_dim:    512
+    local_files_only:  false
+
+    # Warm-start the IMU encoder from a prior MAE/CLIP run (set to null to train from scratch).
+    pretrained_run:  null
+    pretrained_ckpt: best
+
+    # Sentence construction: "The person is {dataset_activity_label}"
+    # The label is lower-cased and underscores replaced with spaces automatically.
+    sentence_template: "The person is {}"
+
+    # Set true to freeze the IMU encoder and train only the projection head (probe mode).
+    freeze_imu_encoder: false
+
+    # Keep the CLIP text encoder frozen — embeddings are pre-computed once at startup.
+    # Training the 63 M-param text model jointly destabilises both branches.
+    freeze_text_encoder: true
+
+    # Trainable 2-layer MLP on top of the frozen CLIP text embeddings.
+    # Gives the text branch domain-adaptation capacity without fine-tuning CLIP.
+    text_projection_mlp: true
+    text_mlp_hidden_dim: null    # null → same as clip_embed_dim (512)
+
+windowing:
+  window_seconds: 2.56        # 128 samples @ 50 Hz → 8 patches per channel
+  window_hop_ratio: 0.5
+  label_policy: center        # pick label of the centre sample per window
+  majority_threshold: 0.8
+  handle_gaps: true
+  gap_method: interpolate
+  max_gap_ms: 200
+  max_gaps_per_session: 100
+
+# Training-time augmentations (applied in realdata_clip_loader, train split only)
+gaussian_noise:
+  enabled: true
+  sigma: 0.02              # mild sensor jitter (~1% of typical acc range)
+
+gain_jitter:
+  enabled: true
+  min_scale: 0.9
+  max_scale: 1.1           # ±10% calibration variation
+
+axis_bias:
+  enabled: true
+  max_bias: 0.05           # small constant offset per channel (accelerometer bias)
+
+time_warp:
+  enabled: true
+  max_warp: 0.05           # ±5% time stretch — subtle tempo variation
+  smooth_sigma: 3
+
+data:
+  sensor_columns: ["acc_x", "acc_y", "acc_z", "gyro_x", "gyro_y", "gyro_z"]
+  # 6D datasets with named activity labels (acc + gyro, ~154 h total)
+  train_on_datasets: ["pamap2", "recofit", "samosa", "shoaib", "ut_watch", "utd_mhad", "wisdm"]
+  batch_size: 256
+  eval_batch_size: 256
+  num_workers: 8
+  pin_memory: true
+
+splits:
+  seed: 0
+  group_key: subject_id
+  shuffle: true
+  probe_dataset: prism       # excluded from pretraining splits
+  val_ratio: 0.05
+  test_ratio: 0              # no held-out test during pretraining
+
+trainer:
+  val_max_batches: 100       # cap validation at 100 batches (val loader is finite)
+  seed: 42
+  amp: true
+  max_steps: 5000000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 500
+
+  optim:
+    name: adamw
+    lr: 0.0002
+    weight_decay: 0.0001
+    betas: [0.9, 0.98]       # CLIP-style higher β₂
+    eps: 1.0e-8
+
+  sched:
+    name: cosine
+    warmup_steps: 2000       # longer warmup to handle higher LR
+
+  early_stopping:
+    enabled: False
+    monitor: val_loss
+    patience: 20

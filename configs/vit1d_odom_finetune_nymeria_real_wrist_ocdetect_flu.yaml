@@ -11,7 +11,7 @@ vit1d:
     layer_norm_eps: 1.0e-6
   odom_decoder:
     hidden_size: 192
-    num_hidden_layers: 2
+    num_hidden_layers: 1
     num_attention_heads: 4
     mlp_ratio: 4.0
     dropout: 0.0
@@ -21,7 +21,7 @@ vit1d:
 objective:
   type: odom_finetune_nymeria_real_wrist_flu   # warm-started encoder (trainable) + odom decoder
   odom_finetune_nymeria_real_wrist_flu:
-    pretrained_run: vit1d_mae_ocdetect_flu
+    pretrained_run: vit1d_mae_ocdetect_flu_v2
     pretrained_ckpt: best
     train_pkl_root: /mnt/nas2/processed_data_body_Ty_rwrist
     train_files: all
@@ -49,6 +49,6 @@ trainer:
     warmup_steps: 500
 
   early_stopping:
-    enabled: true
+    enabled: false
     monitor: val_loss
     patience: 20

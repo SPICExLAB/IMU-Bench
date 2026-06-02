@@ -58,7 +58,7 @@ python scripts/vis_imuposer_odom.py \
 
 ## Nymeria_full
 python scripts/vis_nymeria_odom.py \
-    --pkl          /mnt/nas2/processed_data_test_body_Ty_rwrist/20231222_s0_denise_carter_act2_d8mdi5_cpfbody_rwrist_imu50hz_wristimu50hz_pose50hz.pkl \
+    --pkl          /mnt/nas2/processed_data_test_body_Ty_rwrist/20231108_s0_nicholas_hicks_act0_g5hz4p_cpfbody_rwrist_imu50hz_wristimu50hz_pose50hz.pkl \
     --config       configs/base.yaml \
     --model-config configs/vit1d_odom_supervised_nymeria_real_wrist_flu.yaml \
     --run          vit1d_odom_supervised_nymeria_real_wrist_flu \
@@ -91,9 +91,38 @@ python scripts/vis_nymeria_full_body_pose.py \
     --run          vit1d_full_body_pose_supervised_nymeria_syn_wrist_global \
     --ckpt         best
 
+## Nymeria - 24-joint T-pose sub-patch model
+python scripts/vis_nymeria_full_body_pose_24j_tpose.py \
+    --pkl          /mnt/nas2/processed_data_test_body_Ty_rwrist/20231222_s0_denise_carter_act2_d8mdi5_cpfbody_rwrist_imu50hz_wristimu50hz_pose50hz.pkl \
+    --config       configs/base.yaml \
+    --model-config configs/vit1d_full_body_pose_supervised_nymeria_real_wrist_flu_24j_tpose.yaml \
+    --run          vit1d_full_body_pose_supervised_nymeria_real_wrist_flu_24j_tpose \
+    --ckpt         best \
+    --max-frames   5000
+
+## Nymeria - 23-joint T-pose sub-patch model
+python scripts/vis_nymeria_full_body_pose_23j.py \
+    --pkl          /mnt/nas2/processed_data_test_body_Ty_rwrist/20231222_s0_denise_carter_act6_26wfkz_cpfbody_rwrist_imu50hz_wristimu50hz_pose50hz.pkl \
+    --config       configs/base.yaml \
+    --model-config configs/vit1d_full_body_pose_supervised_nymeria_real_wrist_flu_23j.yaml \
+    --run          vit1d_full_body_pose_supervised_nymeria_real_wrist_flu_23j \
+    --ckpt         latest \
+    --max-frames   5000
+
+
+
+
+
 python scripts/vis_nymeria_full_body_pose.py \
     --pkl          /mnt/nas2/processed_data_test_body_Ty_rwrist/20231222_s0_denise_carter_act2_d8mdi5_cpfbody_rwrist_imu50hz_wristimu50hz_pose50hz.pkl \
     --config       configs/base.yaml \
     --model-config configs/vit1d_full_body_pose_probe_nymeria_real_wrist_ocdetect_flu.yaml \
     --run          vit1d_full_body_pose_probe_nymeria_real_wrist_ocdetect_flu \
     --ckpt         best
+
+
+python /home/yiquan/TransfHAR/scripts/plot_ocdetect_sequence.py \
+  /mnt/nas2/yiquan_data/preprocessed/OCDetect_01_recording_00_55ef074f-147f-424f-b9c6-58c0cf9dfee0.csv
+
+python /home/yiquan/TransfHAR/scripts/plot_ocdetect_sequence.py \
+  /mnt/nas2/yiquan_data/preprocessed/OCDetect_25_recording_12_5c20634e-03c2-4a30-8275-6a66d7268bb4.csv

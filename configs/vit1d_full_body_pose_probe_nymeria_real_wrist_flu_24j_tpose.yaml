@@ -1,0 +1,63 @@
+# Full-body pose probe: frozen OCDetect MAE encoder + trainable pose decoder.
+# 24 joints (including root), sub_patches=4 (4×0.08 s predictions per 0.32 s patch),
+# T-pose reset at each window start.
+
+vit1d:
+  patch_size: 16
+  shared_kernel: true
+  encoder:
+    hidden_size: 384
+    num_hidden_layers: 12
+    num_attention_heads: 6
+    intermediate_size: 1536
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-6
+  pose_decoder:
+    hidden_size: 192
+    num_hidden_layers: 4
+    num_attention_heads: 4
+    mlp_ratio: 4.0
+    dropout: 0.0
+    sub_patches: 4                        # 4 predictions per 0.32 s patch → 0.08 s each
+  max_patches_per_channel: 256
+  pooling: "mean"
+
+objective:
+  type: pose_probe                        # frozen encoder + trainable pose decoder
+  pose_probe:
+    pretrained_run: vit1d_mae_ocdetect_flu_v2 # vit1d_mae_nymeria_real_wrist_flu #vit1d_mae_ocdetect_flu
+    pretrained_ckpt: best
+    loader: nymeria_real_wrist_full_body_flu
+    train_pkl_root: /mnt/nas2/processed_data_body_Ty_rwrist
+    train_files: all
+    val_pkl_root: /mnt/nas2/processed_data_test_body_Ty_rwrist
+    val_files: all
+    num_joints: 24                        # include root (global pelvis orientation)
+    add_gravity: true
+    reset_root_orientation: true          # T-pose reset at each window start
+    jerk_weight: 0.001
+
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 10000000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 1000
+
+  optim:
+    name: adamw
+    lr: 0.0003
+    weight_decay: 0.01
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+
+  sched:
+    name: cosine
+    warmup_steps: 500
+
+  early_stopping:
+    enabled: true
+    monitor: val_loss
+    patience: 20

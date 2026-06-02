@@ -47,7 +47,13 @@ Coordinate frame
   Raw CSV columns are in the Android sensor frame. This loader applies the
   Android → FLU transform before windowing:
 
-      F = +X_android,  L = -Y_android,  U = +Z_android
+      F = +Y_android,  L = -X_android,  U = +Z_android
+
+  The top edge of the phone points toward the fingertips (F direction);
+  the screen faces away from the wrist (U direction = +Z_android).
+  When the arm hangs relaxed, F aligns with gravity so acc_F ≈ -9.8 m/s².
+  U points away from the watch face (dorsal / out-of-screen direction), NOT
+  world-up.
 
   Channel order emitted: [acc_F, acc_L, acc_U, gyro_F, gyro_L, gyro_U]
 
@@ -134,6 +140,44 @@ def _list_files(data_dir: str) -> List[str]:
     return csv_files
 
 
+def select_ocd_files(
+    data_dir: str,
+    max_files: Optional[int] = None,
+    seed: int = 42,
+) -> List[str]:
+    """Deterministically select up to *max_files* OCDetect files.
+
+    OCDetect is ~5,790 h across 678 files; loading everything to RAM just to
+    sub-sample a few hundred hours is wasteful. This pre-caps the file set
+    BEFORE windowing.
+
+    Selection is deterministic: the full sorted list is shuffled with a fixed
+    ``seed`` (so the kept files are spread across subjects, not biased toward
+    OCDetect_01), the first ``max_files`` are kept, then re-sorted so the
+    downstream ``_collect_windows`` order is stable. Any pipeline calling this
+    with the same ``(data_dir, max_files, seed)`` gets the identical file set —
+    guaranteeing different models train on the same OCDetect subset.
+
+    Parameters
+    ----------
+    data_dir  : directory of ``OCDetect_*`` files
+    max_files : keep at most this many files (None = all)
+    seed      : RNG seed for the representative shuffle
+
+    Returns
+    -------
+    sorted list of selected file paths
+    """
+    files = _list_files(data_dir)
+    if max_files is not None and 0 < int(max_files) < len(files):
+        perm = np.random.default_rng(seed).permutation(len(files))
+        kept = [files[i] for i in perm[: int(max_files)]]
+        files = sorted(kept)
+        _log.info("[OCDetect] pre-capped to %d/%d files (seed=%d)",
+                  len(files), len(_list_files(data_dir)), seed)
+    return files
+
+
 def _subject_id_from_path(path: str) -> int:
     """Parse the integer subject ID from an OCDetect filename.
 
@@ -148,16 +192,22 @@ def _subject_id_from_path(path: str) -> int:
 
 def _load_recording(
     path: str,
+    apply_flu_transform: bool = True,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Load one CSV and return ``(imu, compulsive, ignore)``.
 
-    The raw Android-frame IMU channels are converted to FLU on load:
-        F = +X_android,  L = -Y_android,  U = +Z_android
+    The raw Android-frame IMU channels are converted to FLU on load when
+    ``apply_flu_transform=True`` (default):
+        F = +Y_android,  L = -X_android,  U = +Z_android
     Channel order: [acc_F, acc_L, acc_U, gyro_F, gyro_L, gyro_U]
+
+    Set ``apply_flu_transform=False`` to keep the raw Android frame (useful
+    when a random-rotation augmentation will be applied at __getitem__ time,
+    making the absolute orientation irrelevant).
 
     Returns
     -------
-    imu        : [N, 6]  float32 — acc_F/L/U, gyro_F/L/U  (FLU frame)
+    imu        : [N, 6]  float32 — acc_F/L/U, gyro_F/L/U  (or raw Android)
     compulsive : [N]     float32 — 0.0 (background/NaN→0) or 1.0 (episode)
     ignore     : [N]     int32   — quality mask (0=usable, else exclude)
     """
@@ -170,21 +220,29 @@ def _load_recording(
             low_memory=False,
         )
     imu        = df[IMU_COLS].values.astype(np.float32)
-    # Android → FLU: negate Y channels (acc_y → acc_L, gyro_y → gyro_L)
-    imu[:, 1] *= -1  # acc_y  →  acc_L
-    imu[:, 4] *= -1  # gyro_y →  gyro_L
+    if apply_flu_transform:
+        # Android → FLU: F = +Y_android, L = -X_android, U = +Z_android
+        # Top edge of phone points toward fingertips (F); screen faces away from wrist (U=+Z).
+        acc_x, acc_y   = imu[:, 0].copy(), imu[:, 1].copy()
+        gyro_x, gyro_y = imu[:, 3].copy(), imu[:, 4].copy()
+        imu[:, 0] =  -acc_x   
+        imu[:, 1] = acc_y  
+        # imu[:, 2] unchanged  # acc_U  = +acc_z
+        imu[:, 3] =  gyro_x   
+        imu[:, 4] = gyro_y  
+        # imu[:, 5] unchanged  # gyro_U = +gyro_z
     compulsive = df["compulsive"].fillna(0.0).values.astype(np.float32)
     ignore     = df["ignore"].values.astype(np.int32)
     return imu, compulsive, ignore
 
 
 def _process_one_file(
-    args: Tuple[str, int, int],
+    args: Tuple[str, int, int, bool],
 ) -> Tuple[np.ndarray, np.ndarray, Optional[str], Optional[str]]:
     """Multiprocessing worker: load and window one OCDetect CSV file."""
-    path, window_samples, hop_samples = args
+    path, window_samples, hop_samples, apply_flu_transform = args
     try:
-        imu, compulsive, ignore = _load_recording(path)
+        imu, compulsive, ignore = _load_recording(path, apply_flu_transform)
     except Exception as exc:
         return (
             np.empty((0, 6, window_samples), dtype=np.float32),
@@ -232,6 +290,8 @@ def _collect_windows(
     files: List[str],
     window_samples: int = WINDOW_SAMPLES,
     hop_samples: int = HOP_SAMPLES,
+    apply_flu_transform: bool = True,
+    max_files: Optional[int] = None,
 ) -> Tuple[np.ndarray, np.ndarray]:
     """Slide windows over *files*, respecting the ``ignore`` quality mask.
 
@@ -250,17 +310,24 @@ def _collect_windows(
     X : [M, 6, window_samples]  float32
     y : [M]                     int64    (0 = background, 1 = compulsive)
     """
+    if max_files is not None:
+        files = files[:max_files]
+
     X_chunks: List[np.ndarray] = []
     y_chunks: List[np.ndarray] = []
 
-    args_list = [(f, window_samples, hop_samples) for f in files]
+    args_list = [(f, window_samples, hop_samples, apply_flu_transform) for f in files]
     n_workers = min(_mp.cpu_count(), 8, len(files))
 
     # fork is fastest on Linux and avoids the spawn startup cost.
+    # NOTE: use ordered ``imap`` (not ``imap_unordered``) so the concatenated
+    # window array is deterministic in file order. This guarantees that any
+    # downstream seeded subset (e.g. the 500 h cap via rng(42).choice) and
+    # positional train/val split are identical across runs and across models.
     ctx = _mp.get_context("fork")
     with ctx.Pool(processes=n_workers) as pool:
         for X_c, y_c, err, fname in tqdm(
-            pool.imap_unordered(_process_one_file, args_list),
+            pool.imap(_process_one_file, args_list),
             total=len(files),
             desc="[OCDetect] loading",
             unit="file",
@@ -303,25 +370,45 @@ class OCDetectDataset(Dataset):
           nymeria_real_wrist_loader_FLU.py.
     """
 
-    def __init__(self, X: np.ndarray, y: np.ndarray, cfg: dict | None = None) -> None:
+    def __init__(
+        self,
+        X: np.ndarray,
+        y: np.ndarray,
+        cfg: dict | None = None,
+        multi_view: bool = False,
+    ) -> None:
         # Keep as numpy so preprocess_window (numpy) can operate without a copy.
-        self._X   = X.astype(np.float32)   # [M, 6, 128]
-        self._y   = torch.from_numpy(y).long()
-        self._cfg = cfg or {}
-        self.stats = PreprocessStats()
+        self._X          = X.astype(np.float32)   # [M, 6, 128]
+        self._y          = torch.from_numpy(y).long()
+        self._cfg        = cfg or {}
+        self._multi_view = multi_view
+        self.stats       = PreprocessStats()
 
     def __len__(self) -> int:
         return len(self._X)
 
-    def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
-        # Stored as [C, T]; preprocess_window expects [T, C].
-        Xw = self._X[idx].T  # [128, 6]
-
-        Xproc = preprocess_window(Xw, self._cfg, self.stats)  # [C, T] or None
+    def _preprocess(self, idx: int) -> np.ndarray:
+        """Preprocess window idx → [C, T] float32 (no augmentation yet)."""
+        Xw    = self._X[idx].T                        # [128, 6]
+        Xproc = preprocess_window(Xw, self._cfg, self.stats)
         if Xproc is None:
-            # Fallback: plain zscore so the batch is never empty.
             Xproc = (Xw - Xw.mean(axis=0, keepdims=True)) / (Xw.std(axis=0, keepdims=True) + 1e-6)
-            Xproc = Xproc.T.astype(np.float32)  # [C, T]
+            Xproc = Xproc.T.astype(np.float32)        # [C, T]
+        return Xproc                                  # [C, T]
+
+    def __getitem__(self, idx: int):
+        Xproc = self._preprocess(idx)                 # [C, T]
+
+        if self._multi_view:
+            # Two independently-augmented views of the same window.
+            # Used by DINO: student and teacher each get a different random rotation/noise.
+            x1 = apply_augment(Xproc.T, self._cfg).T  # [C, T]
+            x2 = apply_augment(Xproc.T, self._cfg).T  # [C, T]
+            return (
+                torch.from_numpy(x1).float(),
+                torch.from_numpy(x2).float(),
+                self._y[idx],
+            )
 
         Xproc = apply_augment(Xproc.T, self._cfg).T  # augment in [T,C] space, back to [C,T]
         return torch.from_numpy(Xproc).float(), self._y[idx]
@@ -339,8 +426,9 @@ def _make_loader(
     num_workers: int,
     pin_memory: bool,
     cfg: dict | None = None,
+    multi_view: bool = False,
 ) -> DataLoader:
-    ds = OCDetectDataset(X, y, cfg=cfg)
+    ds = OCDetectDataset(X, y, cfg=cfg, multi_view=multi_view)
     return DataLoader(
         ds,
         batch_size=batch_size,
@@ -431,6 +519,10 @@ def make_ocdetect_loaders_random(
     seed: int = 42,
     window_samples: int = WINDOW_SAMPLES,
     hop_samples: int = HOP_SAMPLES,
+    apply_flu_transform: bool = True,
+    multi_view: bool = False,
+    train_fraction: float = 1.0,
+    max_files: Optional[int] = None,
     cfg: dict | None = None,
 ) -> Dict[str, DataLoader]:
     """Random window-level split pooling all subjects.
@@ -459,7 +551,9 @@ def make_ocdetect_loaders_random(
     eval_batch_size = eval_batch_size or batch_size
     all_files = _list_files(data_dir)
 
-    X, y = _collect_windows(all_files, window_samples, hop_samples)
+    X, y = _collect_windows(all_files, window_samples, hop_samples,
+                            apply_flu_transform=apply_flu_transform,
+                            max_files=max_files)
 
     rng  = np.random.default_rng(seed)
     perm = rng.permutation(len(X))
@@ -473,6 +567,10 @@ def make_ocdetect_loaders_random(
     X_val,   y_val   = X[n_train:n_train + n_val], y[n_train:n_train + n_val]
     X_test,  y_test  = X[n_train + n_val:],         y[n_train + n_val:]
 
+    if train_fraction < 1.0:
+        n_keep = max(1, int(len(X_train) * train_fraction))
+        X_train, y_train = X_train[:n_keep], y_train[:n_keep]
+
     _log.info(
         "[OCDetect] random split — train: %d (pos=%d) | val: %d (pos=%d) | test: %d (pos=%d)",
         len(X_train), int((y_train == 1).sum()),
@@ -481,7 +579,7 @@ def make_ocdetect_loaders_random(
     )
 
     return {
-        "train_loader": _make_loader(X_train, y_train, batch_size,      True,  num_workers, pin_memory, cfg=cfg),
-        "val_loader":   _make_loader(X_val,   y_val,   eval_batch_size, False, num_workers, pin_memory, cfg=cfg),
-        "test_loader":  _make_loader(X_test,  y_test,  eval_batch_size, False, num_workers, pin_memory, cfg=cfg),
+        "train_loader": _make_loader(X_train, y_train, batch_size,      True,  num_workers, pin_memory, cfg=cfg, multi_view=multi_view),
+        "val_loader":   _make_loader(X_val,   y_val,   eval_batch_size, False, num_workers, pin_memory, cfg=cfg, multi_view=False),
+        "test_loader":  _make_loader(X_test,  y_test,  eval_batch_size, False, num_workers, pin_memory, cfg=cfg, multi_view=False),
     }

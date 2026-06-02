@@ -13,7 +13,9 @@ from typing import Any, Dict, Optional, List
 import torch
 import torch.nn as nn
 from torch.optim import Adam, AdamW
-from torch.optim.lr_scheduler import LambdaLR, ReduceLROnPlateau
+from torch.optim.lr_scheduler import (
+    LambdaLR, ReduceLROnPlateau, CosineAnnealingWarmRestarts,
+)
 
 from imu_lm.utils.helpers import cfg_get
 
@@ -76,37 +78,100 @@ def build_optimizer(model: nn.Module, cfg: Any):
 
 def build_scheduler(optimizer, cfg: Any):
     """Build learning rate scheduler.
-    
-    Supports cosine with warmup and reduce_on_plateau.
+
+    Supported schedulers (trainer.sched.name):
+
+    cosine            — cosine decay from lr → 0 over max_steps (default)
+    step_decay        — multiply lr by `factor` every `step_size` steps
+                        config keys: step_size (int), factor (float, default 0.5)
+    cosine_restarts   — cosine annealing with periodic warm restarts
+                        config keys: T_0 (int, first cycle length),
+                                     T_mult (int, cycle length multiplier, default 2),
+                                     eta_min_ratio (float, min_lr / base_lr, default 0.01)
+    reduce_on_plateau — reduce lr when val_loss stops improving
+                        config keys: patience (int), factor (float)
+
+    All step-based schedulers support an optional warmup_steps linear ramp.
     """
     tcfg = cfg_get(cfg, ["trainer"], {}) or {}
     scfg = tcfg.get("sched", {})
-    
-    # Handle both nested (sched.name) and flat (sched as string) config
+
     if isinstance(scfg, dict):
-        sched_name = scfg.get("name", "cosine").lower()
+        sched_name   = scfg.get("name", "cosine").lower()
         warmup_steps = int(scfg.get("warmup_steps", 0))
     else:
-        sched_name = str(scfg).lower() if scfg else "cosine"
+        sched_name   = str(scfg).lower() if scfg else "cosine"
         warmup_steps = int(tcfg.get("warmup_steps", 0))
-    
+
     max_steps = int(tcfg.get("max_steps", 100000))
-    
+
+    # ── reduce_on_plateau ─────────────────────────────────────────────────
     if sched_name == "reduce_on_plateau":
-        scfg = tcfg.get("sched", {}) if isinstance(tcfg.get("sched"), dict) else {}
+        scfg     = tcfg.get("sched", {}) if isinstance(tcfg.get("sched"), dict) else {}
         patience = int(scfg.get("patience", 5))
-        factor = float(scfg.get("factor", 0.5))
+        factor   = float(scfg.get("factor", 0.5))
         return ReduceLROnPlateau(optimizer, mode="min", patience=patience, factor=factor)
-    
+
+    # ── step_decay ────────────────────────────────────────────────────────
+    if sched_name == "step_decay":
+        step_size = int(scfg.get("step_size", max(1, max_steps // 4)))
+        factor    = float(scfg.get("factor", 0.5))
+        min_ratio = float(scfg.get("min_lr_ratio", 0.0))  # floor as fraction of base lr
+
+        def lr_lambda_step(step):
+            if warmup_steps > 0 and step < warmup_steps:
+                return step / float(max(1, warmup_steps))
+            steps_past = max(0, step - warmup_steps)
+            n_decays   = steps_past // step_size
+            ratio      = factor ** n_decays
+            return max(ratio, min_ratio)
+
+        return LambdaLR(optimizer, lr_lambda_step)
+
+    # ── cosine_restarts ───────────────────────────────────────────────────
+    if sched_name == "cosine_restarts":
+        T_0            = int(scfg.get("T_0", max(1, max_steps // 4)))
+        T_mult         = int(scfg.get("T_mult", 2))
+        eta_min_ratio  = float(scfg.get("eta_min_ratio", 0.01))
+        base_lrs       = [pg["lr"] for pg in optimizer.param_groups]
+        eta_mins       = [lr * eta_min_ratio for lr in base_lrs]
+
+        # Wrap with warmup via LambdaLR during warmup, then hand off to restarts
+        if warmup_steps > 0:
+            cosine_sched = CosineAnnealingWarmRestarts(
+                optimizer, T_0=T_0, T_mult=T_mult,
+                eta_min=eta_mins[0] if eta_mins else 0.0,
+            )
+
+            def lr_lambda_warmup(step):
+                if step < warmup_steps:
+                    return step / float(max(1, warmup_steps))
+                return 1.0  # hand off to cosine_sched after warmup
+
+            warmup_sched = LambdaLR(optimizer, lr_lambda_warmup)
+
+            from torch.optim.lr_scheduler import SequentialLR
+            return SequentialLR(
+                optimizer,
+                schedulers=[warmup_sched, cosine_sched],
+                milestones=[warmup_steps],
+            )
+
+        return CosineAnnealingWarmRestarts(
+            optimizer, T_0=T_0, T_mult=T_mult,
+            eta_min=eta_mins[0] if eta_mins else 0.0,
+        )
+
+    # ── cosine (default) ──────────────────────────────────────────────────
     if sched_name != "cosine":
         return None
-    
+
     def lr_lambda(step):
         if warmup_steps > 0 and step < warmup_steps:
             return step / float(max(1, warmup_steps))
         progress = (step - warmup_steps) / float(max(1, max_steps - warmup_steps))
         return 0.5 * (1.0 + math.cos(math.pi * min(1.0, progress)))
-    
+
     return LambdaLR(optimizer, lr_lambda)
 
 
@@ -146,12 +211,15 @@ def build_label_map(
 
     raw_to_idx = {int(r): i for i, r in enumerate(kept)}
     idx_to_raw = {i: int(r) for i, r in enumerate(kept)}
+    # class_counts[i] = number of training samples for contiguous class index i
+    class_counts = [counts.get(int(r), 0) for r in kept]
     logger.info("build_label_map: classes=%d", len(raw_to_idx))
     return {
-        "raw_to_idx": raw_to_idx,
-        "idx_to_raw": idx_to_raw,
-        "num_classes": len(raw_to_idx),
-        "unknown_id": unknown_id,
+        "raw_to_idx":    raw_to_idx,
+        "idx_to_raw":    idx_to_raw,
+        "num_classes":   len(raw_to_idx),
+        "unknown_id":    unknown_id,
+        "class_counts":  class_counts,   # list[int], index-aligned with raw_to_idx
     }
 
 

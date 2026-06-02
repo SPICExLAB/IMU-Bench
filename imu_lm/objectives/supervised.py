@@ -29,6 +29,7 @@ def forward_loss(
     head: nn.Module,
     cfg: Any,
     raw_to_idx: Optional[Dict[int, int]] = None,
+    class_weights: Optional[torch.Tensor] = None,
 ) -> Tuple[torch.Tensor, Dict[str, float]]:
     """Compute supervised classification loss with comprehensive metrics.
     
@@ -63,8 +64,9 @@ def forward_loss(
     # Classify
     logits = head(z)  # [B, num_classes]
     
-    # Cross-entropy loss
-    loss = F.cross_entropy(logits, y)
+    # Cross-entropy loss (with optional class weights for imbalanced datasets)
+    w = class_weights.to(x.device) if class_weights is not None else None
+    loss = F.cross_entropy(logits, y, weight=w)
     
     # Predictions
     preds = logits.argmax(dim=1)

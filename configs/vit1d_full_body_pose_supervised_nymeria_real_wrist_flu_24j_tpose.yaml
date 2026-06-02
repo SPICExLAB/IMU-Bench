@@ -1,0 +1,66 @@
+# Full-body pose supervised training: 24 joints (including root/global pelvis),
+# 2.56 s windows @ 50 Hz (128 samples), patch_size=16 → 8 patches → 32 predictions.
+#
+# Key differences from vit1d_full_body_pose_supervised_nymeria_real_wrist_flu.yaml:
+#   - patch_size: 16  (0.32 s per patch, 8 patches per window)
+#   - sub_patches: 4  (4 predictions per patch at 0.08 s intervals → 32 total)
+#   - num_joints: 24  (root/global pelvis included, 24 × 6D = 144 dims per sub-patch)
+#   - reset_root_orientation: true  (T-pose reset: first sub-patch root = identity)
+
+vit1d:
+  patch_size: 16
+  shared_kernel: true
+  encoder:
+    hidden_size: 384
+    num_hidden_layers: 12
+    num_attention_heads: 6
+    intermediate_size: 1536
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-6
+  pose_decoder:
+    hidden_size: 192
+    num_hidden_layers: 4
+    num_attention_heads: 4
+    mlp_ratio: 4.0
+    dropout: 0.0
+    sub_patches: 4                        # 4 predictions per 0.32 s patch → 0.08 s each
+  max_patches_per_channel: 256
+  pooling: "mean"
+
+objective:
+  type: pose
+  pose:
+    loader: nymeria_real_wrist_full_body_flu
+    train_pkl_root: /mnt/nas2/processed_data_body_Ty_rwrist
+    train_files: all
+    val_pkl_root: /mnt/nas2/processed_data_test_body_Ty_rwrist
+    val_files: all
+    num_joints: 24                        # include root (global pelvis orientation)
+    add_gravity: true
+    reset_root_orientation: true          # normalise first-patch root to identity
+    jerk_weight: 0.001
+
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 10000000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 1000
+
+  optim:
+    name: adamw
+    lr: 0.0003
+    weight_decay: 0.01
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+
+  sched:
+    name: cosine
+    warmup_steps: 500
+
+  early_stopping:
+    enabled: true
+    monitor: val_loss
+    patience: 20

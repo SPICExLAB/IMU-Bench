@@ -21,14 +21,6 @@ python scripts/run_pose_eval_dataset.py \
 	--ckpt         best \
 	--out-dir      data_vis/pose_supervised_imuposer_flu_eval_dataset
 
-python scripts/vis_imuposer_arm_pose.py \
-	--pkl          /mnt/nas2/yiquan_data/IMUPoser/ioposer_with_hip_30hz_2/test/imuposer_seq_00009.pkl \
-	--config       configs/base.yaml \
-	--model-config configs/vit1d_pose_supervised_imuposer_flu.yaml \
-	--run          vit1d_pose_supervised_imuposer_flu \
-	--ckpt         best \
-	--play-fps     10
-
 # Arm pose - probe (OCDetect MAE encoder)
 CUDA_VISIBLE_DEVICES=1 python scripts/run_pretrain.py \
 	--config       configs/base.yaml \
@@ -61,13 +53,13 @@ python scripts/run_pose_eval_dataset.py \
 	--config       configs/base.yaml \
 	--model-config configs/vit1d_pose_finetune_imuposer_ocdetect_flu.yaml \
 	--run          vit1d_pose_finetune_imuposer_ocdetect_flu \
-	--test-dir     "$IMUPOSER_TEST" \
+	--test-dir     /mnt/nas2/yiquan_data/IMUPoser/ioposer_with_hip_30hz_2/test \
 	--ckpt         best \
 	--out-dir      data_vis/pose_finetune_imuposer_ocdetect_flu_eval_dataset
 
 
 python scripts/vis_imuposer_arm_pose.py \
-	--pkl          /mnt/nas2/yiquan_data/IMUPoser/ioposer_with_hip_30hz_2/test/imuposer_seq_00009.pkl \
+	--pkl          /mnt/nas2/yiquan_data/IMUPoser/ioposer_with_hip_30hz_2/test/imuposer_seq_00001.pkl \
 	--config       configs/base.yaml \
 	--model-config configs/vit1d_pose_finetune_imuposer_ocdetect_flu.yaml \
 	--run          vit1d_pose_finetune_imuposer_ocdetect_flu \
@@ -220,6 +212,7 @@ python scripts/run_pose_eval_dataset.py \
 	--test-dir     "$IMUPOSER_TEST" \
 	--ckpt         best \
 	--out-dir      data_vis/full_body_pose_finetune_imuposer_ocdetect_flu_eval_dataset
+	
 ############################# IMUPoser FLU: local-velocity odom — fully supervised from scratch ####
 # Encoder + odom decoder trained end-to-end from random init.
 # Input : real right-wrist MEMS IMU in FLU body frame [B, 6, T]

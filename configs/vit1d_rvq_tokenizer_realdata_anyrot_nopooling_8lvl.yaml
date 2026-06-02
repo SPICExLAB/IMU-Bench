@@ -1,0 +1,91 @@
+# RVQ tokenizer: no channel pooling, 8 levels, anyrot + z-norm, trained on master parquet.
+# Fixes dataset bias of vit1d_rvq_tokenizer_realdata_nopooling_8lvl (NMI≈0.51) by adding:
+#   - random_rotation: removes orientation/gravity DC offset differences across datasets
+#   - normalize: z-norm per window removes sensor scale/offset differences
+# 6 channels x 8 patches x 8 levels = 384 token indices per 2.56s window.
+
+vit1d:
+  patch_size: 16
+  shared_kernel: "acc_gyro"
+  use_cls_token: false
+  encoder:
+    hidden_size: 256
+    num_hidden_layers: 6
+    num_attention_heads: 4
+    intermediate_size: 1024
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-6
+    drop_path_rate: 0.05
+
+objective:
+  type: rvq_tokenizer_realdata_anyrot_nopooling_8lvl
+  rvq_tokenizer_realdata_anyrot_nopooling_8lvl:
+    num_levels:         8
+    num_codes:          1024
+    code_dim:           256
+    ema_decay:          0.95
+    commitment_weight:  0.05
+    decoder_hidden_dim: 512
+    cutoff_hz:    [1.0, 2.0, 4.0, 6.0, 10.0, 15.0, 20.0, 999.0]
+    lambda_levels: [1.0, 1.0, 1.5, 1.5, 2.0, 2.0, 3.0, 3.0]
+    lambda_spec:  0.1
+    fs:           50.0
+    pool_channels: false
+    num_channels:  6
+
+random_rotation:
+  enabled: true
+
+time_crop:
+  enabled: true
+  min_crop_ratio: 0.90
+
+gaussian_noise:
+  enabled: true
+  sigma: 0.01
+
+preprocess:
+  normalize:
+    enabled: true
+
+windowing:
+  window_seconds: 2.56
+
+data:
+  train_on_datasets: ["pamap2", "recofit", "samosa", "shoaib", "ut_watch", "utd_mhad", "wisdm"]
+  sensor_columns: [acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z]
+  batch_size: 256
+  eval_batch_size: 256
+  num_workers: 4
+  pin_memory: true
+
+splits:
+  val_ratio: 0.1
+
+logging:
+  ckpt_every_steps: 5000
+
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 300000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 500
+
+  optim:
+    name: adamw
+    lr: 0.0003
+    weight_decay: 0.01
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+
+  sched:
+    name: cosine
+    warmup_steps: 2000
+
+  early_stopping:
+    enabled: false
+    monitor: val_loss
+    patience: 20

@@ -1,0 +1,125 @@
+# DINOv2-style SSL on OCDetect wrist-IMU (any orientation) — v5: stronger augmentations.
+#
+# Changes vs v4:
+#   time_crop    : min_crop_ratio 0.90 → 0.50  (views cover different halves of window)
+#   gaussian_noise: sigma 0.01 → 0.05           (5× stronger)
+#   jitter       : sigma 0.003 → 0.02           (7× stronger)
+#   bias_drift   : max_drift 0.05 → 0.15        (3× stronger)
+#   sensor_dropout: p 0.1 → 0.3                 (3× more likely to drop a channel)
+#   frequency_mask: fraction 0.20→0.50, masks 1→2  (much harder spectral masking)
+#
+# Motivation: weaker augmentations meant two views were nearly identical
+# (90%+ shared timesteps, tiny noise) so the model could match them without
+# learning abstract representations → proto_eff_k stayed low (~60/512).
+# Stronger augmentations force the model to recognise the same activity
+# across genuinely different views → drives proto_eff_k toward 200+.
+
+vit1d:
+  patch_size: 16
+  shared_kernel: "acc_gyro"
+  use_cls_token: true
+  encoder:
+    hidden_size: 384
+    num_hidden_layers: 12
+    num_attention_heads: 6
+    intermediate_size: 1536
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-6
+    drop_path_rate: 0.1
+  dino_head:
+    out_dim: 512
+    hidden_dim: 2048
+    bottleneck_dim: 256
+  max_patches_per_channel: 8
+  pooling: "cls"
+
+objective:
+  type: dino_ocdetect_anyrot
+  mask_ratio: 0.50             # increased from 0.40 — harder iBOT task with stronger augmentation
+  mask_strategy: "random,temporal"
+  dino_ocdetect_anyrot:
+    data_dir: /mnt/nas2/yiquan_data/preprocessed
+    splits: [0.8, 0.1, 0.1]
+    apply_flu_transform: false
+    ema_momentum_start: 0.994
+    ema_momentum: 0.9996
+    freeze_last_layer_steps: 1000
+    loss:
+      teacher_temp: 0.07
+      warmup_teacher_temp: 0.04
+      warmup_teacher_temp_steps: 10000
+      student_temp: 0.10
+      center_momentum: 0.99
+      lambda_patch: 1.0
+      lambda_koleo: 0.1
+
+preprocess:
+  impute:
+    enabled: true
+  filter:
+    enabled: true
+  normalize:
+    enabled: false
+
+random_rotation:
+  enabled: true                # uniform SO(3) — unchanged, already the strongest
+
+gaussian_noise:
+  enabled: true
+  sigma: 0.05                  # was 0.01 — 5× stronger
+
+jitter:
+  enabled: true
+  sigma: 0.02                  # was 0.003 — 7× stronger
+
+bias_drift:
+  enabled: true
+  max_drift: 0.15              # was 0.05 — 3× stronger gyro/acc bias simulation
+
+sensor_dropout:
+  enabled: true
+  p: 0.3                       # was 0.1 — 30% chance to zero each channel independently
+
+time_crop:
+  enabled: true
+  min_crop_ratio: 0.50         # was 0.90 — views now cover different halves of the window
+
+frequency_mask:
+  enabled: true
+  max_mask_fraction: 0.50      # was 0.20 — mask up to half the frequency content
+  n_masks: 2                   # was 1 — two independent frequency bands masked
+
+data:
+  batch_size: 256
+  eval_batch_size: 256
+  num_workers: 4
+  pin_memory: true
+
+logging:
+  ckpt_every_steps: 10000
+
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 10000000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 1000
+
+  optim:
+    name: adamw
+    lr: 0.0001
+    weight_decay: 0.04
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+
+  sched:
+    name: cosine
+    warmup_steps: 1000
+
+  early_stopping:
+    enabled: false
+    monitor: val_loss
+    patience: 10
+    min_delta: 0.0001

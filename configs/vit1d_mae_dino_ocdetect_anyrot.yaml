@@ -1,0 +1,123 @@
+# MAE + DINOv1 CLS combined SSL on OCDetect wrist-IMU (any orientation).
+#
+# Architecture:
+#   Encoder : ViT1D-Base (384-dim, 12 layers) with CLS token + acc/gyro shared kernels
+#   Decoder : PatchReconHead — linear LayerNorm(D)→Linear(D→patch_size) per masked patch
+#   DINO head: MLP → bottleneck → weight-norm projection onto K prototypes (CLS only)
+#
+# Two losses:
+#   MAE  loss : student patch tokens at masked positions → reconstruct raw signal → MSE
+#   DINO CLS  : student CLS vs teacher CLS (EMA) → cross-entropy self-distillation
+#
+# Augmentations: identical to vit1d_dino_ocdetect_anyrot (v4) — NOT the stronger v5.
+
+vit1d:
+  patch_size: 16
+  shared_kernel: "acc_gyro"
+  use_cls_token: true           # required for DINO CLS token
+  encoder:
+    hidden_size: 384
+    num_hidden_layers: 12
+    num_attention_heads: 6
+    intermediate_size: 1536
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-6
+    drop_path_rate: 0.1
+  dino_head:
+    out_dim: 4096               # prototype vocabulary size K
+    hidden_dim: 2048
+    bottleneck_dim: 256
+  max_patches_per_channel: 8
+  pooling: "cls"
+
+objective:
+  type: mae_dino_ocdetect_anyrot
+  mask_ratio: 0.50              # slightly higher than pure MAE — student must predict more
+  mask_strategy: "random,temporal"
+  lambda_mae: 1.0               # weight on MAE reconstruction loss
+  lambda_cls: 1.0               # weight on DINO CLS loss
+  mae_dino_ocdetect_anyrot:
+    data_dir: /mnt/nas2/yiquan_data/preprocessed
+    splits: [0.8, 0.1, 0.1]
+    apply_flu_transform: false
+    ema_momentum_start: 0.994
+    ema_momentum: 0.9996
+    freeze_last_layer_steps: 1000
+    loss:
+      teacher_temp: 0.07
+      warmup_teacher_temp: 0.04
+      warmup_teacher_temp_steps: 10000
+      student_temp: 0.10
+      center_momentum: 0.9
+      lambda_koleo: 0.0          # disabled: MAE loss already prevents CLS collapse
+      lambda_mae: 1.0
+      lambda_cls: 1.0
+
+preprocess:
+  impute:
+    enabled: true
+  filter:
+    enabled: true
+  normalize:
+    enabled: false              # no z-norm: random rotation must not assume canonical mean
+
+# ── Augmentations: same as v4 ──────────────────────────────────────────────
+random_rotation:
+  enabled: true
+
+gaussian_noise:
+  enabled: true
+  sigma: 0.01
+
+jitter:
+  enabled: true
+  sigma: 0.003
+
+bias_drift:
+  enabled: true
+  max_drift: 0.05
+
+sensor_dropout:
+  enabled: true
+  p: 0.1
+
+time_crop:
+  enabled: true
+  min_crop_ratio: 0.90
+
+frequency_mask:
+  enabled: true
+  max_mask_fraction: 0.20
+  n_masks: 1
+
+data:
+  batch_size: 256
+  eval_batch_size: 256
+  num_workers: 4
+  pin_memory: true
+
+logging:
+  ckpt_every_steps: 10000
+
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 10000000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 1000
+
+  optim:
+    name: adamw
+    lr: 0.0001
+    weight_decay: 0.04
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+
+  sched:
+    name: cosine
+    warmup_steps: 1000
+
+  early_stopping:
+    enabled: false

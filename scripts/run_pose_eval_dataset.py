@@ -9,6 +9,9 @@ Metrics
   Geodesic error (°) — angular distance between predicted and GT rotation matrices
   MPJPE (mm)         — L2 distance between predicted and GT 3-D joint positions
                        derived via SMPL forward kinematics (requires core.articulate)
+  MPJVE (cm)         — Mean Per Joint Vertex Error: mean Euclidean distance across all
+                       SMPL mesh vertices between predicted and GT poses, with the root
+                       joint (pelvis) aligned. Reported in centimetres.
 
 Output PNGs (--out-dir)
 -----------------------
@@ -48,6 +51,12 @@ from scipy.spatial.transform import Rotation as ScipyRot
 from tqdm import tqdm
 
 from imu_lm.data.augmentations.preprocess import PreprocessStats, preprocess_window
+from imu_lm.data.imuposerdataset import (
+    _resample_linear,
+    _resample_nearest,
+    _resample_rotmat_nlerp,
+    _resample_rotmat_nearest,
+)
 from imu_lm.data.nymeria_wrist_loader import (
     RIGHT_WRIST_CHAIN_JOINTS,
     _XSENS_RIGHT_WRIST_JOINT,
@@ -143,6 +152,21 @@ def load_sequence(pkl_path: str, fps: int, max_frames: int, num_joints: int,
         real_ori   = real_ori[:N]
         joint_pos  = joint_pos[:N]
 
+        # Resample to target fps — must match the training loader
+        if abs(actual_fps - fps) > 1e-3:
+            new_len     = int(round((N - 1) * fps / actual_fps)) + 1
+            up          = fps > actual_fps
+            _pose_t     = torch.from_numpy(pose_local)
+            _jpos_t     = torch.from_numpy(joint_pos)
+            _acc_t      = torch.from_numpy(real_acc.astype(np.float32))
+            _ori_t      = torch.from_numpy(real_ori.astype(np.float32))
+            pose_local  = (_resample_rotmat_nearest if up else _resample_rotmat_nlerp)(_pose_t, new_len).numpy().astype(np.float32)
+            joint_pos   = (_resample_nearest        if up else _resample_linear       )(_jpos_t, new_len).numpy().astype(np.float32)
+            real_acc    = (_resample_nearest        if up else _resample_linear       )(_acc_t,  new_len).numpy().astype(np.float64)
+            real_ori    = (_resample_rotmat_nearest if up else _resample_rotmat_nlerp)(_ori_t,  new_len).numpy().astype(np.float64)
+            N           = new_len
+            actual_fps  = float(fps)
+
         smpl_R_local = pose_local   # already local rotations
 
         # FK to get world-frame wrist rotation (needed for FLU frame)
@@ -177,6 +201,8 @@ def load_sequence(pkl_path: str, fps: int, max_frames: int, num_joints: int,
         gyro_flu = np.einsum("nij,nj->ni", R_X_from_world, omega_world).astype(np.float32)
 
         X = np.concatenate([acc_flu, gyro_flu], axis=1)   # [N, 6]
+        # Measured wrist orientation ≈ R_world_from_smpl_wrist (sensor calibrated to SMPL frame)
+        R_wrist_world_meas = real_ori[:, 1].astype(np.float32)  # [N, 3, 3]
 
     # ------------------------------------------------------------------
     # Nymeria format: gt_data["xsens_pose"] = [N, 23, 4, 4]
@@ -192,7 +218,7 @@ def load_sequence(pkl_path: str, fps: int, max_frames: int, num_joints: int,
         )
         actual_fps = float(fps)
 
-        if loader_type == "nymeria_real_wrist_flu":
+        if loader_type in ("nymeria_real_wrist_flu", "nymeria_real_wrist_full_body_flu"):
             # --- Real wrist IMU in FLU frame (matches training loader) ---
             _R_WRIST_FROM_FLU_EVAL = np.array(
                 [[-1., 0., 0.], [0., 0., 1.], [0., 1., 0.]], dtype=np.float64
@@ -248,6 +274,8 @@ def load_sequence(pkl_path: str, fps: int, max_frames: int, num_joints: int,
             acc_flu  = np.einsum("nij,nj->ni", R_X_from_world, acc_world)
             gyro_flu = np.einsum("nij,nj->ni", R_X_from_world, gyro_world)
             X = np.concatenate([acc_flu, gyro_flu], axis=1).astype(np.float32)
+            # wrist_gt_data orientation = R_world_from_smpl_wrist in Nymeria Y-up world
+            R_wrist_world_meas = R_world_from_wrist.astype(np.float32)  # [N, 3, 3]
 
         else:
             # --- Synthetic IMU from Xsens pose (global frame) ---
@@ -270,6 +298,7 @@ def load_sequence(pkl_path: str, fps: int, max_frames: int, num_joints: int,
             gyro     = np.zeros((N, 3), dtype=np.float32)
             gyro[:-1] = gyro_raw.astype(np.float32);  gyro[-1] = gyro[-2]
             X = np.concatenate([acc, gyro], axis=1)   # [N, 6]
+            R_wrist_world_meas = None   # synthetic IMU: no real wrist sensor
 
         smpl_R_global = torch.from_numpy(
             _xsens_to_smpl_rotmat(xsens_pose[:, :, :3, :3])
@@ -291,7 +320,7 @@ def load_sequence(pkl_path: str, fps: int, max_frames: int, num_joints: int,
         sel_R = smpl_R_local[:, RIGHT_WRIST_CHAIN_JOINTS]   # [N, 5, 3, 3]
 
     gt_6d = np.concatenate([sel_R[..., 0], sel_R[..., 1]], axis=-1)  # [N, J, 6]
-    return X, gt_6d, smpl_R_local, actual_fps
+    return X, gt_6d, smpl_R_local, actual_fps, R_wrist_world_meas
 
 
 # ---------------------------------------------------------------------------
@@ -364,6 +393,8 @@ def compute_mpjpe_mm(
     pred_R_full = smpl_R_gt_local.copy()   # [N, 24, 3, 3]
     if num_joints == 24:
         pred_R_full = pred_R_sel
+    elif num_joints == 23:
+        pred_R_full[:, 1:] = pred_R_sel   # joints 1-23, skip root
     else:
         for ci, ji in enumerate(RIGHT_WRIST_CHAIN_JOINTS):
             pred_R_full[:, ji] = pred_R_sel[:, ci]
@@ -395,6 +426,8 @@ def compute_mpjpe_mm(
 
     if num_joints == 24:
         sel_idx = list(range(24))
+    elif num_joints == 23:
+        sel_idx = list(range(1, 24))   # SMPL joints 1-23, skip root
     else:
         sel_idx = RIGHT_WRIST_CHAIN_JOINTS
 
@@ -403,6 +436,226 @@ def compute_mpjpe_mm(
         np.linalg.norm(pos_pred[:, sel_idx] - pos_gt[:, sel_idx], axis=-1) * 1000.0
     )  # [N, num_joints]
     return mpjpe
+
+
+def compute_mpjve_cm(
+    pred_6d: np.ndarray,          # [N, num_joints, 6]
+    smpl_R_gt_local: np.ndarray,  # [N, 24, 3, 3]
+    num_joints: int,
+    device: torch.device,
+    batch_size: int = 64,
+) -> np.ndarray:
+    """Return MPJVE in centimetres per frame [N].
+
+    MPJVE = Mean Per Joint Vertex Error: mean Euclidean distance across all SMPL
+    mesh vertices between predicted and GT poses, with the root joint (pelvis)
+    aligned (both meshes translated so their pelvis joint sits at the origin).
+
+    Requires core.articulate (SMPL model). Returns None if unavailable.
+    """
+    try:
+        import core.articulate as art
+        from core.paths import Paths
+    except ImportError:
+        return None
+
+    N = pred_6d.shape[0]
+
+    # Build full predicted local rotation matrices (same logic as compute_mpjpe_mm)
+    pred_R_sel = rotation_6d_to_matrix(
+        torch.from_numpy(pred_6d)
+    ).numpy()   # [N, num_joints, 3, 3]
+
+    pred_R_full = smpl_R_gt_local.copy()   # [N, 24, 3, 3]
+    if num_joints == 24:
+        pred_R_full = pred_R_sel
+    elif num_joints == 23:
+        pred_R_full[:, 1:] = pred_R_sel
+    else:
+        for ci, ji in enumerate(RIGHT_WRIST_CHAIN_JOINTS):
+            pred_R_full[:, ji] = pred_R_sel[:, ci]
+
+    body_model = art.model.ParametricModel(Paths.SMPL_FILE, device=device)
+
+    mpjve_frames = []
+    for start in range(0, N, batch_size):
+        end = min(start + batch_size, N)
+        Nb = end - start
+        R_gt_b   = torch.from_numpy(smpl_R_gt_local[start:end]).float().to(device)
+        R_pred_b = torch.from_numpy(pred_R_full[start:end]).float().to(device)
+        try:
+            _, jpos_gt,   verts_gt   = body_model.forward_kinematics(
+                R_gt_b.reshape(Nb, -1), calc_mesh=True)
+            _, jpos_pred, verts_pred = body_model.forward_kinematics(
+                R_pred_b.reshape(Nb, -1), calc_mesh=True)
+        except Exception:
+            return None
+
+        # Pelvis alignment: subtract root joint (joint 0) from both meshes
+        verts_gt_aligned   = verts_gt   - jpos_gt[:, :1]    # [Nb, V, 3]
+        verts_pred_aligned = verts_pred - jpos_pred[:, :1]  # [Nb, V, 3]
+
+        # Mean vertex L2 error per frame, convert metres → cm
+        err_per_frame = (
+            (verts_pred_aligned - verts_gt_aligned)
+            .norm(dim=-1)       # [Nb, V]
+            .mean(dim=-1)       # [Nb]
+            * 100.0             # cm
+        )
+        mpjve_frames.append(err_per_frame.detach().cpu().numpy())
+
+    return np.concatenate(mpjve_frames)   # [N]
+
+
+# ---------------------------------------------------------------------------
+# Wrist-pelvis helpers — derive global pelvis from measured wrist orientation
+# ---------------------------------------------------------------------------
+
+def _build_pred_R_full(
+    pred_6d: np.ndarray,          # [N, num_joints, 6]
+    smpl_R_gt_local: np.ndarray,  # [N, 24, 3, 3]
+    num_joints: int,
+) -> np.ndarray:                  # [N, 24, 3, 3]
+    """Convert predicted 6D rotations → full 24-joint local rotation matrices.
+
+    Non-predicted joints (e.g. the pelvis root for num_joints==23) are filled
+    from the GT local rotations.
+    """
+    pred_R_sel = rotation_6d_to_matrix(torch.from_numpy(pred_6d)).numpy()
+    pred_R_full = smpl_R_gt_local.copy()
+    if num_joints == 24:
+        pred_R_full = pred_R_sel
+    elif num_joints == 23:
+        pred_R_full[:, 1:] = pred_R_sel   # joints 1-23; leave root as GT placeholder
+    else:
+        for ci, ji in enumerate(RIGHT_WRIST_CHAIN_JOINTS):
+            pred_R_full[:, ji] = pred_R_sel[:, ci]
+    return pred_R_full
+
+
+def _derive_pelvis_from_wrist(
+    pred_R_full: np.ndarray,     # [N, 24, 3, 3] local rotations (root is placeholder)
+    R_wrist_world: np.ndarray,   # [N, 3, 3] R_world_from_smpl_wrist (measured)
+    body_model,
+    device: torch.device,
+) -> np.ndarray:                  # [N, 3, 3] estimated global pelvis rotation
+    """Estimate global pelvis rotation from measured wrist orientation + predicted pose.
+
+    SMPL FK chain from root to right wrist (joint 21):
+        R_global[21] = R_global_pelvis @ C_wrist
+
+    Setting root = I to isolate the chain product C_wrist via FK, then:
+        R_global_pelvis = R_wrist_world_meas @ C_wrist.T
+
+    This gives the pelvis orientation such that, combined with the predicted
+    body pose, the right-wrist FK output matches the measured wrist orientation.
+    """
+    N = pred_R_full.shape[0]
+    R_no_root = pred_R_full.copy()
+    R_no_root[:, 0] = np.eye(3, dtype=np.float32)   # identity root
+    R_t = torch.from_numpy(R_no_root).float().to(device)
+    # FK with identity root → R_global[21] = C_wrist (chain product root→wrist)
+    R_global = body_model.forward_kinematics_R(R_t.reshape(N, -1))   # [N, 24, 3, 3]
+    C_wrist = R_global[:, 21].detach().cpu().numpy()                   # [N, 3, 3]
+    # R_global_pelvis = R_wrist_world @ C_wrist.T
+    R_global_pelvis = np.matmul(
+        R_wrist_world.astype(np.float32),
+        C_wrist.transpose(0, 2, 1),
+    )
+    return R_global_pelvis   # [N, 3, 3]
+
+
+def compute_mpjpe_wrist_pelvis_mm(
+    pred_6d: np.ndarray,          # [N, num_joints, 6]
+    smpl_R_gt_local: np.ndarray,  # [N, 24, 3, 3]
+    num_joints: int,
+    R_wrist_world: np.ndarray,    # [N, 3, 3] measured R_world_from_smpl_wrist
+    device: torch.device,
+) -> np.ndarray:
+    """MPJPE (mm) using the global pelvis rotation derived from measured wrist orientation.
+
+    Unlike compute_mpjpe_mm (which uses the GT pelvis rotation for all predicted
+    non-root joints), this function back-computes the global pelvis rotation
+    from the predicted body pose + the measured wrist IMU orientation.
+    """
+    try:
+        import core.articulate as art
+        from core.paths import Paths
+    except ImportError:
+        return None
+
+    N = pred_6d.shape[0]
+    body_model = art.model.ParametricModel(Paths.SMPL_FILE, device=device)
+    pred_R_full = _build_pred_R_full(pred_6d, smpl_R_gt_local, num_joints)
+    R_pelvis = _derive_pelvis_from_wrist(pred_R_full, R_wrist_world, body_model, device)
+    pred_R_full_wp = pred_R_full.copy()
+    pred_R_full_wp[:, 0] = R_pelvis
+
+    def _fk_pos(R_local_np):
+        R_t = torch.from_numpy(R_local_np).float().to(device)
+        try:
+            result = body_model.forward_kinematics(R_t.reshape(N, -1))
+            pos = result[1] if isinstance(result, (tuple, list)) else result
+        except AttributeError:
+            return None
+        return pos.detach().cpu().numpy() if hasattr(pos, "detach") else pos
+
+    pos_gt   = _fk_pos(smpl_R_gt_local)
+    pos_pred = _fk_pos(pred_R_full_wp)
+    if pos_gt is None or pos_pred is None:
+        return None
+
+    if num_joints == 24:
+        sel_idx = list(range(24))
+    elif num_joints == 23:
+        sel_idx = list(range(1, 24))
+    else:
+        sel_idx = RIGHT_WRIST_CHAIN_JOINTS
+
+    return np.linalg.norm(pos_pred[:, sel_idx] - pos_gt[:, sel_idx], axis=-1) * 1000.0
+
+
+def compute_mpjve_wrist_pelvis_cm(
+    pred_6d: np.ndarray,          # [N, num_joints, 6]
+    smpl_R_gt_local: np.ndarray,  # [N, 24, 3, 3]
+    num_joints: int,
+    R_wrist_world: np.ndarray,    # [N, 3, 3] measured R_world_from_smpl_wrist
+    device: torch.device,
+    batch_size: int = 64,
+) -> np.ndarray:
+    """MPJVE (cm, pelvis-aligned) using pelvis derived from measured wrist orientation."""
+    try:
+        import core.articulate as art
+        from core.paths import Paths
+    except ImportError:
+        return None
+
+    N = pred_6d.shape[0]
+    body_model = art.model.ParametricModel(Paths.SMPL_FILE, device=device)
+    pred_R_full = _build_pred_R_full(pred_6d, smpl_R_gt_local, num_joints)
+    R_pelvis = _derive_pelvis_from_wrist(pred_R_full, R_wrist_world, body_model, device)
+    pred_R_full_wp = pred_R_full.copy()
+    pred_R_full_wp[:, 0] = R_pelvis
+
+    mpjve_frames = []
+    for start in range(0, N, batch_size):
+        end = min(start + batch_size, N)
+        Nb = end - start
+        R_gt_b   = torch.from_numpy(smpl_R_gt_local[start:end]).float().to(device)
+        R_pred_b = torch.from_numpy(pred_R_full_wp[start:end]).float().to(device)
+        try:
+            _, jpos_gt,   verts_gt   = body_model.forward_kinematics(
+                R_gt_b.reshape(Nb, -1), calc_mesh=True)
+            _, jpos_pred, verts_pred = body_model.forward_kinematics(
+                R_pred_b.reshape(Nb, -1), calc_mesh=True)
+        except Exception:
+            return None
+        verts_gt_aligned   = verts_gt   - jpos_gt[:, :1]
+        verts_pred_aligned = verts_pred - jpos_pred[:, :1]
+        err = (verts_pred_aligned - verts_gt_aligned).norm(dim=-1).mean(dim=-1) * 100.0
+        mpjve_frames.append(err.detach().cpu().numpy())
+
+    return np.concatenate(mpjve_frames)   # [N]
 
 
 # ---------------------------------------------------------------------------
@@ -589,17 +842,23 @@ def main():
 
     # ---- Per-sequence accumulators ---------------------------------------- #
     # geo_all[j] = flat list of per-frame geodesic errors for joint j
-    geo_all     = [[] for _ in range(num_joints)]
-    mpjpe_all   = [[] for _ in range(num_joints)]
+    geo_all       = [[] for _ in range(num_joints)]
+    mpjpe_all     = [[] for _ in range(num_joints)]
+    mpjve_all     = []
+    mpjpe_wp_all  = [[] for _ in range(num_joints)]   # wrist-pelvis variant
+    mpjve_wp_all  = []                                 # wrist-pelvis variant
     seq_names   = []
     seq_geo_means = []
     seq_failed  = []
-    compute_mpjpe = True   # will be set False if FK is unavailable
+    compute_mpjpe    = True   # set False if FK unavailable
+    compute_mpjve    = True   # set False if FK unavailable
+    compute_mpjpe_wp = True   # set False if FK or wrist data unavailable
+    compute_mpjve_wp = True   # set False if FK or wrist data unavailable
 
     for pkl_path in tqdm(pkl_files, desc="Evaluating sequences", unit="seq"):
         seq_name = os.path.basename(pkl_path).replace(".pkl", "")
         try:
-            X, gt_6d, smpl_R_local, actual_fps = load_sequence(
+            X, gt_6d, smpl_R_local, actual_fps, R_wrist_world = load_sequence(
                 pkl_path, args.fps, args.max_frames, num_joints,
                 add_gravity=add_gravity, loader_type=loader_type,
             )
@@ -636,6 +895,44 @@ def main():
                 for j in range(num_joints):
                     mpjpe_all[j].extend(mpjpe_seq[:, j].tolist())
 
+        # ---- MPJVE ---- #
+        if compute_mpjve:
+            mpjve_seq = compute_mpjve_cm(pred_6d, smpl_R_local, num_joints, device)
+            if mpjve_seq is None:
+                compute_mpjve = False
+                logger.warning("FK unavailable — MPJVE will not be computed.")
+            else:
+                mpjve_all.extend(mpjve_seq.tolist())
+
+        # ---- MPJPE (wrist-pelvis) ---- #
+        if compute_mpjpe_wp:
+            if R_wrist_world is None:
+                compute_mpjpe_wp = False
+                logger.info("No measured wrist orientation — skipping wrist-pelvis MPJPE.")
+            else:
+                mpjpe_wp_seq = compute_mpjpe_wrist_pelvis_mm(
+                    pred_6d, smpl_R_local, num_joints, R_wrist_world, device)
+                if mpjpe_wp_seq is None:
+                    compute_mpjpe_wp = False
+                    logger.warning("FK unavailable — wrist-pelvis MPJPE will not be computed.")
+                else:
+                    for j in range(num_joints):
+                        mpjpe_wp_all[j].extend(mpjpe_wp_seq[:, j].tolist())
+
+        # ---- MPJVE (wrist-pelvis) ---- #
+        if compute_mpjve_wp:
+            if R_wrist_world is None:
+                compute_mpjve_wp = False
+                logger.info("No measured wrist orientation — skipping wrist-pelvis MPJVE.")
+            else:
+                mpjve_wp_seq = compute_mpjve_wrist_pelvis_cm(
+                    pred_6d, smpl_R_local, num_joints, R_wrist_world, device)
+                if mpjve_wp_seq is None:
+                    compute_mpjve_wp = False
+                    logger.warning("FK unavailable — wrist-pelvis MPJVE will not be computed.")
+                else:
+                    mpjve_wp_all.extend(mpjve_wp_seq.tolist())
+
     if not seq_names:
         raise SystemExit("No sequences evaluated successfully.")
 
@@ -669,6 +966,15 @@ def main():
         all_mpjpe_flat = np.concatenate([np.array(m) for m in mpjpe_all if len(m) > 0])
         print(f"  {all_mpjpe_flat.mean():>15.2f}   {all_mpjpe_flat.std():>10.2f}", end="")
     print()
+    if compute_mpjve and len(mpjve_all) > 0:
+        mpjve_arr_full = np.array(mpjve_all)
+        print(f"\n  MPJVE (pelvis-aligned, GT pelvis): {mpjve_arr_full.mean():.2f} ± {mpjve_arr_full.std():.2f} cm")
+    if compute_mpjpe_wp and any(len(m) > 0 for m in mpjpe_wp_all):
+        all_mpjpe_wp_flat = np.concatenate([np.array(m) for m in mpjpe_wp_all if len(m) > 0])
+        print(f"  MPJPE  (wrist-derived pelvis)    : {all_mpjpe_wp_flat.mean():.2f} ± {all_mpjpe_wp_flat.std():.2f} mm")
+    if compute_mpjve_wp and len(mpjve_wp_all) > 0:
+        mpjve_wp_arr = np.array(mpjve_wp_all)
+        print(f"  MPJVE  (wrist-derived pelvis)    : {mpjve_wp_arr.mean():.2f} ± {mpjve_wp_arr.std():.2f} cm")
     if seq_failed:
         print(f"\n  ⚠ Skipped {len(seq_failed)} sequences: {seq_failed[:5]}{'...' if len(seq_failed) > 5 else ''}")
     print()
@@ -709,6 +1015,52 @@ def main():
             out_path=os.path.join(args.out_dir, "mpjpe_cdf.png"),
             xlabel="MPJPE (mm)",
         )
+
+    if compute_mpjpe_wp and any(len(m) > 0 for m in mpjpe_wp_all):
+        mpjpe_wp_arr   = [np.array(m) for m in mpjpe_wp_all]
+        mpjpe_wp_means = np.array([m.mean() for m in mpjpe_wp_arr])
+        mpjpe_wp_stds  = np.array([m.std()  for m in mpjpe_wp_arr])
+        plot_per_joint_bar(
+            mpjpe_wp_means, mpjpe_wp_stds,
+            ylabel="MPJPE (mm)",
+            title=f"Per-Joint MPJPE — wrist-derived pelvis  ({len(seq_names)} test sequences)",
+            out_path=os.path.join(args.out_dir, "per_joint_mpjpe_wrist_pelvis.png"),
+            joint_names=joint_names,
+            color="darkorange",
+        )
+        plot_cdf(
+            mpjpe_wp_arr, joint_names,
+            out_path=os.path.join(args.out_dir, "mpjpe_wrist_pelvis_cdf.png"),
+            xlabel="MPJPE (mm)",
+        )
+
+    if compute_mpjve and len(mpjve_all) > 0:
+        mpjve_arr_full = np.array(mpjve_all)
+        fig, ax = plt.subplots(figsize=(7, 4))
+        ax.hist(mpjve_arr_full, bins=60, color="mediumpurple", alpha=0.75, edgecolor="none")
+        ax.axvline(mpjve_arr_full.mean(), color="r", lw=1.4, ls="--",
+                   label=f"Mean: {mpjve_arr_full.mean():.2f} cm")
+        ax.set_xlabel("MPJVE (cm)")
+        ax.set_ylabel("Frame count")
+        ax.set_title(f"MPJVE — GT pelvis  ({len(seq_names)} test sequences, pelvis-aligned)")
+        ax.legend(fontsize=9)
+        ax.grid(True, alpha=0.3)
+        fig.tight_layout()
+        _save(fig, os.path.join(args.out_dir, "mpjve_hist.png"))
+
+    if compute_mpjve_wp and len(mpjve_wp_all) > 0:
+        mpjve_wp_arr_full = np.array(mpjve_wp_all)
+        fig, ax = plt.subplots(figsize=(7, 4))
+        ax.hist(mpjve_wp_arr_full, bins=60, color="teal", alpha=0.75, edgecolor="none")
+        ax.axvline(mpjve_wp_arr_full.mean(), color="r", lw=1.4, ls="--",
+                   label=f"Mean: {mpjve_wp_arr_full.mean():.2f} cm")
+        ax.set_xlabel("MPJVE (cm)")
+        ax.set_ylabel("Frame count")
+        ax.set_title(f"MPJVE — wrist-derived pelvis  ({len(seq_names)} test sequences, pelvis-aligned)")
+        ax.legend(fontsize=9)
+        ax.grid(True, alpha=0.3)
+        fig.tight_layout()
+        _save(fig, os.path.join(args.out_dir, "mpjve_wrist_pelvis_hist.png"))
 
     logger.info("All plots written to %s", args.out_dir)
 

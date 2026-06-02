@@ -1,0 +1,73 @@
+# Full-body pose linear probe: frozen MAE+DINOv1 CLS encoder + single linear head.
+# Encoder was pretrained with MAE+DINO combined SSL on OCDetect (any orientation).
+# 23 joints (exclude root/joint-0). Zero transformer layers in the decoder —
+# computation is: CLS token → Linear(384→192) → LayerNorm → Linear(192→23*6).
+# use_cls_token: true matches training-time encoder (mask_token + cls_token params).
+
+vit1d:
+  patch_size: 16
+  shared_kernel: "acc_gyro"
+  use_cls_token: true          # must match DINO encoder (has cls_token/mask_token params)
+  encoder:
+    hidden_size: 384
+    num_hidden_layers: 12
+    num_attention_heads: 6
+    intermediate_size: 1536
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-6
+    drop_path_rate: 0.0        # frozen encoder — no stochastic depth during eval
+  pose_decoder:
+    hidden_size: 192
+    num_hidden_layers: 0       # no 2D cross-channel transformer
+    num_temporal_layers: 0     # no 1D temporal transformer
+    num_attention_heads: 4
+    mlp_ratio: 4.0
+    dropout: 0.0
+    drop_path_rate: 0.0
+    sub_patches: 1             # one 6D-rotation prediction per patch (8 per 2.56 s window)
+  max_patches_per_channel: 8    # 128 samples / patch_size 16 = 8 patches per channel
+  pooling: "cls"
+
+objective:
+  type: pose_probe             # frozen encoder + trainable pose decoder
+  pose_probe:
+    pretrained_run: vit1d_mae_dino_ocdetect_anyrot
+    pretrained_ckpt: latest
+    loader: nymeria_real_wrist_full_body_flu
+    train_pkl_root: /mnt/nas2/processed_data_body_Ty_rwrist
+    train_files: all
+    val_pkl_root: /mnt/nas2/processed_data_test_body_Ty_rwrist
+    val_files: all
+    num_joints: 23             # exclude root (joint-0, global pelvis)
+    add_gravity: true
+    reset_root_orientation: false
+    jitter_weight: 0.0         # disabled — linear head cannot smooth sequences
+    joint_pos_weight: 10.0
+
+logging:
+  ckpt_every_steps: 10000      # prevent disk spam (default was 200 → 83MB × 812 = 66GB)
+
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 10000000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 1000
+
+  optim:
+    name: adamw
+    lr: 0.001                  # higher lr: fewer parameters to train
+    weight_decay: 0.0          # no regularisation on a linear head
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+
+  sched:
+    name: cosine
+    warmup_steps: 500
+
+  early_stopping:
+    enabled: false
+    monitor: val_loss
+    patience: 20

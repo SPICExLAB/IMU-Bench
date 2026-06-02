@@ -1,0 +1,70 @@
+# Linear probe on PRISM (96 classes, 31 subjects) using frozen DINO encoder.
+# Architecture matches vit1d_dino_ocdetect_anyrot.
+# Note: prism is the default probe_dataset in base.yaml (excluded from pretraining).
+
+vit1d:
+  patch_size: 16
+  shared_kernel: "acc_gyro"
+  use_cls_token: true
+  encoder:
+    hidden_size: 384
+    num_hidden_layers: 12
+    num_attention_heads: 6
+    intermediate_size: 1536
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-6
+    drop_path_rate: 0.0
+  max_patches_per_channel: 8
+  pooling: "cls"
+
+objective:
+  type: har_probe
+  har_probe:
+    pretrained_run:  vit1d_dino_ocdetect_anyrot_v4  # overridden by eval script
+    pretrained_ckpt: best                            # overridden by eval script
+
+preprocess:
+  normalize:
+    enabled: false             # match DINO pretraining
+
+windowing:
+  window_seconds: 2.56
+
+splits:
+  probe_dataset: null         # override base.yaml which excludes prism from training
+  val_ratio: 0.2              # 31 subjects → ~6 val, ~25 train
+
+data:
+  train_on_datasets: ["prism"]
+  sensor_columns: [acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z]
+  batch_size:       256
+  eval_batch_size:  256
+  num_workers:      8
+  pin_memory:       true
+
+logging:
+  ckpt_every_steps: 500
+
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 30000             # more steps — 96 classes needs longer training
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 200
+
+  early_stopping:
+    enabled: true
+    patience: 20
+
+  optim:
+    name: adamw
+    lr: 1.0e-3
+    weight_decay: 0.1
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+
+  sched:
+    name: cosine
+    warmup_steps: 200          # longer warmup for 96 classes
