@@ -16,7 +16,6 @@ CUDA_VISIBLE_DEVICES=1 python scripts/run_pretrain.py \
     --model-config configs/vit1d_har_supervised_utd_mhad.yaml \
     --run-name     vit1d_har_supervised_utd_mhad
 
-
 #########################
 python scripts/eval_dino_ckpts_utd_mhad.py \
     --config       configs/base.yaml \

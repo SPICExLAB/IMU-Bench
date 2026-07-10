@@ -3,11 +3,13 @@
 Time-domain loss (on masked patches):
     loss_time = Σ_b  (w_b / Σw) * MSE(recon_b[mask], x_b[mask])
 
-Spectral loss (optional, on masked patches):
-    loss_spec = L1( |FFT(recon * mask)|, |FFT(x * mask)| )
+Spectral loss (optional, full signal): length-invariant log-magnitude L1
+    loss_spec = L1( log1p|rfft(recon, ortho)|, log1p|rfft(x, ortho)| )
+    (orthonormal FFT → scale invariant to window length; log-mag → band-balanced)
 
 Total:
     loss = loss_time + spectral_weight * loss_spec
+    (with loss_type: full_mse, loss_time is the plain full-signal MSE instead)
 
 Config keys (all optional, under ``objective.freq_mae``):
     bands            list of [lo, hi] pairs  default see BANDS_DEFAULT
@@ -43,6 +45,21 @@ def _bandpass(x: torch.Tensor, lo: float, hi: float, fs: float) -> torch.Tensor:
     X_out[..., keep] = X_f[..., keep]
     out = torch.fft.irfft(X_out, n=T, dim=-1)
     return out.to(x.dtype)
+
+
+def _spectral_loss(recon: torch.Tensor, x: torch.Tensor) -> torch.Tensor:
+    """Length-invariant log-magnitude spectral L1 between recon and x [B, C, T].
+
+    - Orthonormal FFT (``norm="ortho"``) is Parseval-normalized, so the scale is
+      invariant to the window length T — important with variable-length windows.
+    - ``log1p`` on the magnitudes compresses the gravity-dominated low-frequency
+      content so every band contributes, instead of low freq drowning out high.
+    - Magnitude only (phase ignored): the time-domain MSE already supervises
+      phase/alignment, so this term just matches the energy distribution.
+    """
+    recon_mag = torch.fft.rfft(recon.float(), dim=-1, norm="ortho").abs()
+    x_mag     = torch.fft.rfft(x.float(),     dim=-1, norm="ortho").abs()
+    return F.l1_loss(torch.log1p(recon_mag), torch.log1p(x_mag))
 
 
 def forward_loss(
@@ -94,12 +111,19 @@ def forward_loss(
 
     # Encode: BERT mode keeps all N tokens; standard MAE drops masked tokens
     if getattr(encoder, '_use_bert_mask', False):
-        # Encoder sees all N tokens with learnable mask tokens at masked positions
-        all_tokens = encoder(
-            x, mask=patch_mask,
-            padding_mask=padding_mask,
-            return_keep_padding_mask=False,
-        )  # [B, N, D]
+        if getattr(encoder, 'use_cls_token', False) and padding_mask is None:
+            # CLS-token encoder: forward_dino prepends a CLS token that attends over
+            # all patches (incl. masked, replaced in-place with the mask token) and
+            # returns it separately, mirroring the alt-attn encoder. The CLS is not
+            # reconstructed — only the patch tokens go to the decoder.
+            _cls_out, all_tokens = encoder.forward_dino(x, patch_mask)  # [B, D], [B, N, D]
+        else:
+            # Encoder sees all N tokens with learnable mask tokens at masked positions
+            all_tokens = encoder(
+                x, mask=patch_mask,
+                padding_mask=padding_mask,
+                return_keep_padding_mask=False,
+            )  # [B, N, D]
         # Decoder sees all tokens — no additional mask token insertion needed
         empty_mask = torch.zeros_like(patch_mask)
         reconstructed = decoder(
@@ -125,18 +149,45 @@ def forward_loss(
     if T_recon < x.shape[-1]:
         x = x[:, :, :T_recon]
 
-    # ── Full-signal plain MSE (loss_type: full_mse) ───────────────────────────
+    # ── Full-signal plain MSE (loss_type: full_mse), optionally + spectral ─────
     loss_type = str(obj_cfg.get("loss_type", "freq_weighted"))
     if loss_type == "full_mse":
-        loss = F.mse_loss(reconstructed, x)
+        mse = F.mse_loss(reconstructed, x)
+        loss = mse
         logs: Dict[str, float] = {
-            "loss":            float(loss.detach()),
-            "mse_loss":        float(loss.detach()),
+            "mse_loss":        float(mse.detach()),
             "mask_ratio_act":  float(patch_mask.float().mean().item()),
         }
-        # During validation: also log per-band and mae_freq_loss (same as v3)
-        # so v0 and v3 are directly comparable in WandB without training on them.
-        if not encoder.training:
+        # Optional explicit frequency-band-weighted reconstruction term (full signal):
+        #   band_loss_weight * Σ_b (w_b/Σw)·MSE(recon_b, x_b)
+        # band_loss_weight == 0 (default) keeps plain full_mse unchanged. With uniform
+        # band_weights the bands partition the spectrum, so this ≈ a scaled full MSE;
+        # set non-uniform band_weights to actually emphasize a band.
+        band_loss_weight = float(freq_cfg.get("band_loss_weight", 0.0))
+        if band_loss_weight > 0.0:
+            ws_b = sum(weights)
+            band_term = torch.zeros((), device=x.device, dtype=x.dtype)
+            for (lo, hi), w in zip(bands, weights):
+                x_b = _bandpass(x,             lo, hi, fs)
+                r_b = _bandpass(reconstructed, lo, hi, fs)
+                bl  = F.mse_loss(r_b, x_b)
+                band_term = band_term + (w / ws_b) * bl
+                logs[f"loss_band_{lo:.0f}_{hi:.0f}hz"] = float(bl.detach())
+            loss = loss + band_loss_weight * band_term
+            logs["mae_freq_loss"] = float(band_term.detach())
+        # Optional spectral term: L1 on the full-signal FFT magnitude, added to
+        # the full-signal MSE. spectral_weight == 0 (default) leaves plain
+        # full_mse unchanged, so existing full_mse configs are unaffected.
+        spectral_weight = float(freq_cfg.get("spectral_weight", 0.0))
+        if spectral_weight > 0.0:
+            spec_loss = _spectral_loss(reconstructed, x)
+            loss = loss + spectral_weight * spec_loss
+            logs["spectral_loss"] = float(spec_loss.detach())
+        logs["loss"] = float(loss.detach())
+        # During validation: also log per-band and mae_freq_loss (on masked patches)
+        # so plain full_mse runs stay comparable in WandB. Skip when band_loss_weight>0,
+        # since the band term above already logs full-signal per-band values.
+        if not encoder.training and band_loss_weight == 0.0:
             sm = _patch_mask_to_signal_mask(patch_mask, num_patches_per_channel, C, patch_size)
             if T_recon < sm.shape[-1]:
                 sm = sm[:, :, :T_recon]
@@ -173,12 +224,10 @@ def forward_loss(
 
     logs["mae_freq_loss"] = float(total_loss.detach())
 
-    # Spectral loss: L1 on FFT magnitude of full reconstructed vs original signal
+    # Spectral loss: length-invariant log-magnitude L1 (full reconstructed vs original)
     spectral_weight = float(freq_cfg.get("spectral_weight", 0.0))
     if spectral_weight > 0.0:
-        x_mag     = torch.fft.rfft(x.float(),             dim=-1).abs()
-        recon_mag = torch.fft.rfft(reconstructed.float(), dim=-1).abs()
-        spec_loss  = F.l1_loss(recon_mag, x_mag)
+        spec_loss  = _spectral_loss(reconstructed, x)
         total_loss = total_loss + spectral_weight * spec_loss
         logs["spectral_loss"] = float(spec_loss.detach())
 

@@ -153,6 +153,60 @@ class RegisterPoseDecoder(nn.Module):
         return self.head(self.dropout(out))                        # [B, Pt, 138]
 
 
+class IndepRegisterPoseDecoder(nn.Module):
+    """Per-section pose decoder with INDEPENDENT register tokens → temporal transformer.
+
+    Same 2-stage structure as RegisterPoseDecoder, but stage 1 gives each 0.32 s
+    section its OWN distinct learnable register token (nn.Embedding(Pt, H)) rather
+    than one shared token specialised by a per-section positional id. Each section's
+    register cross-attends to ONLY that section's C channel tokens (local, B*Pt
+    batched) in a single MultiheadAttention layer → section feature. Stage 2 is a
+    temporal transformer over the Pt section features → 23×6 pose.
+    """
+
+    def __init__(self, embed_dim, in_channels, num_patches, num_joints=23,
+                 hidden=192, n_temporal=2, n_heads=4, dropout=0.2):
+        super().__init__()
+        self.in_channels = in_channels
+        self.num_patches = num_patches
+        self.hidden = hidden
+
+        self.proj = nn.Linear(embed_dim, hidden)
+        # Stage 1: one INDEPENDENT register token per section (distinct params)
+        self.registers  = nn.Embedding(num_patches, hidden)
+        self.frame_attn = nn.MultiheadAttention(hidden, n_heads, dropout=dropout, batch_first=True)
+        self.norm1      = nn.LayerNorm(hidden)
+        # Stage 2: temporal transformer over Pt section features
+        self.time_pos = nn.Embedding(num_patches, hidden)
+        layer = nn.TransformerEncoderLayer(
+            d_model=hidden, nhead=n_heads, dim_feedforward=hidden * 4,
+            dropout=dropout, batch_first=True, activation="gelu", norm_first=True)
+        self.temporal = nn.TransformerEncoder(layer, num_layers=n_temporal)
+        self.norm2    = nn.LayerNorm(hidden)
+        self.dropout  = nn.Dropout(dropout)
+        self.head     = nn.Linear(hidden, num_joints * ROT6D_DIM)
+        nn.init.trunc_normal_(self.registers.weight, std=0.02)
+        nn.init.trunc_normal_(self.head.weight, std=0.02)
+        nn.init.zeros_(self.head.bias)
+
+    def forward(self, tokens):
+        """tokens [B, C*Pt, D] (channel-major) → [B, Pt, 138]."""
+        B = tokens.shape[0]
+        C, Pt = self.in_channels, self.num_patches
+        h = self.proj(tokens)                                       # [B, C*Pt, H]
+        # section grid [B, Pt, C, H] → [B*Pt, C, H]
+        grid = h.reshape(B, C, Pt, self.hidden).permute(0, 2, 1, 3).reshape(B * Pt, C, self.hidden)
+        sec = torch.arange(Pt, device=tokens.device)
+        # independent register query per section: [Pt, H] → [B*Pt, 1, H] (b outer, pt inner)
+        reg = self.registers(sec).repeat(B, 1).unsqueeze(1)        # [B*Pt, 1, H]
+        sec_feat, _ = self.frame_attn(reg, grid, grid)             # [B*Pt, 1, H]
+        sec_feat = self.norm1(sec_feat).reshape(B, Pt, self.hidden)  # [B, Pt, H]
+        # Stage 2 temporal
+        sec_feat = sec_feat + self.time_pos(sec).unsqueeze(0)
+        out = self.norm2(self.temporal(sec_feat))
+        return self.head(self.dropout(out))                        # [B, Pt, 138]
+
+
 class TemporalPoseHead(nn.Module):
     """Pose head that consumes the encoder's PRETRAINED per-section register
     features [B, Pt, D] directly (no from-scratch query) → temporal transformer.
@@ -224,14 +278,16 @@ def _pose_feat(enc, x, use_reg):
 
 
 def run_one(enc, train_loader, val_loader, device, mode, Pt, lr, wd, epochs,
-            patience, body_model, joint_pos_w, jitter_w, dropout, wb_run=None):
+            patience, body_model, joint_pos_w, jitter_w, dropout, wb_run=None,
+            head="shared"):
     use_reg = bool(getattr(enc, "_use_register", False))
     if use_reg:
         dec = TemporalPoseHead(enc.embed_dim, Pt, dropout=dropout).to(device)
         print("  using PRETRAINED per-section register features → TemporalPoseHead")
     else:
-        dec = RegisterPoseDecoder(enc.embed_dim, enc.in_channels, Pt, dropout=dropout).to(device)
-        print("  encoder has no registers → from-scratch RegisterPoseDecoder")
+        DecCls = IndepRegisterPoseDecoder if head == "indep" else RegisterPoseDecoder
+        dec = DecCls(enc.embed_dim, enc.in_channels, Pt, dropout=dropout).to(device)
+        print(f"  encoder has no registers → from-scratch {DecCls.__name__} (head={head})")
 
     if mode == "probe":
         for p in enc.parameters():
@@ -355,6 +411,11 @@ def parse_args():
     p.add_argument("--run", default="vit1d_ssl_mae_varlen_altattn")
     p.add_argument("--runs-root", default="runs")
     p.add_argument("--mode", choices=["probe", "finetune"], default="probe")
+    p.add_argument("--head", choices=["shared", "indep"], default="shared",
+                   help="no-register decoder: 'shared' = one register token + per-section "
+                        "positional id (RegisterPoseDecoder, default); 'indep' = one distinct "
+                        "learnable register per section (IndepRegisterPoseDecoder). "
+                        "Ignored when the encoder has pretrained registers.")
     p.add_argument("--step", type=int, default=None)
     p.add_argument("--train-dir", default="/mnt/nas2/processed_data_body_Ty_rwrist")
     p.add_argument("--val-dir",   default="/mnt/nas2/processed_data_test_body_Ty_rwrist")
@@ -425,7 +486,8 @@ def main():
     patience = 0 if args.no_early_stop else args.patience
     final, per_j = run_one(enc, train_loader, val_loader, device, args.mode, Pt,
                            lr, args.weight_decay, args.epochs, patience, body_model,
-                           args.joint_pos_weight, args.jitter_weight, args.dropout, wb_run)
+                           args.joint_pos_weight, args.jitter_weight, args.dropout, wb_run,
+                           head=args.head)
     if wb_run is not None:
         wb_run.log({"best/val_geo_err_deg": final["geo_err_deg"],
                     "best/val_mpjpe_mm": final.get("mpjpe_mm")})

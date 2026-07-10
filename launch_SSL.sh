@@ -4,6 +4,51 @@ CUDA_VISIBLE_DEVICES=0 python scripts/run_pretrain.py \
     --model-config configs/vit1d_ssl_mae_varlen_altattn_realdata_ocdetect_flu.yaml \
     --run-name vit1d_ssl_mae_varlen_altattn
 
+CUDA_VISIBLE_DEVICES=0 python scripts/run_pretrain.py \
+    --config configs/base.yaml \
+    --model-config configs/vit1d_ssl_mae_varlen_altattn_fullocd_balanced_realdata_ocdetect_flu.yaml \
+    --run-name vit1d_ssl_mae_varlen_altattn_new_trained
+
+CUDA_VISIBLE_DEVICES=1 python scripts/run_pretrain.py \
+    --config configs/base.yaml \
+    --model-config configs/vit1d_ssl_mae_varlen_altattn_fullocd_balanced_realdata_ocdetect_flu_win128.yaml \
+    --run-name vit1d_ssl_mae_varlen_altattn_win128_trained
+
+CUDA_VISIBLE_DEVICES=0 python scripts/run_pretrain.py \
+    --config configs/base.yaml \
+    --model-config configs/vit1d_ssl_mae_varlen_altattn_fullocd_balanced_spectral_realdata_ocdetect_flu.yaml \
+    --run-name vit1d_ssl_mae_varlen_altattn_spectral
+
+CUDA_VISIBLE_DEVICES=1 python scripts/run_pretrain.py \
+    --config configs/base.yaml \
+    --model-config configs/vit1d_ssl_mae_varlen_altattn_fullocd_balanced_bandweighted_realdata_ocdetect_flu.yaml \
+    --run-name vit1d_ssl_mae_varlen_altattn_bandweighted
+
+CUDA_VISIBLE_DEVICES=1 python scripts/run_pretrain.py \
+    --config configs/base.yaml \
+    --model-config configs/vit1d_ssl_mae_varlen_fullocd_balanced_realdata_ocdetect_flu.yaml \
+    --run-name vit1d_ssl_mae_varlen
+###
+CUDA_VISIBLE_DEVICES=0 python scripts/run_pretrain.py \
+    --config configs/base.yaml \
+    --model-config configs/vit1d_ssl_mae_varlen_altattn_fullocd_balanced_realdata_ocdetect_flu.yaml \
+    --run-name vit1d_ssl_mae_varlen_altattn_resume100k \
+    --resume /home/yiquan/TransfHAR/runs/vit1d_ssl_mae_varlen_altattn_new_trained/checkpoints/step_0100000.pt 
+
+CUDA_VISIBLE_DEVICES=0 python scripts/run_pretrain.py \
+    --config configs/base.yaml \
+    --model-config configs/vit1d_ssl_mae_varlen_altattn_fullocd_balanced_realdata_ocdetect_flu.yaml \
+    --run-name vit1d_ssl_mae_varlen_altattn_resume270k \
+    --resume /home/yiquan/TransfHAR/runs/vit1d_ssl_mae_varlen_altattn_resume100k/checkpoints/step_0270000.pt
+
+CUDA_VISIBLE_DEVICES=1 python scripts/run_pretrain.py \
+    --config configs/base.yaml \
+    --model-config configs/vit1d_ssl_mae_varlen_fullocd_balanced_realdata_ocdetect_flu.yaml \
+    --run-name vit1d_ssl_mae_varlen_resume100k \
+    --resume /home/yiquan/TransfHAR/runs/vit1d_ssl_mae_varlen/checkpoints/step_0100000.pt
+
+###
+
 # MAE (variable length + alt-attn) + full occlusion detection
 CUDA_VISIBLE_DEVICES=1 python scripts/run_pretrain.py \
     --config configs/base.yaml \

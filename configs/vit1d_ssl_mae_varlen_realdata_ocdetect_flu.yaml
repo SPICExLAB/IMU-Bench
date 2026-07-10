@@ -9,6 +9,10 @@ vit1d:
     hidden_dropout_prob: 0.0
     attention_probs_dropout_prob: 0.0
     layer_norm_eps: 1.0e-06
+    # BERT-style masking (mask tokens kept in place, all N tokens encoded) to
+    # match the alt-attn model; the ONLY remaining difference is that this
+    # encoder uses full joint self-attention instead of frame/global alt-attn.
+    bert_masking: true
   decoder:
     hidden_size: 192
     num_hidden_layers: 4
@@ -17,6 +21,10 @@ vit1d:
   max_patches_per_channel: 256
   pooling: mean
   pos_embed_type: 2d
+  # CLS token (like the alt-attn model): prepended to the sequence, attends over
+  # all patches during MAE pretraining via forward_dino, then stripped before the
+  # decoder. Requires bert_masking: true above (selects the all-tokens BERT path).
+  use_cls_token: true
 objective:
   type: mae_realdata_ocdetect_flu
   loss_type: full_mse
