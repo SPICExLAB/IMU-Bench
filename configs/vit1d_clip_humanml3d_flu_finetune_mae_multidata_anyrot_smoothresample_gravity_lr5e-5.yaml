@@ -1,0 +1,143 @@
+# IMU<->text CLIP alignment FINETUNE on HumanML3D, retrained WITH random
+# SO(3) rotation augmentation -- identical in every other respect to
+# vit1d_clip_humanml3d_flu_finetune_mae_multidata.yaml (the config that
+# produced 33.00%/34.25% imu<->text retrieval on HumanML3D itself, our
+# current best "Ours(MAE+HumanML3D-CLIP)" checkpoint).
+#
+# Motivation: investigating why Ours(MAE+HumanML3D-CLIP) badly underperforms
+# UniMTS on zero-shot HAR classification (see EXPERIMENTS.md §10). Checked
+# UniMTS's own training code directly (baselines/language_alignment/UniMTS/
+# pretrain.py + utils.py::augment_data) and found it applies a fresh random
+# 3D rotation to every training sample's acc+gyro every batch -- explicit
+# training for sensor-orientation invariance. Our HumanML3D-CLIP training
+# has NEVER done this: it was trained purely on HumanML3D's one fixed,
+# perfectly-canonical synthetic FLU-frame convention, with zero exposure to
+# orientation variation. Real target-dataset sensors (WISDM/UTD-MHAD/PAMAP2)
+# inevitably have calibration/mounting-angle variance relative to that one
+# fixed synthetic convention -- a rotation-naive model has no way to be
+# robust to that. This repo already has the exact same augmentation
+# UniMTS uses (imu_lm/data/augmentations/transform.py::apply_random_rotation,
+# uniform SO(3) via unit quaternion) already wired into HumanML3D's own
+# loader (imu_lm/data/humanml3d_dataset_FLU.py calls apply_augment on the
+# train split) -- just never turned on for this specific config. Retraining
+# Stage 2 (not just continuing from the existing checkpoint, since we want a
+# clean encoder that was rotation-augmented from the start) with this one
+# change turned on to test the hypothesis directly, holding everything else
+# fixed. This is a DIFFERENT axis of change than the earlier midtraining v1/v2
+# experiments (which changed the DATA MIX/scale, not the augmentation) --
+# both of those made zero-shot worse, so this tests a genuinely different
+# mechanism instead of re-tuning the same one.
+
+vit1d:
+  patch_size: 16
+  shared_kernel: acc_gyro
+  pos_embed_type: 2d
+  max_patches_per_channel: 256
+  max_channels: 32
+  pooling: "mean"
+
+  encoder:
+    hidden_size: 384
+    num_hidden_layers: 12
+    num_attention_heads: 6
+    intermediate_size: 1536
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-6
+    alt_attention: true
+
+objective:
+  type: imu_text_clip_flu
+  imu_text_clip_flu:
+    pretrained_run:  vit1d_ssl_mae_varlen_altattn_multidata
+    pretrained_ckpt: best
+    freeze_imu_encoder:  false
+    freeze_text_encoder: true
+
+    humanml3d_root: /projects/b53017/vbc1591/HumanML3D
+    clip_model:     openai/clip-vit-base-patch32
+    clip_embed_dim: 512
+    local_files_only: true
+    text_cache_path: /projects/b53017/vbc1591/HumanML3D/clip_text_emb_cache.pt
+
+paths:
+  dataset_path: /projects/b53017/vbc1591/IMULM_master_dataset_v2.parquet
+  runs_root: /gpfs/home/vbc1591/IMU-SSL/runs
+
+random_rotation:
+  enabled: true               # uniform SO(3) on acc+gyro together -- see header note
+  rotation_set: so3
+
+# NEW (2026-07-25): _resample_joints upsamples HumanML3D's native 20Hz joint
+# positions to 50Hz via LINEAR interpolation before acceleration is derived
+# via second-order finite difference downstream. Linear interpolation has
+# piecewise-constant velocity between the original 20Hz sample points, so its
+# second derivative is a series of artificial spikes exactly at each 20Hz
+# breakpoint -- a pure numerical artifact of the interpolation method, not
+# real motion (mirrors why IMUSim, UniMTS's own synthesis tool, uses a
+# SplinedBodyModel for smooth trajectory representation before deriving
+# physical quantities). Confirmed empirically end-to-end through this exact
+# FLU pipeline: switching to cubic-spline resampling drops a 2nd-difference
+# "roughness" proxy from ~14-21 down to ~0.2-0.7 (a 20-40x reduction) while
+# leaving the overall acceleration MAGNITUDE essentially unchanged (5.53->5.69,
+# 1.40->1.47) -- i.e. this removes a spurious numerical artifact, not real
+# signal. Real accelerometer data (WISDM/PAMAP2) shows this same roughness
+# proxy at ~0.8-2.4 -- cubic resampling brings HumanML3D's synthetic
+# acceleration in line with real sensor characteristics for the first time,
+# whereas the current default (linear) was ~10-20x rougher than any real
+# target dataset. gravity_mps2 is deliberately left at its default (0.0,
+# unset) here to isolate this fix as a single clean variable, separate from
+# the already-tested (and negative) gravity experiment.
+humanml3d:
+  resample_method: cubic
+  gravity_mps2: 9.81   # NEW: combine with the resample fix now that the roughness
+                       # artifact (hypothesized cause of gravity's earlier negative
+                       # result -- z-score normalization dividing by a variance
+                       # dominated by artifact-inflated roughness rather than real
+                       # movement) is fixed. Isolated gravity test alone was negative
+                       # (see vit1d_clip_humanml3d_flu_finetune_mae_multidata_anyrot_gravity.yaml);
+                       # this tests whether it behaves differently on a properly
+                       # smoothed signal.
+
+windowing:
+  min_window_seconds: 1.28
+  max_window_seconds: 10.24
+
+data:
+  sensor_columns: [acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z]
+  batch_size: 64
+  num_workers: 4
+
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 10000000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 500
+  val_max_batches: 100
+
+  optim:
+    name: adamw
+    lr: 5.0e-5   # LR sweep value
+    weight_decay: 0.01
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+
+  sched:
+    name: cosine
+    warmup_steps: 200
+
+  early_stopping:
+    enabled: true
+    monitor: val_loss
+    patience: 20
+
+logging:
+  log_every_steps: 5
+  ckpt_every_steps: 500
+  save_step_checkpoints: false
+
+wandb:
+  entity: yli32258-northwestern-university
+  project: TransfHAR_project

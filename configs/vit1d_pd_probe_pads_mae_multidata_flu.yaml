@@ -1,0 +1,97 @@
+# Linear probe on PADS (Parkinson's Disease Smartwatch) using the frozen
+# encoder from the combined-multidata MAE pretrain (alt-attn ViT1DEncoder).
+# Sibling of vit1d_har_probe_hhar_mae_multidata_flu.yaml -- same generic
+# utd_mhad_probe objective, dataset swapped via data.train_on_datasets.
+#
+# Task: 3-class differential diagnosis from a single wrist IMU
+#   0=Healthy  1=Parkinson's  2=Differential Diagnosis (other movement
+#   disorders / essential tremor / atypical parkinsonism / MS)
+# The label is SUBJECT-level, so splits.group_key must stay subject_id
+# (inherited from base.yaml) -- session-level grouping would leak the label
+# through the same patient's other recordings. See
+# scripts/prepare_pads_dataset.py.
+#
+# Classes are imbalanced (~276 PD / 114 DD / 79 HC subjects); read bal_acc and
+# macro_f1 rather than acc.
+#
+# Caveat for the frozen encoder: PADS accelerometer is Apple Watch
+# userAcceleration -- GRAVITY ALREADY REMOVED -- whereas the multidata MAE was
+# pretrained on gravity-bearing accelerometer. There is no gravity-direction
+# cue here, so this probe measures transfer under that shift; the finetune
+# sibling and the scratch baseline bracket how much it costs.
+
+vit1d:
+  patch_size: 16
+  shared_kernel: acc_gyro       # must match the MAE checkpoint's patch embed
+  use_cls_token: false
+  encoder:
+    hidden_size: 384
+    num_hidden_layers: 12
+    num_attention_heads: 6
+    intermediate_size: 1536
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-6
+    drop_path_rate: 0.0
+    alt_attention: true
+  max_patches_per_channel: 256
+  pooling: "mean"
+
+objective:
+  type: utd_mhad_probe          # generic linear-probe objective: frozen encoder + LinearHead
+  utd_mhad_probe:
+    pretrained_run:  vit1d_ssl_mae_varlen_altattn_multidata
+    pretrained_ckpt: best
+
+paths:
+  dataset_path: /projects/b53017/vbc1591/pads_dataset.parquet
+  runs_root: /gpfs/home/vbc1591/IMU-SSL/runs
+
+preprocess:
+  normalize:
+    enabled: true              # MAE was trained with z-score normalization
+
+windowing:
+  window_seconds: 2.56         # 128 samples @ 50 Hz; covers 4-6 Hz PD tremor
+
+splits:
+  val_ratio: 0.2               # grouped by subject_id (base.yaml)
+
+data:
+  train_on_datasets: ["pads"]
+  sensor_columns: [acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z]
+  batch_size:       256
+  eval_batch_size:  256
+  num_workers:      8
+  pin_memory:       true
+
+logging:
+  ckpt_every_steps: 500
+  save_step_checkpoints: false   # only keep best.pt/latest.pt (no per-step snapshots)
+
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 20000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 200
+
+  early_stopping:
+    enabled: true
+    patience: 20
+
+  optim:
+    name: adamw
+    lr: 1.0e-3
+    weight_decay: 0.1
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+
+  sched:
+    name: cosine
+    warmup_steps: 100
+
+wandb:
+  entity: yli32258-northwestern-university
+  project: TransfHAR_project

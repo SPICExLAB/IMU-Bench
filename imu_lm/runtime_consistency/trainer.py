@@ -17,6 +17,7 @@ except ImportError:
     tqdm = None
 
 from imu_lm.utils.helpers import cfg_get
+from imu_lm.utils.metrics import compute_metrics
 
 try:
     import wandb
@@ -41,6 +42,24 @@ class Trainer:
         seed = int(cfg_get(cfg, ["trainer", "seed"], 42))
         _set_seed(seed)
 
+        # Acc-only ablation: truncate every [B, C, T] batch to the first
+        # data.sensor_columns channels (the acc-only prefix, by this repo's
+        # acc-then-gyro column convention) before it reaches the objective, so
+        # the encoder is trained/probed on accelerometer signal only. A single
+        # choke point here covers MAE pretraining and every downstream
+        # probe/finetune objective without touching per-source loaders or
+        # per-objective forward_loss code. Some loaders already honor
+        # data.sensor_columns and hand back acc-only data directly (in which
+        # case this is a no-op); others (the FLU wrist loaders, the MAE
+        # multidata cache) always emit the full acc+gyro concat regardless of
+        # config, so this is the only reliable place to cut it down. Slicing
+        # to an explicit target width (not just "half of whatever arrives")
+        # keeps this idempotent either way.
+        self._acc_only = bool(cfg_get(cfg, ["data", "acc_only"], False))
+        self._acc_only_n = len(cfg_get(cfg, ["data", "sensor_columns"], []) or []) if self._acc_only else None
+        if self._acc_only and not self._acc_only_n:
+            raise ValueError("data.acc_only=true requires a non-empty data.sensor_columns to know the target channel count")
+
         os.makedirs(os.path.join(run_dir, "logs"), exist_ok=True)
         os.makedirs(os.path.join(run_dir, "checkpoints"), exist_ok=True)
 
@@ -49,6 +68,7 @@ class Trainer:
 
         self.log_every = int(cfg_get(cfg, ["logging", "log_every_steps"], 100))
         self.ckpt_every = int(cfg_get(cfg, ["logging", "ckpt_every_steps"], 1000))
+        self.save_step_checkpoints = bool(cfg_get(cfg, ["logging", "save_step_checkpoints"], True))
         self.max_steps = int(cfg_get(cfg, ["trainer", "max_steps"], 100000))
         self.use_amp = bool(cfg_get(cfg, ["trainer", "amp"], False))
         self.grad_clip_norm = float(cfg_get(cfg, ["trainer", "grad_clip_norm"], 0.0))
@@ -62,11 +82,31 @@ class Trainer:
         es_cfg = cfg_get(cfg, ["trainer", "early_stopping"], {}) or {}
         self.early_stopping_enabled = bool(es_cfg.get("enabled", False))
         self.early_stopping_patience = int(es_cfg.get("patience", 5))
+        # Selection metric for best.pt / early stopping. Default "val_loss"
+        # (minimise) — the repo-wide convention. Any pooled val metric name
+        # (e.g. "macro_f1", maximised) is also accepted; used to mirror the
+        # OpenWatch paper's "early stop on val macro-F1" recipe (§5f).
+        self.es_monitor = str(es_cfg.get("monitor", "val_loss"))
+        # Direction: default keeps the historical rule (val_loss -> minimise,
+        # anything else -> maximise). `early_stopping.mode: min|max` overrides
+        # it so a lower-is-better pooled val metric (e.g. mpjpe_mm for the
+        # pose tasks) can drive best.pt / early stopping (IMU-Bench uses this).
+        es_mode = es_cfg.get("mode")
+        if es_mode is None:
+            self.es_monitor_maximise = self.es_monitor != "val_loss"
+        else:
+            if str(es_mode).lower() not in ("min", "max"):
+                raise ValueError(f"early_stopping.mode must be 'min' or 'max', got {es_mode!r}")
+            self.es_monitor_maximise = str(es_mode).lower() == "max"
         self.best_val_loss = float("inf")
         self.best_val_mpjpe = float("inf")
         self.epochs_without_improvement = 0
         self.ckpt_best = os.path.join(run_dir, "checkpoints", "best.pt")
         self.ckpt_best_mpjpe = os.path.join(run_dir, "checkpoints", "best_mpjpe.pt")
+        # trainer.extra_best: {macro_f1: max, ...} -> also keep checkpoints/best_<metric>.pt
+        _eb = (cfg_get(cfg, ["trainer", "extra_best"], {}) or {})
+        self.extra_best_metrics = {str(k): (str(v).lower() == "max") for k, v in _eb.items()}
+        self._extra_best_val = {}
 
     def fit(
         self,
@@ -94,16 +134,25 @@ class Trainer:
 
         step = int(start_step)
         self._epoch = 0
-        # Restore early stopping state + epoch from checkpoint if resuming
+        # Restore early stopping state + epoch from checkpoint if resuming.
+        # Prefer latest.pt (freshest bookkeeping) but fall back to best.pt if
+        # latest.pt is missing or corrupted (e.g. truncated by a disk-quota
+        # write failure) -- both checkpoints carry the same bookkeeping keys.
         if start_step > 0:
-            ckpt_path = self.ckpt_latest
-            if os.path.exists(ckpt_path):
-                ckpt = torch.load(ckpt_path, map_location="cpu", weights_only=False)
+            for ckpt_path in (self.ckpt_latest, self.ckpt_best):
+                if not os.path.exists(ckpt_path):
+                    continue
+                try:
+                    ckpt = torch.load(ckpt_path, map_location="cpu", weights_only=False)
+                except Exception as e:
+                    print(f"[resume] failed to read {ckpt_path} ({e}), trying next checkpoint")
+                    continue
                 self.best_val_loss = ckpt.get("best_val_loss", float("inf"))
                 self.best_val_mpjpe = ckpt.get("best_val_mpjpe", float("inf"))
                 self.epochs_without_improvement = ckpt.get("epochs_without_improvement", 0)
                 self._epoch = ckpt.get("epoch", 0)
-                print(f"[resume] epoch={self._epoch} best_val_loss={self.best_val_loss:.6f} patience_count={self.epochs_without_improvement}")
+                print(f"[resume] epoch={self._epoch} best_val_loss={self.best_val_loss:.6f} patience_count={self.epochs_without_improvement} (from {ckpt_path})")
+                break
         metrics_f = open(self.metrics_path, "a", buffering=1)
 
         stop = False
@@ -139,6 +188,7 @@ class Trainer:
                     mod.train()
 
                 batch = self._to_device(batch)
+                batch = self._acc_only_slice(batch)
                 with autocast("cuda", enabled=self.use_amp):
                     loss, logs = objective_step(batch, model, self.cfg)
                     if self.grad_accum_steps > 1:
@@ -175,11 +225,12 @@ class Trainer:
                         epoch_bar.set_postfix(loss=f"{_last_loss:.4f}", step=step)
 
                 if step % self.ckpt_every == 0:
-                    step_path = os.path.join(
-                        os.path.dirname(self.ckpt_latest),
-                        f"step_{step:07d}.pt",
-                    )
-                    self._save_ckpt(model, optimizer, scheduler, step, path=step_path)
+                    if self.save_step_checkpoints:
+                        step_path = os.path.join(
+                            os.path.dirname(self.ckpt_latest),
+                            f"step_{step:07d}.pt",
+                        )
+                        self._save_ckpt(model, optimizer, scheduler, step, path=step_path)
                     self._save_ckpt(model, optimizer, scheduler, step)
 
                 # Periodic in-training validation
@@ -221,12 +272,36 @@ class Trainer:
                 self.best_val_mpjpe = mpjpe
                 self._save_ckpt(model, optimizer, scheduler, step, path=self.ckpt_best_mpjpe)
                 print(f"[train] new best val mpjpe={mpjpe:.2f} mm")
+        # Secondary "best_<metric>.pt" checkpoints, independent of early stopping: lets one run be
+        # read under two selection rules (e.g. min val_loss AND max val macro_f1) without re-training.
+        for m, maximise in getattr(self, "extra_best_metrics", {}).items():
+            if avg_logs is None or m not in avg_logs:
+                continue
+            v = float(avg_logs[m]) * (-1.0 if maximise else 1.0)
+            if v < self._extra_best_val.get(m, float("inf")):
+                self._extra_best_val[m] = v
+                self._save_ckpt(model, optimizer, scheduler, step, path=os.path.join(self.run_dir, "checkpoints", f"best_{m}.pt"))
+                print(f"[train] new best val {m}={float(avg_logs[m]):.6f} -> best_{m}.pt")
         if self.early_stopping_enabled and val_loss is not None:
-            if val_loss < self.best_val_loss:
-                self.best_val_loss = val_loss
+            # Score to compare: val_loss (min) or a pooled val metric (max),
+            # stored negated so the "lower is better" bookkeeping is shared.
+            if self.es_monitor == "val_loss":
+                score = val_loss
+            else:
+                if avg_logs is None or self.es_monitor not in avg_logs:
+                    raise KeyError(f"early_stopping.monitor={self.es_monitor!r} not in val logs "
+                                   f"(have {sorted(avg_logs or {})})")
+                score = float(avg_logs[self.es_monitor])
+                if self.es_monitor_maximise:
+                    score = -score
+            if score < self.best_val_loss:
+                self.best_val_loss = score
                 self.epochs_without_improvement = 0
                 self._save_ckpt(model, optimizer, scheduler, step, path=self.ckpt_best)
-                print(f"[train] new best val_loss={val_loss:.6f}")
+                if self.es_monitor != "val_loss":
+                    print(f"[train] new best val {self.es_monitor}={(-score if self.es_monitor_maximise else score):.6f} (val_loss={val_loss:.6f})")
+                else:
+                    print(f"[train] new best val_loss={val_loss:.6f}")
             else:
                 self.epochs_without_improvement += 1
                 print(f"[train] no improvement for {self.epochs_without_improvement} evals")
@@ -243,15 +318,32 @@ class Trainer:
         count = 0
         all_logs_keys = set()
         accum_logs: Dict[str, float] = {}
+        # Classification objectives may attach raw per-batch predictions under
+        # "_y_true"/"_y_pred" (list-valued, underscore-prefixed so the scalar
+        # accumulation path above skips them). Macro-averaged metrics
+        # (macro_f1/precision/recall, balanced accuracy) are NOT valid to
+        # average per-batch and then mean across batches -- with many classes
+        # and modest batch sizes, each batch's per-class support is small and
+        # noisy, and F1 in particular is harshly punished by a single
+        # zero-support class in one batch even if the model handles that
+        # class fine over the full validation set. Pooling every prediction
+        # across the whole eval pass and computing these metrics once, here,
+        # is the statistically correct approach.
+        pooled_y_true: list = []
+        pooled_y_pred: list = []
         with torch.no_grad():
             for batch in val_loader:
                 if batch is None:
                     continue
                 batch = self._to_device(batch)
+                batch = self._acc_only_slice(batch)
                 with autocast("cuda", enabled=self.use_amp):
                     loss, logs = objective_step(batch, model, self.cfg)
                 total_loss += float(loss.detach().item())
                 count += 1
+                if "_y_true" in logs and "_y_pred" in logs:
+                    pooled_y_true.extend(logs["_y_true"])
+                    pooled_y_pred.extend(logs["_y_pred"])
                 for k, v in logs.items():
                     if isinstance(v, (int, float)) and k != "loss":
                         accum_logs[k] = accum_logs.get(k, 0.0) + float(v)
@@ -264,6 +356,11 @@ class Trainer:
         avg_logs: Dict[str, float] = {"loss": avg_loss, "epoch": self._epoch}
         for k in sorted(all_logs_keys):
             avg_logs[k] = accum_logs[k] / count
+        if pooled_y_true:
+            pooled = compute_metrics(pooled_y_true, pooled_y_pred)
+            for k in ("bal_acc", "macro_f1", "macro_precision", "macro_recall"):
+                if k in avg_logs and k in pooled:
+                    avg_logs[k] = pooled[k]
         line = self._format_log(step, "val", self._get_lr(None), avg_logs)
         metrics_f.write(line + "\n")
         print(line)
@@ -286,8 +383,8 @@ class Trainer:
     def _format_log(self, step: int, split: str, lr: float, logs: Dict[str, float]):
         tokens = [f"epoch={logs.get('epoch', 0)}", f"step={step}", f"split={split}", f"loss={logs.get('loss', 0.0):.6f}", f"lr={lr:.6f}"]
         for k, v in logs.items():
-            if k in ("loss", "epoch"):
-                continue
+            if k in ("loss", "epoch") or k.startswith("_"):
+                continue  # "_"-prefixed: internal plumbing (e.g. pooled-metric inputs), not a metric itself
             if isinstance(v, float):
                 tokens.append(f"{k}={v:.6f}")
             else:
@@ -320,3 +417,25 @@ class Trainer:
         if torch.is_tensor(batch):
             return batch.to(self.device)
         return batch
+
+    def _acc_only_slice(self, batch):
+        """Truncate batch[0] ([B, C, T]) to the first self._acc_only_n
+        channels, and, if present, a matching-width bool channel_valid_mask
+        ([B, C]) in batch[2]. No-op if the batch already arrives at the
+        target width (loader already honored data.sensor_columns)."""
+        if not self._acc_only or not isinstance(batch, tuple):
+            return batch
+        x = batch[0]
+        if not (torch.is_tensor(x) and x.dim() == 3):
+            return batch
+        c = x.shape[1]
+        n = self._acc_only_n
+        if c <= n:
+            return batch
+        batch = list(batch)
+        batch[0] = x[:, :n, :]
+        if len(batch) > 2:
+            m = batch[2]
+            if torch.is_tensor(m) and m.dtype == torch.bool and m.dim() == 2 and m.shape[1] == c:
+                batch[2] = m[:, :n]
+        return tuple(batch)

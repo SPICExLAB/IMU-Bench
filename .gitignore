@@ -42,3 +42,30 @@ Figs/
 .agents/
 .DS_Store
 Thumbs.db
+# --- 2026-08-27 additions (bench outputs & local state) ---
+bench/results/_tmp/
+bench/results/_raw/
+bench/generated/results_*/
+bench/generated/slurm/
+bench/generated/.*_jobs
+analysis/legacy_results/*.npz
+logs/catboost_info/
+*.out
+*.err
+scratch.ipynb
+# large data & third-party checkpoints (never redistribute Nymeria/derived data)
+baselines/**/data_processed/
+baselines/**/checkpoint/
+baselines/**/checkpoints/
+baselines/**/data/
+baselines/**/dataset/
+export_for_collaborator/
+data_derived/
+baselines/HAR/DeepConvLSTM/
+baselines/SSL/NormWear/
+baselines/SSL/relcon/
+baselines/full_body_pose/SimplePoser/
+baselines/inertia1/repo/
+baselines/language_alignment/UniMTS/
+baselines/odometry/Air-IO/
+baselines/odometry/TLIO/

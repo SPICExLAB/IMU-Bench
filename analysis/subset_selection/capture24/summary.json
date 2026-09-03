@@ -1,0 +1,147 @@
+{
+ "full_pool": {
+  "windows": 2194855,
+  "hours": 3121.6,
+  "clusters_covered": 2000,
+  "coverage": 1.0,
+  "norm_entropy": 0.9827,
+  "effective_clusters": 1752.9,
+  "rare_clusters_kept": 1.0,
+  "exclusive_clusters_kept": 1.0,
+  "nn_dist_median": 0.0,
+  "nn_dist_p95": 0.0,
+  "max_cluster_share": 0.0019
+ },
+ "random": {
+  "windows": 42188,
+  "hours": 60.0,
+  "clusters_covered": 1994,
+  "coverage": 0.997,
+  "norm_entropy": 0.9789,
+  "effective_clusters": 1703.4,
+  "rare_clusters_kept": 0.994,
+  "exclusive_clusters_kept": 1.0,
+  "nn_dist_median": 0.478,
+  "nn_dist_p95": 7.383,
+  "max_cluster_share": 0.0021
+ },
+ "strided": {
+  "windows": 42188,
+  "hours": 60.0,
+  "clusters_covered": 1998,
+  "coverage": 0.999,
+  "norm_entropy": 0.9805,
+  "effective_clusters": 1724.4,
+  "rare_clusters_kept": 0.998,
+  "exclusive_clusters_kept": 1.0,
+  "nn_dist_median": 0.48,
+  "nn_dist_p95": 7.482,
+  "max_cluster_share": 0.0019
+ },
+ "balanced": {
+  "windows": 42188,
+  "hours": 60.0,
+  "clusters_covered": 2000,
+  "coverage": 1.0,
+  "norm_entropy": 0.9999,
+  "effective_clusters": 1998.6,
+  "rare_clusters_kept": 1.0,
+  "exclusive_clusters_kept": 1.0,
+  "nn_dist_median": 0.478,
+  "nn_dist_p95": 7.262,
+  "max_cluster_share": 0.0005
+ },
+ "balanced_exclusive2x": {
+  "windows": 42188,
+  "hours": 60.0,
+  "clusters_covered": 2000,
+  "coverage": 1.0,
+  "norm_entropy": 0.9985,
+  "effective_clusters": 1977.8,
+  "rare_clusters_kept": 1.0,
+  "exclusive_clusters_kept": 1.0,
+  "nn_dist_median": 0.472,
+  "nn_dist_p95": 7.228,
+  "max_cluster_share": 0.001
+ },
+ "coverage_curve": {
+  "budget_frac": [
+   0.0001,
+   0.0005,
+   0.001,
+   0.005,
+   0.01,
+   0.02,
+   0.05,
+   0.1,
+   0.2,
+   0.5
+  ],
+  "hours": [
+   0.3,
+   1.6,
+   3.1,
+   15.6,
+   31.2,
+   62.4,
+   156.1,
+   312.2,
+   624.3,
+   1560.8
+  ],
+  "random": [
+   0.0955,
+   0.3955,
+   0.6155,
+   0.9615,
+   0.9915,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0
+  ],
+  "strided": [
+   0.1015,
+   0.404,
+   0.627,
+   0.969,
+   0.995,
+   0.998,
+   1.0,
+   1.0,
+   1.0,
+   1.0
+  ],
+  "balanced": [
+   0.1095,
+   0.5485,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0
+  ]
+ },
+ "meta": {
+  "cache": "/projects/b53017/vbc1591/mae_multidata_cache_raw",
+  "source": "capture24",
+  "N": 2194855,
+  "K": 2000,
+  "budget_hours": 60.0,
+  "budget_windows": 42188,
+  "budget_frac_of_pool": 0.0192,
+  "other_source_cluster_coverage": {
+   "eatingspeed": 1693,
+   "motionx": 557,
+   "nhanes": 1762,
+   "ocdetect": 1233,
+   "totalcapture": 171
+  },
+  "exclusive_clusters": 55,
+  "pca_explained": 0.842
+ }
+}

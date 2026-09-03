@@ -1,0 +1,347 @@
+{
+  "n_sampled": 12000,
+  "per_type": 12,
+  "fs_hz": 50.0,
+  "eta_squared_variance_explained_by_type": {
+    "acc_dyn": 0.6851,
+    "gyro_mag": 0.976,
+    "dom_freq": 0.4052,
+    "spec_ent": 0.4277,
+    "still_frac": 0.5048
+  },
+  "eta_squared_excluding_capture24_types": {
+    "acc_dyn": 0.6591,
+    "gyro_mag": 0.7719,
+    "dom_freq": 0.401,
+    "spec_ent": 0.4104,
+    "still_frac": 0.5008
+  },
+  "n_capture24_dominated_types": 269,
+  "type_mean_percentiles": {
+    "acc_dyn": {
+      "1": 0.5574,
+      "25": 0.7467,
+      "50": 0.8339,
+      "75": 0.9904,
+      "99": 1.4322
+    },
+    "gyro_mag": {
+      "1": 0.0,
+      "25": 0.0,
+      "50": 1.2239,
+      "75": 1.391,
+      "99": 1.5902
+    },
+    "dom_freq": {
+      "1": 0.3174,
+      "25": 0.4476,
+      "50": 0.6104,
+      "75": 1.0173,
+      "99": 4.7855
+    },
+    "spec_ent": {
+      "1": 0.6144,
+      "25": 0.7311,
+      "50": 0.774,
+      "75": 0.8133,
+      "99": 0.9098
+    },
+    "still_frac": {
+      "1": 0.0552,
+      "25": 0.0791,
+      "50": 0.0915,
+      "75": 0.1174,
+      "99": 0.3661
+    }
+  },
+  "extreme_types": {
+    "acc_dyn": {
+      "lowest": [
+        {
+          "type": 259,
+          "value": 0.0,
+          "dominant_source": "eatingspeed"
+        },
+        {
+          "type": 852,
+          "value": 0.4931,
+          "dominant_source": "capture24"
+        },
+        {
+          "type": 236,
+          "value": 0.4985,
+          "dominant_source": "ocdetect"
+        },
+        {
+          "type": 495,
+          "value": 0.5154,
+          "dominant_source": "ocdetect"
+        },
+        {
+          "type": 834,
+          "value": 0.5228,
+          "dominant_source": "capture24"
+        }
+      ],
+      "highest": [
+        {
+          "type": 633,
+          "value": 1.5703,
+          "dominant_source": "capture24"
+        },
+        {
+          "type": 831,
+          "value": 1.5665,
+          "dominant_source": "eatingspeed"
+        },
+        {
+          "type": 132,
+          "value": 1.5399,
+          "dominant_source": "eatingspeed"
+        },
+        {
+          "type": 191,
+          "value": 1.5371,
+          "dominant_source": "capture24"
+        },
+        {
+          "type": 556,
+          "value": 1.5222,
+          "dominant_source": "capture24"
+        }
+      ]
+    },
+    "gyro_mag": {
+      "lowest": [
+        {
+          "type": 635,
+          "value": 0.0,
+          "dominant_source": "capture24"
+        },
+        {
+          "type": 561,
+          "value": 0.0,
+          "dominant_source": "capture24"
+        },
+        {
+          "type": 630,
+          "value": 0.0,
+          "dominant_source": "capture24"
+        },
+        {
+          "type": 627,
+          "value": 0.0,
+          "dominant_source": "capture24"
+        },
+        {
+          "type": 624,
+          "value": 0.0,
+          "dominant_source": "capture24"
+        }
+      ],
+      "highest": [
+        {
+          "type": 170,
+          "value": 1.6328,
+          "dominant_source": "ocdetect"
+        },
+        {
+          "type": 935,
+          "value": 1.6274,
+          "dominant_source": "ocdetect"
+        },
+        {
+          "type": 257,
+          "value": 1.6089,
+          "dominant_source": "ocdetect"
+        },
+        {
+          "type": 920,
+          "value": 1.6055,
+          "dominant_source": "ocdetect"
+        },
+        {
+          "type": 152,
+          "value": 1.603,
+          "dominant_source": "realdata"
+        }
+      ]
+    },
+    "dom_freq": {
+      "lowest": [
+        {
+          "type": 259,
+          "value": 0.0244,
+          "dominant_source": "eatingspeed"
+        },
+        {
+          "type": 499,
+          "value": 0.3011,
+          "dominant_source": "realdata"
+        },
+        {
+          "type": 889,
+          "value": 0.3011,
+          "dominant_source": "ocdetect"
+        },
+        {
+          "type": 277,
+          "value": 0.3011,
+          "dominant_source": "eatingspeed"
+        },
+        {
+          "type": 268,
+          "value": 0.3092,
+          "dominant_source": "eatingspeed"
+        }
+      ],
+      "highest": [
+        {
+          "type": 91,
+          "value": 6.4046,
+          "dominant_source": "ocdetect"
+        },
+        {
+          "type": 339,
+          "value": 6.2907,
+          "dominant_source": "eatingspeed"
+        },
+        {
+          "type": 808,
+          "value": 6.2093,
+          "dominant_source": "capture24"
+        },
+        {
+          "type": 992,
+          "value": 5.363,
+          "dominant_source": "ocdetect"
+        },
+        {
+          "type": 512,
+          "value": 5.3304,
+          "dominant_source": "eatingspeed"
+        }
+      ]
+    },
+    "spec_ent": {
+      "lowest": [
+        {
+          "type": 259,
+          "value": 0.0209,
+          "dominant_source": "eatingspeed"
+        },
+        {
+          "type": 499,
+          "value": 0.2725,
+          "dominant_source": "realdata"
+        },
+        {
+          "type": 537,
+          "value": 0.5062,
+          "dominant_source": "sonic"
+        },
+        {
+          "type": 978,
+          "value": 0.5075,
+          "dominant_source": "ocdetect"
+        },
+        {
+          "type": 645,
+          "value": 0.5835,
+          "dominant_source": "ocdetect"
+        }
+      ],
+      "highest": [
+        {
+          "type": 165,
+          "value": 0.9233,
+          "dominant_source": "capture24"
+        },
+        {
+          "type": 115,
+          "value": 0.9144,
+          "dominant_source": "capture24"
+        },
+        {
+          "type": 158,
+          "value": 0.9137,
+          "dominant_source": "capture24"
+        },
+        {
+          "type": 436,
+          "value": 0.9123,
+          "dominant_source": "capture24"
+        },
+        {
+          "type": 198,
+          "value": 0.9119,
+          "dominant_source": "capture24"
+        }
+      ]
+    },
+    "still_frac": {
+      "lowest": [
+        {
+          "type": 493,
+          "value": 0.0412,
+          "dominant_source": "ocdetect"
+        },
+        {
+          "type": 537,
+          "value": 0.0425,
+          "dominant_source": "sonic"
+        },
+        {
+          "type": 343,
+          "value": 0.0477,
+          "dominant_source": "sonic"
+        },
+        {
+          "type": 763,
+          "value": 0.0501,
+          "dominant_source": "sonic"
+        },
+        {
+          "type": 761,
+          "value": 0.0506,
+          "dominant_source": "ocdetect"
+        }
+      ],
+      "highest": [
+        {
+          "type": 259,
+          "value": 1.0,
+          "dominant_source": "eatingspeed"
+        },
+        {
+          "type": 686,
+          "value": 0.5407,
+          "dominant_source": "eatingspeed"
+        },
+        {
+          "type": 834,
+          "value": 0.5226,
+          "dominant_source": "capture24"
+        },
+        {
+          "type": 798,
+          "value": 0.4544,
+          "dominant_source": "eatingspeed"
+        },
+        {
+          "type": 63,
+          "value": 0.4399,
+          "dominant_source": "capture24"
+        }
+      ]
+    }
+  },
+  "stat_definitions": {
+    "acc_dyn": "std of |acc| (z-scored ch.) -- burstiness of translation",
+    "gyro_mag": "mean |gyro| (z-scored ch.) -- rotation content; 0 => gyro absent",
+    "dom_freq": "peak frequency of |acc| in 0.2-10 Hz (Hz) -- tempo",
+    "spec_ent": "normalised spectral entropy of |acc| -- 0 periodic, 1 broadband",
+    "still_frac": "fraction of samples within 5% of median |acc| -- stillness"
+  },
+  "units_caveat": "channels are per-window z-scored by base.yaml before the encoder sees them, so amplitude and gravity are divided out; all statistics below are shape descriptors in normalised units, NOT g or rad/s"
+}

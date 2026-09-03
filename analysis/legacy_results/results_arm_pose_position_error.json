@@ -1,0 +1,32 @@
+{
+  "Ours (MAE)": {
+    "pos_err_cm": 8.171609044075012,
+    "ang_err_deg": 9.81008243560791,
+    "run": "vit1d_arm_pose_probe_nymeria_mae_multidata"
+  },
+  "Ours (MAE) finetune": {
+    "pos_err_cm": 8.003421127796173,
+    "ang_err_deg": 9.889495849609375,
+    "run": "vit1d_arm_pose_finetune_nymeria_mae_multidata"
+  },
+  "Ours (MAE, no alt-attn)": {
+    "pos_err_cm": 8.171790093183517,
+    "ang_err_deg": 9.970406532287598,
+    "run": "vit1d_arm_pose_probe_nymeria_mae_noaltattn_multidata"
+  },
+  "FOCAL": {
+    "pos_err_cm": 8.729766309261322,
+    "ang_err_deg": 10.747379302978516,
+    "run": "vit1d_arm_pose_probe_nymeria_focal_multidata"
+  },
+  "SimMTM": {
+    "pos_err_cm": 8.558684587478638,
+    "ang_err_deg": 10.392851829528809,
+    "run": "vit1d_arm_pose_probe_nymeria_simmtm_multidata"
+  },
+  "Scratch": {
+    "pos_err_cm": 8.1528902053833,
+    "ang_err_deg": 9.939501762390137,
+    "run": "vit1d_arm_pose_supervised_nymeria_altattn_scratch"
+  }
+}

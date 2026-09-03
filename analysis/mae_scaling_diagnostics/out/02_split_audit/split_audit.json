@@ -1,0 +1,86 @@
+{
+  "split_unit_summary": {
+    "realdata": {
+      "unit": "subject",
+      "disjoint": true,
+      "note": "splits.group_key=subject_id (imu_lm/data/splits.py::make_splits)"
+    },
+    "ocdetect": {
+      "unit": "window",
+      "disjoint": false,
+      "note": "positional slice through file-ordered windows -- SEE DETAILED CHECK BELOW"
+    },
+    "nymeria": {
+      "unit": "file/session",
+      "disjoint": true,
+      "note": "train_root vs. val_root are physically separate directories"
+    },
+    "totalcapture": {
+      "unit": "subject",
+      "disjoint": true,
+      "note": "train_subjects=[s1..s4] vs val_subjects=[s5], disjoint by construction"
+    },
+    "imuposer": {
+      "unit": "subject",
+      "disjoint": true,
+      "note": "val_participants={P9,P10} held out entirely, rest is train"
+    },
+    "eatingspeed": {
+      "unit": "participant",
+      "disjoint": true,
+      "note": "make_eatingspeed_loaders_random splits at participant level (rng.permutation)"
+    },
+    "motionx": {
+      "unit": "clip",
+      "disjoint": true,
+      "note": "val_frac holdout of clips, no session-sliding-window reuse (synthetic, 1 window/clip-ish)"
+    },
+    "humanml3d": {
+      "unit": "clip",
+      "disjoint": "unverified",
+      "note": "official HumanML3D train.txt/val.txt -- SEE DETAILED CHECK BELOW"
+    },
+    "sonic": {
+      "unit": "session",
+      "disjoint": true,
+      "note": "max_train_sessions/max_val_sessions from disjoint file lists"
+    },
+    "capture24": {
+      "unit": "participant",
+      "disjoint": true,
+      "note": "make_capture24_loaders_random splits at participant level explicitly (docstring-verified)"
+    },
+    "openwatch": {
+      "unit": "subject",
+      "disjoint": true,
+      "note": "train_subjects/val_subjects, subject-level split"
+    }
+  },
+  "ocdetect_boundary_check": {
+    "n_train": 175781,
+    "n_val": 7863,
+    "boundary_file": "/projects/b53017/vbc1591/OCDetect_extracted/preprocessed/OCDetect_03_recording_06_c076109d-651c-46c4-a745-5df8b383bec3.csv",
+    "straddles_boundary": false,
+    "train_windows_from_boundary_file": 1,
+    "val_windows_from_boundary_file": 0,
+    "note": [
+      "The train/val cut is a plain positional slice through file-concatenated, NOT shuffled windows (combined_mae_multidata_loader.py _build_ocdetect). At this build, the boundary file happens to end exactly at a file boundary this time (no straddle). This is incidental to the current file selection/ordering, NOT a property of the split logic itself -- a different `sample_fraction`/`max_files`/file count would very likely reintroduce the straddle. The split logic is unsafe in general even when this particular build got lucky."
+    ]
+  },
+  "humanml3d_amass_parent_check": {
+    "train_clips": 23384,
+    "val_clips": 1460,
+    "train_clips_with_amass_parent": 11692,
+    "val_clips_with_amass_parent": 730,
+    "shared_parent_amass_sequences": 224,
+    "train_clips_from_shared_sequences": 312,
+    "val_clips_from_shared_sequences": 229,
+    "example_shared_sequences": [
+      "/projects/b53017/vbc1591/HumanML3D/amass_data/MPI_mosh/50026/stretches 1_poses.npz",
+      "/projects/b53017/vbc1591/HumanML3D/amass_data/TotalCapture/s4/freestyle1_poses.npz",
+      "/projects/b53017/vbc1591/HumanML3D/amass_data/CMU/80/80_27_poses.npz",
+      "/projects/b53017/vbc1591/HumanML3D/amass_data/CMU/30/30_09_poses.npz",
+      "/projects/b53017/vbc1591/HumanML3D/amass_data/CMU/105/105_31_poses.npz"
+    ]
+  }
+}

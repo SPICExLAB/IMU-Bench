@@ -1,0 +1,12 @@
+{
+  "Inertia-1 (ART) probe": {
+    "pos_err_cm": 8.474954217672348,
+    "ang_err_deg": 10.437329292297363,
+    "run": "vit1d_arm_pose_probe_nymeria_inertia1_art"
+  },
+  "Inertia-1 (ART) finetune": {
+    "pos_err_cm": 8.474166691303253,
+    "ang_err_deg": 10.457837104797363,
+    "run": "vit1d_arm_pose_finetune_nymeria_inertia1_art"
+  }
+}

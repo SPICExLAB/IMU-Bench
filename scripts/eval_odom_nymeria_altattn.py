@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from imu_lm.data.augmentations.preprocess import PreprocessStats, preprocess_window
 from imu_lm.data.nymeria_real_wrist_odom_loader_FLU import load_session_local_vel_flu
-from imu_lm.models.ViT1D.model import ViT1DEncoderAltAttn
+from imu_lm.models.ViT1D.model import ViT1DEncoder, ViT1DEncoderAltAttn
 from imu_lm.utils.helpers import cfg_get
 
 FS = 50.0
@@ -39,6 +39,14 @@ def build_windows(sessions, cfg, T, ps, hop, target_hz=50):
     Ns, dtQ = Pt * 4, Q / target_hz
     X, Y, GY, R0s, POS = [], [], [], [], []
     stats = PreprocessStats()
+    # Acc-only ablation: the encoder's own input (X, appended below) is
+    # truncated to its acc-only prefix -- matching Trainer._acc_only_slice
+    # during training -- but GY (raw gyro) is kept full-width regardless: it
+    # feeds the classical exp_so3 gyro-integration step below (ground-truth
+    # rotation, not a model input), which every row in this table relies on
+    # to reconstruct a trajectory from predicted local velocities.
+    acc_only = bool(cfg_get(cfg, ["data", "acc_only"], False))
+    n_acc = len(cfg_get(cfg, ["data", "sensor_columns"], []) or []) if acc_only else None
     for X_flu, pos_root, R_X_fw in sessions:
         N = X_flu.shape[0]
         for s in range(0, N - T - ps, hop):
@@ -46,6 +54,8 @@ def build_windows(sessions, cfg, T, ps, hop, target_hz=50):
             proc = preprocess_window(Xw, cfg, stats)
             if proc is None:
                 continue
+            if acc_only:
+                proc = proc[:n_acc, :]   # proc is [C, T] (preprocess_window transposes to channel-first)
             vel = np.empty((Pt, 4, 3), dtype=np.float32)
             for p in range(Pt):
                 tp = s + p * ps
@@ -86,7 +96,11 @@ def load_encoder(run_dir, step, device):
         ckpt = os.path.join(run_dir, "checkpoints", "latest.pt")
     obj = torch.load(ckpt, map_location="cpu", weights_only=False)
     cfg = obj["cfg"]
-    enc = ViT1DEncoderAltAttn(cfg).to(device)
+    # Build whichever encoder architecture the checkpoint was actually trained
+    # with: alt-attn for our MAE model, plain ViT1DEncoder for the FOCAL/SimMTM
+    # baselines and from-scratch runs (features() below handles both).
+    from imu_lm.models.baselines.inertia1_encoder import build_encoder as _build_encoder
+    enc = _build_encoder(cfg).to(device)   # also handles the Inertia-1 external baseline (cfg["inertia1"])
     enc.load_state_dict(obj["model"], strict=True)
     print(f"  loaded {os.path.basename(run_dir)} from {ckpt} step={obj.get('step', '?')}")
     return enc, cfg
@@ -180,7 +194,7 @@ def train_probe(enc, tr, va, device, ps, epochs, patience, lr, batch_size):
             break
     if best_state:
         head.load_state_dict(best_state)
-    return eval_metrics(enc, head, va, device, ps)
+    return head, eval_metrics(enc, head, va, device, ps)
 
 
 def parse_args():
@@ -201,11 +215,20 @@ def parse_args():
     p.add_argument("--batch-size", type=int, default=128)
     p.add_argument("--out-dir", default="data_vis/nymeria_odom_altattn_probe")
     p.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
+    p.add_argument("--seed", type=int, default=42,
+                    help="seeds random/np.random/torch (+cuda) for probe-head init and data shuffling "
+                         "-- previously unseeded (non-deterministic run-to-run); default 42 makes single "
+                         "runs reproducible, override for multi-seed variance studies")
     return p.parse_args()
 
 
 def main():
     args = parse_args()
+    import random
+    random.seed(args.seed)
+    np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
+    torch.cuda.manual_seed_all(args.seed)
     os.makedirs(args.out_dir, exist_ok=True)
     device = torch.device(args.device)
     enc, cfg = load_encoder(os.path.join(args.runs_root, args.run), args.step, device)
@@ -223,11 +246,27 @@ def main():
     tr = dict(zip(keys, build_windows(tr_sess, cfg, T, ps, hop, int(FS))))
     va = dict(zip(keys, build_windows(va_sess, cfg, T, ps, hop, int(FS))))
     print(f"  windows train={len(tr['X'])} val={len(va['X'])}")
-    m = train_probe(enc, tr, va, device, ps, args.epochs, args.patience, args.lr, args.batch_size)
-    print(f"\n{args.run}: vel_mse={m['vel_mse']:.5f} ATE={m['ate']:.4f}m drift={m['drift']:.2f}%")
-    with open(os.path.join(args.out_dir, "odom_probe.csv"), "w", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=["run", "vel_mse", "ate", "drift"])
-        w.writeheader(); w.writerow({"run": args.run, **m})
+    head, m = train_probe(enc, tr, va, device, ps, args.epochs, args.patience, args.lr, args.batch_size)
+    print(f"\n{args.run}: vel_mse={m['vel_mse']:.5f} ATE={m['ate']:.4f}m drift={m['drift']:.2f}% seed={args.seed}")
+    csv_name = "odom_probe.csv" if args.seed == 42 else f"odom_probe_seed{args.seed}.csv"
+    with open(os.path.join(args.out_dir, csv_name), "w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=["run", "seed", "vel_mse", "ate", "drift"])
+        w.writeheader(); w.writerow({"run": args.run, "seed": args.seed, **m})
+
+    # Persist the trained probe head so future analysis/visualization can just
+    # load + run inference instead of re-running the full ~50-epoch training
+    # (this was previously thrown away -- only the CSV summary survived).
+    Pt = tr["X"].shape[-1] // ps
+    head_path = os.path.join(args.out_dir, "odom_head.pt")
+    torch.save({
+        "head_state_dict": head.state_dict(),
+        "embed_dim": enc.embed_dim,
+        "num_patches": Pt,
+        "patch_size": ps,
+        "run": args.run,
+        "metrics": m,
+    }, head_path)
+    print(f"saved trained probe head to {head_path}")
 
 
 if __name__ == "__main__":

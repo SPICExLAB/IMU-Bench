@@ -1,0 +1,32 @@
+{
+  "run": "vit1d_pddd_finetune_pads_focal",
+  "ckpt": "/gpfs/home/vbc1591/IMU-SSL/runs/vit1d_pddd_finetune_pads_focal/checkpoints/best.pt",
+  "num_classes": 2,
+  "n_windows": 14040,
+  "n_subjects": 78,
+  "window": {
+    "acc": 0.7188034188034188,
+    "bal_acc": 0.5028950216450216,
+    "macro_f1": 0.4254810419042274
+  },
+  "subject_mean_prob": {
+    "acc": 0.717948717948718,
+    "bal_acc": 0.5,
+    "macro_f1": 0.417910447761194
+  },
+  "subject_vote": {
+    "acc": 0.717948717948718,
+    "bal_acc": 0.5,
+    "macro_f1": 0.417910447761194
+  },
+  "subject_confusion_mean_prob": [
+    [
+      0,
+      22
+    ],
+    [
+      0,
+      56
+    ]
+  ]
+}

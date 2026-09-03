@@ -1,0 +1,461 @@
+{
+  "pool": {
+    "n_windows": 1959288,
+    "sources": [
+      "realdata",
+      "ocdetect",
+      "eatingspeed",
+      "motionx",
+      "sonic"
+    ]
+  },
+  "k_clusters": 1000,
+  "n_nonempty": 1000,
+  "cluster_sizes": {
+    "min": 181,
+    "median": 1829,
+    "max": 7114
+  },
+  "grid": {
+    "largest_first": {
+      "1": {
+        "available_windows": 7114,
+        "available_fraction": 0.0036309108206654664,
+        "cells": {
+          "0.0001": {
+            "need": 196,
+            "available": 7114,
+            "feasible": true
+          },
+          "0.001": {
+            "need": 1959,
+            "available": 7114,
+            "feasible": true
+          },
+          "0.01": {
+            "need": 19593,
+            "available": 7114,
+            "feasible": false
+          },
+          "0.1": {
+            "need": 195929,
+            "available": 7114,
+            "feasible": false
+          },
+          "1.0": {
+            "need": 1959288,
+            "available": 7114,
+            "feasible": false
+          }
+        }
+      },
+      "5": {
+        "available_windows": 26654,
+        "available_fraction": 0.013603921424517478,
+        "cells": {
+          "0.0001": {
+            "need": 196,
+            "available": 26654,
+            "feasible": true
+          },
+          "0.001": {
+            "need": 1959,
+            "available": 26654,
+            "feasible": true
+          },
+          "0.01": {
+            "need": 19593,
+            "available": 26654,
+            "feasible": true
+          },
+          "0.1": {
+            "need": 195929,
+            "available": 26654,
+            "feasible": false
+          },
+          "1.0": {
+            "need": 1959288,
+            "available": 26654,
+            "feasible": false
+          }
+        }
+      },
+      "10": {
+        "available_windows": 47240,
+        "available_fraction": 0.02411079943326351,
+        "cells": {
+          "0.0001": {
+            "need": 196,
+            "available": 47240,
+            "feasible": true
+          },
+          "0.001": {
+            "need": 1959,
+            "available": 47240,
+            "feasible": true
+          },
+          "0.01": {
+            "need": 19593,
+            "available": 47240,
+            "feasible": true
+          },
+          "0.1": {
+            "need": 195929,
+            "available": 47240,
+            "feasible": false
+          },
+          "1.0": {
+            "need": 1959288,
+            "available": 47240,
+            "feasible": false
+          }
+        }
+      },
+      "25": {
+        "available_windows": 103876,
+        "available_fraction": 0.053017218499781554,
+        "cells": {
+          "0.0001": {
+            "need": 196,
+            "available": 103876,
+            "feasible": true
+          },
+          "0.001": {
+            "need": 1959,
+            "available": 103876,
+            "feasible": true
+          },
+          "0.01": {
+            "need": 19593,
+            "available": 103876,
+            "feasible": true
+          },
+          "0.1": {
+            "need": 195929,
+            "available": 103876,
+            "feasible": false
+          },
+          "1.0": {
+            "need": 1959288,
+            "available": 103876,
+            "feasible": false
+          }
+        }
+      },
+      "50": {
+        "available_windows": 190477,
+        "available_fraction": 0.09721745858699692,
+        "cells": {
+          "0.0001": {
+            "need": 196,
+            "available": 190477,
+            "feasible": true
+          },
+          "0.001": {
+            "need": 1959,
+            "available": 190477,
+            "feasible": true
+          },
+          "0.01": {
+            "need": 19593,
+            "available": 190477,
+            "feasible": true
+          },
+          "0.1": {
+            "need": 195929,
+            "available": 190477,
+            "feasible": false
+          },
+          "1.0": {
+            "need": 1959288,
+            "available": 190477,
+            "feasible": false
+          }
+        }
+      },
+      "100": {
+        "available_windows": 347609,
+        "available_fraction": 0.17741597968241524,
+        "cells": {
+          "0.0001": {
+            "need": 196,
+            "available": 347609,
+            "feasible": true
+          },
+          "0.001": {
+            "need": 1959,
+            "available": 347609,
+            "feasible": true
+          },
+          "0.01": {
+            "need": 19593,
+            "available": 347609,
+            "feasible": true
+          },
+          "0.1": {
+            "need": 195929,
+            "available": 347609,
+            "feasible": true
+          },
+          "1.0": {
+            "need": 1959288,
+            "available": 347609,
+            "feasible": false
+          }
+        }
+      },
+      "1000": {
+        "available_windows": 1959288,
+        "available_fraction": 1.0,
+        "cells": {
+          "0.0001": {
+            "need": 196,
+            "available": 1959288,
+            "feasible": true
+          },
+          "0.001": {
+            "need": 1959,
+            "available": 1959288,
+            "feasible": true
+          },
+          "0.01": {
+            "need": 19593,
+            "available": 1959288,
+            "feasible": true
+          },
+          "0.1": {
+            "need": 195929,
+            "available": 1959288,
+            "feasible": true
+          },
+          "1.0": {
+            "need": 1959288,
+            "available": 1959288,
+            "feasible": true
+          }
+        }
+      }
+    },
+    "random": {
+      "1": {
+        "available_windows": 2144,
+        "available_fraction": 0.0010942750631862186,
+        "cells": {
+          "0.0001": {
+            "need": 196,
+            "available": 2144,
+            "feasible": true
+          },
+          "0.001": {
+            "need": 1959,
+            "available": 2144,
+            "feasible": true
+          },
+          "0.01": {
+            "need": 19593,
+            "available": 2144,
+            "feasible": false
+          },
+          "0.1": {
+            "need": 195929,
+            "available": 2144,
+            "feasible": false
+          },
+          "1.0": {
+            "need": 1959288,
+            "available": 2144,
+            "feasible": false
+          }
+        }
+      },
+      "5": {
+        "available_windows": 11830,
+        "available_fraction": 0.006037907648084406,
+        "cells": {
+          "0.0001": {
+            "need": 196,
+            "available": 11830,
+            "feasible": true
+          },
+          "0.001": {
+            "need": 1959,
+            "available": 11830,
+            "feasible": true
+          },
+          "0.01": {
+            "need": 19593,
+            "available": 11830,
+            "feasible": false
+          },
+          "0.1": {
+            "need": 195929,
+            "available": 11830,
+            "feasible": false
+          },
+          "1.0": {
+            "need": 1959288,
+            "available": 11830,
+            "feasible": false
+          }
+        }
+      },
+      "10": {
+        "available_windows": 21590,
+        "available_fraction": 0.011019309055126148,
+        "cells": {
+          "0.0001": {
+            "need": 196,
+            "available": 21590,
+            "feasible": true
+          },
+          "0.001": {
+            "need": 1959,
+            "available": 21590,
+            "feasible": true
+          },
+          "0.01": {
+            "need": 19593,
+            "available": 21590,
+            "feasible": true
+          },
+          "0.1": {
+            "need": 195929,
+            "available": 21590,
+            "feasible": false
+          },
+          "1.0": {
+            "need": 1959288,
+            "available": 21590,
+            "feasible": false
+          }
+        }
+      },
+      "25": {
+        "available_windows": 49979,
+        "available_fraction": 0.025508756242063443,
+        "cells": {
+          "0.0001": {
+            "need": 196,
+            "available": 49979,
+            "feasible": true
+          },
+          "0.001": {
+            "need": 1959,
+            "available": 49979,
+            "feasible": true
+          },
+          "0.01": {
+            "need": 19593,
+            "available": 49979,
+            "feasible": true
+          },
+          "0.1": {
+            "need": 195929,
+            "available": 49979,
+            "feasible": false
+          },
+          "1.0": {
+            "need": 1959288,
+            "available": 49979,
+            "feasible": false
+          }
+        }
+      },
+      "50": {
+        "available_windows": 95312,
+        "available_fraction": 0.048646242920897795,
+        "cells": {
+          "0.0001": {
+            "need": 196,
+            "available": 95312,
+            "feasible": true
+          },
+          "0.001": {
+            "need": 1959,
+            "available": 95312,
+            "feasible": true
+          },
+          "0.01": {
+            "need": 19593,
+            "available": 95312,
+            "feasible": true
+          },
+          "0.1": {
+            "need": 195929,
+            "available": 95312,
+            "feasible": false
+          },
+          "1.0": {
+            "need": 1959288,
+            "available": 95312,
+            "feasible": false
+          }
+        }
+      },
+      "100": {
+        "available_windows": 195548,
+        "available_fraction": 0.09980564368280723,
+        "cells": {
+          "0.0001": {
+            "need": 196,
+            "available": 195548,
+            "feasible": true
+          },
+          "0.001": {
+            "need": 1959,
+            "available": 195548,
+            "feasible": true
+          },
+          "0.01": {
+            "need": 19593,
+            "available": 195548,
+            "feasible": true
+          },
+          "0.1": {
+            "need": 195929,
+            "available": 195548,
+            "feasible": false
+          },
+          "1.0": {
+            "need": 1959288,
+            "available": 195548,
+            "feasible": false
+          }
+        }
+      },
+      "1000": {
+        "available_windows": 1959288,
+        "available_fraction": 1.0,
+        "cells": {
+          "0.0001": {
+            "need": 196,
+            "available": 1959288,
+            "feasible": true
+          },
+          "0.001": {
+            "need": 1959,
+            "available": 1959288,
+            "feasible": true
+          },
+          "0.01": {
+            "need": 19593,
+            "available": 1959288,
+            "feasible": true
+          },
+          "0.1": {
+            "need": 195929,
+            "available": 1959288,
+            "feasible": true
+          },
+          "1.0": {
+            "need": 1959288,
+            "available": 1959288,
+            "feasible": true
+          }
+        }
+      }
+    }
+  },
+  "n_feasible_largest_first": 23,
+  "n_feasible_random": 21
+}

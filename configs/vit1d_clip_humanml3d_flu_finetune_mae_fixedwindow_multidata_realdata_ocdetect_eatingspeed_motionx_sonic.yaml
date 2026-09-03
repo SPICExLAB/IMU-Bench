@@ -1,0 +1,113 @@
+# 5-source SSL MAE pretrain variant of vit1d_clip_humanml3d_flu_finetune_mae_fixedwindow_multidata.yaml.
+# ONLY pretrained_run changed: vit1d_ssl_mae_varlen_altattn_multidata -> vit1d_ssl_mae_varlen_altattn_realdata_ocdetect_eatingspeed_motionx_sonic.
+# Ablation of vit1d_clip_humanml3d_flu_finetune_mae_multidata.yaml: isolates
+# the windowing/padding asymmetry against the UniMTS finetuned baseline,
+# rather than the CLIP text-tower-reshaping hypothesis.
+#
+# The default config samples a random window length T in [1.28s, 10.24s] per
+# batch and, for clips longer than T, a random crop within the clip -- so the
+# model is often asked to match a partial, randomly-placed sub-window against
+# a caption describing the WHOLE clip's action (see
+# HumanML3DIMUVarLenDatasetFLU.__iter__). It also zero-pads clips shorter
+# than T, diluting the mean-pooled representation with dead timesteps.
+# UniMTS's own pipeline (data.py::load_custom_data) instead always uses the
+# (near-)whole clip and wrap-pads short ones, so every timestep carries real
+# signal.
+#
+# This variant removes both differences while changing nothing else: fixed
+# min_window_seconds == max_window_seconds == 10.24s (every batch sees the
+# full clip, matching UniMTS's window budget) and windowing.pad_mode: wrap
+# (short clips are cyclically repeated instead of zero-filled, matching
+# UniMTS's convention -- see pad_mode support added to
+# HumanML3DIMUVarLenDatasetFLU/make_humanml3d_imu_loaders_flu in
+# imu_lm/data/humanml3d_dataset_FLU.py). Same warm-started, trainable IMU
+# encoder + frozen text tower as the original finetune row -- only the input
+# windowing/padding changes.
+
+vit1d:
+  patch_size: 16
+  shared_kernel: acc_gyro       # must match the MAE checkpoint's patch embed
+  pos_embed_type: 2d            # must match the MAE checkpoint (learned 2D pos-embed)
+  max_patches_per_channel: 256  # must match the MAE checkpoint's pos-embed table size
+  max_channels: 32
+  pooling: "mean"
+
+  encoder:
+    hidden_size: 384
+    num_hidden_layers: 12
+    num_attention_heads: 6
+    intermediate_size: 1536
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-6
+    alt_attention: true         # checkpoint was trained with the alt-attn encoder
+
+objective:
+  type: imu_text_clip_flu
+  imu_text_clip_flu:
+    pretrained_run:  vit1d_ssl_mae_varlen_altattn_realdata_ocdetect_eatingspeed_motionx_sonic
+    pretrained_ckpt: best
+    freeze_imu_encoder:  false  # FINETUNE: encoder warm-started but trainable
+    freeze_text_encoder: true
+
+    humanml3d_root: /projects/b53017/vbc1591/HumanML3D
+    clip_model:     openai/clip-vit-base-patch32
+    clip_embed_dim: 512
+    local_files_only: true
+    text_cache_path: /projects/b53017/vbc1591/HumanML3D/clip_text_emb_cache.pt
+
+paths:
+  dataset_path: /projects/b53017/vbc1591/IMULM_master_dataset_v2.parquet
+  runs_root: /gpfs/home/vbc1591/IMU-SSL/runs
+
+windowing:
+  min_window_seconds: 10.24   # ABLATION: fixed at max -> every batch sees the whole clip (up to 10.24s)
+  max_window_seconds: 10.24
+  pad_mode: wrap               # ABLATION: wrap-pad short clips instead of zero-pad (matches UniMTS)
+
+data:
+  sensor_columns: [acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z]
+  batch_size: 64
+  num_workers: 4
+
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 10000000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 500
+  val_max_batches: 100   # val loader is infinite (resampled captions)
+
+  optim:
+    name: adamw
+    lr: 1.0e-4             # full end-to-end finetune -> lower LR than head-only probing
+    weight_decay: 0.01
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+
+  sched:
+    name: cosine
+    warmup_steps: 200
+
+  early_stopping:
+    enabled: true
+    monitor: val_loss
+    patience: 20
+
+logging:
+  log_every_steps: 5
+  ckpt_every_steps: 500
+  save_step_checkpoints: false
+
+wandb:
+  entity: yli32258-northwestern-university
+  project: TransfHAR_project
+
+# data reorg fix (see memory 5src-full-table-replication-inflight): the
+# on-disk HumanML3D/joints/ mirror was removed from the cluster; the real
+# data lives under HumanML3D/new_joints/ (this is a pre-existing repo-level
+# fix already used by other configs, e.g. imu_text_clip_realdata ones --
+# unrelated to the pretrained_run swap, needed for ANY fresh run today).
+humanml3d:
+  joints_subpath: HumanML3D/new_joints

@@ -13,3 +13,10 @@ matplotlib
 seaborn
 jupyter
 wandb
+chumpy-fix
+pypose
+opencv-python-headless
+# PADS paper-baseline reimplementation (scripts/pads_paper_baseline.py)
+pyts
+catboost
+skorch

@@ -1,0 +1,3 @@
+paths:
+  runs_root: "/gpfs/home/vbc1591/IMU-SSL/runs"
+  dataset_path: "/projects/b53017/vbc1591/pads_dataset.parquet"

@@ -1,0 +1,3 @@
+vit1d_full_body_pose_probe_nymeria_mae_k1000_f100
+vit1d_full_body_pose_probe_nymeria_mae_k1_f0p01
+vit1d_full_body_pose_probe_nymeria_mae_k1_f0p1

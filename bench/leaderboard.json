@@ -1,0 +1,351 @@
+{
+ "generated": "2026-09-01T14:45:35-05:00",
+ "tables": {
+  "probe": {
+   "protocol": "probe",
+   "rows": [
+    {
+     "encoder": "mae_11src",
+     "mean_rank": 2.857142857142857,
+     "covered": 7,
+     "cells": {
+      "arm_pose_nymeria": 8.171604573726654,
+      "full_body_pose_nymeria": 97.625668,
+      "odometry_nymeria_worldframe": 0.14931109949842494,
+      "microgesture_openwatch": 0.6063870975198207,
+      "language_humanml3d": 27.100266008363143,
+      "pd_pads": 0.3882969727718586,
+      "har_mean": 0.6124265750108162
+     }
+    },
+    {
+     "encoder": "mae_5src",
+     "mean_rank": 3.142857142857143,
+     "covered": 7,
+     "cells": {
+      "arm_pose_nymeria": 8.137040585279465,
+      "full_body_pose_nymeria": 98.106741,
+      "odometry_nymeria_worldframe": 0.1563577076362016,
+      "microgesture_openwatch": 0.6467218088133121,
+      "language_humanml3d": 27.923936596302084,
+      "pd_pads": 0.33950782997762863,
+      "har_mean": 0.6125438884819671
+     }
+    },
+    {
+     "encoder": "mae_noaltattn",
+     "mean_rank": 2.4285714285714284,
+     "covered": 7,
+     "cells": {
+      "arm_pose_nymeria": 8.171800523996353,
+      "full_body_pose_nymeria": 97.434033,
+      "odometry_nymeria_worldframe": 0.15850741838573829,
+      "microgesture_openwatch": 0.6473746755480502,
+      "language_humanml3d": 28.60196911683208,
+      "pd_pads": 0.38649533887629123,
+      "har_mean": 0.618853476820316
+     }
+    },
+    {
+     "encoder": "mae_acconly",
+     "mean_rank": 6.857142857142857,
+     "covered": 7,
+     "cells": {
+      "arm_pose_nymeria": 8.783897757530212,
+      "full_body_pose_nymeria": 103.372722,
+      "odometry_nymeria_worldframe": 0.18218892204968734,
+      "microgesture_openwatch": 0.5861861987375294,
+      "language_humanml3d": 19.268154063176986,
+      "pd_pads": 0.3972222222222222,
+      "har_mean": 0.5460535858375554
+     }
+    },
+    {
+     "encoder": "focal",
+     "mean_rank": 10.571428571428571,
+     "covered": 7,
+     "cells": {
+      "arm_pose_nymeria": 8.729760348796844,
+      "full_body_pose_nymeria": 108.289866,
+      "odometry_nymeria_worldframe": 0.20806419409738044,
+      "microgesture_openwatch": 0.3760092168180404,
+      "language_humanml3d": 8.312663484306515,
+      "pd_pads": 0.2543859649122807,
+      "har_mean": 0.4295690257511848
+     }
+    },
+    {
+     "encoder": "simmtm",
+     "mean_rank": 7.857142857142857,
+     "covered": 7,
+     "cells": {
+      "arm_pose_nymeria": 8.55870321393013,
+      "full_body_pose_nymeria": 103.477094,
+      "odometry_nymeria_worldframe": 0.17934472248817285,
+      "microgesture_openwatch": 0.5317551357025041,
+      "language_humanml3d": 16.67072635901053,
+      "pd_pads": 0.3684823569715656,
+      "har_mean": 0.5248248829539124
+     }
+    },
+    {
+     "encoder": "relcon",
+     "mean_rank": 9.142857142857142,
+     "covered": 7,
+     "cells": {
+      "arm_pose_nymeria": 8.519620448350906,
+      "full_body_pose_nymeria": 102.473837,
+      "odometry_nymeria_worldframe": 0.17171832137376108,
+      "microgesture_openwatch": 0.4190915979918537,
+      "language_humanml3d": 14.468793138193359,
+      "pd_pads": 0.2850561474229773,
+      "har_mean": 0.34173057337873863
+     }
+    },
+    {
+     "encoder": "scratch",
+     "mean_rank": null,
+     "covered": 7,
+     "cells": {
+      "arm_pose_nymeria": 8.152887970209122,
+      "full_body_pose_nymeria": 92.427949,
+      "odometry_nymeria_worldframe": 0.14003519329414305,
+      "microgesture_openwatch": 0.4875816993464053,
+      "language_humanml3d": 23.178559121366312,
+      "pd_pads": 0.33950782997762863,
+      "har_mean": 0.5351810661706131
+     }
+    },
+    {
+     "encoder": "mae_4src_z",
+     "mean_rank": 2.5714285714285716,
+     "covered": 7,
+     "cells": {
+      "arm_pose_nymeria": 8.138521760702133,
+      "full_body_pose_nymeria": 98.086514,
+      "odometry_nymeria_worldframe": 0.1425381867035132,
+      "microgesture_openwatch": 0.6129817878959756,
+      "language_humanml3d": 24.084330318907753,
+      "pd_pads": 0.46274509803921565,
+      "har_mean": 0.6115844547304853
+     }
+    },
+    {
+     "encoder": "mae_4src_dc",
+     "mean_rank": 8.428571428571429,
+     "covered": 7,
+     "cells": {
+      "arm_pose_nymeria": 8.303812891244888,
+      "full_body_pose_nymeria": 101.944251,
+      "odometry_nymeria_worldframe": 0.1696472773707758,
+      "microgesture_openwatch": 0.4715227590435728,
+      "language_humanml3d": 8.289117461836868,
+      "pd_pads": 0.3173076923076923,
+      "har_mean": 0.5077779376128466
+     }
+    },
+    {
+     "encoder": "mae_4src_phys",
+     "mean_rank": 5.428571428571429,
+     "covered": 7,
+     "cells": {
+      "arm_pose_nymeria": 8.257175981998444,
+      "full_body_pose_nymeria": 100.335487,
+      "odometry_nymeria_worldframe": 0.156329803871915,
+      "microgesture_openwatch": 0.55559677171996,
+      "language_humanml3d": 16.965090180865534,
+      "pd_pads": 0.33367983367983367,
+      "har_mean": 0.5568833440840377
+     }
+    },
+    {
+     "encoder": "mae_4src_physnp",
+     "mean_rank": 6.714285714285714,
+     "covered": 7,
+     "cells": {
+      "arm_pose_nymeria": 8.299987763166428,
+      "full_body_pose_nymeria": 100.434732,
+      "odometry_nymeria_worldframe": 0.15878080278180898,
+      "microgesture_openwatch": 0.4921879614862071,
+      "language_humanml3d": 16.527998135926243,
+      "pd_pads": 0.35726883345930965,
+      "har_mean": 0.5449802190996724
+     }
+    }
+   ]
+  },
+  "finetune": {
+   "protocol": "finetune",
+   "rows": [
+    {
+     "encoder": "mae_11src",
+     "mean_rank": 3.0,
+     "covered": 7,
+     "cells": {
+      "arm_pose_nymeria": 8.003421127796173,
+      "full_body_pose_nymeria": 87.458123,
+      "odometry_nymeria_worldframe": 0.12760012210507354,
+      "microgesture_openwatch": 0.5798833412963847,
+      "language_humanml3d": 38.812079323895404,
+      "pd_pads": 0.5422701838529177,
+      "har_mean": 0.6266662010577022
+     }
+    },
+    {
+     "encoder": "mae_5src",
+     "mean_rank": 3.7142857142857144,
+     "covered": 7,
+     "cells": {
+      "arm_pose_nymeria": 8.1740103662014,
+      "full_body_pose_nymeria": 88.110126,
+      "odometry_nymeria_worldframe": 0.12845228883483578,
+      "microgesture_openwatch": 0.5773128943047273,
+      "language_humanml3d": 38.821375636052196,
+      "pd_pads": 0.5971214790746631,
+      "har_mean": 0.6235009506037288
+     }
+    },
+    {
+     "encoder": "mae_noaltattn",
+     "mean_rank": 4.714285714285714,
+     "covered": 7,
+     "cells": {
+      "arm_pose_nymeria": 8.158601075410843,
+      "full_body_pose_nymeria": 88.282693,
+      "odometry_nymeria_worldframe": 0.13113662909875404,
+      "microgesture_openwatch": 0.5436873498019009,
+      "language_humanml3d": 39.37453272205149,
+      "pd_pads": 0.4577777777777778,
+      "har_mean": 0.6201306155289263
+     }
+    },
+    {
+     "encoder": "mae_acconly",
+     "mean_rank": 8.285714285714286,
+     "covered": 7,
+     "cells": {
+      "arm_pose_nymeria": 8.805829286575317,
+      "full_body_pose_nymeria": 96.202216,
+      "odometry_nymeria_worldframe": 0.16132130643812922,
+      "microgesture_openwatch": 0.548297024612814,
+      "language_humanml3d": 29.70106856768603,
+      "pd_pads": 0.6057636649301249,
+      "har_mean": 0.5713856861799652
+     }
+    },
+    {
+     "encoder": "focal",
+     "mean_rank": 10.0,
+     "covered": 7,
+     "cells": {
+      "arm_pose_nymeria": 8.764027059078217,
+      "full_body_pose_nymeria": 97.795202,
+      "odometry_nymeria_worldframe": 0.15173580639931417,
+      "microgesture_openwatch": 0.5306871965086976,
+      "language_humanml3d": 23.488094110534536,
+      "pd_pads": 0.33120772946859905,
+      "har_mean": 0.562592267426802
+     }
+    },
+    {
+     "encoder": "simmtm",
+     "mean_rank": 6.857142857142857,
+     "covered": 7,
+     "cells": {
+      "arm_pose_nymeria": 8.445187658071518,
+      "full_body_pose_nymeria": 93.2748,
+      "odometry_nymeria_worldframe": 0.13707909364813498,
+      "microgesture_openwatch": 0.5786033711730306,
+      "language_humanml3d": 31.310633029371758,
+      "pd_pads": 0.5152989751529898,
+      "har_mean": 0.5775871789294273
+     }
+    },
+    {
+     "encoder": "relcon",
+     "mean_rank": 6.428571428571429,
+     "covered": 7,
+     "cells": {
+      "arm_pose_nymeria": 8.558336645364761,
+      "full_body_pose_nymeria": 91.247217,
+      "odometry_nymeria_worldframe": 0.1418814797867398,
+      "microgesture_openwatch": 0.618061639606262,
+      "language_humanml3d": 30.72926369086604,
+      "pd_pads": 0.619420644634843,
+      "har_mean": 0.5453431647940153
+     }
+    },
+    {
+     "encoder": "scratch",
+     "mean_rank": null,
+     "covered": 7,
+     "cells": {
+      "arm_pose_nymeria": 8.152887970209122,
+      "full_body_pose_nymeria": 92.427949,
+      "odometry_nymeria_worldframe": 0.14003519329414305,
+      "microgesture_openwatch": 0.4875816993464053,
+      "language_humanml3d": 23.178559121366312,
+      "pd_pads": 0.33950782997762863,
+      "har_mean": 0.5351810661706131
+     }
+    },
+    {
+     "encoder": "mae_4src_z",
+     "mean_rank": 2.2857142857142856,
+     "covered": 7,
+     "cells": {
+      "arm_pose_nymeria": 7.98991471529007,
+      "full_body_pose_nymeria": 89.217901,
+      "odometry_nymeria_worldframe": 0.10791177036885492,
+      "microgesture_openwatch": 0.6353251070543161,
+      "language_humanml3d": 37.50868356088468,
+      "pd_pads": 0.5901234567901233,
+      "har_mean": 0.6492211276726414
+     }
+    },
+    {
+     "encoder": "mae_4src_dc",
+     "mean_rank": 7.571428571428571,
+     "covered": 7,
+     "cells": {
+      "arm_pose_nymeria": 8.418037742376328,
+      "full_body_pose_nymeria": 89.995647,
+      "odometry_nymeria_worldframe": 0.11880639613713262,
+      "microgesture_openwatch": 0.5038891420470367,
+      "language_humanml3d": 22.878102675197745,
+      "pd_pads": 0.36382536382536385,
+      "har_mean": 0.5954510266249426
+     }
+    },
+    {
+     "encoder": "mae_4src_phys",
+     "mean_rank": 6.857142857142857,
+     "covered": 7,
+     "cells": {
+      "arm_pose_nymeria": 8.285088837146759,
+      "full_body_pose_nymeria": 91.99915,
+      "odometry_nymeria_worldframe": 0.113637831051267,
+      "microgesture_openwatch": 0.5433721815366038,
+      "language_humanml3d": 30.08120169781853,
+      "pd_pads": 0.3133333333333333,
+      "har_mean": 0.6127744494218432
+     }
+    },
+    {
+     "encoder": "mae_4src_physnp",
+     "mean_rank": 6.285714285714286,
+     "covered": 7,
+     "cells": {
+      "arm_pose_nymeria": 8.15897285938263,
+      "full_body_pose_nymeria": 91.187092,
+      "odometry_nymeria_worldframe": 0.1139646269148788,
+      "microgesture_openwatch": 0.561465862724444,
+      "language_humanml3d": 29.219147690059955,
+      "pd_pads": 0.2543859649122807,
+      "har_mean": 0.6148505481321833
+     }
+    }
+   ]
+  }
+ }
+}

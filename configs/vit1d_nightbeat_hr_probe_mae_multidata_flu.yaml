@@ -1,0 +1,54 @@
+# Nightbeat-DB HR regression with the frozen combined-multidata MAE encoder
+# (alt-attn ViT1DEncoder). Merged over configs/base_nightbeat.yaml by
+# scripts/eval_nightbeat_hr.py.
+#
+# Architecture block must match the MAE checkpoint exactly -- copied from
+# configs/vit1d_ssl_mae_varlen_altattn_multidata_flu.yaml.
+#
+# Nightbeat-DB is accelerometer-only. The eval's default --gyro-mode mask
+# forces every gyro patch position into the encoder's mask, so those
+# embeddings become the pretrained mask token. This is the same state the
+# encoder saw for its own acc-only pretraining sources (capture24, NHANES) on
+# every step -- see imu_lm/objectives/masked_1d_freq_channel_mask.py. Run with
+# --gyro-mode zero to measure what feeding literal zeros instead would cost.
+
+vit1d:
+  patch_size: 16
+  shared_kernel: acc_gyro       # must match the MAE checkpoint's patch embed
+  use_cls_token: false
+  encoder:
+    hidden_size: 384
+    num_hidden_layers: 12
+    num_attention_heads: 6
+    intermediate_size: 1536
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-6
+    drop_path_rate: 0.0
+    alt_attention: true         # -> ViT1DEncoderAltAttn (BERT-style masking,
+                                #    global CLS token is the pooled feature)
+  max_patches_per_channel: 256
+  pooling: "mean"
+  pos_embed_type: 2d
+
+objective:
+  type: nightbeat_hr
+  nightbeat_hr:
+    pretrained_run:  vit1d_ssl_mae_varlen_altattn_multidata
+    pretrained_ckpt: best
+
+# Used only by --mode finetune / --mode scratch; the frozen probe ignores this.
+trainer:
+  seed: 42
+  amp: true
+  epochs: 20
+  grad_clip_norm: 1.0
+  early_stopping:
+    patience: 5
+  optim:
+    lr: 1.0e-4
+    weight_decay: 0.05
+
+wandb:
+  entity: yli32258-northwestern-university
+  project: TransfHAR_project

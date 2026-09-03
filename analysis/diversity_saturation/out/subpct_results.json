@@ -1,0 +1,185 @@
+{
+  "max_steps": 105000,
+  "selection": {
+    "0p01": {
+      "nominal_fraction": 0.0001,
+      "n_windows": 356,
+      "effective_fraction": 0.00010013616831202205,
+      "coverage": 0.289,
+      "index_file": "/projects/b53017/vbc1591/diversity_saturation/idx_sub_0p01pct.npy"
+    },
+    "0p05": {
+      "nominal_fraction": 0.0005,
+      "n_windows": 1778,
+      "effective_fraction": 0.0005001182788167842,
+      "coverage": 0.748,
+      "index_file": "/projects/b53017/vbc1591/diversity_saturation/idx_sub_0p05pct.npy"
+    },
+    "0p1": {
+      "nominal_fraction": 0.001,
+      "n_windows": 3555,
+      "effective_fraction": 0.0009999552762619056,
+      "coverage": 0.928,
+      "index_file": "/projects/b53017/vbc1591/diversity_saturation/idx_sub_0p1pct.npy"
+    },
+    "0p5": {
+      "nominal_fraction": 0.005,
+      "n_windows": 17776,
+      "effective_fraction": 0.005000057662681191,
+      "coverage": 0.999,
+      "index_file": "/projects/b53017/vbc1591/diversity_saturation/idx_sub_0p5pct.npy"
+    },
+    "random_1pct": {
+      "nominal_fraction": 0.013,
+      "n_windows": 46116,
+      "effective_fraction": 0.012971571735610136,
+      "coverage": 1.0,
+      "index_file": "/projects/b53017/vbc1591/diversity_saturation/idx_random_1pct.npy"
+    }
+  },
+  "pretrain": {
+    "0.01%": {
+      "run": "vit1d_ssl_mae_sub0p01pct",
+      "final_step": 105000.0,
+      "final_val_loss": 0.879648,
+      "n_val_rows": 105,
+      "checkpoint": {
+        "exists": true,
+        "step": 20000,
+        "within_budget": true,
+        "best_val_loss": 0.8186169866497878
+      }
+    },
+    "0.05%": {
+      "run": "vit1d_ssl_mae_sub0p05pct",
+      "final_step": 105000.0,
+      "final_val_loss": 0.791006,
+      "n_val_rows": 105,
+      "checkpoint": {
+        "exists": true,
+        "step": 81000,
+        "within_budget": true,
+        "best_val_loss": 0.7905691958999034
+      }
+    },
+    "0.1%": {
+      "run": "vit1d_ssl_mae_sub0p1pct",
+      "final_step": 105000.0,
+      "final_val_loss": 0.784529,
+      "n_val_rows": 105,
+      "checkpoint": {
+        "exists": true,
+        "step": 99000,
+        "within_budget": true,
+        "best_val_loss": 0.7841000237512413
+      }
+    },
+    "0.5%": {
+      "run": "vit1d_ssl_mae_sub0p5pct",
+      "final_step": 105000.0,
+      "final_val_loss": 0.781728,
+      "n_val_rows": 105,
+      "checkpoint": {
+        "exists": true,
+        "step": 100000,
+        "within_budget": true,
+        "best_val_loss": 0.781042755634671
+      }
+    },
+    "1.3%": {
+      "run": "vit1d_ssl_mae_div1pct_random",
+      "final_step": 105000.0,
+      "final_val_loss": 0.776691,
+      "n_val_rows": 112,
+      "checkpoint": {
+        "exists": true,
+        "step": 105000,
+        "within_budget": true,
+        "best_val_loss": 0.7766911983646269
+      }
+    }
+  },
+  "probes": {
+    "WISDM (acc %)": {
+      "higher_better": true,
+      "values": {
+        "0.01%": 53.36840000000001,
+        "0.05%": 59.6499,
+        "0.1%": 60.635600000000004,
+        "0.5%": 60.742399999999996,
+        "1.3%": 61.6964
+      }
+    },
+    "UTD-MHAD (acc %)": {
+      "higher_better": true,
+      "values": {
+        "0.01%": 59.9034,
+        "0.05%": 62.318799999999996,
+        "0.1%": 66.1836,
+        "0.5%": 63.285000000000004,
+        "1.3%": 64.2512
+      }
+    },
+    "PAMAP2 (acc %)": {
+      "higher_better": true,
+      "values": {
+        "0.01%": 46.075300000000006,
+        "0.05%": 55.6458,
+        "0.1%": 54.2911,
+        "0.5%": 52.987700000000004,
+        "1.3%": 54.2212
+      }
+    },
+    "RecoFit (acc %)": {
+      "higher_better": true,
+      "values": {
+        "0.01%": 67.1478,
+        "0.05%": 74.7151,
+        "0.1%": 74.2514,
+        "0.5%": 74.5656,
+        "1.3%": 75.0787
+      }
+    },
+    "Gesture (bal acc %)": {
+      "higher_better": true,
+      "values": {
+        "0.01%": 40.193400000000004,
+        "0.05%": 54.6389,
+        "0.1%": 52.0084,
+        "0.5%": 55.2966,
+        "1.3%": 46.9117
+      }
+    },
+    "Arm pose (val loss)": {
+      "higher_better": false,
+      "values": {
+        "0.01%": 0.018049,
+        "0.05%": 0.017376,
+        "0.1%": 0.017408,
+        "0.5%": 0.017099,
+        "1.3%": 0.017184
+      }
+    },
+    "Full-body (mpjpe mm)": {
+      "higher_better": false,
+      "values": {
+        "0.01%": 102.686011,
+        "0.05%": 100.349865,
+        "0.1%": 100.57692,
+        "0.5%": 99.327708,
+        "1.3%": 99.576087
+      }
+    },
+    "Odometry (vel MSE)": {
+      "higher_better": false,
+      "values": {
+        "0.01%": 0.03017,
+        "0.05%": 0.02824,
+        "0.1%": 0.02808,
+        "0.5%": 0.02802,
+        "1.3%": 0.0274
+      }
+    }
+  },
+  "warnings": []
+}

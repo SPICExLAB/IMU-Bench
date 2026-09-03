@@ -1,0 +1,87 @@
+# Base config for the Nightbeat-DB HR-from-wrist-accelerometer evaluation.
+#
+# Nightbeat-DB (Moebus et al., IEEE BHI 2024) is 40 participants x ~7 h of
+# at-home overnight wrist accelerometry with a chest ECG reference. The task is
+# regression: heart rate (bpm) from the ballistocardiogram in the wrist signal.
+#
+# Data is NOT read from the master parquet -- it is loaded per participant from
+# the prepared cache written by scripts/prepare_nightbeat_dataset.py. There is
+# no dataset_path here for that reason.
+#
+# Two of the 40 published participants are unusable, both for upstream reasons:
+#   pid 27 -- 27_acc_a.npz is corrupt in the published release itself: 3.5 kB on
+#             the ETH polybox share vs 37-70 MB for every other participant, and
+#             a re-fetch reproduces the same bad MD5 (zlib "invalid distance
+#             too far back"). Not a download error.
+#   pid 34 -- hrv_isvalid is 0 everywhere and hr_bxb is empty, i.e. no usable
+#             ECG reference. The loader finds no admissible windows and skips
+#             it with a warning.
+# That leaves 38 participants / ~291 h. Mean ECG-valid fraction across the
+# remaining participants is 0.83, so min_valid_frac below is the main lever on
+# how many windows survive.
+
+paths:
+  runs_root: "/gpfs/home/vbc1591/IMU-SSL/runs"
+
+data:
+  sensor_columns: [acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z]
+  batch_size: 256
+  eval_batch_size: 256
+  num_workers: 8
+  pin_memory: true
+
+  nightbeat:
+    root: /projects/b53017/vbc1591/Nightbeat/prepared
+    # Window admission criteria (see imu_lm/data/nightbeat_loader.py):
+    min_valid_frac: 1.0   # ECG reference must be flagged valid across the window
+    min_beats: 5          # enough beats to define a rate
+    max_hr_std: 8.0       # bpm; reject windows spanning an arousal/HR jump,
+                          # where no single scalar target is correct
+    val_frac: 0.2
+    test_frac: 0.2
+
+windowing:
+  # 10.24 s = 512 samples @ 50 Hz -- matches the multidata MAE pretraining
+  # window exactly, so pos-embed extent and patch count are in-distribution.
+  # At 40-100 bpm that is ~7-17 beats per window.
+  window_seconds: 10.24
+  window_hop_ratio: 1.0   # non-overlapping; 298 h -> ~105k windows
+
+preprocess:
+  impute:
+    enabled: true
+    method: linear
+    max_missing_frac: 0.2
+
+  filter:
+    # Same 0.25-24 Hz passband the MAE was pretrained with. It comfortably
+    # spans the BCG band (fundamental ~0.7-2 Hz plus harmonics), so no
+    # task-specific retuning is applied here -- keeping the frozen encoder's
+    # input distribution intact matters more.
+    enabled: true
+    type: lowpass
+    order: 4
+    low_hz: 0.25
+    high_hz: 24
+
+  normalize:
+    enabled: true
+    method: zscore   # per-channel, per-window; the BCG is ~1-10 mg so the
+                     # absolute scale carries nothing and z-scoring is what
+                     # the encoder was pretrained on
+    eps: 1.0e-6
+
+spectrogram:
+  enabled: false
+
+# No augmentation at eval time.
+random_rotation:
+  enabled: false
+gaussian_noise:
+  enabled: false
+gain_jitter:
+  enabled: false
+time_warp:
+  enabled: false
+axis_bias:
+  enabled: false

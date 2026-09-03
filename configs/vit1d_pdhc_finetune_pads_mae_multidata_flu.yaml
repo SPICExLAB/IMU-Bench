@@ -1,0 +1,86 @@
+# PADS binary clinical task: PD vs. Healthy (0=Healthy 79 subj, 1=Parkinson's 276 subj)
+# Mode: finetune from the combined-multidata Ours (MAE) pretrain
+#
+# Added to test against the original PADS paper, which evaluates two SEPARATE
+# binary problems rather than the 3-class grouping used in
+# configs/vit1d_pd_*_pads_*.yaml. Published reference for this arm: 91.16%
+# balanced accuracy (paper protocol is SUBJECT-level; these runs train and
+# score per 2.56 s window, so use scripts/eval_pads_subject_level.py to get a
+# comparable number).
+#
+# Label is SUBJECT-level, so splits stay grouped by subject_id (base.yaml).
+# Built by scripts/prepare_pads_dataset.py --label-scheme pd_binary
+# Classes are imbalanced; read bal_acc / macro_f1, not acc.
+
+vit1d:
+  patch_size: 16
+  shared_kernel: acc_gyro
+  use_cls_token: false
+  encoder:
+    hidden_size: 384
+    num_hidden_layers: 12
+    num_attention_heads: 6
+    intermediate_size: 1536
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-6
+    drop_path_rate: 0.0
+    alt_attention: true
+  max_patches_per_channel: 256
+  pooling: "mean"
+
+objective:
+  type: utd_mhad_finetune
+  utd_mhad_finetune:
+    pretrained_run:  vit1d_ssl_mae_varlen_altattn_multidata
+    pretrained_ckpt: best
+
+paths:
+  dataset_path: /projects/b53017/vbc1591/pads_pdhc_dataset.parquet
+  runs_root: /gpfs/home/vbc1591/IMU-SSL/runs
+
+preprocess:
+  normalize:
+    enabled: true
+
+windowing:
+  window_seconds: 2.56
+
+splits:
+  val_ratio: 0.2
+
+data:
+  train_on_datasets: ["pads"]
+  sensor_columns: [acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z]
+  batch_size:       256
+  eval_batch_size:  256
+  num_workers:      8
+  pin_memory:       true
+
+logging:
+  ckpt_every_steps: 500
+  save_step_checkpoints: false
+
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 20000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 200
+  early_stopping:
+    enabled: true
+    patience: 20
+  optim:
+    name: adamw
+    lr: 1.0e-4
+    weight_decay: 0.1
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+  sched:
+    name: cosine
+    warmup_steps: 100
+
+wandb:
+  entity: yli32258-northwestern-university
+  project: TransfHAR_project

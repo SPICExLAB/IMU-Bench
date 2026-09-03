@@ -18,6 +18,7 @@ from imu_lm.models.ViT1D import run as vit1d_run
 from imu_lm.models.CNN1D import run as cnn_run
 from imu_lm.models.TSTransformer1D import run as tstransformer1d_run
 from imu_lm.models.RNN1D import run as rnn1d_run
+from imu_lm.models.DeepConvLSTM import run as deepconvlstm_run
 from imu_lm.utils.helpers import deep_update, load_yaml
 try:
     import wandb
@@ -52,11 +53,15 @@ def main():
     ap.add_argument("--model-config", required=True, help="Model config YAML")
     ap.add_argument("--run-name", default=None)
     ap.add_argument("--resume", default=None, help="Checkpoint path or name (latest/best) to resume from")
+    ap.add_argument("--seed", type=int, default=None,
+                     help="Override trainer.seed from the merged config (e.g. for multi-seed variance runs)")
     args = ap.parse_args()
 
     base_cfg = load_yaml(args.config)
     model_cfg = load_yaml(args.model_config)
     cfg = deep_update(base_cfg, model_cfg)
+    if args.seed is not None:
+        cfg = deep_update(cfg, {"trainer": {"seed": args.seed}})
 
     run_dir = _resolve_run_dir(cfg, args.run_name)
     _log_resolved(cfg, run_dir)
@@ -80,6 +85,8 @@ def main():
         cnn_run.main(cfg, run_dir, resume_ckpt=args.resume)
     elif "rnn1d" in cfg:
         rnn1d_run.main(cfg, run_dir, resume_ckpt=args.resume)
+    elif "deepconvlstm" in cfg:
+        deepconvlstm_run.main(cfg, run_dir, resume_ckpt=args.resume)
     elif "vit1d" in cfg:
         vit1d_run.main(cfg, run_dir, resume_ckpt=args.resume)
     elif "tstransformer1d" in cfg:
@@ -87,7 +94,7 @@ def main():
     elif "vit" in cfg:
         vit_run.main(cfg, run_dir, resume_ckpt=args.resume)
     else:
-        raise ValueError("No supported model config found (expected 'vit', 'vit1d', 'tstransformer1d', 'rnn1d', or 'cnn1d' section)")
+        raise ValueError("No supported model config found (expected 'vit', 'vit1d', 'tstransformer1d', 'rnn1d', 'cnn1d', or 'deepconvlstm' section)")
 
 
 if __name__ == "__main__":

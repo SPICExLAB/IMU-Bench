@@ -1,0 +1,150 @@
+##############################################################################
+# Linear probe — OpenWatch smartwatch micro-gestures (36 classes)
+# Dataset : OpenWatch raw IMU (open_watch_without_augmentations), 51 subjects,
+#           real wrist recordings, converted to FLU to match pretraining.
+# Classes : restricted via `gestures:` below to finger/wrist-level micro-gestures
+#           only (clench, pinch, spread, rotate, snap, thumbs, peace, ...) —
+#           excludes whole-arm/two-hand/functional activities from the full
+#           59-class label_map.json (wash_hands, type_computer, clapping,
+#           handshake, waving_hello, ...). Labels are remapped to a dense
+#           [0, 36) range by discover_openwatch_records so the LinearHead only
+#           needs to cover the classes actually in play.
+# IMU     : 6 channels = acc_F/L/U + gyro_F/L/U
+# Window  : each per-gesture CSV recording is resampled to the model's window
+#           length (kept at 10.24 s / 512 samples to match the pretrain window
+#           this encoder's positional embeddings were trained on).
+# Encoder : ViT1D alt-attn — FROZEN from vit1d_ssl_mae_varlen_altattn_multidata
+# Head    : LinearHead(embed_dim=384 -> 36)
+##############################################################################
+
+vit1d:
+  patch_size: 16
+  shared_kernel: acc_gyro       # must match the MAE checkpoint's patch embed
+  encoder:
+    hidden_size: 384
+    num_hidden_layers: 12
+    num_attention_heads: 6
+    intermediate_size: 1536
+    hidden_dropout_prob: 0.0    # no dropout for frozen-encoder probing
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-6
+    alt_attention: true         # checkpoint was trained with the alt-attn encoder
+  max_patches_per_channel: 256
+  pooling: "mean"
+
+objective:
+  type: openwatch_gesture_probe
+  openwatch_gesture_probe:
+    root: /projects/b53017/vbc1591/openwatch_raw/open_watch_without_augmentations
+    coordinate_frame: flu        # match how this source was fed during MAE pretrain
+    num_classes: 36               # size of the `gestures:` subset below (dense-remapped)
+    gestures:
+      - clench
+      - double_clench
+      - pinch
+      - double_pinch
+      - pinky_pinch
+      - double_pinky_pinch
+      - italian_pinch
+      - pinch_up
+      - pinch_down
+      - pinch_left
+      - pinch_right
+      - spread
+      - double_spread
+      - flex
+      - extend
+      - rotate_in
+      - rotate_out
+      - deviate_in
+      - deviate_out
+      - snap
+      - double_snap
+      - slide
+      - index_pointing
+      - peace
+      - peace_up
+      - thumbs_up
+      - thumbs_down
+      - vulcan_salute
+      - ok_sign
+      - horns
+      - finger_up
+      - stop_sign
+      - small_amount
+      - steepling
+      - power_sign
+      - love_fingers
+    # train_subjects / val_subjects / test_subjects: null -> auto 80/10/10 subject split
+    pretrained_run:  vit1d_ssl_mae_varlen_altattn_multidata
+    pretrained_ckpt: best
+
+paths:
+  dataset_path: /projects/b53017/vbc1591/IMULM_master_dataset_v2.parquet
+  runs_root: /gpfs/home/vbc1591/IMU-SSL/runs
+
+windowing:
+  window_seconds: 10.24    # match pretrain window so patch-position embeddings line up
+
+splits:
+  seed: 42
+  val_fraction: 0.1
+  test_fraction: 0.1
+
+data:
+  sensor_columns: [acc_F, acc_L, acc_U, gyro_F, gyro_L, gyro_U]
+  batch_size:       256
+  eval_batch_size:  256
+  num_workers:      8
+  pin_memory:       true
+
+preprocess:
+  filter:
+    enabled: true
+    type: lowpass
+    high_hz: 24
+    low_hz: 0.25
+    order: 4
+  impute:
+    enabled: true
+    method: linear
+    max_missing_frac: 0.2
+  normalize:
+    enabled: true              # MAE was trained with z-score normalization
+    method: zscore
+    eps: 1.0e-06
+
+random_rotation:
+  enabled: false                # frozen-encoder probe: evaluate on canonical orientation
+
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 20000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 200
+
+  early_stopping:
+    enabled: true
+    patience: 20
+
+  optim:
+    name: adamw
+    lr: 1.0e-3
+    weight_decay: 0.1
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+
+  sched:
+    name: cosine
+    warmup_steps: 100
+
+logging:
+  log_every_steps: 5
+  ckpt_every_steps: 500
+  save_step_checkpoints: false   # only keep best.pt/latest.pt (no per-step snapshots)
+
+wandb:
+  entity: yli32258-northwestern-university
+  project: TransfHAR_project

@@ -1,0 +1,210 @@
+# Same acc-only MAE ablation as vit1d_ssl_mae_varlen_acconly_multidata_flu.yaml
+# (identical encoder/decoder/objective/trainer hyperparameters -- see that
+# config's header comment for the acc-only rationale), plus a 12th data
+# source: NHANES 2011-2014 PAX80 raw wrist accelerometer (nhanes_wrist_loader.py).
+# NHANES is accelerometer-only, like capture24, so it fits the same
+# AccOnlyPadTo6ChDataset path. It is also ~2.77M raw person-hours across
+# 14,693 participants -- orders of magnitude larger than every other source
+# combined -- so it is capped the same way ocdetect is (sample_fraction caps
+# participant-archive selection before any I/O; max_hours is a post-hoc safety
+# cap on the resulting window count). Everything else is byte-identical to the
+# 11-source config so NHANES's contribution is the only variable in this
+# ablation vs. that run.
+vit1d:
+  patch_size: 16
+  shared_kernel: true   # ablation: acc-only, no gyro half to split -- single shared Conv1d
+  encoder:
+    hidden_size: 384
+    num_hidden_layers: 12
+    num_attention_heads: 6
+    intermediate_size: 1536
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-06
+    alt_attention: true
+  decoder:
+    hidden_size: 192
+    num_hidden_layers: 4
+    num_attention_heads: 4
+    intermediate_size: 768
+  max_patches_per_channel: 256
+  pooling: mean
+  pos_embed_type: 2d
+objective:
+  type: mae_multidata_varlen_altattn_flu
+  loss_type: full_mse
+  mask_ratio: 0.75
+  mask_strategy: composite
+  mae_multidata_varlen_altattn_flu:
+    cache_dir: /projects/b53017/vbc1591/mae_multidata_cache
+    sampling_mode: natural    # natural = plain concat+shuffle (each window seen once/epoch, proportional to source size); balanced = equal expected mass/epoch per source
+    # source_weights: {realdata: 1.0, ocdetect: 1.0, ...}   # optional per-source reweighting under balanced mode
+    sources:
+      realdata:
+        enabled: true
+        train_on_datasets: [pamap2, recofit, samosa, shoaib, ut_watch, utd_mhad, wisdm]
+      ocdetect:
+        enabled: true
+        data_dir: /projects/b53017/vbc1591/OCDetect_extracted/preprocessed
+        splits: [0.8, 0.1, 0.1]
+        max_hours: 500.0     # cap to keep OCDetect from dominating; raise once training scale is validated
+        max_files: null
+        sample_fraction: 0.01   # only load 1/100 of OCDetect's 678 files (applied before I/O)
+      nymeria:
+        enabled: true
+        train_root: /projects/b53017/vbc1591/processed_data_body_Ty_rwrist
+        val_root: /projects/b53017/vbc1591/processed_data_test_body_Ty_rwrist
+        add_gravity: true
+      totalcapture:   # also referred to as "DIP-IMU" -- same on-disk source (DIP_recalculate), counted once
+        enabled: true
+        root: /projects/b53017/vbc1591/DIP_recalculate
+        train_subjects: [s1, s2, s3, s4]
+        val_subjects: [s5]
+        target_hz: 50   # resample from native 60 Hz so windows span 10.24s like every other source
+        add_gravity: true
+      imuposer:
+        enabled: true
+        root: /projects/b53017/vbc1591/imuposer_dataset
+        val_participants: [P9, P10]
+        target_hz: 50
+        add_gravity: false
+      eatingspeed:
+        enabled: true
+        root: /projects/b53017/vbc1591/EatingSpeed
+        subsets: [FD-I, FD-II, MO]
+        splits: [0.8, 0.1, 0.1]
+        sample_fraction: 0.1   # only keep 1/10 of windows per subset (train and val subsampled independently)
+      motionx:
+        enabled: true
+        root: /projects/b53017/vbc1591/Motion-Xplusplus
+        val_frac: 0.05
+        add_gravity: true
+      humanml3d:
+        enabled: true
+        root: /projects/b53017/vbc1591/HumanML3D
+        t_min: 64
+      sonic:      # bones-seed BVH mocap synthesis
+        enabled: true
+        root: /projects/b53017/vbc1591/bones-seed
+        add_gravity: true
+      capture24:   # accelerometer-only (no gyro) -- see AccOnlyPadTo6ChDataset
+        enabled: true
+        root: /projects/b53017/vbc1591/capture24/capture24
+        target_hz: 50   # resample from native 100 Hz so windows span 10.24s like every other source
+        sample_fraction: 0.1   # only load 1/10 of capture24's 151 files (applied before I/O)
+      openwatch:   # real wrist gesture recordings, 51 subjects, acc+gyro
+        enabled: true
+        root: /projects/b53017/vbc1591/openwatch_raw/open_watch_without_augmentations
+        coordinate_frame: flu
+      nhanes:   # NHANES 2011-2014 PAX80 raw wrist accelerometer -- accelerometer-only (no gyro), see AccOnlyPadTo6ChDataset
+        enabled: true
+        root: /projects/b53017/vbc1591/nhanes_pax
+        target_hz: 50   # resample from native 80 Hz so windows span 10.24s like every other source
+        # ~44 of 14,693 participants (pre-I/O cap). nhanes_wrist_loader.py filters at the WINDOW
+        # level (drops near-zero-variance/non-wear windows), not the whole-participant level, so
+        # nearly every selected participant contributes close to their full ~188h -- keep this
+        # small: a 150-participant attempt at this stage of development OOM'd a 180GB job because
+        # _collect_windows holds every raw window in memory before the max_hours downsample below
+        # even applies. 44 participants is still comfortably >> max_hours=200h worth of data.
+        sample_fraction: 0.003
+        # max_hours=500 (matching ocdetect's own cap) was the first value tried, but a real
+        # 12-source build showed NHANES alone made up 42.0% of train AND 92.8% of val at that
+        # setting -- ocdetect's identical-looking 500h cap never actually binds for ocdetect
+        # (its sample_fraction=0.01 selection has far less than 500h of raw data to begin with),
+        # so copying its cap value doesn't copy its effective size. Tightened both caps so NHANES
+        # lands close to the other largest sources (nymeria/capture24) instead of dominating.
+        max_hours: 200.0        # -> ~140k train windows, ~22% of the train epoch
+        max_hours_val: 30.0     # -> ~21k val windows, ~23% of the val set (val was uncapped by
+                                 # default elsewhere in this pool, but NHANES's per-participant
+                                 # window density is high enough that "uncapped" meant "dominates")
+        splits: [0.85, 0.15]
+data:
+  acc_only: true   # ablation: Trainer truncates every batch to the first sensor_columns channels (acc-only, drops gyro)
+  sensor_columns: [acc_x, acc_y, acc_z]
+  batch_size: 128
+  eval_batch_size: 128
+  num_workers: 8
+  pin_memory: true
+  dataset_column: dataset
+  label_column: dataset_activity_id
+  label_name_column: dataset_activity_label
+  session_column: session_id
+  subject_column: subject_id
+  time_column: timestamp_ns
+  drop_na: false
+  variable_length:
+    enabled: true
+    min_samples: 64
+    max_samples: 512
+paths:
+  dataset_path: /projects/b53017/vbc1591/IMULM_master_dataset_v2.parquet
+  runs_root: /gpfs/home/vbc1591/IMU-SSL/runs
+preprocess:
+  filter:
+    enabled: true
+    type: lowpass
+    high_hz: 24
+    low_hz: 0.25
+    order: 4
+  impute:
+    enabled: true
+    method: linear
+    max_missing_frac: 0.2
+  normalize:
+    enabled: true
+    method: zscore
+    eps: 1.0e-06
+random_rotation:
+  enabled: true
+  rotation_set: octahedral   # restrict to the 24 proper 90°-multiple rotations of the cube (not continuous SO(3))
+axis_bias:
+  enabled: false
+gain_jitter:
+  enabled: false
+gaussian_noise:
+  enabled: false
+time_warp:
+  enabled: false
+splits:
+  group_key: subject_id
+  seed: 42
+  shuffle: true
+  test_ratio: 0
+  val_ratio: 0.05
+windowing:
+  window_seconds: 10.24
+  window_hop_ratio: 0.5
+  label_policy: center
+  majority_threshold: 0.8
+  handle_gaps: true
+  gap_method: interpolate
+  max_gap_ms: 200
+  max_gaps_per_session: 100
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 10000000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 1000
+  optim:
+    name: adamw
+    lr: 0.0001
+    weight_decay: 0.0001
+    betas: [0.9, 0.95]
+    eps: 1.0e-08
+  sched:
+    name: cosine
+    warmup_steps: 500
+  early_stopping:
+    enabled: true
+    monitor: val_loss
+    patience: 10
+    min_delta: 0.0001
+logging:
+  log_every_steps: 5
+  ckpt_every_steps: 10000
+  save_step_checkpoints: false   # only keep best.pt/latest.pt (no per-step snapshots)
+wandb:
+  entity: yli32258-northwestern-university
+  project: TransfHAR_project

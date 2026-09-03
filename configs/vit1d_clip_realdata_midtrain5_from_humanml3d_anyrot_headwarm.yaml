@@ -1,0 +1,132 @@
+# "Midtraining" v5: same as midtrain v3
+# (vit1d_clip_realdata_midtrain3_from_humanml3d_anyrot.yaml -- rotation-aug
+# checkpoint warm-start, encoder TRAINABLE (not frozen -- see below), SO(3)
+# rotation kept on, recofit/samosa/shoaib/ut_watch mix, lr 3e-5) with two
+# changes that fix the actual root cause of the UTD-MHAD zero-shot collapse:
+#
+# 1. clip_head warm-start (code fix, imu_lm/models/ViT1D/run.py): v3 and v4
+#    both showed UTD-MHAD zero-shot collapse to a single class ("The person
+#    is arm curl", ~100%/60% recall on that one class, 0% on all 20 others
+#    -- below the 1/21 random-guess floor). v4 tested "encoder drift" as the
+#    cause by freezing the encoder during midtraining (freeze_imu_encoder:
+#    true) -- the collapse persisted almost identically (1.81%/1.21% vs
+#    v3's 2.26%/0.27%), which RULES OUT the encoder as the cause. Inspecting
+#    runs/vit1d_clip_humanml3d_finetune_mae_multidata_anyrot/checkpoints/best.pt
+#    directly (torch.load) confirmed it has a real, trained `clip_head` key
+#    (2 params) -- but imu_text_clip_realdata's own code only ever
+#    warm-started the ENCODER from pretrained_run, never the paired
+#    clip_head it was jointly trained with in Stage 2. clip_head was always
+#    built fresh (randomly initialized) and fit ONLY on the midtrain mix's
+#    narrow templated-caption vocabulary -- discarding the HumanML3D-trained
+#    projection entirely, regardless of freeze_imu_encoder. Fixed by loading
+#    clip_head's state from the same checkpoint whenever present.
+# 2. text_projection_mlp: false (was true in v3/v4) -- the Stage-2 anyrot
+#    checkpoint was trained WITHOUT this adapter (confirmed no "text_mlp"
+#    key in its checkpoint), so enabling it here would leave a SECOND
+#    fresh, midtrain-only-trained component with the same failure mode as
+#    clip_head had. Disabling it lets frozen CLIP text embeddings pass
+#    through unchanged -- exactly what clip_head was originally trained
+#    against in Stage 2.
+#
+# encoder is back to TRAINABLE (freeze_imu_encoder: false, matching v3, not
+# v4) since freezing it didn't help and wasn't the actual problem -- this
+# isolates the head-warm-start fix as the single new variable under test.
+
+vit1d:
+  patch_size: 16
+  shared_kernel: acc_gyro
+  pos_embed_type: 2d
+  max_patches_per_channel: 256
+  max_channels: 32
+  pooling: "mean"
+
+  encoder:
+    hidden_size: 384
+    num_hidden_layers: 12
+    num_attention_heads: 6
+    intermediate_size: 1536
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-6
+    alt_attention: true
+
+objective:
+  type: imu_text_clip_realdata
+  imu_text_clip_realdata:
+    clip_model:        openai/clip-vit-base-patch32
+    clip_embed_dim:    512
+    local_files_only:  true
+
+    pretrained_run:  vit1d_clip_humanml3d_finetune_mae_multidata_anyrot
+    pretrained_ckpt: best
+
+    sentence_template: "The person is {}"
+
+    freeze_imu_encoder:  false
+    freeze_text_encoder: true
+    text_projection_mlp: false   # NEW vs v3/v4 -- see header note
+    text_mlp_hidden_dim: null
+
+paths:
+  dataset_path: /projects/b53017/vbc1591/IMULM_master_dataset_v2.parquet
+  runs_root: /gpfs/home/vbc1591/IMU-SSL/runs
+
+preprocess:
+  normalize:
+    enabled: false            # HumanML3D-CLIP checkpoint expects raw scale (see §10 configs)
+
+windowing:
+  window_seconds: 2.56
+
+splits:
+  seed: 42
+  group_key: subject_id
+  shuffle: true
+  val_ratio: 0.1
+  test_ratio: 0.0
+
+data:
+  sensor_columns: [acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z]
+  train_on_datasets: ["recofit", "samosa", "shoaib", "ut_watch"]
+  batch_size: 256
+  eval_batch_size: 256
+  num_workers: 8
+  pin_memory: true
+
+random_rotation:
+  enabled: true
+  rotation_set: so3
+
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 10000000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 500
+  val_max_batches: 100
+
+  optim:
+    name: adamw
+    lr: 3.0e-5
+    weight_decay: 0.01
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+
+  sched:
+    name: cosine
+    warmup_steps: 500
+
+  early_stopping:
+    enabled: true
+    monitor: val_loss
+    patience: 20
+
+logging:
+  log_every_steps: 5
+  ckpt_every_steps: 500
+  save_step_checkpoints: false
+
+wandb:
+  entity: yli32258-northwestern-university
+  project: TransfHAR_project

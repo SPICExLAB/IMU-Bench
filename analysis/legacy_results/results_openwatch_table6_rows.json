@@ -1,0 +1,458 @@
+[
+  {
+    "name": "FOCAL win/noaug",
+    "run": "vit1d_gesture_probe_openwatch_6class_focal_windowed_strat",
+    "split": "val",
+    "n_clips": 102,
+    "n_windows": 612,
+    "window": {
+      "acc": 0.4215686274509804,
+      "bal_acc": 0.4901420817369093,
+      "macro_f1": 0.393194501701798,
+      "macro_recall": 0.4901420817369093
+    },
+    "clip": {
+      "acc": 0.49019607843137253,
+      "bal_acc": 0.6155035577449371,
+      "macro_f1": 0.4781433541158399,
+      "macro_recall": 0.6155035577449371
+    }
+  },
+  {
+    "name": "FOCAL win/noaug",
+    "run": "vit1d_gesture_probe_openwatch_6class_focal_windowed_strat",
+    "split": "test",
+    "n_clips": 87,
+    "n_windows": 522,
+    "window": {
+      "acc": 0.3793103448275862,
+      "bal_acc": 0.39087301587301587,
+      "macro_f1": 0.3368989892514858,
+      "macro_recall": 0.39087301587301587
+    },
+    "clip": {
+      "acc": 0.41379310344827586,
+      "bal_acc": 0.45403439153439157,
+      "macro_f1": 0.3760092168180404,
+      "macro_recall": 0.45403439153439157
+    }
+  },
+  {
+    "name": "FOCAL win/aug",
+    "run": "vit1d_gesture_probe_openwatch_6class_focal_windowed_strat_aug",
+    "split": "val",
+    "n_clips": 102,
+    "n_windows": 612,
+    "window": {
+      "acc": 0.4297385620915033,
+      "bal_acc": 0.5087389010521194,
+      "macro_f1": 0.4155231574254236,
+      "macro_recall": 0.5087389010521194
+    },
+    "clip": {
+      "acc": 0.47058823529411764,
+      "bal_acc": 0.5899448093413611,
+      "macro_f1": 0.4733652579644141,
+      "macro_recall": 0.5899448093413611
+    }
+  },
+  {
+    "name": "FOCAL win/aug",
+    "run": "vit1d_gesture_probe_openwatch_6class_focal_windowed_strat_aug",
+    "split": "test",
+    "n_clips": 87,
+    "n_windows": 522,
+    "window": {
+      "acc": 0.3620689655172414,
+      "bal_acc": 0.3900793650793651,
+      "macro_f1": 0.33495828885167994,
+      "macro_recall": 0.3900793650793651
+    },
+    "clip": {
+      "acc": 0.40229885057471265,
+      "bal_acc": 0.48941798941798936,
+      "macro_f1": 0.407088680555108,
+      "macro_recall": 0.48941798941798936
+    }
+  },
+  {
+    "name": "SimMTM win/noaug",
+    "run": "vit1d_gesture_probe_openwatch_6class_simmtm_windowed_strat",
+    "split": "val",
+    "n_clips": 102,
+    "n_windows": 612,
+    "window": {
+      "acc": 0.5228758169934641,
+      "bal_acc": 0.6254469987228607,
+      "macro_f1": 0.5017966074490751,
+      "macro_recall": 0.6254469987228607
+    },
+    "clip": {
+      "acc": 0.6176470588235294,
+      "bal_acc": 0.7450761722313445,
+      "macro_f1": 0.6065069297627437,
+      "macro_recall": 0.7450761722313445
+    }
+  },
+  {
+    "name": "SimMTM win/noaug",
+    "run": "vit1d_gesture_probe_openwatch_6class_simmtm_windowed_strat",
+    "split": "test",
+    "n_clips": 87,
+    "n_windows": 522,
+    "window": {
+      "acc": 0.47126436781609193,
+      "bal_acc": 0.510405643738977,
+      "macro_f1": 0.4467049602090927,
+      "macro_recall": 0.510405643738977
+    },
+    "clip": {
+      "acc": 0.5517241379310345,
+      "bal_acc": 0.615542328042328,
+      "macro_f1": 0.5317551357025041,
+      "macro_recall": 0.615542328042328
+    }
+  },
+  {
+    "name": "SimMTM win/aug",
+    "run": "vit1d_gesture_probe_openwatch_6class_simmtm_windowed_strat_aug",
+    "split": "val",
+    "n_clips": 102,
+    "n_windows": 612,
+    "window": {
+      "acc": 0.5196078431372549,
+      "bal_acc": 0.629685884570942,
+      "macro_f1": 0.5006237527160367,
+      "macro_recall": 0.629685884570942
+    },
+    "clip": {
+      "acc": 0.6274509803921569,
+      "bal_acc": 0.7987867177522349,
+      "macro_f1": 0.6314405497517452,
+      "macro_recall": 0.7987867177522349
+    }
+  },
+  {
+    "name": "SimMTM win/aug",
+    "run": "vit1d_gesture_probe_openwatch_6class_simmtm_windowed_strat_aug",
+    "split": "test",
+    "n_clips": 87,
+    "n_windows": 522,
+    "window": {
+      "acc": 0.4329501915708812,
+      "bal_acc": 0.4974537037037037,
+      "macro_f1": 0.414876842651209,
+      "macro_recall": 0.4974537037037037
+    },
+    "clip": {
+      "acc": 0.5172413793103449,
+      "bal_acc": 0.6287037037037037,
+      "macro_f1": 0.5149123715790382,
+      "macro_recall": 0.6287037037037037
+    }
+  },
+  {
+    "name": "RelCon win/noaug",
+    "run": "vit1d_gesture_probe_openwatch_6class_relcon_windowed_strat",
+    "split": "val",
+    "n_clips": 102,
+    "n_windows": 612,
+    "window": {
+      "acc": 0.3937908496732026,
+      "bal_acc": 0.48162059843094324,
+      "macro_f1": 0.38569637681986846,
+      "macro_recall": 0.48162059843094324
+    },
+    "clip": {
+      "acc": 0.39215686274509803,
+      "bal_acc": 0.508976464148878,
+      "macro_f1": 0.41136302590774787,
+      "macro_recall": 0.508976464148878
+    }
+  },
+  {
+    "name": "RelCon win/noaug",
+    "run": "vit1d_gesture_probe_openwatch_6class_relcon_windowed_strat",
+    "split": "test",
+    "n_clips": 87,
+    "n_windows": 522,
+    "window": {
+      "acc": 0.421455938697318,
+      "bal_acc": 0.48456790123456783,
+      "macro_f1": 0.40674695733846317,
+      "macro_recall": 0.48456790123456783
+    },
+    "clip": {
+      "acc": 0.42528735632183906,
+      "bal_acc": 0.5093915343915344,
+      "macro_f1": 0.4190915979918537,
+      "macro_recall": 0.5093915343915344
+    }
+  },
+  {
+    "name": "RelCon win/aug",
+    "run": "vit1d_gesture_probe_openwatch_6class_relcon_windowed_strat_aug",
+    "split": "val",
+    "n_clips": 102,
+    "n_windows": 612,
+    "window": {
+      "acc": 0.38562091503267976,
+      "bal_acc": 0.4017188165176671,
+      "macro_f1": 0.3363874350736881,
+      "macro_recall": 0.4017188165176671
+    },
+    "clip": {
+      "acc": 0.4215686274509804,
+      "bal_acc": 0.4701993249407042,
+      "macro_f1": 0.4039790764790765,
+      "macro_recall": 0.4701993249407042
+    }
+  },
+  {
+    "name": "RelCon win/aug",
+    "run": "vit1d_gesture_probe_openwatch_6class_relcon_windowed_strat_aug",
+    "split": "test",
+    "n_clips": 87,
+    "n_windows": 522,
+    "window": {
+      "acc": 0.3850574712643678,
+      "bal_acc": 0.45909391534391536,
+      "macro_f1": 0.37674574027966196,
+      "macro_recall": 0.45909391534391536
+    },
+    "clip": {
+      "acc": 0.4482758620689655,
+      "bal_acc": 0.5390211640211641,
+      "macro_f1": 0.44316800044818505,
+      "macro_recall": 0.5390211640211641
+    }
+  },
+  {
+    "name": "Ours (MAE), no alt-attn win/noaug",
+    "run": "vit1d_gesture_probe_openwatch_6class_mae_noaltattn_windowed_strat",
+    "split": "val",
+    "n_clips": 102,
+    "n_windows": 612,
+    "window": {
+      "acc": 0.5735294117647058,
+      "bal_acc": 0.6727117922520223,
+      "macro_f1": 0.5518258829868449,
+      "macro_recall": 0.6727117922520223
+    },
+    "clip": {
+      "acc": 0.6568627450980392,
+      "bal_acc": 0.7775063856960408,
+      "macro_f1": 0.6468236806505172,
+      "macro_recall": 0.7775063856960408
+    }
+  },
+  {
+    "name": "Ours (MAE), no alt-attn win/noaug",
+    "run": "vit1d_gesture_probe_openwatch_6class_mae_noaltattn_windowed_strat",
+    "split": "test",
+    "n_clips": 87,
+    "n_windows": 522,
+    "window": {
+      "acc": 0.5517241379310345,
+      "bal_acc": 0.5870039682539683,
+      "macro_f1": 0.5235048384708718,
+      "macro_recall": 0.5870039682539683
+    },
+    "clip": {
+      "acc": 0.6551724137931034,
+      "bal_acc": 0.7324074074074073,
+      "macro_f1": 0.6473746755480502,
+      "macro_recall": 0.7324074074074073
+    }
+  },
+  {
+    "name": "Ours (MAE), no alt-attn win/aug",
+    "run": "vit1d_gesture_probe_openwatch_6class_mae_noaltattn_windowed_strat_aug",
+    "split": "val",
+    "n_clips": 102,
+    "n_windows": 612,
+    "window": {
+      "acc": 0.5588235294117647,
+      "bal_acc": 0.6696360153256705,
+      "macro_f1": 0.5399898092347747,
+      "macro_recall": 0.6696360153256705
+    },
+    "clip": {
+      "acc": 0.6568627450980392,
+      "bal_acc": 0.7991698595146871,
+      "macro_f1": 0.6563821380755018,
+      "macro_recall": 0.7991698595146871
+    }
+  },
+  {
+    "name": "Ours (MAE), no alt-attn win/aug",
+    "run": "vit1d_gesture_probe_openwatch_6class_mae_noaltattn_windowed_strat_aug",
+    "split": "test",
+    "n_clips": 87,
+    "n_windows": 522,
+    "window": {
+      "acc": 0.5019157088122606,
+      "bal_acc": 0.5722883597883598,
+      "macro_f1": 0.4942243235064037,
+      "macro_recall": 0.5722883597883598
+    },
+    "clip": {
+      "acc": 0.5747126436781609,
+      "bal_acc": 0.6805555555555555,
+      "macro_f1": 0.5817593500659862,
+      "macro_recall": 0.6805555555555555
+    }
+  },
+  {
+    "name": "Ours (MAE), acc-only win/noaug",
+    "run": "vit1d_gesture_probe_openwatch_6class_mae_acconly_windowed_strat",
+    "split": "val",
+    "n_clips": 102,
+    "n_windows": 612,
+    "window": {
+      "acc": 0.5343137254901961,
+      "bal_acc": 0.6183463327859879,
+      "macro_f1": 0.50789659619114,
+      "macro_recall": 0.6183463327859879
+    },
+    "clip": {
+      "acc": 0.6470588235294118,
+      "bal_acc": 0.743607462141945,
+      "macro_f1": 0.6250375228636098,
+      "macro_recall": 0.743607462141945
+    }
+  },
+  {
+    "name": "Ours (MAE), acc-only win/noaug",
+    "run": "vit1d_gesture_probe_openwatch_6class_mae_acconly_windowed_strat",
+    "split": "test",
+    "n_clips": 87,
+    "n_windows": 522,
+    "window": {
+      "acc": 0.49616858237547895,
+      "bal_acc": 0.5456238977072311,
+      "macro_f1": 0.47829298794422753,
+      "macro_recall": 0.5456238977072311
+    },
+    "clip": {
+      "acc": 0.5862068965517241,
+      "bal_acc": 0.6729497354497355,
+      "macro_f1": 0.5861861987375294,
+      "macro_recall": 0.6729497354497355
+    }
+  },
+  {
+    "name": "Ours (MAE), acc-only win/aug",
+    "run": "vit1d_gesture_probe_openwatch_6class_mae_acconly_windowed_strat_aug",
+    "split": "val",
+    "n_clips": 102,
+    "n_windows": 612,
+    "window": {
+      "acc": 0.5130718954248366,
+      "bal_acc": 0.6218607462141944,
+      "macro_f1": 0.4975774949187271,
+      "macro_recall": 0.6218607462141944
+    },
+    "clip": {
+      "acc": 0.5980392156862745,
+      "bal_acc": 0.7568258529465427,
+      "macro_f1": 0.5990379700620664,
+      "macro_recall": 0.7568258529465427
+    }
+  },
+  {
+    "name": "Ours (MAE), acc-only win/aug",
+    "run": "vit1d_gesture_probe_openwatch_6class_mae_acconly_windowed_strat_aug",
+    "split": "test",
+    "n_clips": 87,
+    "n_windows": 522,
+    "window": {
+      "acc": 0.48659003831417624,
+      "bal_acc": 0.5428020282186949,
+      "macro_f1": 0.47084051553881157,
+      "macro_recall": 0.5428020282186949
+    },
+    "clip": {
+      "acc": 0.5747126436781609,
+      "bal_acc": 0.6532407407407407,
+      "macro_f1": 0.5638888888888889,
+      "macro_recall": 0.6532407407407407
+    }
+  },
+  {
+    "name": "Scratch win/noaug",
+    "run": "vit1d_gesture_supervised_openwatch_6class_altattn_scratch_windowed_strat",
+    "split": "val",
+    "n_clips": 102,
+    "n_windows": 612,
+    "window": {
+      "acc": 0.6062091503267973,
+      "bal_acc": 0.4922235145654686,
+      "macro_f1": 0.4855007006099239,
+      "macro_recall": 0.4922235145654686
+    },
+    "clip": {
+      "acc": 0.7156862745098039,
+      "bal_acc": 0.6306923918992884,
+      "macro_f1": 0.6212663067926225,
+      "macro_recall": 0.6306923918992884
+    }
+  },
+  {
+    "name": "Scratch win/noaug",
+    "run": "vit1d_gesture_supervised_openwatch_6class_altattn_scratch_windowed_strat",
+    "split": "test",
+    "n_clips": 87,
+    "n_windows": 522,
+    "window": {
+      "acc": 0.5191570881226054,
+      "bal_acc": 0.4036816578483245,
+      "macro_f1": 0.4034916454965454,
+      "macro_recall": 0.4036816578483245
+    },
+    "clip": {
+      "acc": 0.6091954022988506,
+      "bal_acc": 0.4864417989417989,
+      "macro_f1": 0.4875816993464053,
+      "macro_recall": 0.4864417989417989
+    }
+  },
+  {
+    "name": "Scratch win/aug",
+    "run": "vit1d_gesture_supervised_openwatch_6class_altattn_scratch_windowed_strat_aug",
+    "split": "val",
+    "n_clips": 102,
+    "n_windows": 612,
+    "window": {
+      "acc": 0.6421568627450981,
+      "bal_acc": 0.49201521924223074,
+      "macro_f1": 0.50373313106503,
+      "macro_recall": 0.49201521924223074
+    },
+    "clip": {
+      "acc": 0.7941176470588235,
+      "bal_acc": 0.6491174055829227,
+      "macro_f1": 0.6825297941170477,
+      "macro_recall": 0.6491174055829227
+    }
+  },
+  {
+    "name": "Scratch win/aug",
+    "run": "vit1d_gesture_supervised_openwatch_6class_altattn_scratch_windowed_strat_aug",
+    "split": "test",
+    "n_clips": 87,
+    "n_windows": 522,
+    "window": {
+      "acc": 0.49808429118773945,
+      "bal_acc": 0.35241402116402115,
+      "macro_f1": 0.35445456515045776,
+      "macro_recall": 0.35241402116402115
+    },
+    "clip": {
+      "acc": 0.5172413793103449,
+      "bal_acc": 0.3386243386243386,
+      "macro_f1": 0.3486121387758458,
+      "macro_recall": 0.3386243386243386
+    }
+  }
+]

@@ -1,6 +1,6 @@
 paths:
-  runs_root: "/home/yiquan/TransfHAR/runs/"
-  dataset_path: "/mnt/nas2/yiquan_data/IMULM_master_dataset_v2.parquet"
+  runs_root: "/gpfs/home/vbc1591/IMU-SSL/runs"
+  dataset_path: "/projects/b53017/vbc1591/IMULM_master_dataset_v2.parquet"
 
 logging:
   log_every_steps: 5

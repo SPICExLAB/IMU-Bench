@@ -1,0 +1,39 @@
+{
+  "task": "full_body_pose_nymeria",
+  "encoder": "mae_noaltattn",
+  "protocol": "probe",
+  "seed": 42,
+  "metrics": {
+    "mpjpe_mm": 97.434033,
+    "val_pose_mse": 0.019405
+  },
+  "primary_metric": "mpjpe_mm",
+  "eval_split": "val",
+  "run": "vit1d_full_body_pose_probe_nymeria_mae_noaltattn_multidata",
+  "checkpoint": "best_mpjpe.pt",
+  "checkpoint_step": 45000,
+  "selection": {
+    "split": "val",
+    "monitor": "mpjpe_mm",
+    "mode": "min",
+    "via": "best_mpjpe.pt (legacy)"
+  },
+  "job_ids": {
+    "train": null,
+    "score": null
+  },
+  "provenance": {
+    "source": "scorer:bench.score.full_body_pose",
+    "date": "2026-08-16T17:33:10-05:00",
+    "git": "1b95aa3-dirty",
+    "legacy_run": true,
+    "info": {
+      "min_val_mpjpe_mm": 97.434033,
+      "min_val_mpjpe_step": 45000,
+      "n_val_evals": 370
+    }
+  },
+  "status": "ok",
+  "notes": "harvested from a pre-harness run with a recipe-equivalent config.",
+  "schema_version": 1
+}

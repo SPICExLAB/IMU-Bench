@@ -1,0 +1,123 @@
+# "Midtraining" v2: continue CLIP language-alignment from the HumanML3D-CLIP
+# checkpoint onto a MUCH broader/larger real-data mix than v1
+# (configs/vit1d_clip_realdata_midtrain_from_humanml3d.yaml, which only used
+# recofit/samosa/shoaib/ut_watch -- 4 datasets, ~187 classes -- and made
+# ZERO-SHOT WORSE on wisdm/utd_mhad/pamap2 across the board, diagnosed as
+# overfitting to too narrow a real-dataset mix rather than genuinely
+# generalizing; see EXPERIMENTS.md §10's midtraining follow-up).
+#
+# v2 changes, both aimed at the diagnosed failure mode:
+#   1. MUCH more data/diversity: adds capture24 (699M rows! 151 subjects, 78
+#      classes -- by far the largest, most diverse real HAR dataset in this
+#      repo's master parquet), opportunity++ (21 classes, 4 subjects), and
+#      wear (19 classes, 24 subjects), on top of v1's recofit/samosa/shoaib/
+#      ut_watch. 7 datasets total, ~250+ combined classes, vs. v1's 4/~187.
+#      More diversity should reduce the risk of overfitting to any single
+#      dataset's specific sensor placement/subject population/activity
+#      vocabulary -- closer (though still far short) of UniMTS's own
+#      dozens-of-datasets pretraining scale.
+#   2. 10x lower LR (3e-6 vs. v1's 3e-5): gentler adaptation, less likely to
+#      catastrophically drift away from HumanML3D's more general (if
+#      narrower) alignment while absorbing the new real-data exposure.
+#
+# `prism` is deliberately excluded -- it's this repo's own reserved
+# held-out probe dataset (see splits.probe_dataset: prism convention used
+# elsewhere), not meant to be trained on.
+#
+# Same architecture-block-must-match-checkpoint and
+# preprocess.normalize:false rationale as v1 (see that config's own header).
+
+vit1d:
+  patch_size: 16
+  shared_kernel: acc_gyro
+  pos_embed_type: 2d
+  max_patches_per_channel: 256
+  max_channels: 32
+  pooling: "mean"
+
+  encoder:
+    hidden_size: 384
+    num_hidden_layers: 12
+    num_attention_heads: 6
+    intermediate_size: 1536
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-6
+    alt_attention: true
+
+objective:
+  type: imu_text_clip_realdata
+  imu_text_clip_realdata:
+    clip_model:        openai/clip-vit-base-patch32
+    clip_embed_dim:    512
+    local_files_only:  true
+
+    pretrained_run:  vit1d_clip_humanml3d_finetune_mae_multidata
+    pretrained_ckpt: best
+
+    sentence_template: "The person is {}"
+
+    freeze_imu_encoder:  false
+    freeze_text_encoder: true
+    text_projection_mlp: true
+    text_mlp_hidden_dim: null
+
+paths:
+  dataset_path: /projects/b53017/vbc1591/IMULM_master_dataset_v2.parquet
+  runs_root: /gpfs/home/vbc1591/IMU-SSL/runs
+
+preprocess:
+  normalize:
+    enabled: false
+
+windowing:
+  window_seconds: 2.56
+
+splits:
+  seed: 42
+  group_key: subject_id
+  shuffle: true
+  val_ratio: 0.05
+  test_ratio: 0.0
+
+data:
+  sensor_columns: [acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z]
+  train_on_datasets: ["capture24", "opportunity++", "wear", "recofit", "samosa", "shoaib", "ut_watch"]
+  batch_size: 256
+  eval_batch_size: 256
+  num_workers: 8
+  pin_memory: true
+
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 10000000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 500
+  val_max_batches: 100
+
+  optim:
+    name: adamw
+    lr: 3.0e-6
+    weight_decay: 0.01
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+
+  sched:
+    name: cosine
+    warmup_steps: 500
+
+  early_stopping:
+    enabled: true
+    monitor: val_loss
+    patience: 20
+
+logging:
+  log_every_steps: 5
+  ckpt_every_steps: 500
+  save_step_checkpoints: false
+
+wandb:
+  entity: yli32258-northwestern-university
+  project: TransfHAR_project

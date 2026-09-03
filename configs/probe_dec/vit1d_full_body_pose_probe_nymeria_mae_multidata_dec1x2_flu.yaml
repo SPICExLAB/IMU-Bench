@@ -1,0 +1,98 @@
+# Decoder-capacity sweep for the full-body pose frozen probe.
+# ONLY vit1d.pose_decoder.num_hidden_layers (1, cross-channel) and
+# num_temporal_layers (2, temporal) differ from the control cell
+# lr3e-4_cos (decoder 1x0 -> 97.71mm best / 98.17mm final5). Optimizer is held
+# at the swept-optimal lr=3e-4 + cosine-to-0 over an equal 60K budget; see
+# EXPERIMENTS.md section 2 (the probe is NOT LR-limited, and cosine halves the
+# plateau noise, so capacity effects are readable here).
+# Full-body pose linear probe on Nymeria real-wrist IMU: frozen encoder from the
+# combined-multidata MAE pretrain (vit1d_ssl_mae_varlen_altattn_multidata,
+# alt-attn ViT1DEncoder) + trainable ViT1DPoseDecoder.
+# 23 joints (exclude root/joint-0), 4 sub-patches per 0.32 s patch → 0.08 s resolution.
+
+vit1d:
+  patch_size: 16
+  shared_kernel: acc_gyro       # must match the MAE checkpoint's patch embed
+  encoder:
+    hidden_size: 384
+    num_hidden_layers: 12
+    num_attention_heads: 6
+    intermediate_size: 1536
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-6
+    alt_attention: true         # checkpoint was trained with the alt-attn encoder
+  pose_decoder:
+    hidden_size: 192
+    num_hidden_layers: 1
+    num_attention_heads: 4
+    mlp_ratio: 4.0
+    dropout: 0.2
+    sub_patches: 4              # 4 predictions per 0.32 s patch → 0.08 s each
+    num_temporal_layers: 2
+  max_patches_per_channel: 256
+  pooling: "mean"
+
+objective:
+  type: pose_probe
+  pose_probe:
+    pretrained_run: vit1d_ssl_mae_varlen_altattn_multidata
+    pretrained_ckpt: best
+    loader: nymeria_real_wrist_full_body_flu
+    train_pkl_root: /projects/b53017/vbc1591/processed_data_body_Ty_rwrist
+    train_files: all
+    val_pkl_root: /projects/b53017/vbc1591/processed_data_test_body_Ty_rwrist
+    val_files: all
+    num_joints: 23               # exclude root (joint-0, global pelvis)
+    add_gravity: true
+    reset_root_orientation: false
+    jitter_weight: 0.0001        # L_jitter = mean||pred[t+1]-pred[t]||^2
+    joint_pos_weight: 10.0
+
+paths:
+  dataset_path: /projects/b53017/vbc1591/IMULM_master_dataset_v2.parquet
+  runs_root: /gpfs/home/vbc1591/IMU-SSL/runs
+
+data:
+  sensor_columns: [acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z]
+  batch_size: 256
+  eval_batch_size: 256
+  num_workers: 8
+  pin_memory: true
+
+windowing:
+  window_seconds: 10.24    # match pretrain window so patch-position embeddings line up
+  window_hop_ratio: 0.5
+
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 60000         # equal-budget sweep (baseline converged by ~20K)
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 1000
+
+  optim:
+    name: adamw
+    lr: 0.0003
+    weight_decay: 0.05
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+
+  sched:
+    name: cosine            # LR-sweep variant: decay to 0 over max_steps
+    warmup_steps: 500
+
+  early_stopping:
+    enabled: true          # patience below cannot fire -> guarantees the full fixed budget AND writes best.pt
+    monitor: val_loss
+    patience: 999999
+
+logging:
+  log_every_steps: 5
+  ckpt_every_steps: 1000
+  save_step_checkpoints: false   # only keep best.pt/latest.pt (no per-step snapshots)
+
+wandb:
+  entity: yli32258-northwestern-university
+  project: TransfHAR_project

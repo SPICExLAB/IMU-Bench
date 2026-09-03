@@ -1,0 +1,86 @@
+# WISDM activity-recognition FINETUNE, warm-started from the ROTATION-
+# AUGMENTED HumanML3D-CLIP checkpoint (vit1d_clip_humanml3d_finetune_mae_multidata_anyrot,
+# early-stopped step 21000, val_loss=2.493862, acc_imu2text=34.20%/acc_text2imu=33.98%
+# on HumanML3D's own held-out val split -- on par with the plain checkpoint's
+# 33.00%/34.25%) instead of the plain HumanML3D-CLIP checkpoint used in the
+# sibling vit1d_har_finetune_wisdm_humanml3dclip_multidata_flu.yaml. The only
+# difference in the Stage-2 CLIP training that produced this checkpoint was
+# random_rotation.enabled: true (uniform SO(3) on acc+gyro, mirroring
+# UniMTS's own augment_data() rotation-invariance trick) -- everything else
+# (recipe, data, architecture) is identical to that sibling config.
+
+vit1d:
+  patch_size: 16
+  shared_kernel: acc_gyro
+  use_cls_token: false
+  encoder:
+    hidden_size: 384
+    num_hidden_layers: 12
+    num_attention_heads: 6
+    intermediate_size: 1536
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-6
+    drop_path_rate: 0.0
+    alt_attention: true
+  max_patches_per_channel: 256
+  pooling: "mean"
+
+objective:
+  type: utd_mhad_finetune       # generic finetune objective: warm-started encoder + LinearHead
+  utd_mhad_finetune:
+    pretrained_run:  vit1d_clip_humanml3d_finetune_mae_multidata_anyrot
+    pretrained_ckpt: best
+
+paths:
+  dataset_path: /projects/b53017/vbc1591/IMULM_master_dataset_v2.parquet
+  runs_root: /gpfs/home/vbc1591/IMU-SSL/runs
+
+preprocess:
+  normalize:
+    enabled: false             # see sibling config's header note -- checkpoint expects raw scale
+
+windowing:
+  window_seconds: 2.56
+
+splits:
+  val_ratio: 0.2
+
+data:
+  train_on_datasets: ["wisdm"]
+  sensor_columns: [acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z]
+  batch_size:       256
+  eval_batch_size:  256
+  num_workers:      8
+  pin_memory:       true
+
+logging:
+  ckpt_every_steps: 500
+  save_step_checkpoints: false
+
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 20000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 200
+
+  early_stopping:
+    enabled: true
+    patience: 20
+
+  optim:
+    name: adamw
+    lr: 1.0e-4
+    weight_decay: 0.1
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+
+  sched:
+    name: cosine
+    warmup_steps: 100
+
+wandb:
+  entity: yli32258-northwestern-university
+  project: TransfHAR_project

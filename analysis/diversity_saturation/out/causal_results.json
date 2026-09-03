@@ -1,0 +1,61 @@
+{
+  "max_steps": 105000,
+  "pretrain": {
+    "redundant": {
+      "final_step": 105000.0,
+      "final_val_loss": 0.92173,
+      "n_val_rows": 109,
+      "checkpoint": {
+        "exists": true,
+        "step": 103000,
+        "within_budget": true,
+        "best_val_loss": 0.921653000547052
+      }
+    },
+    "random": {
+      "final_step": 105000.0,
+      "final_val_loss": 0.776691,
+      "n_val_rows": 112,
+      "checkpoint": {
+        "exists": true,
+        "step": 105000,
+        "within_budget": true,
+        "best_val_loss": 0.7766911983646269
+      }
+    },
+    "diverse": {
+      "final_step": 105000.0,
+      "final_val_loss": 0.775282,
+      "n_val_rows": 114,
+      "checkpoint": {
+        "exists": true,
+        "step": 105000,
+        "within_budget": true,
+        "best_val_loss": 0.7752824789826384
+      }
+    }
+  },
+  "probes": {
+    "Arm pose (val loss)": {
+      "redundant": 0.018452,
+      "random": 0.017184,
+      "diverse": 0.017038
+    },
+    "WISDM (acc %)": {
+      "redundant": 35.3099,
+      "random": 61.6964,
+      "diverse": 61.5094
+    },
+    "PAMAP2 (acc %)": {
+      "redundant": 30.2832,
+      "random": 54.2212,
+      "diverse": 56.6368
+    },
+    "Odometry (vel MSE)": {
+      "redundant": 0.0327,
+      "random": 0.0274,
+      "diverse": 0.02739
+    }
+  },
+  "warnings": []
+}

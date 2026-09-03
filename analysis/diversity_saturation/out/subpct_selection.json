@@ -1,0 +1,43 @@
+{
+  "n_pool": 3555159,
+  "k_clusters": 1000,
+  "seed": 42,
+  "nested": true,
+  "arms": {
+    "0p01": {
+      "nominal_fraction": 0.0001,
+      "n_windows": 356,
+      "effective_fraction": 0.00010013616831202205,
+      "coverage": 0.289,
+      "index_file": "/projects/b53017/vbc1591/diversity_saturation/idx_sub_0p01pct.npy"
+    },
+    "0p05": {
+      "nominal_fraction": 0.0005,
+      "n_windows": 1778,
+      "effective_fraction": 0.0005001182788167842,
+      "coverage": 0.748,
+      "index_file": "/projects/b53017/vbc1591/diversity_saturation/idx_sub_0p05pct.npy"
+    },
+    "0p1": {
+      "nominal_fraction": 0.001,
+      "n_windows": 3555,
+      "effective_fraction": 0.0009999552762619056,
+      "coverage": 0.928,
+      "index_file": "/projects/b53017/vbc1591/diversity_saturation/idx_sub_0p1pct.npy"
+    },
+    "0p5": {
+      "nominal_fraction": 0.005,
+      "n_windows": 17776,
+      "effective_fraction": 0.005000057662681191,
+      "coverage": 0.999,
+      "index_file": "/projects/b53017/vbc1591/diversity_saturation/idx_sub_0p5pct.npy"
+    },
+    "random_1pct": {
+      "nominal_fraction": 0.013,
+      "n_windows": 46116,
+      "effective_fraction": 0.012971571735610136,
+      "coverage": 1.0,
+      "index_file": "/projects/b53017/vbc1591/diversity_saturation/idx_random_1pct.npy"
+    }
+  }
+}

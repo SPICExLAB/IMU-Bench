@@ -1,0 +1,95 @@
+{
+  "n_pool": 3555159,
+  "n_target": 46116,
+  "k_clusters": 1000,
+  "pca_var_kept": 0.9685831069946289,
+  "coverage_curve": {
+    "0.0001": 0.292,
+    "0.001": 0.937,
+    "0.005": 0.999,
+    "0.013": 1.0,
+    "0.05": 1.0,
+    "0.106": 1.0,
+    "0.25": 1.0,
+    "1.0": 1.0
+  },
+  "coverage_subsets": {
+    "random": 1.0,
+    "diverse": 1.0,
+    "redundant": 0.003
+  },
+  "novelty": {
+    "random": {
+      "pool_to_subset_pcts": {
+        "5": 1.3097495317459107,
+        "25": 2.3070788383483887,
+        "50": 3.239259958267212,
+        "75": 3.989582061767578,
+        "95": 4.925512409210205
+      },
+      "subset_self_nn_median": 3.2457027435302734,
+      "frac_pool_below_self_median": 0.5021557729624019
+    },
+    "diverse": {
+      "pool_to_subset_pcts": {
+        "5": 1.4095846712589264,
+        "25": 2.3482439517974854,
+        "50": 3.23007595539093,
+        "75": 3.942239761352539,
+        "95": 4.809426188468933
+      },
+      "subset_self_nn_median": 3.563387870788574,
+      "frac_pool_below_self_median": 0.6184111903411393
+    },
+    "redundant": {
+      "pool_to_subset_pcts": {
+        "5": 1.7803428769111633,
+        "25": 11.142337322235107,
+        "50": 14.866735458374023,
+        "75": 16.216520309448242,
+        "95": 18.042637062072753
+      },
+      "subset_self_nn_median": 0.9879426956176758,
+      "frac_pool_below_self_median": 0.003404893521075379
+    }
+  },
+  "embedding_effective_rank_384d": 15.213244222334863,
+  "cluster_sizes_pcts": {
+    "0": 363,
+    "25": 2325,
+    "50": 3060,
+    "75": 4005,
+    "100": 17489
+  },
+  "subset_source_composition": {
+    "random": {
+      "eatingspeed": 7399,
+      "capture24": 18401,
+      "ocdetect": 16347,
+      "realdata": 1233,
+      "nymeria": 2137,
+      "sonic": 459,
+      "humanml3d": 41,
+      "motionx": 67,
+      "totalcapture": 6,
+      "imuposer": 1,
+      "openwatch": 25
+    },
+    "diverse": {
+      "eatingspeed": 10806,
+      "nymeria": 2675,
+      "ocdetect": 17659,
+      "realdata": 1833,
+      "capture24": 12373,
+      "sonic": 566,
+      "humanml3d": 83,
+      "motionx": 88,
+      "imuposer": 2,
+      "openwatch": 26,
+      "totalcapture": 5
+    },
+    "redundant": {
+      "capture24": 46116
+    }
+  }
+}

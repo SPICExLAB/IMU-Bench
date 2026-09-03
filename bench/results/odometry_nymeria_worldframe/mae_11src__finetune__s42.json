@@ -1,0 +1,41 @@
+{
+  "task": "odometry_nymeria_worldframe",
+  "encoder": "mae_11src",
+  "protocol": "finetune",
+  "seed": 42,
+  "metrics": {
+    "vel_mse": 0.017236510291695595,
+    "ate_m": 0.12760012210507354,
+    "drift_pct": 33.95085376055882
+  },
+  "primary_metric": "ate_m",
+  "eval_split": "val",
+  "run": "vit1d_odom_worldframe_finetune_nymeria_mae_multidata",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 19000,
+  "selection": {
+    "split": "val",
+    "monitor": "val_loss",
+    "mode": "min"
+  },
+  "job_ids": {
+    "train": null,
+    "score": "9560109"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.odometry",
+    "date": "2026-08-16T18:25:13-05:00",
+    "git": "unknown",
+    "legacy_run": true,
+    "info": {
+      "n_val_windows": 73515,
+      "n_val_windows_total": 73515,
+      "n_val_sessions": 101,
+      "T": 128,
+      "train_end": "unknown/incomplete"
+    }
+  },
+  "status": "ok",
+  "notes": "harvested from a pre-harness run with a recipe-equivalent config.",
+  "schema_version": 1
+}

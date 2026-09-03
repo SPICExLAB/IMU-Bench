@@ -1,0 +1,44 @@
+{
+  "task": "har_pamap2",
+  "encoder": "relcon",
+  "protocol": "finetune",
+  "seed": 42,
+  "metrics": {
+    "macro_f1": 0.16948956730139314,
+    "bal_acc": 0.22968036828505872,
+    "acc": 0.2754840214602286,
+    "val_loss": 2.915917
+  },
+  "primary_metric": "macro_f1",
+  "eval_split": "val",
+  "run": "bench_har_pamap2__relcon__finetune__s42",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 400,
+  "selection": {
+    "split": "val",
+    "monitor": "val_loss",
+    "mode": "min",
+    "note": "same convention as Experiments_table \u00a73 (metrics read at the min-val-loss checkpoint)"
+  },
+  "job_ids": {
+    "train": 9731588,
+    "score": "9731588"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.har",
+    "date": "2026-08-17T21:52:07-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_val_samples": 4287,
+      "n_classes_seen": 16,
+      "n_classes_head": 18,
+      "n_val_batches": 17,
+      "logged_macro_f1_at_ckpt": 0.169478,
+      "train_end": "early stopping at step=8400 epoch=138"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

@@ -1,0 +1,814 @@
+{
+  "duplicate_subject_groups": [
+    [
+      39,
+      41,
+      42,
+      46,
+      47,
+      48,
+      49
+    ],
+    [
+      40,
+      43
+    ]
+  ],
+  "duplicate_file_groups": {
+    "331904040ba46a3f8c52a13266908369": [
+      "id_39/sitting/answer_phone.csv",
+      "id_41/sitting/answer_phone.csv",
+      "id_42/sitting/answer_phone.csv"
+    ],
+    "734edd29dba27ca2893db6001fd4dbec": [
+      "id_39/sitting/cat_grab.csv",
+      "id_41/sitting/cat_grab.csv",
+      "id_42/sitting/cat_grab.csv"
+    ],
+    "cfe68a9f5d218565194fef5b9509d431": [
+      "id_39/sitting/cheering_fist.csv",
+      "id_41/sitting/cheering_fist.csv",
+      "id_42/sitting/cheering_fist.csv"
+    ],
+    "bdc76875d2dec66e3684373f48c71712": [
+      "id_39/sitting/double_clench.csv",
+      "id_41/sitting/double_clench.csv",
+      "id_42/sitting/double_clench.csv"
+    ],
+    "2bb90e356273eb5c5a4178b3ccce75f3": [
+      "id_39/sitting/double_pinch.csv",
+      "id_41/sitting/double_pinch.csv",
+      "id_42/sitting/double_pinch.csv"
+    ],
+    "3e5c78593a530dd8f5b1efc85a6d4c8c": [
+      "id_39/sitting/double_pinky_pinch.csv",
+      "id_41/sitting/double_pinky_pinch.csv",
+      "id_42/sitting/double_pinky_pinch.csv"
+    ],
+    "6bb04fa77eaff3d02b47ba9448ca3f3d": [
+      "id_39/sitting/good_luck.csv",
+      "id_41/sitting/good_luck.csv",
+      "id_42/sitting/good_luck.csv"
+    ],
+    "c449ca67e0828a52b4653ee49e272361": [
+      "id_39/sitting/grab_cup.csv",
+      "id_41/sitting/grab_cup.csv",
+      "id_42/sitting/grab_cup.csv"
+    ],
+    "0f1f79ffea222cffa57b1f604b6c706f": [
+      "id_39/sitting/index_pointing.csv",
+      "id_41/sitting/index_pointing.csv",
+      "id_42/sitting/index_pointing.csv"
+    ],
+    "e6980f958db003cab2e06e0d6962c9f0": [
+      "id_39/sitting/love_fingers.csv",
+      "id_41/sitting/love_fingers.csv",
+      "id_42/sitting/love_fingers.csv"
+    ],
+    "b527f1a56ee942194b559b64adb63511": [
+      "id_39/sitting/money_sign.csv",
+      "id_41/sitting/money_sign.csv",
+      "id_42/sitting/money_sign.csv"
+    ],
+    "2739ed2c210baf2cd3b7f4c9428d28e2": [
+      "id_39/sitting/open_palm.csv",
+      "id_41/sitting/open_palm.csv",
+      "id_42/sitting/open_palm.csv"
+    ],
+    "6c1571efa0126dc12b602a6867f85e8e": [
+      "id_39/sitting/peace.csv",
+      "id_41/sitting/peace.csv",
+      "id_42/sitting/peace.csv"
+    ],
+    "b0fd6616ad2bd732ee74af3c4634efcb": [
+      "id_39/sitting/pinch_down.csv",
+      "id_41/sitting/pinch_down.csv",
+      "id_42/sitting/pinch_down.csv"
+    ],
+    "a9800e216614a226e5232e499cb26eab": [
+      "id_39/sitting/pinch_left.csv",
+      "id_41/sitting/pinch_left.csv",
+      "id_42/sitting/pinch_left.csv"
+    ],
+    "15d42d5c924e02acbc2908a43d2d23df": [
+      "id_39/sitting/pinch_right.csv",
+      "id_41/sitting/pinch_right.csv",
+      "id_42/sitting/pinch_right.csv"
+    ],
+    "e8dfe8c06ddd121f71ed1502a1aee713": [
+      "id_39/sitting/pinch_up.csv",
+      "id_41/sitting/pinch_up.csv",
+      "id_42/sitting/pinch_up.csv"
+    ],
+    "05c7a13ad101b4608db65c660bdde753": [
+      "id_39/sitting/pinky_pinch.csv",
+      "id_41/sitting/pinky_pinch.csv",
+      "id_42/sitting/pinky_pinch.csv"
+    ],
+    "80ef079cdf3cdfdef93e448b0c2943e4": [
+      "id_39/sitting/pistol_gun.csv",
+      "id_41/sitting/pistol_gun.csv",
+      "id_42/sitting/pistol_gun.csv"
+    ],
+    "d2125e4f21d67cdeeaac1970e32655b4": [
+      "id_39/sitting/rotate_in.csv",
+      "id_41/sitting/rotate_in.csv",
+      "id_42/sitting/rotate_in.csv"
+    ],
+    "e45976212b13ae347197019d502e57c7": [
+      "id_39/sitting/slide.csv",
+      "id_41/sitting/slide.csv",
+      "id_42/sitting/slide.csv"
+    ],
+    "1b4d2f7fe944f1d68ddcff9a77f06a6f": [
+      "id_39/sitting/snap.csv",
+      "id_41/sitting/snap.csv",
+      "id_42/sitting/snap.csv"
+    ],
+    "9f8ba7f6d685acf388d911f796c34d12": [
+      "id_39/sitting/steepling.csv",
+      "id_41/sitting/steepling.csv",
+      "id_42/sitting/steepling.csv"
+    ],
+    "7aa42b892a5fbc16a9710d01720800c2": [
+      "id_39/sitting/stop_sign.csv",
+      "id_41/sitting/stop_sign.csv",
+      "id_42/sitting/stop_sign.csv"
+    ],
+    "b74f9e55040eb29fdea346e1665d3a7a": [
+      "id_39/sitting/thumbs_down.csv",
+      "id_41/sitting/thumbs_down.csv",
+      "id_42/sitting/thumbs_down.csv"
+    ],
+    "54ac2285dca4c428efcaf48a21464b68": [
+      "id_39/sitting/type_computer.csv",
+      "id_41/sitting/type_computer.csv",
+      "id_42/sitting/type_computer.csv"
+    ],
+    "8c941b0a51996dea6b401ab4285740b9": [
+      "id_39/sitting/type_phone.csv",
+      "id_41/sitting/type_phone.csv",
+      "id_42/sitting/type_phone.csv"
+    ],
+    "5d69631c5f5b56c3a4a84e4a29b93226": [
+      "id_39/sitting/waiting_bored.csv",
+      "id_41/sitting/waiting_bored.csv",
+      "id_42/sitting/waiting_bored.csv"
+    ],
+    "1a63330530da47ee0647553d21cf539b": [
+      "id_39/sitting/wash_hands.csv",
+      "id_41/sitting/wash_hands.csv",
+      "id_42/sitting/wash_hands.csv"
+    ],
+    "a6eb4bedbcf249133571b7849cff0b23": [
+      "id_39/sitting/waving_hello.csv",
+      "id_41/sitting/waving_hello.csv",
+      "id_42/sitting/waving_hello.csv"
+    ],
+    "349a1cc7475193a0cb1df4f099ac4ff5": [
+      "id_39/sitting/write_pen.csv",
+      "id_41/sitting/write_pen.csv",
+      "id_42/sitting/write_pen.csv"
+    ],
+    "1def0769cc77c6c853bbdff847e3b4f5": [
+      "id_39/standing/air.csv",
+      "id_49/standing/write_pen.csv"
+    ],
+    "a05372c98c3fae8359f5bc79a5b1800c": [
+      "id_39/standing/bill_please.csv",
+      "id_49/standing/peace_up.csv"
+    ],
+    "ed9ca360d6feaa89b03df1a0e61c8056": [
+      "id_39/standing/double_clench.csv",
+      "id_46/standing/double_clench.csv",
+      "id_48/standing/double_clench.csv"
+    ],
+    "3e50a8034028655cb682e14d17b75539": [
+      "id_39/standing/double_spread.csv",
+      "id_49/standing/extend.csv"
+    ],
+    "33599fb34b67834f4f2c7bd83401a118": [
+      "id_39/standing/extend.csv",
+      "id_46/standing/extend.csv",
+      "id_48/standing/extend.csv"
+    ],
+    "40f0c3d01ad138ec65fe63f4f921eca9": [
+      "id_39/standing/ok_sign.csv",
+      "id_47/standing/finger_up.csv"
+    ],
+    "7c3b5dbd0b693217a3506ce335af7dc2": [
+      "id_39/standing/open_palm.csv",
+      "id_49/standing/balling.csv"
+    ],
+    "0ff6efd37c12e1fad6e664209cf67397": [
+      "id_39/standing/pinky_pinch.csv",
+      "id_49/standing/thumbs_down.csv"
+    ],
+    "b08d2610a44b3ad46af2ce1109c050c0": [
+      "id_39/standing/steepling.csv",
+      "id_49/standing/pistol_gun.csv"
+    ],
+    "f4c3526862f844d1bef550b8165cab86": [
+      "id_40/sitting/air.csv",
+      "id_43/sitting/air.csv"
+    ],
+    "65ef9d416f3d2bf282c386a806f004b4": [
+      "id_40/sitting/answer_phone.csv",
+      "id_43/sitting/answer_phone.csv"
+    ],
+    "e0c091ec3e5b726023f30f6387d10d26": [
+      "id_40/sitting/balling.csv",
+      "id_43/sitting/balling.csv"
+    ],
+    "8628bf54741227b571187500f3d955c5": [
+      "id_40/sitting/cat_grab.csv",
+      "id_43/sitting/cat_grab.csv"
+    ],
+    "a978ea3852e0e69cc4889478b134bf1f": [
+      "id_40/sitting/cheering_fist.csv",
+      "id_43/sitting/cheering_fist.csv"
+    ],
+    "ac898cd55b9baeb2360fdb0355aa82e8": [
+      "id_40/sitting/clapping.csv",
+      "id_43/sitting/clapping.csv"
+    ],
+    "70e258db6f64e28078a22b08ff813d5b": [
+      "id_40/sitting/clench.csv",
+      "id_43/sitting/clench.csv"
+    ],
+    "2ace6cf9b7f56b605f92d3e8e2d321c4": [
+      "id_40/sitting/double_pinch.csv",
+      "id_43/sitting/double_pinch.csv"
+    ],
+    "f3d9017d88876b856218b08b3ae88a62": [
+      "id_40/sitting/double_spread.csv",
+      "id_43/sitting/double_spread.csv"
+    ],
+    "e2bb447da90c8117702014b3f9a8e7ef": [
+      "id_40/sitting/extend.csv",
+      "id_43/sitting/extend.csv"
+    ],
+    "29357c9f4798336d1d9e0ac345e2c60a": [
+      "id_40/sitting/flex.csv",
+      "id_43/sitting/flex.csv"
+    ],
+    "e8b4f000daa2baf74904fd04ae150607": [
+      "id_40/sitting/handshake.csv",
+      "id_43/sitting/handshake.csv"
+    ],
+    "561d1acbdda9467dc0745709ef2696bd": [
+      "id_40/sitting/index_pointing.csv",
+      "id_43/sitting/index_pointing.csv"
+    ],
+    "e1f2aa27c453d7134461bd9c987d9221": [
+      "id_40/sitting/italian_pinch.csv",
+      "id_43/sitting/italian_pinch.csv"
+    ],
+    "6000aa6d9b49a2f6bb9045fdae616689": [
+      "id_40/sitting/love_fingers.csv",
+      "id_43/sitting/love_fingers.csv"
+    ],
+    "bfe234a8b6c37f60531685151b80683d": [
+      "id_40/sitting/love_hands.csv",
+      "id_43/sitting/love_hands.csv"
+    ],
+    "8ce91899d66384afa9810d32b22805a9": [
+      "id_40/sitting/nock_on_wood.csv",
+      "id_43/sitting/nock_on_wood.csv"
+    ],
+    "bb86fb19e0b8f7cca4a867af324fb7e4": [
+      "id_40/sitting/open_palm.csv",
+      "id_43/sitting/open_palm.csv"
+    ],
+    "30809c2b2f9c80cc6f1db4226a4ad5e5": [
+      "id_40/sitting/peace.csv",
+      "id_43/sitting/peace.csv"
+    ],
+    "0f16a3f7f82c951661a2fadc142d1fa9": [
+      "id_40/sitting/pinch_down.csv",
+      "id_43/sitting/pinch_down.csv"
+    ],
+    "a15d9c7a443703be0edb7a38a982b9d0": [
+      "id_40/sitting/pinch_left.csv",
+      "id_43/sitting/pinch_left.csv"
+    ],
+    "5fa42d99a2ef58079b2563bf7e301502": [
+      "id_40/sitting/pinch_right.csv",
+      "id_43/sitting/pinch_right.csv"
+    ],
+    "a829a0d63149572f6c4ed98d23eb7e94": [
+      "id_40/sitting/pinch_up.csv",
+      "id_43/sitting/pinch_up.csv"
+    ],
+    "da827e14d9dce4b9980c0128564f46e3": [
+      "id_40/sitting/pinky_pinch.csv",
+      "id_43/sitting/pinky_pinch.csv"
+    ],
+    "d9411a6079830fbc0d6152a4bbc3a318": [
+      "id_40/sitting/pistol_gun.csv",
+      "id_43/sitting/pistol_gun.csv"
+    ],
+    "6d901297200b6bfa4d483e5794a01206": [
+      "id_40/sitting/slide.csv",
+      "id_43/sitting/slide.csv"
+    ],
+    "c03f6eaea6c1eb2e35ddcb278afffdff": [
+      "id_40/sitting/steepling.csv",
+      "id_43/sitting/steepling.csv"
+    ],
+    "b876af15bdb4959d9e8067df780dc15c": [
+      "id_40/sitting/thumbs_down.csv",
+      "id_43/sitting/thumbs_down.csv"
+    ],
+    "9057be94a8d8b60d6c4ff1273ecffd3f": [
+      "id_40/sitting/waiting_bored.csv",
+      "id_43/sitting/waiting_bored.csv"
+    ],
+    "7dbdd6f26603f92566975d5bd640a7eb": [
+      "id_40/sitting/wash_hands.csv",
+      "id_43/sitting/wash_hands.csv"
+    ],
+    "9963b8cfdb4d3bd5022af4e812aa5fb3": [
+      "id_40/sitting/waving_hello.csv",
+      "id_43/sitting/waving_hello.csv"
+    ],
+    "144780e625419068fb77a4c466f7a68b": [
+      "id_46/standing/air.csv",
+      "id_48/standing/air.csv",
+      "id_49/standing/air.csv"
+    ],
+    "37af4813f531f5e51b5a2641cd5c2fe1": [
+      "id_46/standing/balling.csv",
+      "id_48/standing/balling.csv"
+    ],
+    "f2b63e2a5767a23232baa2bab9b4839b": [
+      "id_46/standing/bill_please.csv",
+      "id_48/standing/bill_please.csv"
+    ],
+    "aa8038f29a49742fe4d38490bbddf105": [
+      "id_46/standing/clench.csv",
+      "id_48/standing/clench.csv",
+      "id_49/standing/clench.csv"
+    ],
+    "42b6305b04aeb579eb929fbca7d73fdd": [
+      "id_46/standing/double_pinch.csv",
+      "id_48/standing/double_pinch.csv",
+      "id_49/standing/double_pinch.csv"
+    ],
+    "12290c41e3f77ccc81e14d70362eab1d": [
+      "id_46/standing/double_pinky_pinch.csv",
+      "id_48/standing/double_pinky_pinch.csv",
+      "id_49/standing/double_pinky_pinch.csv"
+    ],
+    "5e11e14f0a5ff1cc7dbd5eb645dd7411": [
+      "id_46/standing/double_spread.csv",
+      "id_48/standing/double_spread.csv"
+    ],
+    "7b92856d042a6abf77001e85e45b4477": [
+      "id_46/standing/finger_up.csv",
+      "id_48/standing/finger_up.csv",
+      "id_49/standing/finger_up.csv"
+    ],
+    "32f8cc246868bef9743f35e7f89b41c2": [
+      "id_46/standing/flex.csv",
+      "id_48/standing/flex.csv"
+    ],
+    "4574af38baaf432f3caf8bd75f589cbf": [
+      "id_46/standing/good_luck.csv",
+      "id_47/standing/good_luck.csv",
+      "id_48/standing/good_luck.csv"
+    ],
+    "0da5753e70cfdcb16c2d0b820907d4e6": [
+      "id_46/standing/handshake.csv",
+      "id_48/standing/handshake.csv",
+      "id_49/standing/handshake.csv"
+    ],
+    "7c4633f920be8b7777749bceed2c6ac6": [
+      "id_46/standing/index_pointing.csv",
+      "id_48/standing/index_pointing.csv"
+    ],
+    "4a3594493839274dd911dd2c4c0e0154": [
+      "id_46/standing/no_waving.csv",
+      "id_48/standing/no_waving.csv",
+      "id_49/standing/no_waving.csv"
+    ],
+    "96d009e90235cfc48347f5e8aa391c5f": [
+      "id_46/standing/ok_sign.csv",
+      "id_47/standing/ok_sign.csv",
+      "id_48/standing/ok_sign.csv"
+    ],
+    "a6a31956fb1313f3b45bfb445de2e3a8": [
+      "id_46/standing/open_palm.csv",
+      "id_48/standing/open_palm.csv"
+    ],
+    "d5298b809edaba32ddfb20a2b8a7868c": [
+      "id_46/standing/peace.csv",
+      "id_48/standing/peace.csv",
+      "id_49/standing/peace.csv"
+    ],
+    "cc2c7d476ffc3ec31da4eca42a019d67": [
+      "id_46/standing/peace_up.csv",
+      "id_48/standing/peace_up.csv"
+    ],
+    "e7d6cdea827bd203932957a0dff5f96f": [
+      "id_46/standing/pinch.csv",
+      "id_48/standing/pinch.csv",
+      "id_49/standing/pinch.csv"
+    ],
+    "58ff5be0e022be25d51924cb5983d6ed": [
+      "id_46/standing/pinch_right.csv",
+      "id_48/standing/pinch_right.csv"
+    ],
+    "b5b78e999be70af48c59b55d5f97c58d": [
+      "id_46/standing/pinky_pinch.csv",
+      "id_48/standing/pinky_pinch.csv"
+    ],
+    "3a800035b0a0cacf7f42c77df21a6c8b": [
+      "id_46/standing/pistol_gun.csv",
+      "id_47/standing/pistol_gun.csv",
+      "id_48/standing/pistol_gun.csv"
+    ],
+    "57b341e5cac3d267d5fd7af7ea6a0549": [
+      "id_46/standing/power_sign.csv",
+      "id_47/standing/power_sign.csv",
+      "id_48/standing/power_sign.csv"
+    ],
+    "1ab8ca791dbeac1e793d5173e4177641": [
+      "id_46/standing/rotate_in.csv",
+      "id_48/standing/rotate_in.csv",
+      "id_49/standing/rotate_in.csv"
+    ],
+    "e88c8a8ccdba7437a49926ea842393b7": [
+      "id_46/standing/rotate_out.csv",
+      "id_48/standing/rotate_out.csv",
+      "id_49/standing/rotate_out.csv"
+    ],
+    "56e0aae25bc6433d31946eae463da3b4": [
+      "id_46/standing/small_amount.csv",
+      "id_48/standing/small_amount.csv",
+      "id_49/standing/small_amount.csv"
+    ],
+    "9edf27d2f1f7c5502335911e5554cc7f": [
+      "id_46/standing/steepling.csv",
+      "id_48/standing/steepling.csv"
+    ],
+    "707153f5f07b32fd853dba00d64f77b4": [
+      "id_46/standing/thumbs_down.csv",
+      "id_48/standing/thumbs_down.csv"
+    ],
+    "daa1aab31937e0075ca3c5ab003eba50": [
+      "id_46/standing/wash_hands.csv",
+      "id_48/standing/wash_hands.csv",
+      "id_49/standing/wash_hands.csv"
+    ],
+    "3cf468832c60699766ba4ad407872949": [
+      "id_46/standing/write_pen.csv",
+      "id_48/standing/write_pen.csv"
+    ],
+    "ad2089c89b27df0f9ac62d78ea2baba2": [
+      "id_47/standing/double_spread.csv",
+      "id_49/standing/double_spread.csv"
+    ],
+    "bf51c736cf58d2be27fa85018274516a": [
+      "id_47/standing/open_palm.csv",
+      "id_49/standing/open_palm.csv"
+    ]
+  },
+  "aug_source_map": {
+    "51": 1,
+    "52": 2,
+    "53": 3,
+    "54": 4,
+    "55": 5,
+    "56": 7,
+    "57": 8,
+    "58": 9,
+    "59": 10,
+    "60": 11,
+    "61": 13,
+    "62": 14,
+    "63": 15,
+    "64": 17,
+    "65": 21,
+    "66": 24,
+    "67": 26,
+    "68": 27,
+    "69": 28,
+    "70": 29,
+    "71": 31,
+    "72": 32,
+    "73": 36,
+    "74": 37,
+    "75": 38,
+    "76": 40,
+    "77": 45,
+    "78": 39,
+    "79": 50,
+    "80": 16,
+    "81": 19,
+    "82": 22,
+    "83": 39,
+    "84": 39,
+    "85": 39
+  },
+  "aug_ambiguous_ids": [],
+  "aug_vote_report": {
+    "51": {
+      "votes": {
+        "1": 16,
+        "27": 1,
+        "36": 1,
+        "38": 1
+      },
+      "files_checked": 16
+    },
+    "52": {
+      "votes": {
+        "2": 16
+      },
+      "files_checked": 16
+    },
+    "53": {
+      "votes": {
+        "3": 16,
+        "28": 1,
+        "14": 1
+      },
+      "files_checked": 16
+    },
+    "54": {
+      "votes": {
+        "4": 16
+      },
+      "files_checked": 16
+    },
+    "55": {
+      "votes": {
+        "5": 16,
+        "45": 1,
+        "23": 1,
+        "6": 1,
+        "7": 1
+      },
+      "files_checked": 16
+    },
+    "56": {
+      "votes": {
+        "7": 16,
+        "23": 1,
+        "28": 1,
+        "5": 1
+      },
+      "files_checked": 16
+    },
+    "57": {
+      "votes": {
+        "8": 16,
+        "6": 1
+      },
+      "files_checked": 16
+    },
+    "58": {
+      "votes": {
+        "9": 16,
+        "6": 1,
+        "45": 1,
+        "19": 1,
+        "23": 2,
+        "26": 1,
+        "39": 1,
+        "14": 1
+      },
+      "files_checked": 16
+    },
+    "59": {
+      "votes": {
+        "10": 16,
+        "34": 1,
+        "6": 1,
+        "19": 1,
+        "23": 2,
+        "26": 1,
+        "14": 1
+      },
+      "files_checked": 16
+    },
+    "60": {
+      "votes": {
+        "11": 16,
+        "23": 1
+      },
+      "files_checked": 16
+    },
+    "61": {
+      "votes": {
+        "13": 16,
+        "23": 1,
+        "36": 1
+      },
+      "files_checked": 16
+    },
+    "62": {
+      "votes": {
+        "14": 16,
+        "3": 1,
+        "9": 1,
+        "10": 1,
+        "28": 1
+      },
+      "files_checked": 16
+    },
+    "63": {
+      "votes": {
+        "15": 16,
+        "36": 1
+      },
+      "files_checked": 16
+    },
+    "64": {
+      "votes": {
+        "17": 24,
+        "26": 1,
+        "34": 1,
+        "23": 1
+      },
+      "files_checked": 24
+    },
+    "65": {
+      "votes": {
+        "21": 4,
+        "36": 1
+      },
+      "files_checked": 4
+    },
+    "66": {
+      "votes": {
+        "24": 5
+      },
+      "files_checked": 5
+    },
+    "67": {
+      "votes": {
+        "26": 23,
+        "9": 1,
+        "10": 1,
+        "17": 1,
+        "27": 1,
+        "28": 3,
+        "36": 1
+      },
+      "files_checked": 23
+    },
+    "68": {
+      "votes": {
+        "27": 24,
+        "34": 1,
+        "6": 1,
+        "19": 1,
+        "23": 2,
+        "26": 1,
+        "45": 1,
+        "16": 1,
+        "1": 1
+      },
+      "files_checked": 24
+    },
+    "69": {
+      "votes": {
+        "28": 24,
+        "19": 1,
+        "23": 4,
+        "26": 3,
+        "7": 1,
+        "3": 1,
+        "14": 1
+      },
+      "files_checked": 24
+    },
+    "70": {
+      "votes": {
+        "29": 8
+      },
+      "files_checked": 8
+    },
+    "71": {
+      "votes": {
+        "31": 7
+      },
+      "files_checked": 7
+    },
+    "72": {
+      "votes": {
+        "32": 8
+      },
+      "files_checked": 8
+    },
+    "73": {
+      "votes": {
+        "36": 4,
+        "1": 1,
+        "6": 1,
+        "13": 1,
+        "45": 1,
+        "15": 1,
+        "21": 1,
+        "26": 1
+      },
+      "files_checked": 4
+    },
+    "74": {
+      "votes": {
+        "37": 5
+      },
+      "files_checked": 5
+    },
+    "75": {
+      "votes": {
+        "38": 6,
+        "1": 1,
+        "12": 1,
+        "16": 1,
+        "23": 1
+      },
+      "files_checked": 6
+    },
+    "76": {
+      "votes": {
+        "40": 6
+      },
+      "files_checked": 6
+    },
+    "77": {
+      "votes": {
+        "45": 4,
+        "5": 1,
+        "9": 1,
+        "18": 1,
+        "27": 1,
+        "36": 1
+      },
+      "files_checked": 4
+    },
+    "78": {
+      "votes": {
+        "39": 4
+      },
+      "files_checked": 4
+    },
+    "79": {
+      "votes": {
+        "50": 6
+      },
+      "files_checked": 6
+    },
+    "80": {
+      "votes": {
+        "16": 16,
+        "27": 1,
+        "38": 1
+      },
+      "files_checked": 16
+    },
+    "81": {
+      "votes": {
+        "19": 24,
+        "9": 2,
+        "10": 1,
+        "27": 2,
+        "28": 2
+      },
+      "files_checked": 24
+    },
+    "82": {
+      "votes": {
+        "22": 3,
+        "39": 1
+      },
+      "files_checked": 3
+    },
+    "83": {
+      "votes": {
+        "39": 7,
+        "9": 1,
+        "22": 1
+      },
+      "files_checked": 7
+    },
+    "84": {
+      "votes": {
+        "39": 5,
+        "9": 1,
+        "22": 1
+      },
+      "files_checked": 5
+    },
+    "85": {
+      "votes": {
+        "39": 5,
+        "9": 1,
+        "22": 1
+      },
+      "files_checked": 5
+    }
+  }
+}

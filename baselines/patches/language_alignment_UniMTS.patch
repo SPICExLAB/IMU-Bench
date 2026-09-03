@@ -1,0 +1,25 @@
+diff --git a/evaluate_custom.py b/evaluate_custom.py
+index 29e8356..88656ca 100644
+--- a/evaluate_custom.py
++++ b/evaluate_custom.py
+@@ -85,6 +85,20 @@ def main(args):
+         print(f"acc: {acc}, prec: {prec}, rec: {rec}, f1: {f1}")
+         wandb.log({f"acc": acc, f"prec": prec, f"rec": rec, f"f1": f1})
+ 
++        # Diagnostic addition (2026-07-26, non-invasive, does not change any
++        # metric computation above): per-class top-1 recall breakdown,
++        # mirroring this benchmark's own run_zeroshot_har.py reporting, to
++        # allow direct per-class comparison against "Ours" checkpoints.
++        real_labels_np = real_labels.numpy()
++        print("\nPer-class top-1 accuracy (UniMTS):")
++        for cls_idx, cls_name in enumerate(label_list):
++            mask = real_labels_np == cls_idx
++            n = int(mask.sum())
++            if n == 0:
++                continue
++            cls_acc = float((pred[mask] == cls_idx).mean())
++            print(f"  {cls_name:40s} {cls_acc*100:5.1f}%  (n={n:4d})")
++
+         logits_whole = torch.cat(logits_whole)
+         r_at_1, r_at_2, r_at_3, r_at_4, r_at_5, mrr_score = compute_metrics_np(logits_whole.detach().cpu().numpy(), real_labels.numpy())
+         

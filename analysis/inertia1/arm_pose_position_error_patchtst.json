@@ -1,0 +1,12 @@
+{
+  "Inertia-1 (PatchTST) probe": {
+    "pos_err_cm": 8.430351316928864,
+    "ang_err_deg": 10.260151863098145,
+    "run": "vit1d_arm_pose_probe_nymeria_inertia1_patchtst"
+  },
+  "Inertia-1 (PatchTST) finetune": {
+    "pos_err_cm": 8.55356901884079,
+    "ang_err_deg": 10.458978652954102,
+    "run": "vit1d_arm_pose_finetune_nymeria_inertia1_patchtst"
+  }
+}

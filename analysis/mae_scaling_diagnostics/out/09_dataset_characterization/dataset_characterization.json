@@ -1,0 +1,398 @@
+[
+  {
+    "source": "realdata",
+    "native_hz": "varies by sub-dataset (pamap2/recofit/samosa/shoaib/ut_watch/utd_mhad/wisdm)",
+    "coordinate_frame": "raw device frame (no FLU transform -- imu_lm/data/loaders.py has none)",
+    "channels": "acc+gyro (6ch)",
+    "activity_labels": "discrete HAR activity classes (dataset_activity_id), per-subdataset taxonomy (walking/running/cycling/etc., varies by which of the 7 sub-datasets)",
+    "real_or_synthetic": "real",
+    "n_train_cached": 93510,
+    "n_val_cached": 4189,
+    "channel_valid": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "mean_per_channel": [
+      -6.416027463274077e-05,
+      5.926417045998278e-08,
+      -1.4278416671231753e-08,
+      6.1015987817825135e-09,
+      5.03087838055194e-09,
+      8.226401781996628e-09
+    ],
+    "std_per_channel": [
+      0.9998361468315125,
+      0.9999966025352478,
+      0.9998297691345215,
+      0.9997556805610657,
+      0.9999309778213501,
+      0.9999299049377441
+    ],
+    "T": 512,
+    "reconstruction_mse_valset": 0.7238170693715413
+  },
+  {
+    "source": "ocdetect",
+    "native_hz": 50,
+    "coordinate_frame": "FLU (apply_flu_transform=True)",
+    "channels": "acc+gyro (6ch)",
+    "activity_labels": "binary: compulsive-behavior episode vs. background (OCD hand-washing/checking detection)",
+    "real_or_synthetic": "real",
+    "n_train_cached": 8703,
+    "n_val_cached": 1087,
+    "channel_valid": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "mean_per_channel": [
+      1.6123522517119682e-09,
+      1.9147837093669295e-08,
+      4.917906970547392e-09,
+      -9.309344961572208e-11,
+      -2.6723137591666557e-10,
+      -3.434640072352835e-10
+    ],
+    "std_per_channel": [
+      0.9999998211860657,
+      0.9999997615814209,
+      0.9999997615814209,
+      0.9999976754188538,
+      0.9999977350234985,
+      0.999997615814209
+    ],
+    "T": 512,
+    "reconstruction_mse_valset": 0.7448854695906196
+  },
+  {
+    "source": "nymeria",
+    "native_hz": "Aria glasses native rate, resampled to 50",
+    "coordinate_frame": "FLU",
+    "channels": "acc+gyro (6ch)",
+    "activity_labels": "no discrete class label used here (loader strips to raw IMU + 24-joint SMPL pose targets for MAE) -- source dataset has egocentric daily-activity atomic-action annotations",
+    "real_or_synthetic": "real",
+    "n_train_cached": 157885,
+    "n_val_cached": 18269,
+    "channel_valid": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "mean_per_channel": [
+      2.377479540882632e-05,
+      -0.00010764189210021868,
+      1.798026971755462e-08,
+      -7.301133155124262e-05,
+      -3.3810218155849725e-05,
+      3.7657413486158475e-05
+    ],
+    "std_per_channel": [
+      0.9993404150009155,
+      0.9994293451309204,
+      0.999411940574646,
+      0.999331533908844,
+      0.9993342757225037,
+      0.9992280602455139
+    ],
+    "T": 512,
+    "reconstruction_mse_valset": 0.7267847409248352
+  },
+  {
+    "source": "totalcapture",
+    "native_hz": 60,
+    "coordinate_frame": "FLU",
+    "channels": "acc+gyro (6ch)",
+    "activity_labels": "no discrete class label used here (pose-regression target only) -- source is indoor/sports mocap (DIP-IMU / DIP_recalculate)",
+    "real_or_synthetic": "real",
+    "n_train_cached": 461,
+    "n_val_cached": 47,
+    "channel_valid": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "mean_per_channel": [
+      -8.142507113007014e-09,
+      -3.3586198266988276e-09,
+      1.6949667225318876e-09,
+      -7.906645893562825e-10,
+      4.2121639509673514e-10,
+      2.8459884449105743e-10
+    ],
+    "std_per_channel": [
+      0.9999996423721313,
+      0.9999996423721313,
+      0.9999996423721313,
+      0.9999989867210388,
+      0.9999989867210388,
+      0.9999990463256836
+    ],
+    "T": 512,
+    "reconstruction_mse_valset": 0.7838481068611145
+  },
+  {
+    "source": "imuposer",
+    "native_hz": "resampled to 50",
+    "coordinate_frame": "FLU (despite add_gravity=False by default)",
+    "channels": "acc+gyro (6ch)",
+    "activity_labels": "no discrete class label used here (pose-regression target only)",
+    "real_or_synthetic": "real",
+    "n_train_cached": 137,
+    "n_val_cached": 33,
+    "channel_valid": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "mean_per_channel": [
+      -3.857850705557553e-10,
+      -1.7530278340061045e-09,
+      -1.6060215657365262e-10,
+      1.036691177347393e-09,
+      6.645020644846511e-10,
+      -8.68441318857549e-10
+    ],
+    "std_per_channel": [
+      0.9999985694885254,
+      0.9999986290931702,
+      0.9999986290931702,
+      0.9999985098838806,
+      0.9999985098838806,
+      0.9999984502792358
+    ],
+    "T": 512,
+    "reconstruction_mse_valset": 0.9275941848754883
+  },
+  {
+    "source": "eatingspeed",
+    "native_hz": 64,
+    "coordinate_frame": "raw sensor frame -- NO FLU transform (documented explicitly in eatingspeed_wrist_loader.py: 'no coordinate transform is applied')",
+    "channels": "acc+gyro (6ch)",
+    "activity_labels": "eating-speed condition per subset: FD-I / FD-II / MO (fast/slow-eating-speed protocol conditions, not a general activity taxonomy)",
+    "real_or_synthetic": "real",
+    "n_train_cached": 57536,
+    "n_val_cached": 10114,
+    "channel_valid": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "mean_per_channel": [
+      4.251545604461171e-08,
+      9.866540295888626e-08,
+      -5.968803407085943e-08,
+      -5.009611214745746e-08,
+      4.2716614245819073e-08,
+      4.920797991303516e-09
+    ],
+    "std_per_channel": [
+      0.9994863271713257,
+      0.9994863271713257,
+      0.99948650598526,
+      0.9994991421699524,
+      0.9994990825653076,
+      0.9994991421699524
+    ],
+    "T": 512,
+    "reconstruction_mse_valset": 0.7459712080955505
+  },
+  {
+    "source": "motionx",
+    "native_hz": 30,
+    "coordinate_frame": "FLU (synthetic, derived via SMPL FK from AMASS-style mocap)",
+    "channels": "acc+gyro (6ch, synthetic gyro incl. optional injected white noise/bias drift)",
+    "activity_labels": "large free-text motion-category/caption vocabulary (Motion-X++), not used by MAE (labels stripped)",
+    "real_or_synthetic": "synthetic (derived IMU from mocap)",
+    "n_train_cached": 4683,
+    "n_val_cached": 269,
+    "channel_valid": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "mean_per_channel": [
+      -2.4322071023874514e-09,
+      -1.8084538311313736e-09,
+      2.2851940340018473e-09,
+      -1.4540273152174876e-10,
+      -2.3569252452504408e-11,
+      -6.464930674132674e-11
+    ],
+    "std_per_channel": [
+      0.9999999403953552,
+      0.9999999403953552,
+      0.9999999403953552,
+      0.9999983906745911,
+      0.9999983310699463,
+      0.9999982714653015
+    ],
+    "T": 512,
+    "reconstruction_mse_valset": 0.9387356904802713
+  },
+  {
+    "source": "humanml3d",
+    "native_hz": "20 (source mocap), resampled to 50 via SMPL FK",
+    "coordinate_frame": "FLU (synthetic, same SMPL-FK-derivation approach as nymeria/motionx)",
+    "channels": "acc+gyro (6ch)",
+    "activity_labels": "free-text motion captions (AMASS/HumanML3D), not used by MAE (labels stripped)",
+    "real_or_synthetic": "synthetic (derived IMU from mocap)",
+    "n_train_cached": 2825,
+    "n_val_cached": 353,
+    "channel_valid": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "mean_per_channel": [
+      4.253087049210791e-10,
+      6.612493191893165e-11,
+      1.1811518776938534e-11,
+      1.107284819390486e-09,
+      -1.0855728538317067e-09,
+      4.6482165338979087e-10
+    ],
+    "std_per_channel": [
+      0.8089789152145386,
+      0.8089789152145386,
+      0.8089789748191833,
+      0.8089789152145386,
+      0.8089789152145386,
+      0.8089789152145386
+    ],
+    "T": 512,
+    "reconstruction_mse_valset": 0.5864116007477974
+  },
+  {
+    "source": "sonic",
+    "native_hz": "BVH source fps, resampled to 50",
+    "coordinate_frame": "FLU",
+    "channels": "acc+gyro (6ch)",
+    "activity_labels": "none (raw BVH mocap, bones-seed) -- pure motion diversity source, no labels at all",
+    "real_or_synthetic": "synthetic (derived IMU from BVH mocap)",
+    "n_train_cached": 32662,
+    "n_val_cached": 11804,
+    "channel_valid": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "mean_per_channel": [
+      -5.2788120541436e-08,
+      1.3299286116819076e-09,
+      -7.3697687952289925e-09,
+      1.7172230304396408e-10,
+      2.3193812148658566e-10,
+      -6.651195566531598e-11
+    ],
+    "std_per_channel": [
+      0.9999995231628418,
+      0.9999994039535522,
+      0.999999463558197,
+      0.999993622303009,
+      0.9999933242797852,
+      0.9999935030937195
+    ],
+    "T": 512,
+    "reconstruction_mse_valset": 0.7939344379107157
+  },
+  {
+    "source": "capture24",
+    "native_hz": 100,
+    "coordinate_frame": "raw device frame -- NO FLU transform (documented explicitly in capture24_loader.py: 'axis convention -- kept raw, no coordinate transform applied')",
+    "channels": "accelerometer-ONLY (3ch real + 3ch zero-padded/masked-invalid, see AccOnlyPadTo6ChDataset)",
+    "activity_labels": "free-living activity taxonomy (Capture-24 / Willetts et al.: sleep, sit-stand, walking, bicycling, vehicle, mixed, etc.)",
+    "real_or_synthetic": "real",
+    "n_train_cached": 124881,
+    "n_val_cached": 25336,
+    "channel_valid": [
+      true,
+      true,
+      true,
+      false,
+      false,
+      false
+    ],
+    "mean_per_channel": [
+      -4.006374001619406e-05,
+      -5.55343613086734e-05,
+      9.591645721229725e-06,
+      null,
+      null,
+      null
+    ],
+    "std_per_channel": [
+      0.999314546585083,
+      0.9991847276687622,
+      0.9995137453079224,
+      null,
+      null,
+      null
+    ],
+    "T": 512,
+    "reconstruction_mse_valset": 0.7751436486244202
+  },
+  {
+    "source": "openwatch",
+    "native_hz": "resampled to fixed window length",
+    "coordinate_frame": "configurable, FLU in production config",
+    "channels": "acc+gyro (6ch), optional PPG (unused here)",
+    "activity_labels": "discrete gesture classes (6-class gesture taxonomy in the production probe configs)",
+    "real_or_synthetic": "real",
+    "n_train_cached": 1842,
+    "n_val_cached": 314,
+    "channel_valid": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "mean_per_channel": [
+      -2.0852500171031352e-08,
+      3.354682531764297e-09,
+      6.2752092411244575e-09,
+      4.4113948605151165e-11,
+      1.4668835590647689e-10,
+      -5.746821352126119e-10
+    ],
+    "std_per_channel": [
+      0.9999999403953552,
+      1.0,
+      0.9999999403953552,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "T": 512,
+    "reconstruction_mse_valset": 0.664986734936951
+  }
+]

@@ -1,0 +1,132 @@
+{
+ "meta": {
+  "model": "ours",
+  "label": "rtune soupsrc_s43 step_0006500 (val)",
+  "seed": 42,
+  "n_subsets": 50,
+  "device": "cuda",
+  "split": "val",
+  "run": "rtune_soupsrc_s43",
+  "ckpt": "step_0006500",
+  "ckpt_step": 6500,
+  "objective": "imu_text_clip_flu",
+  "T_min": 512,
+  "T_max": 512,
+  "pad_mode": "wrap",
+  "data_source": "unimts_sim",
+  "captions_subpath": "aug_texts",
+  "crop_mode": "first"
+ },
+ "dataset": "humanml3d",
+ "n_items": 1197,
+ "protocols": {
+  "all": {
+   "n_unique_captions": 5765,
+   "full": {
+    "gallery": "full",
+    "n_imu": 1197,
+    "n_text": 5765,
+    "imu2text": {
+     "R@1": 12.698412698412698,
+     "R@5": 34.67000835421888,
+     "R@10": 46.11528822055138,
+     "MRR": 23.469280945950434,
+     "MedR": 12.0,
+     "MeanR": 57.331662489557225,
+     "n_queries": 1197
+    },
+    "text2imu": {
+     "R@1": 9.349522983521249,
+     "R@5": 28.10060711188205,
+     "R@10": 40.450997398091936,
+     "MRR": 19.201639940785423,
+     "MedR": 16.0,
+     "MeanR": 78.10060711188204,
+     "n_queries": 5765
+    }
+   },
+   "fixed": {
+    "100": {
+     "gallery": 100,
+     "n_subsets": 50,
+     "imu2text": {
+      "R@1": 45.839999999999996,
+      "R@5": 75.74,
+      "R@10": 85.76,
+      "MRR": 59.17874973990234,
+      "MedR": 2.0,
+      "MeanR": 6.3834,
+      "n_queries": 5000,
+      "R@1_subset_std": 4.981405424174989
+     },
+     "text2imu": {
+      "R@1": 36.94175458881341,
+      "R@5": 70.90981355687238,
+      "R@10": 81.82902153490389,
+      "MRR": 52.16282567530559,
+      "MedR": 2.0,
+      "MeanR": 7.464409596762538,
+      "n_queries": 27676,
+      "R@1_subset_std": 2.359714277889455
+     },
+     "mean_text_gallery": 553.52
+    }
+   }
+  },
+  "first": {
+   "n_unique_captions": 900,
+   "full": {
+    "gallery": "full",
+    "n_imu": 1197,
+    "n_text": 900,
+    "imu2text": {
+     "R@1": 10.776942355889723,
+     "R@5": 33.83458646616541,
+     "R@10": 46.03174603174603,
+     "MRR": 22.54386511549614,
+     "MedR": 13.0,
+     "MeanR": 54.154553049289895,
+     "n_queries": 1197
+    },
+    "text2imu": {
+     "R@1": 9.777777777777779,
+     "R@5": 31.666666666666664,
+     "R@10": 44.0,
+     "MRR": 20.56589670954784,
+     "MedR": 14.0,
+     "MeanR": 75.15222222222222,
+     "n_queries": 900
+    }
+   },
+   "fixed": {
+    "100": {
+     "gallery": 100,
+     "n_subsets": 50,
+     "imu2text": {
+      "R@1": 38.4,
+      "R@5": 73.54,
+      "R@10": 83.32000000000001,
+      "MRR": 53.85728405039306,
+      "MedR": 2.0,
+      "MeanR": 6.6294,
+      "n_queries": 5000,
+      "R@1_subset_std": 4.503332099679081
+     },
+     "text2imu": {
+      "R@1": 37.28813559322034,
+      "R@5": 70.43087604655912,
+      "R@10": 81.0904635491117,
+      "MRR": 52.32315795537552,
+      "MedR": 2.0,
+      "MeanR": 7.762099244435369,
+      "n_queries": 4897,
+      "R@1_subset_std": 3.546633017915465
+     },
+     "mean_text_gallery": 97.94
+    }
+   }
+  }
+ },
+ "n_caption_pairs": 6702,
+ "elapsed_s": 19.5
+}

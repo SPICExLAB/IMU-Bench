@@ -1,0 +1,67 @@
+{
+  "task": "language_humanml3d",
+  "encoder": "mae_11src",
+  "protocol": "finetune",
+  "seed": 42,
+  "metrics": {
+    "r1_i2t_g100": 39.324999999999996,
+    "r1_t2i_g100": 38.29915864779082,
+    "r5_i2t_g100": 74.895,
+    "r5_t2i_g100": 73.35885938838229,
+    "r10_i2t_g100": 84.33500000000001,
+    "r10_t2i_g100": 83.17295581641393,
+    "mrr_i2t_g100": 54.9169405631727,
+    "mrr_t2i_g100": 53.85240954388686,
+    "r1_i2t_full": 5.26884625776817,
+    "r1_t2i_full": 4.065934065934066,
+    "mrr_i2t_full": 12.914205195322538,
+    "mrr_t2i_full": 10.841164253157537,
+    "medr_i2t_full": 32.0,
+    "medr_t2i_full": 37.0,
+    "r1_g100": 38.812079323895404,
+    "val_r1_i2t_g100": 41.425,
+    "val_r1_t2i_g100": 39.91830482512127,
+    "val_r5_i2t_g100": 75.615,
+    "val_r5_t2i_g100": 74.35792698493745,
+    "val_r10_i2t_g100": 84.85000000000001,
+    "val_r10_t2i_g100": 83.96732193004851,
+    "val_mrr_i2t_g100": 56.47863818015283,
+    "val_mrr_t2i_g100": 55.262668864686724,
+    "val_r1_i2t_full": 13.032581453634084,
+    "val_r1_t2i_full": 11.444444444444445,
+    "val_mrr_i2t_full": 24.599276990880487,
+    "val_mrr_t2i_full": 22.210048524566318,
+    "val_medr_i2t_full": 10.0,
+    "val_medr_t2i_full": 12.0,
+    "val_r1_g100": 40.67165241256063
+  },
+  "primary_metric": "r1_g100",
+  "eval_split": "test",
+  "run": "rtune_lr1e-4_tau0.1fixed",
+  "checkpoint": "latest.pt",
+  "checkpoint_step": 8000,
+  "selection": {
+    "split": "none",
+    "monitor": "fixed_budget",
+    "mode": "latest",
+    "note": "fixed 8k-step budget, final checkpoint (latest.pt); \u00a713e: val-loss best.pt under-selects for retrieval, latest \u2265 best on every arm"
+  },
+  "job_ids": {
+    "train": 9433561,
+    "score": "9690129"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.language",
+    "date": "2026-08-17T08:16:53-05:00",
+    "git": "unknown",
+    "legacy_run": true,
+    "info": {
+      "n_items_test": 3701,
+      "n_items_val": 1197,
+      "train_end": "max_steps reached at step=8000 epoch=1"
+    }
+  },
+  "status": "ok",
+  "notes": "harvested from a pre-harness run with a recipe-equivalent config.",
+  "schema_version": 1
+}

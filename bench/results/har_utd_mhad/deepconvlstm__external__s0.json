@@ -1,0 +1,41 @@
+{
+  "task": "har_utd_mhad",
+  "encoder": "deepconvlstm",
+  "protocol": "external",
+  "seed": 0,
+  "metrics": {
+    "macro_f1": 0.5182026411349719,
+    "bal_acc": 0.5500644857787715,
+    "acc": 0.5603864734299517,
+    "val_loss": 1.5120458602905273
+  },
+  "primary_metric": "macro_f1",
+  "eval_split": "val",
+  "run": "deepconvlstm_har_utd_mhad",
+  "checkpoint": "best.pt",
+  "checkpoint_step": null,
+  "selection": {
+    "split": "val",
+    "monitor": "val_loss",
+    "mode": "min",
+    "note": "same convention as Experiments_table \u00a73 (metrics read at the min-val-loss checkpoint)"
+  },
+  "job_ids": {
+    "train": 7272579,
+    "score": "9725948"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.har",
+    "date": "2026-08-17T18:49:38-05:00",
+    "git": "unknown",
+    "legacy_run": true,
+    "info": {
+      "via": "summary.json (imu_lm/probe/eval.py pooled eval)",
+      "num_classes": 21,
+      "train_end": "early stopping at step=4200 epoch=1400"
+    }
+  },
+  "status": "ok",
+  "notes": "harvested from a pre-harness run with a recipe-equivalent config.",
+  "schema_version": 1
+}

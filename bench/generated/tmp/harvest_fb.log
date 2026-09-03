@@ -1,0 +1,10 @@
+[bench.score] full_body_pose_nymeria mae_11src__finetune__s42: mpjpe_mm=92.390885
+[bench.score] full_body_pose_nymeria mae_5src__probe__s42: mpjpe_mm=98.106741
+[bench.score] full_body_pose_nymeria mae_5src__finetune__s42: mpjpe_mm=92.761803
+[bench.score] full_body_pose_nymeria mae_noaltattn__probe__s42: mpjpe_mm=97.434033
+[bench.score] full_body_pose_nymeria mae_acconly__probe__s42: mpjpe_mm=103.372722
+[bench.score] full_body_pose_nymeria focal__probe__s42: mpjpe_mm=108.289866
+[bench.score] full_body_pose_nymeria simmtm__probe__s42: mpjpe_mm=103.477094
+[bench.score] full_body_pose_nymeria relcon__probe__s42: mpjpe_mm=102.473837
+[bench.score] full_body_pose_nymeria scratch__scratch__s42: mpjpe_mm=92.427949
+HARVEST_FB_DONE

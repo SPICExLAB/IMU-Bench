@@ -1,0 +1,132 @@
+{
+ "meta": {
+  "model": "ours",
+  "label": "rtune lr1e-4_tau0.1fixed_soupsrc step_0004500 (val)",
+  "seed": 42,
+  "n_subsets": 50,
+  "device": "cuda",
+  "split": "val",
+  "run": "rtune_lr1e-4_tau0.1fixed_soupsrc",
+  "ckpt": "step_0004500",
+  "ckpt_step": 4500,
+  "objective": "imu_text_clip_flu",
+  "T_min": 512,
+  "T_max": 512,
+  "pad_mode": "wrap",
+  "data_source": "unimts_sim",
+  "captions_subpath": "aug_texts",
+  "crop_mode": "first"
+ },
+ "dataset": "humanml3d",
+ "n_items": 1197,
+ "protocols": {
+  "all": {
+   "n_unique_captions": 5765,
+   "full": {
+    "gallery": "full",
+    "n_imu": 1197,
+    "n_text": 5765,
+    "imu2text": {
+     "R@1": 10.025062656641603,
+     "R@5": 30.492898913951542,
+     "R@10": 44.193817878028405,
+     "MRR": 20.562729521836758,
+     "MedR": 14.0,
+     "MeanR": 61.62155388471178,
+     "n_queries": 1197
+    },
+    "text2imu": {
+     "R@1": 8.742411101474415,
+     "R@5": 27.823070251517777,
+     "R@10": 41.1968777103209,
+     "MRR": 18.847764460421907,
+     "MedR": 16.0,
+     "MeanR": 71.38837814397225,
+     "n_queries": 5765
+    }
+   },
+   "fixed": {
+    "100": {
+     "gallery": 100,
+     "n_subsets": 50,
+     "imu2text": {
+      "R@1": 44.22,
+      "R@5": 74.03999999999999,
+      "R@10": 85.61999999999999,
+      "MRR": 57.49561435852784,
+      "MedR": 2.0,
+      "MeanR": 6.5318,
+      "n_queries": 5000,
+      "R@1_subset_std": 5.135328616554154
+     },
+     "text2imu": {
+      "R@1": 36.53707183118948,
+      "R@5": 72.13470154646625,
+      "R@10": 83.39355398178928,
+      "MRR": 52.37706934338634,
+      "MedR": 2.0,
+      "MeanR": 6.807161439514381,
+      "n_queries": 27676,
+      "R@1_subset_std": 2.5920720508955597
+     },
+     "mean_text_gallery": 553.52
+    }
+   }
+  },
+  "first": {
+   "n_unique_captions": 900,
+   "full": {
+    "gallery": "full",
+    "n_imu": 1197,
+    "n_text": 900,
+    "imu2text": {
+     "R@1": 8.771929824561402,
+     "R@5": 34.001670843776104,
+     "R@10": 47.28487886382623,
+     "MRR": 21.039729835387185,
+     "MedR": 12.0,
+     "MeanR": 51.890559732665,
+     "n_queries": 1197
+    },
+    "text2imu": {
+     "R@1": 9.777777777777779,
+     "R@5": 29.22222222222222,
+     "R@10": 43.77777777777778,
+     "MRR": 20.2095549300639,
+     "MedR": 15.0,
+     "MeanR": 66.07666666666667,
+     "n_queries": 900
+    }
+   },
+   "fixed": {
+    "100": {
+     "gallery": 100,
+     "n_subsets": 50,
+     "imu2text": {
+      "R@1": 37.36,
+      "R@5": 74.1,
+      "R@10": 84.32,
+      "MRR": 53.7367315996723,
+      "MedR": 2.0,
+      "MeanR": 6.0752,
+      "n_queries": 5000,
+      "R@1_subset_std": 4.572789083261987
+     },
+     "text2imu": {
+      "R@1": 37.04308760465591,
+      "R@5": 72.10537063508269,
+      "R@10": 83.37757810904635,
+      "MRR": 52.666356485405174,
+      "MedR": 2.0,
+      "MeanR": 6.721462119665101,
+      "n_queries": 4897,
+      "R@1_subset_std": 4.51193960826525
+     },
+     "mean_text_gallery": 97.94
+    }
+   }
+  }
+ },
+ "n_caption_pairs": 6702,
+ "elapsed_s": 33.5
+}

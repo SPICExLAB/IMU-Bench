@@ -44,6 +44,7 @@ from imu_lm.data.realdata_clip_loader import (
     _build_label_map,
     RealdataCLIPDataset,
     _collate_clip,
+    _resample_roundtrip,
 )
 from imu_lm.data.splits import build_session_index, make_splits
 from imu_lm.data.windowing import compute_T_and_hop
@@ -65,11 +66,14 @@ class FullSessionCLIPDataset(torch.utils.data.Dataset):
     """
 
     def __init__(self, parquet_path, session_keys, cfg, id_to_text,
-                 T_model, sentence_template="The person is {}"):
+                 T_model, sentence_template="The person is {}",
+                 roundtrip_low_hz=None, native_hz=50.0):
         self._T_model    = T_model
         self._id_to_text = id_to_text
         self._template   = sentence_template
         self._stats      = PreprocessStats()
+        self._roundtrip_low_hz = roundtrip_low_hz
+        self._native_hz  = native_hz
 
         sensor_cols  = cfg_get(cfg, ["data", "sensor_columns"], [])
         label_col    = cfg_get(cfg, ["data", "label_column"],   "dataset_activity_id")
@@ -103,6 +107,9 @@ class FullSessionCLIPDataset(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         X, text, cfg = self._items[idx]
 
+        if self._roundtrip_low_hz is not None:
+            X = _resample_roundtrip(X, self._native_hz, self._roundtrip_low_hz)
+
         # Preprocess (filter + normalise): input [T, C], output [C, T] or None
         Xp = preprocess_window(X, cfg, self._stats)
         if Xp is None:
@@ -124,9 +131,17 @@ class FullSessionCLIPDataset(torch.utils.data.Dataset):
 # ────────────────────────────────────────────────────────────────────────────
 
 def _load_model(run_dir: str, ckpt_name: str, device: torch.device):
-    """Return (encoder, clip_head, text_mlp, ckpt_cfg) from a CLIP run checkpoint.
+    """Return (encoder, clip_head, text_mlp, ckpt_cfg, text_enc_state) from a
+    CLIP run checkpoint.
 
     text_mlp is None when the checkpoint was trained without a text projection MLP.
+    text_enc_state is None unless the checkpoint was trained with
+    freeze_text_encoder: false (see imu_lm/models/ViT1D/run.py's extra_modules
+    logic for imu_text_clip_flu) -- in that case it's the fine-tuned CLIP text
+    tower's state_dict, and the caller must load it into a CLIPTextEncoder
+    before encoding class labels, or the whole point of training the text
+    tower jointly is silently lost (falling back to vanilla pretrained CLIP
+    text weights that never saw this checkpoint's captions).
     """
     ckpt_path = os.path.join(run_dir, "checkpoints", f"{ckpt_name}.pt")
     if not os.path.exists(ckpt_path):
@@ -135,8 +150,18 @@ def _load_model(run_dir: str, ckpt_name: str, device: torch.device):
     ckpt = torch.load(ckpt_path, map_location="cpu", weights_only=False)
     cfg  = ckpt["cfg"]
 
-    # Encoder
-    encoder = ViT1DEncoder(cfg)
+    # Encoder -- must match the architecture the checkpoint was actually
+    # trained with. Every alt_attention:true checkpoint in this benchmark
+    # (VGGT-style alternating frame/global attention) uses a DIFFERENT class
+    # (ViT1DEncoderAltAttn) than the plain ViT1DEncoder -- loading with the
+    # wrong class silently drops 100% of the encoder weights (all keys land
+    # in missing/unexpected) rather than raising, so this must be checked
+    # explicitly, matching imu_lm.models.ViT1D.run.py's own selection logic.
+    if bool(cfg_get(cfg, ["vit1d", "encoder", "alt_attention"], False)):
+        from imu_lm.models.ViT1D.model import ViT1DEncoderAltAttn
+        encoder = ViT1DEncoderAltAttn(cfg)
+    else:
+        encoder = ViT1DEncoder(cfg)
     missing, unexpected = encoder.load_state_dict(ckpt["model"], strict=False)
     if missing or unexpected:
         logging.warning(
@@ -175,7 +200,14 @@ def _load_model(run_dir: str, ckpt_name: str, device: torch.device):
         text_mlp.eval().to(device)
         logging.info("Loaded TextProjectionMLP (hidden_dim=%d)", hidden_dim)
 
-    return encoder, clip_head, text_mlp, cfg
+    # Fine-tuned text encoder (present only when trained with
+    # freeze_text_encoder: false -- see docstring above)
+    text_enc_state = (
+        ckpt.get("text_enc")
+        or ckpt.get("extra_modules", {}).get("text_enc")
+    )
+
+    return encoder, clip_head, text_mlp, cfg, text_enc_state
 
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -215,6 +247,51 @@ def main():
                     help="Load each session as one item (no windowing). The full signal is "
                          "wrap-padded to T_model. Best for short-sequence datasets like "
                          "utd_mhad where each trial is one continuous action.")
+    ap.add_argument("--val-only", action="store_true",
+                    help="Evaluate only on the held-out val split, reusing the SPLIT CONFIG "
+                         "SAVED IN THE CHECKPOINT (splits.seed/group_key/shuffle/val_ratio as "
+                         "the finetune itself ran with), instead of the full dataset. Required "
+                         "for a leakage-free classification-accuracy number on a checkpoint that "
+                         "was FINETUNED on this dataset (the default train_keys-only, "
+                         "val_ratio=0 behavior is only valid for a checkpoint that never saw "
+                         "this dataset at all, i.e. true zero-shot). Do NOT hardcode split "
+                         "params here: they must match the finetune exactly or the 'held-out' "
+                         "set silently contains training subjects (see the 2026-07-28 fix note "
+                         "at the --val-only handling site).")
+    ap.add_argument("--max-gaps-per-session", type=int, default=None,
+                    help="Override windowing.max_gaps_per_session (PAMAP2 needs 700 -- the "
+                         "repo-wide default of 100 rejects every PAMAP2 val session due to "
+                         "real-world sensor dropout, see EXPERIMENTS.md §10).")
+    ap.add_argument("--roundtrip-20hz", action="store_true",
+                    help="Downsample every target-dataset window to 20 Hz then upsample it "
+                         "back to --native-hz before feeding it to the model. Matches the "
+                         "effective bandwidth cap HumanML3D-derived training data has (its "
+                         "real content is capped by AMASS mocap's native 20 Hz frame rate "
+                         "even though the working pipeline upsamples it to native_hz before "
+                         "deriving acc/gyro) -- without this, zero-shot eval feeds the model "
+                         "genuinely higher-bandwidth real sensor data than anything it was "
+                         "ever trained on.")
+    ap.add_argument("--native-hz", type=float, default=50.0,
+                    help="Sample rate the target dataset's windows are stored at in the "
+                         "parquet (default 50.0 -- this benchmark's canonical rate for every "
+                         "real dataset). Only used by --roundtrip-20hz.")
+    ap.add_argument("--zscore-input", action="store_true",
+                    help="Force per-window z-score normalization (preprocess.normalize: "
+                         "enabled=true, method=zscore) on the target dataset's windows before "
+                         "encoding, overriding whatever the checkpoint's own saved config says. "
+                         "Debugging aid (2026-07-25): HumanML3DIMUVarLenDatasetFLU -- the loader "
+                         "Stage-2 HumanML3D-CLIP training actually uses -- unconditionally "
+                         "per-window z-scores every training sample (hardcoded, not gated by "
+                         "any config flag -- see imu_lm/data/humanml3d_dataset_FLU.py __iter__). "
+                         "But this eval script's own real-dataset loading path goes through the "
+                         "generic WindowDataset/preprocess_window pipeline, which IS gated by "
+                         "preprocess.normalize.enabled -- and every HumanML3D-CLIP checkpoint's "
+                         "own saved config has no preprocess block at all (defaults to "
+                         "disabled), so real target-dataset windows were being fed to the "
+                         "encoder RAW while HumanML3D training windows were always z-scored -- a "
+                         "genuine train/eval distribution mismatch. This flag tests the fix "
+                         "without retraining: it z-scores the target dataset the same way "
+                         "HumanML3D windows always were.")
     args = ap.parse_args()
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -227,21 +304,51 @@ def main():
 
     # ── 1. Load model ───────────────────────────────────────────────────────
     log.info("Loading checkpoint '%s' from %s ...", args.ckpt, run_dir)
-    encoder, clip_head, text_mlp, ckpt_cfg = _load_model(run_dir, args.ckpt, device)
+    encoder, clip_head, text_mlp, ckpt_cfg, text_enc_state = _load_model(run_dir, args.ckpt, device)
     D_enc  = encoder.embed_dim
     D_clip = clip_head.projection.weight.shape[0]
-    log.info("Encoder embed_dim=%d  →  CLIP dim=%d  text_mlp=%s",
-             D_enc, D_clip, text_mlp is not None)
+    log.info("Encoder embed_dim=%d  →  CLIP dim=%d  text_mlp=%s  fine-tuned text_enc=%s",
+             D_enc, D_clip, text_mlp is not None, text_enc_state is not None)
 
     # Merge: base config supplies paths; checkpoint config supplies architecture
     # and windowing (window_seconds, patch_size, preprocessing).
     base_cfg = load_yaml(args.config)
     cfg = deep_update(ckpt_cfg, {"paths": base_cfg.get("paths", {})})
+    if args.zscore_input:
+        cfg = deep_update(cfg, {"preprocess": {"normalize": {"enabled": True, "method": "zscore"}}})
+        log.info("[--zscore-input] forcing preprocess.normalize.enabled=true (zscore) on target dataset windows")
+    if args.roundtrip_20hz:
+        log.info("[--roundtrip-20hz] downsampling target dataset windows to 20Hz then "
+                 "upsampling back to %.1fHz before encoding", args.native_hz)
 
     # T_model: the sample length the encoder was trained with.
     # Windows shorter than this are zero-padded on the right so the model
     # always receives its expected input shape.
-    T_model, _ = compute_T_and_hop(ckpt_cfg)
+    #
+    # Bug fix (2026-07-26): compute_T_and_hop reads the SINGULAR
+    # windowing.window_seconds key, defaulting to 2.56s if absent -- but
+    # every HumanML3D-CLIP Stage-2 config in this benchmark instead sets
+    # windowing.min_window_seconds/max_window_seconds (a different key pair
+    # used by make_humanml3d_imu_loaders_flu for variable-length training),
+    # so T_model was SILENTLY falling back to the 2.56s default for every
+    # checkpoint this whole investigation, regardless of the checkpoint's
+    # actual training window. This was harmless for standard windowing
+    # (--window-seconds only controls extraction length there, and T_model
+    # is only used as a "pad up if shorter" floor that never triggers when
+    # the extracted window is already >= T_model) but broke --full-session
+    # mode outright, which wrap-pads directly to T_model with no other
+    # override path -- surfaced as a batch-collation crash on UTD-MHAD
+    # (sessions ~3.3-3.5s long, each ending up at its own native length
+    # instead of a consistent padded T_model=128, since 128 < every
+    # session's real length so the "pad if shorter" branch never fired).
+    # Now: when --window-seconds is explicitly passed, it also overrides
+    # T_model directly, not just the extraction length, so the CLI flag's
+    # own documented contract ("Override the checkpoint's window_seconds")
+    # actually holds for every mode including --full-session.
+    if args.window_seconds is not None:
+        T_model, _ = compute_T_and_hop(deep_update(ckpt_cfg, {"windowing": {"window_seconds": args.window_seconds}}))
+    else:
+        T_model, _ = compute_T_and_hop(ckpt_cfg)
     log.info("Model trained with T=%d samples (%.2fs)",
              T_model, ckpt_cfg.get("windowing", {}).get("window_seconds", "?"))
 
@@ -270,11 +377,31 @@ def main():
         log.info("  [%3d] %s", cid, txt)
 
     log.info("Encoding class labels with %s ...", args.clip_model)
+    # text_projection convention MUST follow the checkpoint's own training
+    # config (2026-07-28): checkpoints trained with objective.<type>.
+    # text_projection: true aligned their clip_head to CLIP's projected text
+    # space (official CLIP / UniMTS convention); older checkpoints aligned
+    # to the bare pooler_output space. Encoding class labels in the wrong
+    # space silently breaks the eval (measured cosine between the two spaces
+    # is only 0.01-0.04).
+    _obj_cfg = ckpt_cfg.get("objective", {}) or {}
+    _use_proj = bool(
+        (_obj_cfg.get(_obj_cfg.get("type", ""), {}) or {}).get("text_projection", False)
+    )
+    if _use_proj:
+        log.info("Checkpoint was trained with text_projection: true -- encoding "
+                 "class labels in CLIP's projected text space")
     text_enc = CLIPTextEncoder(
         model_name       = args.clip_model,
         freeze           = True,
         local_files_only = args.local_files_only,
+        use_projection   = _use_proj,
     )
+    if text_enc_state is not None:
+        text_enc.load_state_dict(text_enc_state)
+        log.info("Loaded FINE-TUNED text encoder weights from checkpoint "
+                 "(this checkpoint was trained with freeze_text_encoder: false)")
+    text_enc.eval().to(device)
     with torch.no_grad():
         z_classes = text_enc(class_texts, device=device)   # [N_cls, D_clip]
         if text_mlp is not None:
@@ -295,6 +422,54 @@ def main():
         )
         windowing_override = {"window_seconds": args.window_seconds}
 
+    if args.max_gaps_per_session is not None:
+        windowing_override["max_gaps_per_session"] = args.max_gaps_per_session
+
+    if args.val_only:
+        # Leakage fix (2026-07-28): this used to hardcode seed=42/group_key=
+        # subject_id/val_ratio=0.2, claiming to match "the convention this
+        # benchmark's own HAR finetune configs use". It did not. Those configs
+        # set ONLY splits.val_ratio; splits.seed comes from configs/base.yaml,
+        # where it is 0 (trainer.seed=42 is an unrelated key -- splits.py:206
+        # reads splits.seed). make_splits shuffles subject groups with
+        # RandomState(seed), so seed=42 at eval time produced a DIFFERENT val
+        # subject set than seed=0 at finetune time: measured overlap was
+        # UTD-MHAD 0/2 (i.e. both "held-out" eval subjects were finetuning
+        # TRAIN subjects), PAMAP2 1/2, WISDM 3/7, RecoFit 2/19 -- silently
+        # inflating every --val-only accuracy on a finetuned checkpoint.
+        #
+        # `cfg` is derived from ckpt_cfg (the config saved inside the
+        # checkpoint at training time), so the checkpoint's own splits block
+        # IS the split the finetune actually held out. Inherit it verbatim
+        # rather than re-deriving it, which makes the two agree by
+        # construction instead of by convention.
+        splits_override = {}
+        _inherited = cfg_get(cfg, ["splits"], {}) or {}
+        if not _inherited:
+            raise SystemExit(
+                "[--val-only] checkpoint config has no 'splits' block, so the finetune's "
+                "held-out val split cannot be reproduced. Refusing to guess: a wrong split "
+                "silently reports training subjects as held-out."
+            )
+        log.info(
+            "[--val-only] inheriting the checkpoint's own split: seed=%s group_key=%s "
+            "shuffle=%s val_ratio=%s test_ratio=%s (reproduces the finetune's held-out set)",
+            _inherited.get("seed", 0), _inherited.get("group_key"),
+            _inherited.get("shuffle"), _inherited.get("val_ratio"),
+            _inherited.get("test_ratio"),
+        )
+        if not float(_inherited.get("val_ratio", 0.0)) > 0:
+            raise SystemExit(
+                f"[--val-only] checkpoint's splits.val_ratio is {_inherited.get('val_ratio')}, "
+                "so it has no val split to evaluate on. This checkpoint was not finetuned "
+                "with a held-out val split; --val-only is meaningless for it."
+            )
+    else:
+        # Set val/test ratios to 0 so every session ends up in train_keys —
+        # appropriate only for a checkpoint that never trained on this
+        # dataset (true zero-shot); see --val-only for the finetuned case.
+        splits_override = {"val_ratio": 0.0, "test_ratio": 0.0}
+
     eval_cfg = deep_update(cfg, {
         "data": {
             "batch_size":      args.batch_size,
@@ -303,10 +478,7 @@ def main():
             "pin_memory":      True,
         },
         "windowing": windowing_override,
-        "splits": {
-            "val_ratio":  0.0,
-            "test_ratio": 0.0,
-        },
+        "splits": splits_override,
     })
 
     log.info("Building session index ...")
@@ -314,8 +486,8 @@ def main():
         parquet_path, eval_cfg, dataset_filter=dataset_filter
     )
     splits    = make_splits(session_index, eval_cfg)
-    eval_keys = splits.get("train_keys", [])
-    log.info("Sessions: %d", len(eval_keys))
+    eval_keys = splits.get("val_keys", []) if args.val_only else splits.get("train_keys", [])
+    log.info("Sessions: %d (%s)", len(eval_keys), "val-only" if args.val_only else "full dataset")
 
     if args.full_session:
         log.info("Mode: full-session (one item per trial, wrap-padded to T=%d)", T_model)
@@ -326,6 +498,8 @@ def main():
             id_to_text        = id_to_text,
             T_model           = T_model,
             sentence_template = args.template,
+            roundtrip_low_hz  = 20.0 if args.roundtrip_20hz else None,
+            native_hz         = args.native_hz,
         )
         # FullSessionCLIPDataset already pads to T_model, no wrap needed in loop
         collate_fn = _collate_clip
@@ -338,6 +512,8 @@ def main():
             split_name        = "val",       # disables augmentation
             id_to_text        = id_to_text,
             sentence_template = args.template,
+            roundtrip_low_hz  = 20.0 if args.roundtrip_20hz else None,
+            native_hz         = args.native_hz,
         )
         collate_fn = _collate_clip
 
@@ -403,6 +579,17 @@ def main():
         topk_preds = all_logits.topk(k, dim=1).indices.numpy()   # [N, k]
         hits = (topk_preds == all_gts[:, None]).any(axis=1)
         print(f"  Top-{k:2d} accuracy : {hits.mean() * 100:6.2f}%")
+
+    # Standard classification accuracy/macro-F1, directly comparable to
+    # UniMTS's own "acc: X, prec: Y, rec: Z, f1: W" convention
+    # (evaluate_custom.py/finetune_custom.py) -- same metric type, computed
+    # the same way (sklearn, pooled over the whole eval pass).
+    from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+    acc  = accuracy_score(all_gts, preds)
+    prec = precision_score(all_gts, preds, average="macro", zero_division=0)
+    rec  = recall_score(all_gts, preds, average="macro", zero_division=0)
+    f1   = f1_score(all_gts, preds, average="macro", zero_division=0)
+    print(f"  acc: {acc}, prec: {prec}, rec: {rec}, f1: {f1}")
 
     print()
     print(f"  Per-class top-1 accuracy:")

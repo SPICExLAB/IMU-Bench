@@ -1,0 +1,107 @@
+# Downstream eval of the NEW two-stage clean-pool model
+# (Stage-1 acc-only 187,223h -> Stage-2 acc+gyro 2,654h, warm-started).
+# Byte-identical to the canonical *_mae_multidata_flu.yaml config it was
+# copied from EXCEPT pretrained_run, so this is directly comparable to the
+# recorded 'Ours (MAE)' numbers in EXPERIMENTS.md Sections 1-5.
+#
+# IMPORTANT ASYMMETRY, in the ORIGINAL model's favour: that model was
+# pretrained on a pool CONTAINING these eval datasets (realdata -> the HAR
+# sets, nymeria -> pose, openwatch -> gesture), with a measured 79-100% of
+# each probe's val subjects seen unlabeled during pretraining (see the
+# transductive-overlap table in Section 11). The two-stage model has ZERO
+# overlap with any eval target. So this comparison is biased AGAINST the
+# new model, and parity here would already be the stronger result.
+# Full-body pose linear probe on Nymeria real-wrist IMU: frozen encoder from the
+# combined-multidata MAE pretrain (vit1d_ssl_mae_stage2_accgyro,
+# alt-attn ViT1DEncoder) + trainable ViT1DPoseDecoder.
+# 23 joints (exclude root/joint-0), 4 sub-patches per 0.32 s patch → 0.08 s resolution.
+
+vit1d:
+  patch_size: 16
+  shared_kernel: acc_gyro       # must match the MAE checkpoint's patch embed
+  encoder:
+    hidden_size: 384
+    num_hidden_layers: 12
+    num_attention_heads: 6
+    intermediate_size: 1536
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-6
+    alt_attention: true         # checkpoint was trained with the alt-attn encoder
+  pose_decoder:
+    hidden_size: 192
+    num_hidden_layers: 1
+    num_attention_heads: 4
+    mlp_ratio: 4.0
+    dropout: 0.2
+    sub_patches: 4              # 4 predictions per 0.32 s patch → 0.08 s each
+    num_temporal_layers: 0
+  max_patches_per_channel: 256
+  pooling: "mean"
+
+objective:
+  type: pose_probe
+  pose_probe:
+    pretrained_run: vit1d_ssl_mae_stage2_accgyro
+    pretrained_ckpt: best
+    loader: nymeria_real_wrist_full_body_flu
+    train_pkl_root: /projects/b53017/vbc1591/processed_data_body_Ty_rwrist
+    train_files: all
+    val_pkl_root: /projects/b53017/vbc1591/processed_data_test_body_Ty_rwrist
+    val_files: all
+    num_joints: 23               # exclude root (joint-0, global pelvis)
+    add_gravity: true
+    reset_root_orientation: false
+    jitter_weight: 0.0001        # L_jitter = mean||pred[t+1]-pred[t]||^2
+    joint_pos_weight: 10.0
+
+paths:
+  dataset_path: /projects/b53017/vbc1591/IMULM_master_dataset_v2.parquet
+  runs_root: /gpfs/home/vbc1591/IMU-SSL/runs
+
+data:
+  sensor_columns: [acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z]
+  batch_size: 256
+  eval_batch_size: 256
+  num_workers: 8
+  pin_memory: true
+
+windowing:
+  window_seconds: 10.24    # match pretrain window so patch-position embeddings line up
+  window_hop_ratio: 0.5
+
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 10000000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 1000
+
+  optim:
+    name: adamw
+    lr: 0.0003
+    weight_decay: 0.05
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+
+  sched:
+    name: step_decay
+    warmup_steps: 500
+    step_size: 500000
+    factor: 0.5
+    min_lr_ratio: 0.01
+
+  early_stopping:
+    enabled: false
+    monitor: val_loss
+    patience: 20
+
+logging:
+  log_every_steps: 5
+  ckpt_every_steps: 1000
+  save_step_checkpoints: false   # only keep best.pt/latest.pt (no per-step snapshots)
+
+wandb:
+  entity: yli32258-northwestern-university
+  project: TransfHAR_project

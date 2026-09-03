@@ -1,0 +1,43 @@
+{
+  "task": "har_samosa",
+  "encoder": "acconly_4src",
+  "protocol": "finetune",
+  "seed": 42,
+  "metrics": {
+    "macro_f1": 0.5274701964586394,
+    "bal_acc": 0.5749329202722687,
+    "acc": 0.5486052409129332,
+    "val_loss": 1.49661
+  },
+  "primary_metric": "macro_f1",
+  "eval_split": "val",
+  "run": "bench_har_samosa__acconly_4src__finetune__s42",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 600,
+  "selection": {
+    "split": "val",
+    "monitor": "val_loss",
+    "mode": "min"
+  },
+  "job_ids": {
+    "train": null,
+    "score": "4683820"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.har",
+    "date": "2026-08-26T19:10:59-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_val_samples": 3549,
+      "n_classes_seen": 27,
+      "n_classes_head": 27,
+      "n_val_batches": 14,
+      "logged_macro_f1_at_ckpt": 0.52747,
+      "train_end": "unknown/incomplete"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

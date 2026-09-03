@@ -193,13 +193,29 @@ def _subject_id_from_path(path: str) -> int:
 def _load_recording(
     path: str,
     apply_flu_transform: bool = True,
+    flu_convention: str = "legacy",
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Load one CSV and return ``(imu, compulsive, ignore)``.
 
-    The raw Android-frame IMU channels are converted to FLU on load when
-    ``apply_flu_transform=True`` (default):
-        F = +Y_android,  L = -X_android,  U = +Z_android
-    Channel order: [acc_F, acc_L, acc_U, gyro_F, gyro_L, gyro_U]
+    The raw Android-frame IMU channels are converted on load when
+    ``apply_flu_transform=True`` (default). Channel order out:
+    [acc_F, acc_L, acc_U, gyro_F, gyro_L, gyro_U].
+
+    ``flu_convention`` picks WHICH transform:
+
+    ``"legacy"`` (default, and what every run in this repo before 2026-08-20
+        was trained on) does NOT implement the FLU mapping in the line above.
+        It applies ``diag(-1, 1, 1)`` to the accelerometer and leaves the
+        gyroscope untouched -- a mirror (det = -1, not a rotation at all), and
+        a *different* map for the two triaxial sensors, so acc and gyro come
+        out in frames that differ by a reflection about X. Kept as the default
+        purely for bit-comparability with existing checkpoints; do not read it
+        as "OCDetect is in FLU".
+
+    ``"documented"`` applies the mapping the docstring always claimed, as one
+        proper rotation (det = +1) shared by acc and gyro:
+            F = +Y_android,  L = -X_android,  U = +Z_android
+        Use this whenever the coordinate frame itself is the object of study.
 
     Set ``apply_flu_transform=False`` to keep the raw Android frame (useful
     when a random-rotation augmentation will be applied at __getitem__ time,
@@ -221,28 +237,36 @@ def _load_recording(
         )
     imu        = df[IMU_COLS].values.astype(np.float32)
     if apply_flu_transform:
-        # Android → FLU: F = +Y_android, L = -X_android, U = +Z_android
         # Top edge of phone points toward fingertips (F); screen faces away from wrist (U=+Z).
         acc_x, acc_y   = imu[:, 0].copy(), imu[:, 1].copy()
         gyro_x, gyro_y = imu[:, 3].copy(), imu[:, 4].copy()
-        imu[:, 0] =  -acc_x   
-        imu[:, 1] = acc_y  
-        # imu[:, 2] unchanged  # acc_U  = +acc_z
-        imu[:, 3] =  gyro_x   
-        imu[:, 4] = gyro_y  
-        # imu[:, 5] unchanged  # gyro_U = +gyro_z
+        if str(flu_convention) == "documented":
+            # Android → FLU as one proper rotation, applied to acc AND gyro alike:
+            # F = +Y_android, L = -X_android, U = +Z_android.
+            imu[:, 0] =  acc_y
+            imu[:, 1] = -acc_x
+            # imu[:, 2] unchanged  # acc_U  = +acc_z
+            imu[:, 3] =  gyro_y
+            imu[:, 4] = -gyro_x
+            # imu[:, 5] unchanged  # gyro_U = +gyro_z
+        else:
+            # legacy: acc mirrored about X, gyro left in the Android frame. See docstring.
+            imu[:, 0] = -acc_x
+            imu[:, 1] =  acc_y
+            imu[:, 3] =  gyro_x
+            imu[:, 4] =  gyro_y
     compulsive = df["compulsive"].fillna(0.0).values.astype(np.float32)
     ignore     = df["ignore"].values.astype(np.int32)
     return imu, compulsive, ignore
 
 
 def _process_one_file(
-    args: Tuple[str, int, int, bool],
+    args: Tuple[str, int, int, bool, str],
 ) -> Tuple[np.ndarray, np.ndarray, Optional[str], Optional[str]]:
     """Multiprocessing worker: load and window one OCDetect CSV file."""
-    path, window_samples, hop_samples, apply_flu_transform = args
+    path, window_samples, hop_samples, apply_flu_transform, flu_convention = args
     try:
-        imu, compulsive, ignore = _load_recording(path, apply_flu_transform)
+        imu, compulsive, ignore = _load_recording(path, apply_flu_transform, flu_convention)
     except Exception as exc:
         return (
             np.empty((0, 6, window_samples), dtype=np.float32),
@@ -292,6 +316,8 @@ def _collect_windows(
     hop_samples: int = HOP_SAMPLES,
     apply_flu_transform: bool = True,
     max_files: Optional[int] = None,
+    return_file_ids: bool = False,
+    flu_convention: str = "legacy",
 ) -> Tuple[np.ndarray, np.ndarray]:
     """Slide windows over *files*, respecting the ``ignore`` quality mask.
 
@@ -304,19 +330,28 @@ def _collect_windows(
     files          : sorted list of CSV paths to process
     window_samples : window length in samples (default 128 = 2.56 s @ 50 Hz)
     hop_samples    : stride between windows in samples (default 64 = 50 %)
+    return_file_ids: if True, also return a per-window int array indexing into
+                      ``files`` (which file each window came from) — off by
+                      default (zero cost/behavior change) since only
+                      provenance-auditing callers need it; ``files`` itself is
+                      always already available to the caller, so this is the
+                      only extra piece of information needed to attribute a
+                      window back to a source file/subject.
 
     Returns
     -------
     X : [M, 6, window_samples]  float32
     y : [M]                     int64    (0 = background, 1 = compulsive)
+    file_ids : [M] int64   (only when return_file_ids=True) — index into `files`
     """
     if max_files is not None:
         files = files[:max_files]
 
     X_chunks: List[np.ndarray] = []
     y_chunks: List[np.ndarray] = []
+    file_id_chunks: List[np.ndarray] = []
 
-    args_list = [(f, window_samples, hop_samples, apply_flu_transform) for f in files]
+    args_list = [(f, window_samples, hop_samples, apply_flu_transform, flu_convention) for f in files]
     n_workers = min(_mp.cpu_count(), 8, len(files))
 
     # fork is fastest on Linux and avoids the spawn startup cost.
@@ -326,18 +361,20 @@ def _collect_windows(
     # positional train/val split are identical across runs and across models.
     ctx = _mp.get_context("fork")
     with ctx.Pool(processes=n_workers) as pool:
-        for X_c, y_c, err, fname in tqdm(
+        for file_idx, (X_c, y_c, err, fname) in enumerate(tqdm(
             pool.imap(_process_one_file, args_list),
             total=len(files),
             desc="[OCDetect] loading",
             unit="file",
             dynamic_ncols=True,
-        ):
+        )):
             if err is not None:
                 _log.warning("[OCDetect] skipping %s — %s", fname, err)
             if len(X_c) > 0:
                 X_chunks.append(X_c)
                 y_chunks.append(y_c)
+                if return_file_ids:
+                    file_id_chunks.append(np.full(len(X_c), file_idx, dtype=np.int64))
 
     if not X_chunks:
         raise RuntimeError(
@@ -351,6 +388,8 @@ def _collect_windows(
         "[OCDetect] collected %d windows | pos=%d (%.2f %%) neg=%d",
         len(X), int((y == 1).sum()), 100.0 * (y == 1).mean(), int((y == 0).sum()),
     )
+    if return_file_ids:
+        return X, y, np.concatenate(file_id_chunks, axis=0)
     return X, y
 
 
@@ -376,12 +415,19 @@ class OCDetectDataset(Dataset):
         y: np.ndarray,
         cfg: dict | None = None,
         multi_view: bool = False,
+        split_name: str = "train",
     ) -> None:
         # Keep as numpy so preprocess_window (numpy) can operate without a copy.
-        self._X          = X.astype(np.float32)   # [M, 6, 128]
+        # asarray not astype: astype copies even when already float32 -- see
+        # the note in nhanes_wrist_loader.NhanesDataset (fixed 2026-08-01).
+        self._X          = np.asarray(X, dtype=np.float32)   # [M, 6, 128]
         self._y          = torch.from_numpy(y).long()
         self._cfg        = cfg or {}
         self._multi_view = multi_view
+        # Gates augmentation to train only (bug fixed 2026-07-28); the
+        # single-view path used to augment val too. Defaults to "train"
+        # so existing callers are unchanged.
+        self.split_name  = split_name
         self.stats       = PreprocessStats()
 
     def __len__(self) -> int:
@@ -410,7 +456,8 @@ class OCDetectDataset(Dataset):
                 self._y[idx],
             )
 
-        Xproc = apply_augment(Xproc.T, self._cfg).T  # augment in [T,C] space, back to [C,T]
+        if self.split_name == "train":  # train-only (fixed 2026-07-28)
+            Xproc = apply_augment(Xproc.T, self._cfg).T  # augment in [T,C] space, back to [C,T]
         return torch.from_numpy(Xproc).float(), self._y[idx]
 
 
@@ -427,8 +474,9 @@ def _make_loader(
     pin_memory: bool,
     cfg: dict | None = None,
     multi_view: bool = False,
+    split_name: str = "train",
 ) -> DataLoader:
-    ds = OCDetectDataset(X, y, cfg=cfg, multi_view=multi_view)
+    ds = OCDetectDataset(X, y, cfg=cfg, multi_view=multi_view, split_name=split_name)
     return DataLoader(
         ds,
         batch_size=batch_size,
@@ -504,8 +552,8 @@ def make_ocdetect_loaders_lopo(
 
     return {
         "train_loader": _make_loader(X_train, y_train, batch_size,      True,  num_workers, pin_memory, cfg=cfg),
-        "val_loader":   _make_loader(X_eval,  y_eval,  eval_batch_size, False, num_workers, pin_memory, cfg=cfg),
-        "test_loader":  _make_loader(X_eval,  y_eval,  eval_batch_size, False, num_workers, pin_memory, cfg=cfg),
+        "val_loader":   _make_loader(X_eval,  y_eval,  eval_batch_size, False, num_workers, pin_memory, cfg=cfg, split_name="val"),
+        "test_loader":  _make_loader(X_eval,  y_eval,  eval_batch_size, False, num_workers, pin_memory, cfg=cfg, split_name="test"),
     }
 
 
@@ -580,6 +628,6 @@ def make_ocdetect_loaders_random(
 
     return {
         "train_loader": _make_loader(X_train, y_train, batch_size,      True,  num_workers, pin_memory, cfg=cfg, multi_view=multi_view),
-        "val_loader":   _make_loader(X_val,   y_val,   eval_batch_size, False, num_workers, pin_memory, cfg=cfg, multi_view=False),
-        "test_loader":  _make_loader(X_test,  y_test,  eval_batch_size, False, num_workers, pin_memory, cfg=cfg, multi_view=False),
+        "val_loader":   _make_loader(X_val,   y_val,   eval_batch_size, False, num_workers, pin_memory, cfg=cfg, multi_view=False, split_name="val"),
+        "test_loader":  _make_loader(X_test,  y_test,  eval_batch_size, False, num_workers, pin_memory, cfg=cfg, multi_view=False, split_name="test"),
     }

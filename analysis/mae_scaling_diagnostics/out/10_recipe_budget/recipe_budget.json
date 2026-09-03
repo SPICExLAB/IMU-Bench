@@ -1,0 +1,93 @@
+{
+  "base_counts": {
+    "realdata": 93510,
+    "ocdetect": 1253077,
+    "nymeria": 157885,
+    "totalcapture": 461,
+    "imuposer": 137,
+    "eatingspeed": 575356,
+    "motionx": 4683,
+    "humanml3d": 2825,
+    "sonic": 32662,
+    "capture24": 1432721,
+    "openwatch": 1842
+  },
+  "total_train": 3555159,
+  "rows": [
+    {
+      "fraction": "5pct",
+      "overall_fraction": 0.05,
+      "per_source": {
+        "realdata": 8448,
+        "ocdetect": 50504,
+        "nymeria": 8008,
+        "totalcapture": 22,
+        "imuposer": 3,
+        "eatingspeed": 28768,
+        "motionx": 228,
+        "humanml3d": 141,
+        "sonic": 1629,
+        "capture24": 71636,
+        "openwatch": 92
+      },
+      "n_train_natural_epoch": 169479,
+      "min_source": "imuposer",
+      "min_source_n": 3,
+      "n_train_balanced_epoch": 33,
+      "steps_per_epoch_natural": 1324,
+      "steps_per_epoch_balanced": 1,
+      "fixed_epoch_budget_max_steps_natural": 101948,
+      "fixed_epoch_budget_max_steps_balanced": 77
+    },
+    {
+      "fraction": "25pct",
+      "overall_fraction": 0.25,
+      "per_source": {
+        "realdata": 19031,
+        "ocdetect": 321461,
+        "nymeria": 39377,
+        "totalcapture": 106,
+        "imuposer": 56,
+        "eatingspeed": 143839,
+        "motionx": 1163,
+        "humanml3d": 706,
+        "sonic": 8178,
+        "capture24": 358180,
+        "openwatch": 460
+      },
+      "n_train_natural_epoch": 892557,
+      "min_source": "imuposer",
+      "min_source_n": 56,
+      "n_train_balanced_epoch": 616,
+      "steps_per_epoch_natural": 6973,
+      "steps_per_epoch_balanced": 4,
+      "fixed_epoch_budget_max_steps_natural": 536921,
+      "fixed_epoch_budget_max_steps_balanced": 308
+    },
+    {
+      "fraction": "100pct",
+      "overall_fraction": 1.0,
+      "per_source": {
+        "realdata": 93510,
+        "ocdetect": 1253077,
+        "nymeria": 157885,
+        "totalcapture": 461,
+        "imuposer": 137,
+        "eatingspeed": 575356,
+        "motionx": 4683,
+        "humanml3d": 2825,
+        "sonic": 32662,
+        "capture24": 1432721,
+        "openwatch": 1842
+      },
+      "n_train_natural_epoch": 3555159,
+      "min_source": "imuposer",
+      "min_source_n": 137,
+      "n_train_balanced_epoch": 1507,
+      "steps_per_epoch_natural": 27774,
+      "steps_per_epoch_balanced": 11,
+      "fixed_epoch_budget_max_steps_natural": 2138598,
+      "fixed_epoch_budget_max_steps_balanced": 847
+    }
+  ]
+}

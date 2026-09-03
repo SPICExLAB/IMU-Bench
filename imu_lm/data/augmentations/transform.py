@@ -16,6 +16,10 @@ frequency_mask    : zero-out random frequency bands (SpecAugment-style, per chan
 gain_jitter       : per-channel amplitude scale
 axis_bias         : per-channel constant DC offset
 time_warp         : smooth monotonic time warp
+
+Separately, `frame_perturb` (below) re-expresses a window in a different
+sensor-mounting frame. It is NOT an augmentation: it is applied to every
+split and is deterministic, and it lives in preprocess_window(), not here.
 """
 
 from __future__ import annotations
@@ -68,7 +72,16 @@ def smooth_time_warp(x: np.ndarray, max_warp: float, sigma: int) -> np.ndarray:
         t = np.arange(-radius, radius + 1)
         kernel = np.exp(-(t ** 2) / (2 * (sigma ** 2)))
         kernel = kernel / kernel.sum()
-        smooth = np.convolve(noise, kernel, mode="same")
+        # BUG FIX (2026-08-15): np.convolve(mode="same") returns
+        # max(len(noise), len(kernel)) samples, so any window shorter than the
+        # kernel (2*3*sigma+1; e.g. a 64-sample HumanML3D clip with sigma=20)
+        # crashed on `t_orig + smooth`. Reflect-pad by the kernel radius and use
+        # mode="valid" -> always exactly T samples, identical result when T is
+        # long enough.
+        padded = np.pad(noise, radius, mode="reflect") if T > 1 else noise
+        smooth = np.convolve(padded, kernel, mode="valid")
+        if smooth.shape[0] != T:                       # T <= radius edge case
+            smooth = np.interp(np.linspace(0, 1, T), np.linspace(0, 1, smooth.shape[0]), smooth)
     else:
         smooth = noise
 
@@ -87,10 +100,10 @@ def smooth_time_warp(x: np.ndarray, max_warp: float, sigma: int) -> np.ndarray:
     return x_warped
 
 
-def _random_rotation_matrix() -> np.ndarray:
-    """Sample a uniformly random rotation from SO(3) via unit quaternion."""
-    q = np.random.randn(4)
-    q /= np.linalg.norm(q)
+def _quat_to_matrix(q: np.ndarray) -> np.ndarray:
+    """Unit-quaternion -> 3x3 rotation matrix (q is normalised here)."""
+    q = np.asarray(q, dtype=np.float64)
+    q = q / np.linalg.norm(q)
     w, x, y, z = q
     return np.array([
         [1 - 2*(y*y + z*z),     2*(x*y - z*w),     2*(x*z + y*w)],
@@ -99,17 +112,159 @@ def _random_rotation_matrix() -> np.ndarray:
     ], dtype=np.float64)
 
 
-def apply_random_rotation(x: np.ndarray) -> np.ndarray:
-    """Apply a single random SO(3) rotation to acc (ch 0-2) and gyro (ch 3-5).
+def _random_rotation_matrix() -> np.ndarray:
+    """Sample a uniformly random rotation from SO(3) via unit quaternion."""
+    return _quat_to_matrix(np.random.randn(4))
 
-    The same rotation R is applied to both triaxial sensors so the relative
-    geometry between acc and gyro is preserved.  x is [T, C] with C >= 6.
-    """
-    R = _random_rotation_matrix()
+
+def _apply_rotation(x: np.ndarray, R: np.ndarray) -> np.ndarray:
+    """Apply one 3x3 rotation to acc (ch 0-2) and, when present, gyro (ch 3-5)."""
     out = x.copy()
     out[:, :3] = (R @ x[:, :3].T).T
-    out[:, 3:6] = (R @ x[:, 3:6].T).T
+    if x.shape[1] >= 6:
+        out[:, 3:6] = (R @ x[:, 3:6].T).T
     return out.astype(x.dtype)
+
+
+def _build_octahedral_rotations() -> np.ndarray:
+    """The 24 proper rotations of the cube (octahedral rotation group).
+
+    Every element is a signed permutation matrix (exactly one nonzero ±1 per
+    row and column — i.e. axis permutation + sign flips) with determinant
+    +1, so each one is a genuine 3D rotation restricted to multiples of 90°
+    about the coordinate axes. Of the 48 signed permutation matrices, exactly
+    half (24) have determinant +1 (the other 24 are improper — reflections).
+    Computed once at import time.
+    """
+    from itertools import permutations, product
+
+    mats = []
+    for perm in permutations(range(3)):
+        P = np.eye(3)[list(perm)]
+        for signs in product((1.0, -1.0), repeat=3):
+            M = P * np.array(signs)[:, None]
+            if np.isclose(np.linalg.det(M), 1.0):
+                mats.append(M)
+    assert len(mats) == 24, f"expected 24 proper rotations, got {len(mats)}"
+    return np.stack(mats).astype(np.float64)   # [24, 3, 3]
+
+
+_OCTAHEDRAL_ROTATIONS = _build_octahedral_rotations()
+
+
+def apply_random_rotation(x: np.ndarray, rotation_set: str = "so3") -> np.ndarray:
+    """Apply a single random rotation to acc (ch 0-2) and, if present, gyro (ch 3-5).
+
+    Args:
+        x            : [T, C] with C >= 3. Gyro (ch 3-5) is only rotated when
+                       C >= 6 — acc-only sources (e.g. capture24, 3 channels)
+                       are rotated on the 3 acc channels alone.
+        rotation_set : "so3" (default) — uniformly random continuous SO(3)
+                       rotation via unit quaternion.
+                       "octahedral" — uniformly random pick from the 24
+                       proper rotations of the cube (rotations that are
+                       multiples of 90° about the coordinate axes: axis
+                       permutations + sign flips with determinant +1).
+                       "gravity_axis" — random rotation about the window's OWN
+                       estimated gravity direction (mean acc); preserves the gravity
+                       vector exactly in any sensor frame. Use this, not "yaw",
+                       for sensor-frame data.
+                       "yaw" / "gravity_preserving" — random rotation about the
+                       vertical (Y, gravity) axis only; preserves the gravity
+                       direction, so the DC/posture cue survives augmentation.
+
+    The same rotation R is applied to both triaxial sensors so the relative
+    geometry between acc and gyro is preserved.
+    """
+    if rotation_set == "octahedral":
+        R = _OCTAHEDRAL_ROTATIONS[np.random.randint(len(_OCTAHEDRAL_ROTATIONS))]
+    elif rotation_set in ("gravity_axis", "about_gravity"):
+        # Rotate about THIS WINDOW's own gravity direction, estimated as the mean acc vector.
+        # In a wrist SENSOR frame there is no fixed "up" axis -- gravity lands on a different axis
+        # in every source (SONIC ch0, OCDetect ch1, Capture24 ch2, NHANES uniformly spread), and it
+        # moves per window, which is exactly the posture signal. A fixed-axis yaw therefore does NOT
+        # preserve gravity for most data; rotating about g-hat does, exactly, for every source.
+        g = x[:, :3].mean(axis=0).astype(np.float64)
+        n = np.linalg.norm(g)
+        if n < 1e-6:
+            R = np.eye(3)                      # gravity-free data (e.g. PADS): nothing to preserve
+        else:
+            k = g / n
+            th = np.random.uniform(0.0, 2.0 * np.pi)
+            K = np.array([[0.0, -k[2], k[1]], [k[2], 0.0, -k[0]], [-k[1], k[0], 0.0]])
+            R = np.eye(3) + np.sin(th) * K + (1.0 - np.cos(th)) * (K @ K)   # Rodrigues
+    elif rotation_set in ("yaw", "gravity_preserving"):
+        # Rotation about the vertical (gravity) axis only: keeps invariance to how the
+        # watch sits around the wrist and to heading, but PRESERVES which way is down.
+        # Required whenever the pipeline keeps the DC term (preprocess.normalize.method:
+        # physical) -- octahedral rotation would randomise the gravity direction and train
+        # the encoder to be posture-agnostic, which is the cue HAR needs most.
+        th = np.random.uniform(0.0, 2.0 * np.pi)
+        c, sn = np.cos(th), np.sin(th)
+        R = np.array([[c, 0.0, sn], [0.0, 1.0, 0.0], [-sn, 0.0, c]], dtype=np.float64)
+    else:
+        R = _random_rotation_matrix()
+    return _apply_rotation(x, R)
+
+
+# ---------------------------------------------------------------------------
+# Coordinate-FRAME perturbation (NOT an augmentation)
+# ---------------------------------------------------------------------------
+# `random_rotation` above is a train-only augmentation: a fresh draw every
+# __getitem__, applied only to the train split, meant to make the encoder
+# orientation-invariant. `frame_perturb` is the opposite tool -- it models a
+# sensor that is *mounted* in a different coordinate frame than the one the
+# encoder was pretrained in, so it must be
+#   (a) applied to EVERY split (train, val, test) alike -- the deployment frame
+#       does not change between splits, and
+#   (b) deterministic in `fixed` mode -- one rotation R per (seed, rotation_set)
+#       for the entire dataset, so a probe measures frame MISMATCH rather than
+#       augmentation noise.
+# It is applied to the RAW window inside preprocess_window(), before filtering
+# and normalisation, because that is where a real mounting rotation acts (a
+# per-channel z-score does NOT commute with a rotation).
+
+_FRAME_ROTATIONS: dict = {}
+
+
+def frame_rotation_matrix(seed: int, rotation_set: str = "so3") -> np.ndarray:
+    """The one fixed rotation this (seed, rotation_set) stands for. Cached."""
+    key = (int(seed), str(rotation_set))
+    R = _FRAME_ROTATIONS.get(key)
+    if R is None:
+        rng = np.random.default_rng(int(seed))
+        if str(rotation_set) == "octahedral":
+            R = _OCTAHEDRAL_ROTATIONS[int(rng.integers(len(_OCTAHEDRAL_ROTATIONS)))]
+        else:
+            R = _quat_to_matrix(rng.standard_normal(4))
+        _FRAME_ROTATIONS[key] = R
+    return R
+
+
+def apply_frame_perturb(x: np.ndarray, cfg: Any) -> np.ndarray:
+    """Re-express a raw window [T, C] in a different sensor-mounting frame.
+
+    Config (top level, all splits)::
+
+        frame_perturb:
+          enabled: true
+          mode: fixed          # "fixed" (default) | "per_window"
+          rotation_set: so3    # "so3" (default) | "octahedral"
+          seed: 7              # `fixed` mode only -- picks WHICH rotation
+
+    fixed       : one R for the whole dataset -- "the watch is worn in an
+                  unknown but consistent orientation". This is the condition a
+                  frame-match ablation wants.
+    per_window  : a fresh uniform draw per window in every split -- the harsher
+                  "orientation is uncontrolled sample to sample" stress test.
+    """
+    fp = cfg_get(cfg, ["frame_perturb"], {}) or {}
+    if not fp.get("enabled", False):
+        return x
+    rot_set = str(fp.get("rotation_set", "so3"))
+    if str(fp.get("mode", "fixed")) == "per_window":
+        return apply_random_rotation(x, rotation_set=rot_set)
+    return _apply_rotation(x, frame_rotation_matrix(int(fp.get("seed", 0)), rot_set))
 
 
 def apply_bias_drift(x: np.ndarray, max_drift: float) -> np.ndarray:
@@ -209,10 +364,11 @@ def apply_augment(x: np.ndarray, cfg: Any) -> np.ndarray:
     """
     out = x
 
-    # 1. SO(3) random rotation (acc ch0-2 + gyro ch3-5, same R)
+    # 1. Random rotation (acc ch0-2 + gyro ch3-5, same R). rotation_set:
+    #    "so3" (default, continuous) | "octahedral" (24 proper cube rotations)
     rr_cfg = cfg_get(cfg, ["random_rotation"], {}) or {}
     if rr_cfg.get("enabled", False):
-        out = apply_random_rotation(out)
+        out = apply_random_rotation(out, rotation_set=str(rr_cfg.get("rotation_set", "so3")))
 
     # 2. Gaussian noise
     gn_cfg = cfg_get(cfg, ["gaussian_noise"], {}) or {}

@@ -1,0 +1,44 @@
+{
+  "task": "har_hhar",
+  "encoder": "focal",
+  "protocol": "probe",
+  "seed": 42,
+  "metrics": {
+    "macro_f1": 0.5000184708554701,
+    "bal_acc": 0.5147164322438246,
+    "acc": 0.5107102593010147,
+    "val_loss": 1.245434
+  },
+  "primary_metric": "macro_f1",
+  "eval_split": "val",
+  "run": "vit1d_har_probe_hhar_focal_multidata",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 11000,
+  "selection": {
+    "split": "val",
+    "monitor": "val_loss",
+    "mode": "min",
+    "note": "same convention as Experiments_table \u00a73 (metrics read at the min-val-loss checkpoint)"
+  },
+  "job_ids": {
+    "train": 9519689,
+    "score": "9725909"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.har",
+    "date": "2026-08-17T18:46:02-05:00",
+    "git": "unknown",
+    "legacy_run": true,
+    "info": {
+      "n_val_samples": 2661,
+      "n_classes_seen": 6,
+      "n_classes_head": 6,
+      "n_val_batches": 11,
+      "logged_macro_f1_at_ckpt": 0.500386,
+      "train_end": "early stopping at step=15000 epoch=366"
+    }
+  },
+  "status": "ok",
+  "notes": "harvested from a pre-harness run with a recipe-equivalent config.",
+  "schema_version": 1
+}

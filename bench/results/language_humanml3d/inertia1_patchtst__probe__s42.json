@@ -1,0 +1,67 @@
+{
+  "task": "language_humanml3d",
+  "encoder": "inertia1_patchtst",
+  "protocol": "probe",
+  "seed": 42,
+  "metrics": {
+    "r1_i2t_g100": 20.165,
+    "r1_t2i_g100": 19.4972038893647,
+    "r5_i2t_g100": 49.39,
+    "r5_t2i_g100": 48.692629351604616,
+    "r10_i2t_g100": 64.06500000000001,
+    "r10_t2i_g100": 63.287823064134216,
+    "mrr_i2t_g100": 34.31848106999312,
+    "mrr_t2i_g100": 33.484987782166904,
+    "r1_i2t_full": 1.3239664955417456,
+    "r1_t2i_full": 1.9047619047619049,
+    "mrr_i2t_full": 5.268973596705418,
+    "mrr_t2i_full": 5.39414978819202,
+    "medr_i2t_full": 127.0,
+    "medr_t2i_full": 154.0,
+    "r1_g100": 19.831101944682352,
+    "val_r1_i2t_g100": 21.38,
+    "val_r1_t2i_g100": 20.679091141179473,
+    "val_r5_i2t_g100": 51.04,
+    "val_r5_t2i_g100": 50.27827418943068,
+    "val_r10_i2t_g100": 64.55499999999999,
+    "val_r10_t2i_g100": 63.466938983916265,
+    "val_mrr_i2t_g100": 35.53994645019849,
+    "val_mrr_t2i_g100": 34.75096862426926,
+    "val_r1_i2t_full": 5.012531328320802,
+    "val_r1_t2i_full": 5.111111111111112,
+    "val_mrr_i2t_full": 11.836997178180022,
+    "val_mrr_t2i_full": 11.183265890239293,
+    "val_medr_i2t_full": 40.0,
+    "val_medr_t2i_full": 46.0,
+    "val_r1_g100": 21.029545570589736
+  },
+  "primary_metric": "r1_g100",
+  "eval_split": "test",
+  "run": "bench_language_humanml3d__inertia1_patchtst__probe__s42",
+  "checkpoint": "latest.pt",
+  "checkpoint_step": 8000,
+  "selection": {
+    "split": "none",
+    "monitor": "fixed_budget",
+    "mode": "latest",
+    "note": "fixed 8k-step budget, final checkpoint (latest.pt); \u00a713e: val-loss best.pt under-selects for retrieval, latest \u2265 best on every arm"
+  },
+  "job_ids": {
+    "train": 9690218,
+    "score": "9690218"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.language",
+    "date": "2026-08-17T09:16:20-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_items_test": 3701,
+      "n_items_val": 1197,
+      "train_end": "max_steps reached at step=8000 epoch=1"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

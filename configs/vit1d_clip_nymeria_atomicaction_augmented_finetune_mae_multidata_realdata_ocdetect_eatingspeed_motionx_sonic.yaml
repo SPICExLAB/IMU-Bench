@@ -1,0 +1,90 @@
+# 5-source SSL MAE pretrain variant of vit1d_clip_nymeria_atomicaction_augmented_finetune_mae_multidata.yaml.
+# ONLY pretrained_run changed: vit1d_ssl_mae_varlen_altattn_multidata -> vit1d_ssl_mae_varlen_altattn_realdata_ocdetect_eatingspeed_motionx_sonic.
+# IMU<->text CLIP alignment FINETUNE on Nymeria ATOMIC-ACTION captions,
+# LLM-AUGMENTED — sibling of vit1d_clip_nymeria_atomicaction_finetune_mae_multidata.yaml
+# (plain atomic_action, scored 10.09%/10.50%, the best Nymeria CLIP result so
+# far). See the probe sibling config's header comment for the augmentation
+# details. Same lr:3e-5 as the un-augmented atomic_action finetune, for an
+# apples-to-apples comparison isolating the caption-augmentation effect.
+
+vit1d:
+  patch_size: 16
+  shared_kernel: acc_gyro
+  pos_embed_type: 2d
+  max_patches_per_channel: 256
+  max_channels: 32
+  pooling: "mean"
+
+  encoder:
+    hidden_size: 384
+    num_hidden_layers: 12
+    num_attention_heads: 6
+    intermediate_size: 1536
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-6
+    alt_attention: true
+
+objective:
+  type: imu_text_clip_nymeria_flu
+  imu_text_clip_nymeria_flu:
+    pretrained_run:  vit1d_ssl_mae_varlen_altattn_realdata_ocdetect_eatingspeed_motionx_sonic
+    pretrained_ckpt: best
+    freeze_imu_encoder:  false  # FINETUNE: encoder warm-started but trainable
+    freeze_text_encoder: true
+
+    caption_source: atomic_action_augmented   # NEW: original + LLM-simplified captions
+    captions_root:  /projects/b53017/vbc1591/nymeria_captions
+    train_pkl_root: /projects/b53017/vbc1591/processed_data_body_Ty_rwrist
+    val_pkl_root:   /projects/b53017/vbc1591/processed_data_test_body_Ty_rwrist
+    clip_model:     openai/clip-vit-base-patch32
+    clip_embed_dim: 512
+    local_files_only: true
+    text_cache_path: /projects/b53017/vbc1591/nymeria_captions/clip_text_emb_cache_atomic_action_augmented.pt
+
+paths:
+  dataset_path: /projects/b53017/vbc1591/IMULM_master_dataset_v2.parquet
+  runs_root: /gpfs/home/vbc1591/IMU-SSL/runs
+
+windowing:
+  min_window_seconds: 1.28
+  max_window_seconds: 10.24
+
+data:
+  sensor_columns: [acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z]
+  batch_size: 64
+  num_workers: 4
+
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 10000000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 500
+  val_max_batches: 100
+
+  optim:
+    name: adamw
+    lr: 3.0e-5
+    weight_decay: 0.01
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+
+  sched:
+    name: cosine
+    warmup_steps: 200
+
+  early_stopping:
+    enabled: true
+    monitor: val_loss
+    patience: 20
+
+logging:
+  log_every_steps: 5
+  ckpt_every_steps: 500
+  save_step_checkpoints: false
+
+wandb:
+  entity: yli32258-northwestern-university
+  project: TransfHAR_project

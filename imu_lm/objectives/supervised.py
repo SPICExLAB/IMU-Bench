@@ -84,4 +84,11 @@ def forward_loss(
         "macro_f1": metrics["macro_f1"],
         "macro_precision": metrics["macro_precision"],
         "macro_recall": metrics["macro_recall"],
+        # Consumed by Trainer._eval to compute pooled (not per-batch-averaged)
+        # macro_f1/precision/recall/bal_acc over the whole validation pass --
+        # see that method's docstring for why per-batch averaging is wrong
+        # for these metrics. Harmless/ignored during training (only read in
+        # eval mode); underscore prefix keeps it out of the scalar log path.
+        "_y_true": y_true,
+        "_y_pred": y_pred,
     }

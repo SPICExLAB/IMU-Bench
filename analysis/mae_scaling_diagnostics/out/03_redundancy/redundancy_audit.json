@@ -1,0 +1,124 @@
+{
+  "analytical_overlap": {
+    "T": 512,
+    "hop": 256,
+    "overlap_fraction": 0.5
+  },
+  "cache_redundancy": {
+    "capture24": {
+      "n_cached_train_windows": 124881,
+      "n_sampled_pairs": 2000,
+      "median_adjacent_cosine_sim": 0.0025,
+      "pct_near_duplicate_pairs (cos>0.98)": 0.0,
+      "pct_low_motion_windows (below own 25th pct accel-var)": 25.0
+    },
+    "eatingspeed": {
+      "n_cached_train_windows": 57536,
+      "n_sampled_pairs": 2000,
+      "median_adjacent_cosine_sim": -0.0028,
+      "pct_near_duplicate_pairs (cos>0.98)": 0.0,
+      "pct_low_motion_windows (below own 25th pct accel-var)": 25.05
+    },
+    "humanml3d": {
+      "n_cached_train_windows": 2825,
+      "n_sampled_pairs": 2000,
+      "median_adjacent_cosine_sim": -0.0014,
+      "pct_near_duplicate_pairs (cos>0.98)": 0.0,
+      "pct_low_motion_windows (below own 25th pct accel-var)": 25.2
+    },
+    "imuposer": {
+      "n_cached_train_windows": 137,
+      "n_sampled_pairs": 136,
+      "median_adjacent_cosine_sim": -0.0088,
+      "pct_near_duplicate_pairs (cos>0.98)": 0.0,
+      "pct_low_motion_windows (below own 25th pct accel-var)": 25.0
+    },
+    "motionx": {
+      "n_cached_train_windows": 4683,
+      "n_sampled_pairs": 2000,
+      "median_adjacent_cosine_sim": -0.0013,
+      "pct_near_duplicate_pairs (cos>0.98)": 0.0,
+      "pct_low_motion_windows (below own 25th pct accel-var)": 26.1
+    },
+    "nymeria": {
+      "n_cached_train_windows": 157885,
+      "n_sampled_pairs": 2000,
+      "median_adjacent_cosine_sim": 0.0023,
+      "pct_near_duplicate_pairs (cos>0.98)": 0.0,
+      "pct_low_motion_windows (below own 25th pct accel-var)": 27.45
+    },
+    "ocdetect": {
+      "n_cached_train_windows": 8703,
+      "n_sampled_pairs": 2000,
+      "median_adjacent_cosine_sim": -0.0006,
+      "pct_near_duplicate_pairs (cos>0.98)": 0.0,
+      "pct_low_motion_windows (below own 25th pct accel-var)": 25.15
+    },
+    "openwatch": {
+      "n_cached_train_windows": 1842,
+      "n_sampled_pairs": 1841,
+      "median_adjacent_cosine_sim": 0.0021,
+      "pct_near_duplicate_pairs (cos>0.98)": 0.0,
+      "pct_low_motion_windows (below own 25th pct accel-var)": 88.48
+    },
+    "realdata": {
+      "n_cached_train_windows": 93510,
+      "n_sampled_pairs": 2000,
+      "median_adjacent_cosine_sim": 0.0003,
+      "pct_near_duplicate_pairs (cos>0.98)": 0.0,
+      "pct_low_motion_windows (below own 25th pct accel-var)": 25.1
+    },
+    "sonic": {
+      "n_cached_train_windows": 32662,
+      "n_sampled_pairs": 2000,
+      "median_adjacent_cosine_sim": 0.002,
+      "pct_near_duplicate_pairs (cos>0.98)": 0.0,
+      "pct_low_motion_windows (below own 25th pct accel-var)": 27.15
+    },
+    "totalcapture": {
+      "n_cached_train_windows": 461,
+      "n_sampled_pairs": 460,
+      "median_adjacent_cosine_sim": -0.0036,
+      "pct_near_duplicate_pairs (cos>0.98)": 0.0,
+      "pct_low_motion_windows (below own 25th pct accel-var)": 25.87
+    }
+  },
+  "effective_segments": {
+    "realdata": {
+      "median_windows_per_session_overlapping": 7.0,
+      "estimated_effective_independent_windows_per_session": 3.5
+    },
+    "ocdetect": {
+      "median_windows_per_session_overlapping": 1153.5,
+      "estimated_effective_independent_windows_per_session": 576.8
+    },
+    "nymeria": {
+      "median_windows_per_session_overlapping": 181.0,
+      "estimated_effective_independent_windows_per_session": 90.5
+    },
+    "totalcapture": {
+      "median_windows_per_session_overlapping": 10.0,
+      "estimated_effective_independent_windows_per_session": 5.0
+    },
+    "imuposer": {
+      "median_windows_per_session_overlapping": 2.0,
+      "estimated_effective_independent_windows_per_session": 1.0
+    },
+    "motionx": {
+      "median_windows_per_session_overlapping": 2.0,
+      "estimated_effective_independent_windows_per_session": 1.0
+    },
+    "humanml3d": {
+      "median_windows_per_session_overlapping": 1.0,
+      "estimated_effective_independent_windows_per_session": 0.5
+    },
+    "sonic": {
+      "median_windows_per_session_overlapping": 1.0,
+      "estimated_effective_independent_windows_per_session": 0.5
+    },
+    "openwatch": {
+      "median_windows_per_session_overlapping": 1.0,
+      "estimated_effective_independent_windows_per_session": 0.5
+    }
+  }
+}

@@ -106,17 +106,41 @@ class CLIPTextEncoder(nn.Module):
         freeze: bool = True,
         max_length: int = 77,
         local_files_only: bool = False,
+        use_projection: bool = False,
     ):
         super().__init__()
         from transformers import CLIPTokenizer, CLIPTextModel
 
-        logger.info("[CLIPTextEncoder] loading %s (freeze=%s)", model_name, freeze)
+        logger.info("[CLIPTextEncoder] loading %s (freeze=%s, use_projection=%s)",
+                    model_name, freeze, use_projection)
         self.tokenizer = CLIPTokenizer.from_pretrained(
             model_name, local_files_only=local_files_only
         )
-        self.model = CLIPTextModel.from_pretrained(
-            model_name, local_files_only=local_files_only
-        )
+        # use_projection (2026-07-28, code-review finding): official CLIP --
+        # and UniMTS's own encode_text (baselines/.../contrastive.py:38,
+        # `... @ self.model.text_projection`) -- applies the learned
+        # text_projection matrix after the final-LN [EOS] state; the
+        # projected space is the one CLIP's contrastive pretraining actually
+        # aligned. The original implementation here used CLIPTextModel's
+        # bare pooler_output instead (cosine vs the projected space measured
+        # at only 0.01-0.04) -- internally consistent (train and eval share
+        # the convention) but NOT the standard pretrained CLIP embedding
+        # space. Config-gated OFF by default: every checkpoint trained
+        # before this flag existed (frozen-text runs, their cached text
+        # embeddings, and their clip_heads) lives in pooler_output space,
+        # and flipping the eval-side convention under them would silently
+        # invalidate their numbers. New runs opt in via
+        # objective.<type>.text_projection: true.
+        self.use_projection = bool(use_projection)
+        if self.use_projection:
+            from transformers import CLIPTextModelWithProjection
+            self.model = CLIPTextModelWithProjection.from_pretrained(
+                model_name, local_files_only=local_files_only
+            )
+        else:
+            self.model = CLIPTextModel.from_pretrained(
+                model_name, local_files_only=local_files_only
+            )
         self.max_length = max_length
 
         if freeze:
@@ -143,8 +167,10 @@ class CLIPTextEncoder(nn.Module):
         )
         inputs = {k: v.to(device) for k, v in inputs.items()}
         outputs = self.model(**inputs)
-        # CLIP uses the [EOS] token (pooler_output) as the text representation
-        z = outputs.pooler_output        # [B, D_clip]
+        # use_projection: text_embeds = final-LN [EOS] state @ text_projection
+        # (official CLIP / UniMTS convention); else bare pooler_output
+        # (legacy convention -- see __init__ note).
+        z = outputs.text_embeds if self.use_projection else outputs.pooler_output
         return F.normalize(z, dim=-1)
 
     def _encode_trainable(self, texts: List[str], device: torch.device) -> torch.Tensor:
@@ -157,7 +183,7 @@ class CLIPTextEncoder(nn.Module):
         )
         inputs = {k: v.to(device) for k, v in inputs.items()}
         outputs = self.model(**inputs)
-        z = outputs.pooler_output        # [B, D_clip]
+        z = outputs.text_embeds if self.use_projection else outputs.pooler_output
         return F.normalize(z, dim=-1)
 
     @property
@@ -229,6 +255,7 @@ def info_nce_loss(
     z_imu: torch.Tensor,
     z_text: torch.Tensor,
     logit_scale: nn.Parameter,
+    direction: str = "symmetric",
 ) -> Tuple[torch.Tensor, Dict[str, float]]:
     """Symmetric InfoNCE (CLIP-style).
 
@@ -283,7 +310,18 @@ def info_nce_loss(
             acc_i2t = (logits_per_imu.argmax(dim=1)  == labels).float().mean().item()
             acc_t2i = (logits_per_text.argmax(dim=1) == labels).float().mean().item()
 
-    loss = (loss_i2t + loss_t2i) / 2.0
+    # direction (2026-07-28): "symmetric" (default, standard CLIP) averages
+    # both directions; "i2t" optimizes ONLY the imu->text direction --
+    # matching UniMTS's own pretrain.py loss exactly
+    # (F.cross_entropy(logits_per_imu, labels) only, line 73) for
+    # loss-matched architecture comparisons. "t2i" is the mirror. Both
+    # retrieval accuracies are always logged regardless.
+    if direction == "i2t":
+        loss = loss_i2t
+    elif direction == "t2i":
+        loss = loss_t2i
+    else:
+        loss = (loss_i2t + loss_t2i) / 2.0
 
     return loss, {
         "loss":            float(loss.item()),
@@ -357,4 +395,13 @@ def forward_loss(
     if text_mlp is not None:
         z_text = text_mlp(z_text)   # [B, D_clip] re-normalised inside MLP
 
-    return info_nce_loss(z_imu, z_text, clip_head.logit_scale)
+    # loss_direction (2026-07-28): read objective.<type>.loss_direction so a
+    # config can opt into UniMTS-style one-way training -- see info_nce_loss.
+    direction = "symmetric"
+    if cfg is not None:
+        from imu_lm.utils.helpers import cfg_get
+        _obj_type = cfg_get(cfg, ["objective", "type"], "") or ""
+        if _obj_type:
+            direction = str(cfg_get(cfg, ["objective", _obj_type, "loss_direction"], "symmetric"))
+
+    return info_nce_loss(z_imu, z_text, clip_head.logit_scale, direction=direction)

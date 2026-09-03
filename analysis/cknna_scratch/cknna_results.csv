@@ -1,0 +1,16 @@
+task_a,task_b,cknna,cka
+HAR (WISDM),Arm pose (Nymeria),0.0399,0.1420
+HAR (WISDM),Full-body pose (Nymeria),0.0433,0.2763
+HAR (WISDM),Gesture (OpenWatch),0.0367,0.1153
+HAR (WISDM),"Odometry (Nymeria, world)",0.0528,0.1876
+HAR (WISDM),CLIP (HumanML3D),0.0870,0.3233
+Arm pose (Nymeria),Full-body pose (Nymeria),0.1311,0.3019
+Arm pose (Nymeria),Gesture (OpenWatch),0.0429,0.1656
+Arm pose (Nymeria),"Odometry (Nymeria, world)",0.0446,0.1077
+Arm pose (Nymeria),CLIP (HumanML3D),0.0467,0.1359
+Full-body pose (Nymeria),Gesture (OpenWatch),0.0434,0.1814
+Full-body pose (Nymeria),"Odometry (Nymeria, world)",0.0482,0.2757
+Full-body pose (Nymeria),CLIP (HumanML3D),0.0713,0.2247
+Gesture (OpenWatch),"Odometry (Nymeria, world)",0.0235,0.0480
+Gesture (OpenWatch),CLIP (HumanML3D),0.0442,0.1903
+"Odometry (Nymeria, world)",CLIP (HumanML3D),0.0641,0.1272

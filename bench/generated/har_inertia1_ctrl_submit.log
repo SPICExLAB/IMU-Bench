@@ -1,0 +1,25 @@
+[sbatch] 9784530  bench_har_wisdm__inertia1_patchtst_scratch__scratch__s42.sh
+[sbatch] 9784533  bench_har_wisdm__inertia1_patchtst_scratch__scratch__s42.sh
+[sbatch] 9784534  bench_har_wisdm__inertia1_patchtst_randinit__probe__s42.sh
+[sbatch] 9784536  bench_har_wisdm__inertia1_patchtst_randinit__probe__s42.sh
+[sbatch] 9784537  bench_har_utd_mhad__inertia1_patchtst_scratch__scratch__s42.sh
+[sbatch] 9784539  bench_har_utd_mhad__inertia1_patchtst_scratch__scratch__s42.sh
+[sbatch] 9784540  bench_har_utd_mhad__inertia1_patchtst_randinit__probe__s42.sh
+[sbatch] 9784552  bench_har_utd_mhad__inertia1_patchtst_randinit__probe__s42.sh
+[sbatch] 9784553  bench_har_pamap2__inertia1_patchtst_scratch__scratch__s42.sh
+[sbatch] 9784555  bench_har_pamap2__inertia1_patchtst_scratch__scratch__s42.sh
+[sbatch] 9784556  bench_har_pamap2__inertia1_patchtst_randinit__probe__s42.sh
+[sbatch] 9784557  bench_har_pamap2__inertia1_patchtst_randinit__probe__s42.sh
+[sbatch] 9784559  bench_har_recofit__inertia1_patchtst_scratch__scratch__s42.sh
+[sbatch] 9784562  bench_har_recofit__inertia1_patchtst_scratch__scratch__s42.sh
+[sbatch] 9784565  bench_har_recofit__inertia1_patchtst_randinit__probe__s42.sh
+[sbatch] 9784566  bench_har_recofit__inertia1_patchtst_randinit__probe__s42.sh
+[sbatch] 9784567  bench_har_hhar__inertia1_patchtst_scratch__scratch__s42.sh
+[sbatch] 9784568  bench_har_hhar__inertia1_patchtst_scratch__scratch__s42.sh
+[sbatch] 9784570  bench_har_hhar__inertia1_patchtst_randinit__probe__s42.sh
+[sbatch] 9784573  bench_har_hhar__inertia1_patchtst_randinit__probe__s42.sh
+[sbatch] 9784575  bench_har_mhealth__inertia1_patchtst_scratch__scratch__s42.sh
+[sbatch] 9784595  bench_har_mhealth__inertia1_patchtst_scratch__scratch__s42.sh
+[sbatch] 9784599  bench_har_mhealth__inertia1_patchtst_randinit__probe__s42.sh
+[sbatch] 9784601  bench_har_mhealth__inertia1_patchtst_randinit__probe__s42.sh
+CTRL_DONE

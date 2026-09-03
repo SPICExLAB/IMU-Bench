@@ -1,0 +1,67 @@
+{
+  "task": "language_humanml3d",
+  "encoder": "mae_4src_physnp",
+  "protocol": "probe",
+  "seed": 42,
+  "metrics": {
+    "r1_i2t_g100": 17.03,
+    "r1_t2i_g100": 16.025996271852485,
+    "r5_i2t_g100": 43.165,
+    "r5_t2i_g100": 42.198599425663765,
+    "r10_i2t_g100": 57.595,
+    "r10_t2i_g100": 56.13884830470048,
+    "mrr_i2t_g100": 29.980242630302854,
+    "mrr_t2i_g100": 28.976984891473556,
+    "r1_i2t_full": 1.3239664955417456,
+    "r1_t2i_full": 1.465201465201465,
+    "mrr_i2t_full": 4.429935164970689,
+    "mrr_t2i_full": 4.059036173606886,
+    "medr_i2t_full": 179.0,
+    "medr_t2i_full": 219.5,
+    "r1_g100": 16.527998135926243,
+    "val_r1_i2t_g100": 15.975,
+    "val_r1_t2i_g100": 14.771508807761041,
+    "val_r5_i2t_g100": 42.21,
+    "val_r5_t2i_g100": 40.408475874393666,
+    "val_r10_i2t_g100": 56.355,
+    "val_r10_t2i_g100": 56.22670411028848,
+    "val_mrr_i2t_g100": 29.125695408300757,
+    "val_mrr_t2i_g100": 27.702460349319857,
+    "val_r1_i2t_full": 3.1746031746031744,
+    "val_r1_t2i_full": 3.4444444444444446,
+    "val_mrr_i2t_full": 8.552097025765866,
+    "val_mrr_t2i_full": 8.153709289328228,
+    "val_medr_i2t_full": 66.0,
+    "val_medr_t2i_full": 75.0,
+    "val_r1_g100": 15.37325440388052
+  },
+  "primary_metric": "r1_g100",
+  "eval_split": "test",
+  "run": "bench_language_humanml3d__mae_4src_physnp__probe__s42",
+  "checkpoint": "latest.pt",
+  "checkpoint_step": 8000,
+  "selection": {
+    "split": "none",
+    "monitor": "fixed_budget",
+    "mode": "latest",
+    "note": "fixed 8k-step budget, final checkpoint (latest.pt); \u00a713e: val-loss best.pt under-selects for retrieval, latest \u2265 best on every arm"
+  },
+  "job_ids": {
+    "train": null,
+    "score": "4867063"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.language",
+    "date": "2026-08-27T13:37:39-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_items_test": 3701,
+      "n_items_val": 1197,
+      "train_end": "unknown/incomplete"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

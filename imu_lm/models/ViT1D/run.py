@@ -20,12 +20,13 @@ from typing import Any, Optional
 
 from imu_lm.data.loaders import make_loaders
 from imu_lm.data.windowing import compute_T_and_hop
-from imu_lm.models.ViT1D.model import ViT1DEncoder, ViT1DDecoder, ViT1DPoseDecoder, ViT1DOdomDecoder
+from imu_lm.models.ViT1D.model import ViT1DEncoder, maybe_stats_wrap, ViT1DDecoder, ViT1DPoseDecoder, ViT1DOdomDecoder
 from imu_lm.objectives import masked_1d as masked_1d_obj
 from imu_lm.objectives import supervised as supervised_obj
 from imu_lm.objectives import pose_1d as pose_1d_obj
 from imu_lm.objectives import odom_1d as odom_1d_obj
 from imu_lm.probe.head import LinearHead
+from imu_lm.utils.metrics import compute_metrics
 from imu_lm.runtime_consistency.artifacts import save_label_map, save_meta
 from imu_lm.runtime_consistency.trainer import Trainer
 from imu_lm.utils.helpers import cfg_get
@@ -53,6 +54,57 @@ def _remap_encoder_state_dict(state_dict: dict) -> dict:
     return remapped
 
 
+def _load_encoder_state_dict(encoder: "torch.nn.Module", enc_state: dict) -> None:
+    """Load a pretrained encoder checkpoint, tolerating checkpoint params that
+    belong to an optional sub-module this downstream config doesn't activate
+    (e.g. bert_masking's global_mask_token/freq_mask_tokens, or a cls_token,
+    when the pretraining run enabled a flag this run leaves off). Those
+    params are simply never referenced by forward() when the corresponding
+    flag is off here, so dropping them is safe.
+
+    Still fails loudly on *missing* keys (params this encoder needs but the
+    checkpoint doesn't have) -- that indicates a genuine architecture
+    mismatch, not an inactive optional module, and should not be silenced.
+    """
+    if hasattr(encoder, "load_pretrained_state"):
+        # External encoders (e.g. Inertia1Encoder) own their key layout; the
+        # ViT1D self_attn/linear1/linear2 remap below would corrupt it.
+        encoder.load_pretrained_state(enc_state)
+        return
+    remapped = _remap_encoder_state_dict(enc_state["model"])
+    result = encoder.load_state_dict(remapped, strict=False)
+    if result.missing_keys:
+        raise RuntimeError(
+            f"Encoder checkpoint is missing required key(s): {result.missing_keys}"
+        )
+    if result.unexpected_keys:
+        import logging as _logging
+        _logging.getLogger(__name__).warning(
+            "[encoder-load] ignoring %d checkpoint key(s) not used by this "
+            "downstream architecture (likely an optional module inactive here, "
+            "e.g. bert_masking off): %s",
+            len(result.unexpected_keys), result.unexpected_keys,
+        )
+
+
+def _openwatch_ce_weight(loaders, cfg_block, num_classes):
+    """Inverse-frequency class weights over the TRAIN loader's labels when
+    `class_weighted_ce: true` is set in the objective block (mirrors the
+    OpenWatch paper's §3.3.3 recipe for the §5f fair comparison); else None
+    (plain CE, this repo's default). Labels are read from the dataset's
+    window/record index so no data pass is needed."""
+    if not bool(cfg_block.get("class_weighted_ce", False)):
+        return None
+    ds = loaders["train_loader"].dataset
+    if getattr(ds, "windowed", False):
+        ys = [int(ds.records[ri].label) for ri, _s in ds._window_index]
+    else:
+        ys = [int(r.label) for r in ds.records]
+    counts = torch.bincount(torch.tensor(ys), minlength=num_classes).float()
+    w = counts.sum() / (num_classes * counts.clamp(min=1.0))
+    return w
+
+
 def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
     # Compute input temporal dimension from windowing config
     T, _ = compute_T_and_hop(cfg)
@@ -60,8 +112,15 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
     # Get objective type: "mae", "supervised", or "pose"
     objective_type = cfg_get(cfg, ["objective", "type"], "mae").lower()
     
-    # Create encoder (always needed)
-    encoder = ViT1DEncoder(cfg)
+    # Create encoder (always needed). An ``inertia1:`` block selects the
+    # Inertia-1 external-baseline adapter (imu_lm/models/baselines/inertia1_encoder.py);
+    # otherwise the plain ViT1DEncoder as before (objective branches below may
+    # still swap in ViT1DEncoderAltAttn when vit1d.encoder.alt_attention is set).
+    if cfg_get(cfg, ["inertia1"], None):
+        from imu_lm.models.baselines.inertia1_encoder import Inertia1Encoder
+        encoder = Inertia1Encoder(cfg)
+    else:
+        encoder = ViT1DEncoder(cfg)
     
     # Save architecture metadata at run start (static — doesn't change during training).
     # Weights are saved in checkpoints/best.pt and latest.pt by the trainer.
@@ -72,7 +131,7 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
         "embedding_dim": encoder.embed_dim,
         "encoding": "raw_1d_imu",
         "objective": objective_type,
-        "backbone": "vit1d",
+        "backbone": "inertia1" if cfg_get(cfg, ["inertia1"], None) else "vit1d",
         "input_spec": {
             "channels": len(sensor_cols),
             "time_steps": T,
@@ -90,14 +149,28 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
     
     if objective_type == "supervised":
         # Supervised: encoder + LinearHead, auto-discover classes from data
+        if bool(cfg_get(cfg, ["vit1d", "encoder", "alt_attention"], False)):
+            import logging as _logging
+            from imu_lm.models.ViT1D.model import ViT1DEncoderAltAttn
+            encoder = ViT1DEncoderAltAttn(cfg)
+            _logging.getLogger(__name__).info(
+                "[supervised] using alternating frame/global attention encoder (VGGT-style)")
         loaders = make_loaders(cfg)
         label_map = build_label_map(loaders["train_loader"], cfg)
         save_label_map(label_map, run_dir)
         raw_to_idx = label_map["raw_to_idx"]
         num_classes = label_map["num_classes"]
+        if (cfg_get(cfg, ['dual_stream'], None) or {}).get('enabled', False):
+            from imu_lm.models.ViT1D.model import build_dual_stream
+            encoder = build_dual_stream(cfg)      # two pretrained stems + gated fusion
+        encoder = maybe_stats_wrap(encoder, cfg)   # stats_concat diagnostic (no-op unless enabled)
         head = LinearHead(encoder.embed_dim, num_classes)
+        _sup_cw = None
+        if bool(cfg_get(cfg, ["objective", "supervised", "class_weighted_ce"], False)):
+            _c = torch.tensor(label_map["class_counts"], dtype=torch.float32)
+            _sup_cw = _c.sum() / (num_classes * _c.clamp(min=1)); _sup_cw = _sup_cw / _sup_cw.sum() * num_classes
         def objective_fn(batch, model, cfg):
-            return supervised_obj.forward_loss(batch, encoder, head, cfg, raw_to_idx=raw_to_idx)
+            return supervised_obj.forward_loss(batch, encoder, head, cfg, raw_to_idx=raw_to_idx, class_weights=_sup_cw)
         all_params = list(encoder.parameters()) + list(head.parameters())
     elif objective_type == "pose":
         # Pose regression: encoder + ViT1DPoseDecoder, [B, P_t, J*6]
@@ -110,6 +183,13 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
         num_patches_per_channel = T // patch_size
         num_joints              = int(pose_cfg.get("num_joints", 5))
         sub_patches             = int(dec_cfg.get("sub_patches", 1))
+
+        if bool(vit_cfg.get("encoder", {}).get("alt_attention", False)):
+            import logging as _logging
+            from imu_lm.models.ViT1D.model import ViT1DEncoderAltAttn
+            encoder = ViT1DEncoderAltAttn(cfg)
+            _logging.getLogger(__name__).info(
+                "[pose] using alternating frame/global attention encoder (VGGT-style)")
 
         _loader_type = str(pose_cfg.get("loader", "")).lower()
         if _loader_type == "flu":
@@ -124,6 +204,8 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
             from imu_lm.data.nymeria_syn_wrist_full_body_loader_global import make_nymeria_syn_wrist_full_body_loaders_global as _make_pose_loaders
         elif _loader_type == "nymeria_syn_wrist_full_body_flu":
             from imu_lm.data.nymeria_syn_wrist_full_body_loader_FLU import make_nymeria_syn_wrist_full_body_loaders_flu as _make_pose_loaders
+        elif _loader_type == "bones_seed_wrist_full_body_flu":
+            from imu_lm.data.bones_seed_wrist_full_body_loader_FLU import make_bones_seed_wrist_full_body_loaders_flu as _make_pose_loaders
         elif _loader_type == "imuposer_flu":
             from imu_lm.data.imuposer_wrist_loader_FLU import make_imuposer_wrist_flu_loaders as _make_pose_loaders
         elif _loader_type == "imuposer_flu_16hz_to_50hz":
@@ -145,6 +227,8 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
 
         def _expand_files(root, files_cfg):
             """Return a list of *absolute* .pkl paths."""
+            if _loader_type == "bones_seed_wrist_full_body_flu":
+                return files_cfg if files_cfg is not None else "all"
             if files_cfg is None or files_cfg == "all":
                 return sorted(_glob.glob(os.path.join(root, "*.pkl")))
             if isinstance(files_cfg, list):
@@ -155,7 +239,7 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
 
         train_files = _expand_files(train_pkl_root, pose_cfg.get("train_files"))
         _frac = pose_cfg.get("train_fraction")
-        if _frac is not None:
+        if _frac is not None and _loader_type != "bones_seed_wrist_full_body_flu":
             train_files = train_files[:max(1, int(len(train_files) * float(_frac)))]
         val_files   = _expand_files(val_pkl_root,   pose_cfg.get("val_files"))
 
@@ -188,7 +272,7 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
             _log = _logging.getLogger(__name__)
             _log.info("[pose] warm-starting encoder from %s (encoder stays trainable)", enc_ckpt_path)
             enc_state = torch.load(enc_ckpt_path, map_location="cpu", weights_only=False)
-            encoder.load_state_dict(_remap_encoder_state_dict(enc_state["model"]), strict=True)
+            _load_encoder_state_dict(encoder, enc_state)
 
         # Load SMPL body model for val MPJPE (fails silently if unavailable)
         _pose_body_model = None
@@ -222,7 +306,24 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
                 body_model=_pose_body_model, y_full_rot=y_full.float(), gt_pos=_gt_pos,
             )
         all_params = list(encoder.parameters()) + list(pose_decoder.parameters())
-        if _loader_type == "totalcapture_real_wrist_flu":
+        if _loader_type == "bones_seed_wrist_full_body_flu":
+            loaders = _make_pose_loaders(
+                cfg=cfg,
+                bvh_root=pose_cfg.get("bvh_root") or pose_cfg.get("train_bvh_root") or train_pkl_root,
+                train_files=pose_cfg.get("train_files", "all"),
+                val_files=pose_cfg.get("val_files"),
+                bones_seed_root=pose_cfg.get("bones_seed_root", "/projects/b53017/vbc1591/bones-seed"),
+                metadata_csv=pose_cfg.get("metadata_csv"),
+                target_hz=int(pose_cfg.get("target_hz", 50)),
+                add_gravity=bool(pose_cfg.get("add_gravity", True)),
+                wrist_joint=pose_cfg.get("wrist_joint"),
+                body_joints=pose_cfg.get("body_joints"),
+                bvh_scale=float(pose_cfg.get("bvh_scale", 0.01)),
+                tar_fallback=bool(pose_cfg.get("tar_fallback", True)),
+                max_train_sessions=pose_cfg.get("max_train_sessions"),
+                max_val_sessions=pose_cfg.get("max_val_sessions"),
+            )
+        elif _loader_type == "totalcapture_real_wrist_flu":
             from imu_lm.data.totalcapture_wrist_loader_FLU import make_totalcapture_real_wrist_loaders_flu as _make_tc
             _tc_root = pose_cfg.get("pkl_root") or train_pkl_root or "/mnt/nas2/DIP_recalculate"
             def _expand_tc_subjects(subjects):
@@ -323,9 +424,13 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
 
         import logging as _logging
         _log = _logging.getLogger(__name__)
+        if bool(cfg_get(cfg, ["vit1d", "encoder", "alt_attention"], False)):
+            from imu_lm.models.ViT1D.model import ViT1DEncoderAltAttn
+            encoder = ViT1DEncoderAltAttn(cfg)
+            _log.info("[pose_probe] using alternating frame/global attention encoder (VGGT-style)")
         _log.info("[pose_probe] loading pretrained encoder from %s", enc_ckpt_path)
         enc_state = torch.load(enc_ckpt_path, map_location="cpu", weights_only=False)
-        encoder.load_state_dict(_remap_encoder_state_dict(enc_state["model"]), strict=True)
+        _load_encoder_state_dict(encoder, enc_state)
         _log.info("[pose_probe] encoder loaded — freezing all encoder parameters")
 
         # Freeze encoder completely
@@ -345,6 +450,8 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
             from imu_lm.data.nymeria_syn_wrist_full_body_loader_global import make_nymeria_syn_wrist_full_body_loaders_global as _make_loaders
         elif _probe_loader_type == "nymeria_syn_wrist_full_body_flu":
             from imu_lm.data.nymeria_syn_wrist_full_body_loader_FLU import make_nymeria_syn_wrist_full_body_loaders_flu as _make_loaders
+        elif _probe_loader_type == "bones_seed_wrist_full_body_flu":
+            from imu_lm.data.bones_seed_wrist_full_body_loader_FLU import make_bones_seed_wrist_full_body_loaders_flu as _make_loaders
         elif _probe_loader_type == "imuposer_flu":
             from imu_lm.data.imuposer_wrist_loader_FLU import make_imuposer_wrist_flu_loaders as _make_loaders
         elif _probe_loader_type == "imuposer_flu_16hz_to_50hz":
@@ -362,6 +469,8 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
         val_pkl_root   = probe_cfg.get("val_pkl_root") or train_pkl_root
 
         def _expand_files(root, files_cfg):
+            if _probe_loader_type == "bones_seed_wrist_full_body_flu":
+                return files_cfg if files_cfg is not None else "all"
             if files_cfg is None or files_cfg == "all":
                 return sorted(_glob.glob(os.path.join(root, "*.pkl")))
             if isinstance(files_cfg, list):
@@ -370,7 +479,7 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
 
         train_files = _expand_files(train_pkl_root, probe_cfg.get("train_files"))
         _frac = probe_cfg.get("train_fraction")
-        if _frac is not None:
+        if _frac is not None and _probe_loader_type != "bones_seed_wrist_full_body_flu":
             train_files = train_files[:max(1, int(len(train_files) * float(_frac)))]
         val_files   = _expand_files(val_pkl_root,   probe_cfg.get("val_files"))
 
@@ -419,7 +528,24 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
 
         # Only decoder parameters are trainable
         all_params = list(pose_decoder.parameters())
-        if _probe_loader_type == "totalcapture_real_wrist_flu":
+        if _probe_loader_type == "bones_seed_wrist_full_body_flu":
+            loaders = _make_loaders(
+                cfg=cfg,
+                bvh_root=probe_cfg.get("bvh_root") or probe_cfg.get("train_bvh_root") or train_pkl_root,
+                train_files=probe_cfg.get("train_files", "all"),
+                val_files=probe_cfg.get("val_files"),
+                bones_seed_root=probe_cfg.get("bones_seed_root", "/projects/b53017/vbc1591/bones-seed"),
+                metadata_csv=probe_cfg.get("metadata_csv"),
+                target_hz=int(probe_cfg.get("target_hz", 50)),
+                add_gravity=bool(probe_cfg.get("add_gravity", True)),
+                wrist_joint=probe_cfg.get("wrist_joint"),
+                body_joints=probe_cfg.get("body_joints"),
+                bvh_scale=float(probe_cfg.get("bvh_scale", 0.01)),
+                tar_fallback=bool(probe_cfg.get("tar_fallback", True)),
+                max_train_sessions=probe_cfg.get("max_train_sessions"),
+                max_val_sessions=probe_cfg.get("max_val_sessions"),
+            )
+        elif _probe_loader_type == "totalcapture_real_wrist_flu":
             from imu_lm.data.totalcapture_wrist_loader_FLU import make_totalcapture_real_wrist_loaders_flu as _make_tc_p
             _tc_root_p = probe_cfg.get("pkl_root") or train_pkl_root or "/mnt/nas2/DIP_recalculate"
             def _expand_tc_subjects_p(subjects):
@@ -519,7 +645,7 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
         _log = _logging.getLogger(__name__)
         _log.info("[odom_probe] loading pretrained encoder from %s", enc_ckpt_path)
         enc_state = torch.load(enc_ckpt_path, map_location="cpu", weights_only=False)
-        encoder.load_state_dict(_remap_encoder_state_dict(enc_state["model"]), strict=True)
+        _load_encoder_state_dict(encoder, enc_state)
         _log.info("[odom_probe] encoder loaded — freezing all encoder parameters")
         encoder.requires_grad_(False)
         encoder.eval()
@@ -596,7 +722,7 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
         _log = _logging.getLogger(__name__)
         _log.info("[odom_finetune] warm-starting encoder from %s (encoder stays trainable)", enc_ckpt_path)
         enc_state = torch.load(enc_ckpt_path, map_location="cpu", weights_only=False)
-        encoder.load_state_dict(_remap_encoder_state_dict(enc_state["model"]), strict=True)
+        _load_encoder_state_dict(encoder, enc_state)
 
         from imu_lm.data.nymeria_wrist_odom_loader import make_nymeria_odom_loaders
 
@@ -659,7 +785,7 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
         _log = _logging.getLogger(__name__)
         _log.info("[odom_probe_imuposer_flu] loading pretrained encoder from %s", enc_ckpt_path)
         enc_state = torch.load(enc_ckpt_path, map_location="cpu", weights_only=False)
-        encoder.load_state_dict(_remap_encoder_state_dict(enc_state["model"]), strict=True)
+        _load_encoder_state_dict(encoder, enc_state)
         _log.info("[odom_probe_imuposer_flu] encoder loaded — freezing all encoder parameters")
         encoder.requires_grad_(False)
         encoder.eval()
@@ -735,7 +861,7 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
         _log = _logging.getLogger(__name__)
         _log.info("[odom_finetune_imuposer_flu] warm-starting encoder from %s (encoder stays trainable)", enc_ckpt_path)
         enc_state = torch.load(enc_ckpt_path, map_location="cpu", weights_only=False)
-        encoder.load_state_dict(_remap_encoder_state_dict(enc_state["model"]), strict=True)
+        _load_encoder_state_dict(encoder, enc_state)
 
         from imu_lm.data.imuposer_wrist_odom_loader_FLU import make_imuposer_odom_flu_loaders
 
@@ -821,6 +947,14 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
         patch_size              = int(vit_cfg_.get("patch_size", 16))
         num_patches_per_channel = T // patch_size
 
+        if bool(vit_cfg_.get("encoder", {}).get("alt_attention", False)):
+            import logging as _logging
+            from imu_lm.models.ViT1D.model import ViT1DEncoderAltAttn
+            encoder = ViT1DEncoderAltAttn(cfg)
+            _logging.getLogger(__name__).info(
+                "[odom_nymeria_real_wrist_flu] using alternating frame/global "
+                "attention encoder (VGGT-style)")
+
         from imu_lm.data.nymeria_real_wrist_odom_loader_FLU import make_nymeria_real_wrist_odom_loaders_flu
 
         train_pkl_root = odom_rw_cfg.get("train_pkl_root")
@@ -862,6 +996,188 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
             add_gravity=bool(odom_rw_cfg.get("add_gravity", True)),
         )
 
+    elif objective_type == "odom_nymeria_real_wrist_worldframe_flu":
+        # Odometry regression using REAL wrist IMU (FLU frame) -> per-patch
+        # CANONICAL WORLD-FRAME velocity [B, Pt, 4, 3]. See
+        # nymeria_real_wrist_odom_worldframe_loader_FLU.py: each window is
+        # rotated once about the vertical axis so its own net displacement
+        # points along +X (heading canonicalization derived from movement
+        # direction, since pelvis body orientation isn't available -- only
+        # position). Unlike odom_nymeria_real_wrist_flu (continuously
+        # re-referenced to the wrist's own rotating orientation, needing gyro
+        # integration to reconstruct), this frame is fixed per window, so
+        # reconstruction at eval time is a plain velocity cumulative sum.
+        # Label flattened to [B, Pt, 12]. Encoder + odom decoder both trained
+        # from scratch (fully supervised).
+        import glob as _glob
+        odom_wf_cfg = cfg_get(cfg, ["objective", "odom_nymeria_real_wrist_worldframe_flu"], {}) or {}
+        vit_cfg_    = cfg_get(cfg, ["vit1d"], {}) or {}
+        patch_size              = int(vit_cfg_.get("patch_size", 16))
+        num_patches_per_channel = T // patch_size
+
+        if bool(vit_cfg_.get("encoder", {}).get("alt_attention", False)):
+            import logging as _logging
+            from imu_lm.models.ViT1D.model import ViT1DEncoderAltAttn
+            encoder = ViT1DEncoderAltAttn(cfg)
+            _logging.getLogger(__name__).info(
+                "[odom_nymeria_real_wrist_worldframe_flu] using alternating frame/global "
+                "attention encoder (VGGT-style)")
+
+        from imu_lm.data.nymeria_real_wrist_odom_worldframe_loader_FLU import (
+            make_nymeria_real_wrist_odom_worldframe_loaders_flu,
+        )
+
+        train_pkl_root = odom_wf_cfg.get("train_pkl_root")
+        val_pkl_root   = odom_wf_cfg.get("val_pkl_root") or train_pkl_root
+
+        def _expand_files(root, files_cfg):
+            if files_cfg is None or files_cfg == "all":
+                return sorted(_glob.glob(os.path.join(root, "*.pkl")))
+            if isinstance(files_cfg, list):
+                return [f if os.path.isabs(f) else os.path.join(root, f) for f in files_cfg]
+            return [files_cfg if os.path.isabs(files_cfg) else os.path.join(root, files_cfg)]
+
+        train_files = _expand_files(train_pkl_root, odom_wf_cfg.get("train_files"))
+        _frac = odom_wf_cfg.get("train_fraction")
+        if _frac is not None:
+            train_files = train_files[:max(1, int(len(train_files) * float(_frac)))]
+        val_files   = _expand_files(val_pkl_root,   odom_wf_cfg.get("val_files"))
+
+        odom_decoder = ViT1DOdomDecoder(
+            embed_dim=encoder.embed_dim,
+            num_patches_per_channel=num_patches_per_channel,
+            in_channels=encoder.in_channels,
+            cfg=cfg,
+            out_dim=12,   # 4 sub-patches × 3D canonical-world-frame velocity
+        )
+
+        def objective_fn(batch, model, cfg):
+            x, y = batch[0], batch[1]   # batch[2] (R_canon) unused for training loss
+            y_flat = y.reshape(y.shape[0], y.shape[1], -1)
+            return odom_1d_obj.forward_loss((x, y_flat), encoder, odom_decoder, cfg)
+
+        all_params = list(encoder.parameters()) + list(odom_decoder.parameters())
+        loaders = make_nymeria_real_wrist_odom_worldframe_loaders_flu(
+            cfg=cfg,
+            pkl_root="/",
+            train_files=train_files,
+            val_files=val_files,
+            add_gravity=bool(odom_wf_cfg.get("add_gravity", True)),
+        )
+
+    elif objective_type == "odom_finetune_nymeria_real_wrist_worldframe_flu":
+        # Warm-started encoder (stays trainable) + trainable ViT1DOdomDecoder on
+        # Nymeria pelvis motion, CANONICAL WORLD-FRAME target. Sibling to
+        # odom_finetune_nymeria_real_wrist_flu (same warm-start pattern), but uses
+        # the world-frame loader/label convention of
+        # odom_nymeria_real_wrist_worldframe_flu (heading canonicalized per-window
+        # from movement direction; no gyro integration needed at eval time).
+        import glob as _glob
+        odom_wf_ft_cfg = cfg_get(cfg, ["objective", "odom_finetune_nymeria_real_wrist_worldframe_flu"], {}) or {}
+        vit_cfg_  = cfg_get(cfg, ["vit1d"], {}) or {}
+        patch_size              = int(vit_cfg_.get("patch_size", 16))
+        num_patches_per_channel = T // patch_size
+
+        if bool(vit_cfg_.get("encoder", {}).get("alt_attention", False)):
+            import logging as _logging
+            from imu_lm.models.ViT1D.model import ViT1DEncoderAltAttn
+            encoder = ViT1DEncoderAltAttn(cfg)
+            _logging.getLogger(__name__).info(
+                "[odom_finetune_nymeria_real_wrist_worldframe_flu] using alternating "
+                "frame/global attention encoder (VGGT-style)")
+
+        # ---- warm-start encoder (stays trainable) ----------------------------
+        pretrained_run  = odom_wf_ft_cfg.get("pretrained_run")
+        pretrained_ckpt = odom_wf_ft_cfg.get("pretrained_ckpt", "best")
+        if not pretrained_run:
+            raise ValueError(
+                "[odom_finetune_nymeria_real_wrist_worldframe_flu] 'pretrained_run' must be set"
+            )
+        runs_root = cfg_get(cfg, ["paths", "runs_root"], "runs")
+        if pretrained_ckpt in ("best", "latest"):
+            enc_ckpt_path = os.path.join(runs_root, pretrained_run,
+                                         "checkpoints", f"{pretrained_ckpt}.pt")
+        else:
+            enc_ckpt_path = pretrained_ckpt
+        if not os.path.exists(enc_ckpt_path):
+            raise FileNotFoundError(
+                f"[odom_finetune_nymeria_real_wrist_worldframe_flu] pretrained encoder "
+                f"checkpoint not found: {enc_ckpt_path}"
+            )
+        import logging as _logging
+        _log = _logging.getLogger(__name__)
+        _log.info("[odom_finetune_nymeria_real_wrist_worldframe_flu] warm-starting encoder "
+                   "from %s (encoder stays trainable)", enc_ckpt_path)
+        enc_state = torch.load(enc_ckpt_path, map_location="cpu", weights_only=False)
+        _load_encoder_state_dict(encoder, enc_state)
+        # IMU-Bench: `freeze_encoder: true` turns this branch into the frozen
+        # world-frame odometry PROBE (same loader / decoder / label convention
+        # as the finetune, only the encoder is frozen) so probe and finetune
+        # rows share one code path and one window length.
+        _wf_freeze = bool(odom_wf_ft_cfg.get("freeze_encoder", False))
+        if _wf_freeze:
+            _log.info("[odom_finetune_nymeria_real_wrist_worldframe_flu] freeze_encoder=true -> "
+                      "encoder frozen (probe mode)")
+            encoder.requires_grad_(False)
+            encoder.eval()
+
+        from imu_lm.data.nymeria_real_wrist_odom_worldframe_loader_FLU import (
+            make_nymeria_real_wrist_odom_worldframe_loaders_flu,
+        )
+
+        train_pkl_root = odom_wf_ft_cfg.get("train_pkl_root")
+        val_pkl_root   = odom_wf_ft_cfg.get("val_pkl_root") or train_pkl_root
+
+        def _expand_files(root, files_cfg):
+            if files_cfg is None or files_cfg == "all":
+                return sorted(_glob.glob(os.path.join(root, "*.pkl")))
+            if isinstance(files_cfg, list):
+                return [f if os.path.isabs(f) else os.path.join(root, f) for f in files_cfg]
+            return [files_cfg if os.path.isabs(files_cfg) else os.path.join(root, files_cfg)]
+
+        train_files = _expand_files(train_pkl_root, odom_wf_ft_cfg.get("train_files"))
+        _frac = odom_wf_ft_cfg.get("train_fraction")
+        if _frac is not None:
+            train_files = train_files[:max(1, int(len(train_files) * float(_frac)))]
+        val_files   = _expand_files(val_pkl_root,   odom_wf_ft_cfg.get("val_files"))
+
+        odom_decoder = ViT1DOdomDecoder(
+            embed_dim=encoder.embed_dim,
+            num_patches_per_channel=num_patches_per_channel,
+            in_channels=encoder.in_channels,
+            cfg=cfg,
+            out_dim=12,   # 4 sub-patches × 3D canonical-world-frame velocity
+        )
+
+        if _wf_freeze:
+            def objective_fn(batch, model, cfg):
+                encoder.eval()
+                x, y = batch[0], batch[1]
+                y_flat = y.reshape(y.shape[0], y.shape[1], -1).float()
+                with torch.no_grad():
+                    tokens, _ = encoder.forward_tokens(x.float())
+                pred = odom_decoder(tokens)
+                loss = torch.nn.functional.mse_loss(pred, y_flat)
+                with torch.no_grad():
+                    mae = (pred.detach() - y_flat).abs().mean()
+                return loss, {"loss": float(loss.detach()),
+                              "odom_mse": float(loss.detach()),
+                              "odom_mae": float(mae)}
+            all_params = list(odom_decoder.parameters())
+        else:
+            def objective_fn(batch, model, cfg):
+                x, y = batch[0], batch[1]   # batch[2] (R_canon) unused for training loss
+                y_flat = y.reshape(y.shape[0], y.shape[1], -1)
+                return odom_1d_obj.forward_loss((x, y_flat), encoder, odom_decoder, cfg)
+            all_params = list(encoder.parameters()) + list(odom_decoder.parameters())
+        loaders = make_nymeria_real_wrist_odom_worldframe_loaders_flu(
+            cfg=cfg,
+            pkl_root="/",
+            train_files=train_files,
+            val_files=val_files,
+            add_gravity=bool(odom_wf_ft_cfg.get("add_gravity", True)),
+        )
+
     elif objective_type == "odom_probe_nymeria_real_wrist_flu":
         # Frozen pretrained encoder + trainable ViT1DOdomDecoder on Nymeria real wrist FLU data.
         # Encoder loaded from a pretrained run (e.g. full-body pose supervised); all encoder params frozen.
@@ -870,6 +1186,14 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
         vit_cfg_  = cfg_get(cfg, ["vit1d"], {}) or {}
         patch_size              = int(vit_cfg_.get("patch_size", 16))
         num_patches_per_channel = T // patch_size
+
+        if bool(vit_cfg_.get("encoder", {}).get("alt_attention", False)):
+            import logging as _logging
+            from imu_lm.models.ViT1D.model import ViT1DEncoderAltAttn
+            encoder = ViT1DEncoderAltAttn(cfg)
+            _logging.getLogger(__name__).info(
+                "[odom_probe_nymeria_real_wrist_flu] using alternating frame/global "
+                "attention encoder (VGGT-style)")
 
         # ---- load & freeze pretrained encoder --------------------------------
         pretrained_run  = odom_probe_rw_cfg.get("pretrained_run")
@@ -890,7 +1214,7 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
         _log = _logging.getLogger(__name__)
         _log.info("[odom_probe_nymeria_real_wrist_flu] loading pretrained encoder from %s", enc_ckpt_path)
         enc_state = torch.load(enc_ckpt_path, map_location="cpu", weights_only=False)
-        encoder.load_state_dict(_remap_encoder_state_dict(enc_state["model"]), strict=True)
+        _load_encoder_state_dict(encoder, enc_state)
         _log.info("[odom_probe_nymeria_real_wrist_flu] encoder loaded — freezing all encoder parameters")
         encoder.requires_grad_(False)
         encoder.eval()
@@ -954,6 +1278,14 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
         patch_size              = int(vit_cfg_.get("patch_size", 16))
         num_patches_per_channel = T // patch_size
 
+        if bool(vit_cfg_.get("encoder", {}).get("alt_attention", False)):
+            import logging as _logging
+            from imu_lm.models.ViT1D.model import ViT1DEncoderAltAttn
+            encoder = ViT1DEncoderAltAttn(cfg)
+            _logging.getLogger(__name__).info(
+                "[odom_finetune_nymeria_real_wrist_flu] using alternating frame/global "
+                "attention encoder (VGGT-style)")
+
         # ---- warm-start encoder (stays trainable) ----------------------------
         pretrained_run  = odom_ft_rw_cfg.get("pretrained_run")
         pretrained_ckpt = odom_ft_rw_cfg.get("pretrained_ckpt", "best")
@@ -973,7 +1305,7 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
         _log = _logging.getLogger(__name__)
         _log.info("[odom_finetune_nymeria_real_wrist_flu] warm-starting encoder from %s (encoder stays trainable)", enc_ckpt_path)
         enc_state = torch.load(enc_ckpt_path, map_location="cpu", weights_only=False)
-        encoder.load_state_dict(_remap_encoder_state_dict(enc_state["model"]), strict=True)
+        _load_encoder_state_dict(encoder, enc_state)
 
         from imu_lm.data.nymeria_real_wrist_odom_loader_FLU import make_nymeria_real_wrist_odom_loaders_flu
 
@@ -1088,7 +1420,7 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
         _log = _logging.getLogger(__name__)
         _log.info("[odom_probe_nymeria_syn_wrist_flu] loading encoder from %s", enc_ckpt_path)
         enc_state = torch.load(enc_ckpt_path, map_location="cpu", weights_only=False)
-        encoder.load_state_dict(_remap_encoder_state_dict(enc_state["model"]), strict=True)
+        _load_encoder_state_dict(encoder, enc_state)
         _log.info("[odom_probe_nymeria_syn_wrist_flu] freezing encoder")
         encoder.requires_grad_(False)
         encoder.eval()
@@ -1164,7 +1496,7 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
         _log = _logging.getLogger(__name__)
         _log.info("[odom_finetune_nymeria_syn_wrist_flu] warm-starting encoder from %s", enc_ckpt_path)
         enc_state = torch.load(enc_ckpt_path, map_location="cpu", weights_only=False)
-        encoder.load_state_dict(_remap_encoder_state_dict(enc_state["model"]), strict=True)
+        _load_encoder_state_dict(encoder, enc_state)
 
         train_pkl_root = odom_ft_syn_cfg.get("train_pkl_root")
         val_pkl_root   = odom_ft_syn_cfg.get("val_pkl_root") or train_pkl_root
@@ -1452,7 +1784,7 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
         _log = _logging.getLogger(__name__)
         _log.info("[local_vel_probe_imuposer_flu] loading pretrained encoder from %s", enc_ckpt_path)
         enc_state = torch.load(enc_ckpt_path, map_location="cpu", weights_only=False)
-        encoder.load_state_dict(_remap_encoder_state_dict(enc_state["model"]), strict=True)
+        _load_encoder_state_dict(encoder, enc_state)
         _log.info("[local_vel_probe_imuposer_flu] encoder loaded — freezing all encoder parameters")
         encoder.requires_grad_(False)
         encoder.eval()
@@ -1529,7 +1861,7 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
         _log = _logging.getLogger(__name__)
         _log.info("[local_vel_finetune_imuposer_flu] warm-starting encoder from %s (encoder stays trainable)", enc_ckpt_path)
         enc_state = torch.load(enc_ckpt_path, map_location="cpu", weights_only=False)
-        encoder.load_state_dict(_remap_encoder_state_dict(enc_state["model"]), strict=True)
+        _load_encoder_state_dict(encoder, enc_state)
 
         train_pkl_root = lv_ft_cfg.get("train_pkl_root")
         val_pkl_root   = lv_ft_cfg.get("val_pkl_root") or train_pkl_root
@@ -1647,7 +1979,7 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
         _log = _logging.getLogger(__name__)
         _log.info("[odom_probe_totalcapture_flu] loading pretrained encoder from %s", enc_ckpt_path)
         enc_state = torch.load(enc_ckpt_path, map_location="cpu", weights_only=False)
-        encoder.load_state_dict(_remap_encoder_state_dict(enc_state["model"]), strict=True)
+        _load_encoder_state_dict(encoder, enc_state)
         _log.info("[odom_probe_totalcapture_flu] encoder loaded — freezing all encoder parameters")
         encoder.requires_grad_(False)
         encoder.eval()
@@ -1731,7 +2063,7 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
         _log = _logging.getLogger(__name__)
         _log.info("[odom_finetune_totalcapture_flu] warm-starting encoder from %s (encoder stays trainable)", enc_ckpt_path)
         enc_state = torch.load(enc_ckpt_path, map_location="cpu", weights_only=False)
-        encoder.load_state_dict(_remap_encoder_state_dict(enc_state["model"]), strict=True)
+        _load_encoder_state_dict(encoder, enc_state)
 
         _tc_pkl_root = odom_ft_tc_cfg.get("pkl_root") or "/mnt/nas2/DIP_recalculate"
 
@@ -1858,6 +2190,14 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
         # Pose labels from the loader are discarded — only x is used.
         from imu_lm.data.nymeria_real_wrist_loader_FLU import make_nymeria_real_wrist_loaders_flu
         import glob as _glob
+
+        if bool(cfg_get(cfg, ["vit1d", "encoder", "alt_attention"], False)):
+            import logging as _logging
+            from imu_lm.models.ViT1D.model import ViT1DEncoderAltAttn
+            encoder = ViT1DEncoderAltAttn(cfg)
+            _logging.getLogger(__name__).info(
+                "[mae_nymeria_real_wrist_flu] using alternating frame/global "
+                "attention encoder (VGGT-style)")
 
         mae_rw_cfg     = cfg_get(cfg, ["objective", "mae_nymeria_real_wrist_flu"], {}) or {}
         train_pkl_root = mae_rw_cfg.get("train_pkl_root")
@@ -2286,7 +2626,7 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
             _log = _logging.getLogger(__name__)
             _log.info("[imu_text_clip] warm-starting encoder from %s", enc_ckpt_path)
             enc_state = torch.load(enc_ckpt_path, map_location="cpu", weights_only=False)
-            encoder.load_state_dict(_remap_encoder_state_dict(enc_state["model"]), strict=True)
+            _load_encoder_state_dict(encoder, enc_state)
 
         if freeze_imu:
             encoder.requires_grad_(False)
@@ -2351,6 +2691,7 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
         text_cache_path = clip_cfg.get("text_cache_path", None)
         use_text_mlp    = bool(clip_cfg.get("text_projection_mlp", False))
         text_mlp_hidden = clip_cfg.get("text_mlp_hidden_dim", None)
+        train_split_name = clip_cfg.get("train_split_name", "train")
 
         if not humanml3d_root:
             raise ValueError("[imu_text_clip_flu] 'humanml3d_root' must be set in objective.imu_text_clip_flu")
@@ -2371,6 +2712,13 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
             _log2.info("[imu_text_clip_flu] cache loaded: %d captions", len(text_emb_cache))
 
         # -- warm-start IMU encoder ------------------------------------------
+        import logging as _logging
+        _log = _logging.getLogger(__name__)
+        if bool(cfg_get(cfg, ["vit1d", "encoder", "alt_attention"], False)):
+            from imu_lm.models.ViT1D.model import ViT1DEncoderAltAttn
+            encoder = ViT1DEncoderAltAttn(cfg)
+            _log.info("[imu_text_clip_flu] using alternating frame/global attention "
+                      "encoder (VGGT-style)")
         if pretrained_run:
             if pretrained_ckpt in ("best", "latest"):
                 enc_ckpt_path = os.path.join(runs_root, pretrained_run,
@@ -2381,11 +2729,236 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
                 raise FileNotFoundError(
                     f"[imu_text_clip_flu] pretrained encoder checkpoint not found: {enc_ckpt_path}"
                 )
-            import logging as _logging
-            _log = _logging.getLogger(__name__)
             _log.info("[imu_text_clip_flu] warm-starting encoder from %s", enc_ckpt_path)
             enc_state = torch.load(enc_ckpt_path, map_location="cpu", weights_only=False)
-            encoder.load_state_dict(_remap_encoder_state_dict(enc_state["model"]), strict=True)
+            _load_encoder_state_dict(encoder, enc_state)
+
+        if freeze_imu:
+            encoder.requires_grad_(False)
+            encoder.eval()
+
+        # -- CLIP projection head (trained) -----------------------------------
+        # init_temperature / freeze_logit_scale (2026-08-15, retrieval-tuning
+        # sweep): optional override of the learnable temperature. Default
+        # (None / False) keeps CLIP's tau=0.07 init and learnable scale, i.e.
+        # every pre-existing config is unchanged.
+        _init_tau = clip_cfg.get("init_temperature", None)
+        _head_kwargs = {}
+        if _init_tau is not None:
+            import math as _math
+            _head_kwargs["init_logit_scale"] = float(_math.log(1.0 / float(_init_tau)))
+        clip_head = ContrastiveCLIPHead(
+            imu_embed_dim  = encoder.embed_dim,
+            clip_embed_dim = clip_embed_dim,
+            **_head_kwargs,
+        )
+        if bool(clip_cfg.get("freeze_logit_scale", False)):
+            clip_head.logit_scale.requires_grad_(False)
+
+        # -- CLIP text encoder (frozen by default) ----------------------------
+        local_files = bool(clip_cfg.get("local_files_only", False))
+        if text_emb_cache is not None and freeze_text:
+            text_encoder = None   # cache fully replaces the online encoder
+        else:
+            text_encoder = CLIPTextEncoder(
+                model_name       = clip_model,
+                freeze           = freeze_text,
+                local_files_only = local_files,
+                # text_projection (2026-07-28): apply CLIP's learned text
+                # projection (official CLIP / UniMTS convention) instead of
+                # the legacy bare pooler_output -- see CLIPTextEncoder.
+                # Default False so every pre-existing config/checkpoint
+                # keeps its original (pooler_output-space) behavior.
+                use_projection   = bool(clip_cfg.get("text_projection", False)),
+            )
+        # text_train_last_n_layers (2026-08-15): with freeze_text_encoder:
+        # false, optionally keep only the LAST n transformer layers (+ final
+        # LN + text_projection) of the CLIP text tower trainable and freeze
+        # embeddings + the remaining layers. None/absent = whole tower
+        # trainable (unchanged behaviour).
+        _text_last_n = clip_cfg.get("text_train_last_n_layers", None)
+        if (not freeze_text) and text_encoder is not None and _text_last_n is not None:
+            _text_last_n = int(_text_last_n)
+            _tm = text_encoder.model
+            _n_layers = len(_tm.text_model.encoder.layers)
+            for _p in _tm.parameters():
+                _p.requires_grad_(False)
+            for _lyr in _tm.text_model.encoder.layers[max(0, _n_layers - _text_last_n):]:
+                for _p in _lyr.parameters():
+                    _p.requires_grad_(True)
+            for _p in _tm.text_model.final_layer_norm.parameters():
+                _p.requires_grad_(True)
+            if getattr(_tm, "text_projection", None) is not None:
+                for _p in _tm.text_projection.parameters():
+                    _p.requires_grad_(True)
+            _log.info("[imu_text_clip_flu] text tower: training last %d/%d layers "
+                      "(+final LN, text_projection); %d/%d params trainable",
+                      _text_last_n, _n_layers,
+                      sum(p.numel() for p in _tm.parameters() if p.requires_grad),
+                      sum(p.numel() for p in _tm.parameters()))
+
+        # -- text-side MLP projection (trainable, optional) -----------------
+        text_mlp = None
+        if use_text_mlp:
+            text_mlp = TextProjectionMLP(
+                embed_dim  = clip_embed_dim,
+                hidden_dim = text_mlp_hidden,
+            )
+
+        def objective_fn(batch, model, cfg):
+            return clip_obj.forward_loss(batch, encoder, clip_head, text_encoder, cfg,
+                                         text_mlp=text_mlp)
+
+        # Optimizer parameter groups (2026-08-15, retrieval-tuning sweep).
+        # Optional keys under objective.imu_text_clip_flu -- ALL default to
+        # the legacy single-group behaviour when absent:
+        #   text_lr_mult   : LR multiplier for the CLIP text tower (default 1.0)
+        #   head_lr_mult   : LR multiplier for clip_head (+text_mlp) (default 1.0)
+        #   layer_decay    : layer-wise LR decay for the IMU encoder
+        #                    (BEiT/MAE-style; block depth d in 1..D gets
+        #                    lr * layer_decay**(D+1-d), embeddings get
+        #                    lr * layer_decay**(D+1); default 1.0 = off)
+        #   no_decay_norm_bias : exclude 1-D params (norms, biases, tokens,
+        #                    logit_scale) from weight decay (default false)
+        _text_lr_mult = float(clip_cfg.get("text_lr_mult", 1.0))
+        _head_lr_mult = float(clip_cfg.get("head_lr_mult", 1.0))
+        _layer_decay  = float(clip_cfg.get("layer_decay", 1.0))
+        _no_decay_1d  = bool(clip_cfg.get("no_decay_norm_bias", False))
+        _use_groups = (_text_lr_mult != 1.0 or _head_lr_mult != 1.0
+                       or _layer_decay != 1.0 or _no_decay_1d)
+        if not _use_groups:
+            if freeze_imu:
+                all_params = list(clip_head.parameters())
+            else:
+                all_params = list(encoder.parameters()) + list(clip_head.parameters())
+            if not freeze_text and text_encoder is not None:
+                all_params += list(text_encoder.model.parameters())
+            if text_mlp is not None:
+                all_params += list(text_mlp.parameters())
+        else:
+            import re as _re
+            _base_lr = float(cfg_get(cfg, ["trainer", "optim", "lr"], cfg_get(cfg, ["trainer", "lr"], 1e-4)))
+            _base_wd = float(cfg_get(cfg, ["trainer", "optim", "weight_decay"], cfg_get(cfg, ["trainer", "weight_decay"], 0.0)))
+            _groups = {}
+            def _add(name, p, lr_mult):
+                if not p.requires_grad:
+                    return
+                wd = 0.0 if (_no_decay_1d and p.ndim <= 1) else _base_wd
+                key = (round(lr_mult, 8), wd)
+                g = _groups.setdefault(key, {"params": [], "lr": _base_lr * lr_mult,
+                                             "weight_decay": wd, "lr_mult": lr_mult})
+                g["params"].append(p)
+            if not freeze_imu:
+                _depths = [int(m.group(2)) for n, _ in encoder.named_parameters()
+                           for m in [_re.match(r"(frame_blocks|global_blocks|blocks|layers)\.(\d+)\.", n)] if m]
+                _D = (max(_depths) + 1) if _depths else 0
+                for n, p in encoder.named_parameters():
+                    m = _re.match(r"(frame_blocks|global_blocks|blocks|layers)\.(\d+)\.", n)
+                    if _layer_decay == 1.0 or _D == 0:
+                        mult = 1.0
+                    elif m:
+                        d = int(m.group(2)) + 1                     # 1..D
+                        mult = _layer_decay ** (_D + 1 - d)
+                    elif n.startswith(("norm.", "cls_norm.")):
+                        mult = 1.0                                   # top of the stack
+                    else:
+                        mult = _layer_decay ** (_D + 1)              # embeddings / tokens
+                    _add(n, p, mult)
+            for n, p in clip_head.named_parameters():
+                _add("clip_head." + n, p, _head_lr_mult)
+            if not freeze_text and text_encoder is not None:
+                for n, p in text_encoder.model.named_parameters():
+                    _add("text." + n, p, _text_lr_mult)
+            if text_mlp is not None:
+                for n, p in text_mlp.named_parameters():
+                    _add("text_mlp." + n, p, _head_lr_mult)
+            all_params = list(_groups.values())
+            _log.info("[imu_text_clip_flu] optimizer param groups: %s",
+                      "; ".join(f"lr={g['lr']:.2e} wd={g['weight_decay']:.3g} n={sum(p.numel() for p in g['params'])}"
+                                for g in all_params))
+
+        loaders = make_humanml3d_imu_loaders_flu(
+            root             = humanml3d_root,
+            cfg              = cfg,
+            text_emb_cache   = text_emb_cache,
+            train_split_name = train_split_name,
+        )
+
+    elif objective_type == "imu_text_clip_nymeria_flu":
+        # CLIP-style contrastive pretraining: real-wrist FLU IMU ↔ text on
+        # Nymeria's own motion-narration captions (downloaded via
+        # scripts/download_nymeria_captions.py). Same machinery as
+        # imu_text_clip_flu (HumanML3D) — ContrastiveCLIPHead/CLIPTextEncoder/
+        # TextProjectionMLP/info_nce_loss — swapping in
+        # nymeria_caption_dataset_FLU's real-wrist-IMU-plus-caption-segment
+        # loader instead of HumanML3D's synthetic-IMU-plus-whole-clip-caption
+        # loader. Unlike HumanML3D, captions are real human narrations of a
+        # real recorded IMU signal (no AMASS/SMPL synthesis involved).
+        from imu_lm.objectives.contrastive_clip_1d import (
+            ContrastiveCLIPHead, CLIPTextEncoder, TextProjectionMLP
+        )
+        import imu_lm.objectives.contrastive_clip_1d as clip_obj
+        from imu_lm.data.nymeria_caption_dataset_FLU import make_nymeria_caption_imu_loaders_flu
+
+        clip_cfg        = cfg_get(cfg, ["objective", "imu_text_clip_nymeria_flu"], {}) or {}
+        runs_root       = cfg_get(cfg, ["paths", "runs_root"], "runs")
+        pretrained_run  = clip_cfg.get("pretrained_run")
+        pretrained_ckpt = clip_cfg.get("pretrained_ckpt", "best")
+        captions_root   = clip_cfg.get("captions_root")
+        train_pkl_root  = clip_cfg.get("train_pkl_root")
+        val_pkl_root    = clip_cfg.get("val_pkl_root")
+        clip_model      = clip_cfg.get("clip_model", "openai/clip-vit-base-patch32")
+        clip_embed_dim  = int(clip_cfg.get("clip_embed_dim", 512))
+        freeze_imu      = bool(clip_cfg.get("freeze_imu_encoder", False))
+        freeze_text     = bool(clip_cfg.get("freeze_text_encoder", True))
+        text_cache_path = clip_cfg.get("text_cache_path", None)
+        use_text_mlp    = bool(clip_cfg.get("text_projection_mlp", False))
+        text_mlp_hidden = clip_cfg.get("text_mlp_hidden_dim", None)
+        caption_source  = clip_cfg.get("caption_source", "motion_narration")
+        imu_source      = clip_cfg.get("imu_source", "real")
+
+        if not captions_root or not train_pkl_root or not val_pkl_root:
+            raise ValueError(
+                "[imu_text_clip_nymeria_flu] 'captions_root', 'train_pkl_root', and "
+                "'val_pkl_root' must all be set in objective.imu_text_clip_nymeria_flu"
+            )
+
+        # -- load pre-cached text embeddings (optional) ----------------------
+        text_emb_cache = None
+        if text_cache_path:
+            import logging as _logging2n
+            _log2n = _logging2n.getLogger(__name__)
+            if not os.path.exists(text_cache_path):
+                raise FileNotFoundError(
+                    f"[imu_text_clip_nymeria_flu] text_cache_path not found: {text_cache_path}\n"
+                    "Run:  python scripts/cache_clip_text_embeddings_nymeria.py "
+                    f"--captions-root {captions_root} --out {text_cache_path}"
+                )
+            _log2n.info("[imu_text_clip_nymeria_flu] loading pre-cached text embeddings from %s", text_cache_path)
+            text_emb_cache = torch.load(text_cache_path, map_location="cpu", weights_only=False)
+            _log2n.info("[imu_text_clip_nymeria_flu] cache loaded: %d captions", len(text_emb_cache))
+
+        # -- warm-start IMU encoder ------------------------------------------
+        import logging as _logging_n
+        _log_n = _logging_n.getLogger(__name__)
+        if bool(cfg_get(cfg, ["vit1d", "encoder", "alt_attention"], False)):
+            from imu_lm.models.ViT1D.model import ViT1DEncoderAltAttn
+            encoder = ViT1DEncoderAltAttn(cfg)
+            _log_n.info("[imu_text_clip_nymeria_flu] using alternating frame/global attention "
+                        "encoder (VGGT-style)")
+        if pretrained_run:
+            if pretrained_ckpt in ("best", "latest"):
+                enc_ckpt_path = os.path.join(runs_root, pretrained_run,
+                                             "checkpoints", f"{pretrained_ckpt}.pt")
+            else:
+                enc_ckpt_path = pretrained_ckpt
+            if not os.path.exists(enc_ckpt_path):
+                raise FileNotFoundError(
+                    f"[imu_text_clip_nymeria_flu] pretrained encoder checkpoint not found: {enc_ckpt_path}"
+                )
+            _log_n.info("[imu_text_clip_nymeria_flu] warm-starting encoder from %s", enc_ckpt_path)
+            enc_state = torch.load(enc_ckpt_path, map_location="cpu", weights_only=False)
+            _load_encoder_state_dict(encoder, enc_state)
 
         if freeze_imu:
             encoder.requires_grad_(False)
@@ -2400,7 +2973,7 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
         # -- CLIP text encoder (frozen by default) ----------------------------
         local_files = bool(clip_cfg.get("local_files_only", False))
         if text_emb_cache is not None and freeze_text:
-            text_encoder = None   # cache fully replaces the online encoder
+            text_encoder = None
         else:
             text_encoder = CLIPTextEncoder(
                 model_name       = clip_model,
@@ -2429,10 +3002,14 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
         if text_mlp is not None:
             all_params += list(text_mlp.parameters())
 
-        loaders = make_humanml3d_imu_loaders_flu(
-            root           = humanml3d_root,
-            cfg            = cfg,
-            text_emb_cache = text_emb_cache,
+        loaders = make_nymeria_caption_imu_loaders_flu(
+            captions_root   = captions_root,
+            train_pkl_root  = train_pkl_root,
+            val_pkl_root    = val_pkl_root,
+            cfg             = cfg,
+            text_emb_cache  = text_emb_cache,
+            caption_source  = caption_source,
+            imu_source      = imu_source,
         )
 
     elif objective_type == "imu_text_clip_realdata":
@@ -2462,6 +3039,20 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
         pretrained_run   = rdc_cfg.get("pretrained_run", None)
         pretrained_ckpt  = rdc_cfg.get("pretrained_ckpt", "best")
 
+        # Bug fix (2026-07-24): this objective never checked alt_attention when
+        # constructing its own encoder, silently keeping the plain ViT1DEncoder
+        # assigned at the top of main() -- any warm-start from an
+        # alt_attention:true checkpoint (every checkpoint that matters in this
+        # benchmark) landed 100% of its weights in missing/unexpected instead
+        # of raising, so the "warm-started" encoder was actually
+        # near-randomly-initialized. Mirrors every other objective's own
+        # alt_attention check (e.g. utd_mhad_finetune, imu_text_clip_nymeria_flu).
+        if bool(cfg_get(cfg, ["vit1d", "encoder", "alt_attention"], False)):
+            from imu_lm.models.ViT1D.model import ViT1DEncoderAltAttn
+            encoder = ViT1DEncoderAltAttn(cfg)
+            _log_rdc.info("[imu_text_clip_realdata] using alternating frame/global "
+                          "attention encoder (VGGT-style)")
+
         # Optional: warm-start IMU encoder from a prior MAE/CLIP run
         if pretrained_run:
             runs_root = cfg_get(cfg, ["paths", "runs_root"], "runs")
@@ -2476,12 +3067,14 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
                 )
             _log_rdc.info("[imu_text_clip_realdata] warm-starting encoder from %s", _enc_ckpt)
             _enc_state = torch.load(_enc_ckpt, map_location="cpu", weights_only=False)
-            _missing, _unexpected = encoder.load_state_dict(_enc_state["model"], strict=False)
-            if _missing or _unexpected:
-                _log_rdc.warning(
-                    "[imu_text_clip_realdata] partial load — missing: %s  unexpected: %s",
-                    _missing, _unexpected,
-                )
+            # Routed through the shared helper (2026-07-28): this was the last
+            # warm-start path still doing a bare strict=False load with only a
+            # warning, and without _remap_encoder_state_dict. A key-name
+            # mismatch (e.g. an older checkpoint using self_attn.* names) would
+            # therefore leave the encoder essentially randomly initialized while
+            # the run logged "warm-starting encoder from ..." and continued --
+            # exactly the silent failure the helper was written to make loud.
+            _load_encoder_state_dict(encoder, _enc_state)
 
         if freeze_imu:
             encoder.requires_grad_(False)
@@ -2492,6 +3085,19 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
             imu_embed_dim  = encoder.embed_dim,
             clip_embed_dim = clip_embed_dim,
         )
+
+        # Bug fix (2026-07-25): pretrained_run only ever warm-started the
+        # encoder, never the paired clip_head it was jointly trained with in
+        # Stage 2 -- clip_head was always freshly (randomly) initialized here,
+        # then fit solely on the midtrain mix's narrow templated-caption
+        # vocabulary. Root-caused via a UTD-MHAD zero-shot collapse (model
+        # predicts the same class for ~100% of windows) that persisted even
+        # with freeze_imu_encoder:true, which ruled out encoder drift as the
+        # cause -- the fresh, narrowly-trained clip_head was the actual
+        # culprit. Warm-start it too when the checkpoint has one saved.
+        if pretrained_run and "clip_head" in _enc_state:
+            clip_head.load_state_dict(_enc_state["clip_head"], strict=True)
+            _log_rdc.info("[imu_text_clip_realdata] warm-starting clip_head from %s", _enc_ckpt)
 
         # Build data loaders (also constructs the id→text label map internally)
         loaders = make_realdata_clip_loaders(cfg, sentence_template=sentence_tmpl)
@@ -2954,6 +3560,172 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
                 collate_fn=_val_collate,
             ),
         }
+
+    elif objective_type == "mae_multidata_varlen_altattn_flu":
+        # Pretraining combining every IMU source available in this deployment:
+        #   realdata (parquet) + OCDetect + Nymeria real wrist + TotalCapture/DIP-IMU +
+        #   IMUPoser + EatingSpeed + Motion-X++ (synth) + AMASS/HumanML3D (synth) +
+        #   SONIC/bones-seed (synth) + Capture24 (acc-only).
+        # See imu_lm/data/combined_mae_multidata_loader.py for per-source details,
+        # on-disk paths, and the balanced/natural sampling + varlen-crop machinery
+        # (mirrors the two-source mae_realdata_ocdetect_flu objective above, generalised
+        # to N sources with per-source WeightedRandomSampler weighting).
+        #
+        # objective.mae_multidata_varlen_altattn_flu.ssl_method selects the
+        # pretext task on the SAME combined dataset (mirrors
+        # mae_realdata_ocdetect_flu's ssl_method switch):
+        #   mae (default) — masked_1d_freq_channel_mask, optionally alt-attn encoder.
+        #   simmtm / focal — baselines on the plain (non-alt-attn) ViT1DEncoder,
+        #     same encoder capacity as the "mae" arm, for a fair, controlled
+        #     "which SSL objective is best?" comparison (identical data + backbone
+        #     size; only the pretext task differs). NOTE: these vendored baseline
+        #     losses only read batch[0] (x) — they do not consume
+        #     channel_valid_mask, so capture24's zero-padded "gyro" channels are
+        #     treated as real signal for simmtm's reconstruction loss and focal's
+        #     gyro-modality contrastive term. This is a minor, accepted skew
+        #     (capture24 is a small, downweighted slice of the combined data),
+        #     not fixed here to avoid rewriting the vendored loss math.
+        import logging as _logging
+        from imu_lm.data.combined_mae_multidata_loader import make_combined_mae_multidata_loaders
+
+        _log = _logging.getLogger(__name__)
+        _var_len = bool(cfg_get(cfg, ["data", "variable_length", "enabled"], False))
+        _mm_cfg = cfg_get(cfg, ["objective", "mae_multidata_varlen_altattn_flu"], {}) or {}
+        _ssl_method = str(_mm_cfg.get("ssl_method", "mae")).lower()
+
+        if _ssl_method in ("simmtm", "focal", "relcon"):
+            from imu_lm.objectives import ssl_vit_baselines as _sslb
+            obj_blk = cfg_get(cfg, ["objective"], {}) or {}
+            _log.info("[mae_multidata_varlen_altattn_flu] SSL baseline on shared ViT1DEncoder: %s%s",
+                      _ssl_method, " (variable length)" if _var_len else "")
+            if _ssl_method == "simmtm":
+                decoder = _sslb.SimMTMHeadVarLen(
+                    embed_dim=encoder.embed_dim, patch_size=encoder.patch_size,
+                    proj_dim=int(obj_blk.get("proj_dim", 128)),
+                    temperature=float(obj_blk.get("temperature", 0.2)),
+                    positive_nums=int(obj_blk.get("positive_nums", 3)))
+                def objective_fn(batch, model, cfg):
+                    return _sslb.simmtm_forward_loss_varlen(batch, encoder, decoder, cfg)
+                all_params = list(encoder.parameters()) + list(decoder.parameters())
+            elif _ssl_method == "focal":
+                decoder = _sslb.FOCALHead(
+                    embed_dim=encoder.embed_dim,
+                    modalities=list(obj_blk.get("modalities", ["acc", "gyro"])),
+                    emb_dim=int(obj_blk.get("emb_dim", 128)))
+                def objective_fn(batch, model, cfg):
+                    return _sslb.focal_forward_loss(batch, encoder, decoder, cfg)
+                all_params = list(encoder.parameters()) + list(decoder.parameters())
+            else:  # relcon
+                # Stage 2 of the RelCon baseline (imu_lm/objectives/relcon_ssl.py) --
+                # trains the SAME shared ViT1DEncoder via RelCon's relative
+                # contrastive loss, using a FROZEN Stage-1 MotifDist distance
+                # network (trained separately via
+                # scripts/train_relcon_motifdist.py) to rank within-batch
+                # candidates. No learnable head beyond the encoder itself --
+                # `decoder` is a no-op placeholder only so the checkpointing
+                # dispatch below (which expects a `decoder` variable for this
+                # objective_type) has something harmless to save.
+                import torch.nn as nn
+                from imu_lm.objectives.relcon_ssl import MotifDistNet, relcon_forward_loss
+                motifdist_run = obj_blk.get("motifdist_run")
+                if not motifdist_run:
+                    raise ValueError("[mae_multidata_varlen_altattn_flu/relcon] "
+                                      "'objective.motifdist_run' must be set (read from the TOP-LEVEL "
+                                      "objective block, not objective.relcon.*)")
+                runs_root_ = cfg_get(cfg, ["paths", "runs_root"], "runs")
+                motifdist_ckpt_path = os.path.join(runs_root_, motifdist_run, "checkpoints", "best.pt")
+                motifdist_ckpt = torch.load(motifdist_ckpt_path, map_location="cpu", weights_only=False)
+                motifdist_net = MotifDistNet(
+                    in_channels=int(motifdist_ckpt.get("in_channels", 6)),
+                    embed_dim=int(motifdist_ckpt.get("embed_dim", 64)),
+                    kernel_size=int(motifdist_ckpt.get("kernel_size", 15)),
+                )
+                motifdist_net.load_state_dict(motifdist_ckpt["model"])
+                motifdist_net.requires_grad_(False)
+                motifdist_net.eval()
+                # NOTE: encoder is not moved to its final device until
+                # Trainer.fit() runs (after this dispatch block returns), so
+                # next(encoder.parameters()).device would be wrong here
+                # (still cpu) -- match Trainer's own device selection instead
+                # (imu_lm/runtime_consistency/trainer.py: self.device).
+                motifdist_net = motifdist_net.to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+                _log.info("[mae_multidata_varlen_altattn_flu/relcon] loaded frozen MotifDist "
+                          "from %s (step=%s)", motifdist_ckpt_path, motifdist_ckpt.get("step"))
+                decoder = nn.Identity()
+                def objective_fn(batch, model, cfg):
+                    return relcon_forward_loss(batch, encoder, motifdist_net, cfg)
+                all_params = list(encoder.parameters())
+
+            loaders = make_combined_mae_multidata_loaders(cfg)
+
+        else:
+            # MAE (default). Capture24 is accelerometer-only: its batches carry a
+            # per-sample channel_valid_mask (all channels valid except capture24's
+            # 3 fake gyro channels), consumed by masked_1d_freq_channel_mask (NOT
+            # the plain masked_1d_freq used by every other objective in this file)
+            # to force those channels to always be masked/hidden from the encoder
+            # and always excluded from the reconstruction loss.
+            from imu_lm.objectives import masked_1d_freq_channel_mask as freq_mae_obj
+
+            if bool(cfg_get(cfg, ["vit1d", "encoder", "alt_attention"], False)):
+                from imu_lm.models.ViT1D.model import ViT1DEncoderAltAttn
+                encoder = ViT1DEncoderAltAttn(cfg)
+                _log.info("[mae_multidata_varlen_altattn_flu] using alternating frame/global "
+                          "attention encoder (VGGT-style)%s",
+                          " (variable length)" if _var_len else "")
+
+            decoder = ViT1DDecoder(
+                embed_dim=encoder.embed_dim, out_channels=encoder.in_channels,
+                target_T=(0 if _var_len else T), cfg=cfg,
+            )
+
+            # ---- optional warm-start from an earlier MAE stage (added 2026-07-28) ----
+            # For MULTI-STAGE MAE pretraining, e.g. stage 1 on a large acc-only
+            # pool then stage 2 on the smaller acc+gyro pool. Distinct from
+            # `--resume`: resume restores optimizer/scheduler/step to continue
+            # ONE run, whereas a new stage wants the learned weights but a
+            # FRESH optimizer, scheduler and step counter (new data, new LR
+            # schedule). Loads the encoder always, and the decoder too by
+            # default -- continuing the same MAE objective, so the stage-1
+            # decoder is a strictly better starting point than re-initializing
+            # it (set load_decoder: false to reinitialize instead).
+            _stage_run  = _mm_cfg.get("pretrained_run")
+            _stage_ckpt = _mm_cfg.get("pretrained_ckpt", "best")
+            if _stage_run:
+                _runs_root = cfg_get(cfg, ["paths", "runs_root"], "runs")
+                if _stage_ckpt in ("best", "latest"):
+                    _stage_path = os.path.join(_runs_root, _stage_run,
+                                                "checkpoints", f"{_stage_ckpt}.pt")
+                else:
+                    _stage_path = _stage_ckpt
+                if not os.path.exists(_stage_path):
+                    raise FileNotFoundError(
+                        f"[mae_multidata_varlen_altattn_flu] stage warm-start checkpoint "
+                        f"not found: {_stage_path}"
+                    )
+                _log.info("[mae_multidata_varlen_altattn_flu] stage warm-start from %s "
+                          "(fresh optimizer/scheduler/step -- NOT a --resume)", _stage_path)
+                _stage_state = torch.load(_stage_path, map_location="cpu", weights_only=False)
+                _load_encoder_state_dict(encoder, _stage_state)
+                if bool(_mm_cfg.get("load_decoder", True)):
+                    if "decoder" not in _stage_state:
+                        raise KeyError(
+                            f"[mae_multidata_varlen_altattn_flu] load_decoder is true but "
+                            f"{_stage_path} has no 'decoder' state (keys: "
+                            f"{sorted(k for k in _stage_state if k != 'cfg')}). Set "
+                            f"load_decoder: false to start stage 2 with a fresh decoder."
+                        )
+                    decoder.load_state_dict(_stage_state["decoder"], strict=True)
+                    _log.info("[mae_multidata_varlen_altattn_flu] stage warm-start: decoder loaded too")
+                else:
+                    _log.info("[mae_multidata_varlen_altattn_flu] stage warm-start: encoder only, "
+                              "decoder re-initialized (load_decoder: false)")
+
+            def objective_fn(batch, model, cfg):
+                return freq_mae_obj.forward_loss(batch, encoder, decoder, cfg)
+
+            all_params = list(encoder.parameters()) + list(decoder.parameters())
+            loaders = make_combined_mae_multidata_loaders(cfg)
 
     elif objective_type == "mae_ocdetect_anyrot":
         # MAE pretraining on OCDetect in raw Android frame + uniform SO(3) random rotation.
@@ -4001,7 +4773,7 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
                 )
             _sxr_log.info("[surfaceXR_gesture_supervised] warm-starting encoder from %s", enc_ckpt_path)
             enc_state = torch.load(enc_ckpt_path, map_location="cpu", weights_only=False)
-            encoder.load_state_dict(_remap_encoder_state_dict(enc_state["model"]), strict=True)
+            _load_encoder_state_dict(encoder, enc_state)
 
         _sxr_log.info(
             "[surfaceXR_gesture_supervised] split=%s test_user=%s num_classes=%d sample_rate_hz=%d",
@@ -4050,7 +4822,7 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
             )
         _sxr_log.info("[surfaceXR_gesture_probe] loading pretrained encoder from %s", enc_ckpt_path)
         enc_state = torch.load(enc_ckpt_path, map_location="cpu", weights_only=False)
-        encoder.load_state_dict(_remap_encoder_state_dict(enc_state["model"]), strict=True)
+        _load_encoder_state_dict(encoder, enc_state)
         _sxr_log.info("[surfaceXR_gesture_probe] encoder loaded — freezing all encoder parameters")
         encoder.requires_grad_(False)
         encoder.eval()
@@ -4105,6 +4877,197 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
             return loss, {"loss": float(loss.detach()), "acc": acc}
 
         all_params = list(head.parameters())
+
+    elif objective_type == "openwatch_gesture_probe":
+        # Linear probe: frozen pretrained encoder + trainable LinearHead over
+        # OpenWatch's per-CSV micro-gesture recordings (59 classes by default —
+        # see label_map.json under the dataset root). Mirrors surfaceXR_gesture_probe
+        # above; data comes from imu_lm.data.openwatch_loader (already used by the
+        # combined MAE multidata pretrain to build this same source).
+        from imu_lm.data.openwatch_loader import make_openwatch_loaders_from_cfg
+        import logging as _logging
+        _ow_log = _logging.getLogger(__name__)
+
+        ow_probe_cfg = cfg_get(cfg, ["objective", "openwatch_gesture_probe"], {}) or {}
+        num_classes = int(ow_probe_cfg.get("num_classes", 59))
+
+        # Load & freeze pretrained encoder
+        pretrained_run  = ow_probe_cfg.get("pretrained_run")
+        pretrained_ckpt = ow_probe_cfg.get("pretrained_ckpt", "best")
+        if not pretrained_run:
+            raise ValueError(
+                "[openwatch_gesture_probe] 'pretrained_run' must be set for probing"
+            )
+        runs_root = cfg_get(cfg, ["paths", "runs_root"], "runs")
+        if pretrained_ckpt in ("best", "latest"):
+            enc_ckpt_path = os.path.join(runs_root, pretrained_run,
+                                         "checkpoints", f"{pretrained_ckpt}.pt")
+        else:
+            enc_ckpt_path = pretrained_ckpt
+        if not os.path.exists(enc_ckpt_path):
+            raise FileNotFoundError(
+                f"[openwatch_gesture_probe] pretrained encoder not found: {enc_ckpt_path}"
+            )
+        if bool(cfg_get(cfg, ["vit1d", "encoder", "alt_attention"], False)):
+            from imu_lm.models.ViT1D.model import ViT1DEncoderAltAttn
+            encoder = ViT1DEncoderAltAttn(cfg)
+            _ow_log.info("[openwatch_gesture_probe] using alternating frame/global "
+                         "attention encoder (VGGT-style)")
+        _ow_log.info("[openwatch_gesture_probe] loading pretrained encoder from %s", enc_ckpt_path)
+        enc_state = torch.load(enc_ckpt_path, map_location="cpu", weights_only=False)
+        _load_encoder_state_dict(encoder, enc_state)
+        _ow_log.info("[openwatch_gesture_probe] encoder loaded — freezing all encoder parameters")
+        encoder.requires_grad_(False)
+        encoder.eval()
+
+        # objective.openwatch_gesture_probe also doubles as the per-source config
+        # block consumed by make_openwatch_loaders_from_cfg (root/train_subjects/
+        # val_subjects/positions/gestures/label_ids/include_ppg/coordinate_frame).
+        loaders = make_openwatch_loaders_from_cfg(cfg, objective_key="openwatch_gesture_probe")
+        head = LinearHead(encoder.embed_dim, num_classes)
+        _ce_w = _openwatch_ce_weight(loaders, ow_probe_cfg, num_classes)
+
+        _ow_log.info(
+            "[openwatch_gesture_probe] num_classes=%d pretrained_run=%s class_weighted_ce=%s",
+            num_classes, pretrained_run, _ce_w is not None,
+        )
+
+        def objective_fn(batch, model, cfg):
+            encoder.eval()
+            x_b, y_b = batch
+            with torch.no_grad():
+                z = encoder(x_b.float())
+            logits = head(z)
+            _w = _ce_w.to(logits.device) if _ce_w is not None else None
+            loss = torch.nn.functional.cross_entropy(logits, y_b.long(), weight=_w)
+            preds = logits.argmax(dim=-1)
+            acc = float((preds == y_b).float().mean())
+            y_true = y_b.detach().cpu().tolist()
+            y_pred = preds.detach().cpu().tolist()
+            metrics = compute_metrics(y_true, y_pred)
+            return loss, {
+                "loss": float(loss.detach()), "acc": acc,
+                "bal_acc": metrics["bal_acc"], "macro_f1": metrics["macro_f1"],
+                "macro_precision": metrics["macro_precision"], "macro_recall": metrics["macro_recall"],
+                "_y_true": y_true, "_y_pred": y_pred,
+            }
+
+        all_params = list(head.parameters())
+
+    elif objective_type == "openwatch_gesture_finetune":
+        # Finetune: warm-started encoder (stays trainable) + trainable LinearHead
+        # over OpenWatch micro-gesture recordings. Sibling to openwatch_gesture_probe
+        # (same loader/data config convention) but the encoder isn't frozen.
+        from imu_lm.data.openwatch_loader import make_openwatch_loaders_from_cfg
+        import logging as _logging
+        _ow_log = _logging.getLogger(__name__)
+
+        ow_ft_cfg = cfg_get(cfg, ["objective", "openwatch_gesture_finetune"], {}) or {}
+        num_classes = int(ow_ft_cfg.get("num_classes", 59))
+
+        pretrained_run  = ow_ft_cfg.get("pretrained_run")
+        pretrained_ckpt = ow_ft_cfg.get("pretrained_ckpt", "best")
+        if not pretrained_run:
+            raise ValueError(
+                "[openwatch_gesture_finetune] 'pretrained_run' must be set"
+            )
+        runs_root = cfg_get(cfg, ["paths", "runs_root"], "runs")
+        if pretrained_ckpt in ("best", "latest"):
+            enc_ckpt_path = os.path.join(runs_root, pretrained_run,
+                                         "checkpoints", f"{pretrained_ckpt}.pt")
+        else:
+            enc_ckpt_path = pretrained_ckpt
+        if not os.path.exists(enc_ckpt_path):
+            raise FileNotFoundError(
+                f"[openwatch_gesture_finetune] pretrained encoder not found: {enc_ckpt_path}"
+            )
+        if bool(cfg_get(cfg, ["vit1d", "encoder", "alt_attention"], False)):
+            from imu_lm.models.ViT1D.model import ViT1DEncoderAltAttn
+            encoder = ViT1DEncoderAltAttn(cfg)
+            _ow_log.info("[openwatch_gesture_finetune] using alternating frame/global "
+                         "attention encoder (VGGT-style)")
+        _ow_log.info("[openwatch_gesture_finetune] warm-starting encoder from %s "
+                     "(encoder stays trainable)", enc_ckpt_path)
+        enc_state = torch.load(enc_ckpt_path, map_location="cpu", weights_only=False)
+        _load_encoder_state_dict(encoder, enc_state)
+
+        # objective.openwatch_gesture_finetune also doubles as the per-source config
+        # block consumed by make_openwatch_loaders_from_cfg (root/train_subjects/
+        # val_subjects/positions/gestures/label_ids/include_ppg/coordinate_frame).
+        loaders = make_openwatch_loaders_from_cfg(cfg, objective_key="openwatch_gesture_finetune")
+        head = LinearHead(encoder.embed_dim, num_classes)
+        _ce_w = _openwatch_ce_weight(loaders, ow_ft_cfg, num_classes)
+
+        _ow_log.info(
+            "[openwatch_gesture_finetune] num_classes=%d pretrained_run=%s", num_classes, pretrained_run,
+        )
+
+        def objective_fn(batch, model, cfg):
+            x_b, y_b = batch
+            z = encoder(x_b.float())
+            logits = head(z)
+            _w = _ce_w.to(logits.device) if _ce_w is not None else None
+            loss = torch.nn.functional.cross_entropy(logits, y_b.long(), weight=_w)
+            preds = logits.argmax(dim=-1)
+            acc = float((preds == y_b).float().mean())
+            y_true = y_b.detach().cpu().tolist()
+            y_pred = preds.detach().cpu().tolist()
+            metrics = compute_metrics(y_true, y_pred)
+            return loss, {
+                "loss": float(loss.detach()), "acc": acc,
+                "bal_acc": metrics["bal_acc"], "macro_f1": metrics["macro_f1"],
+                "macro_precision": metrics["macro_precision"], "macro_recall": metrics["macro_recall"],
+                "_y_true": y_true, "_y_pred": y_pred,
+            }
+
+        all_params = list(encoder.parameters()) + list(head.parameters())
+
+    elif objective_type == "openwatch_gesture_supervised":
+        # Fully supervised OpenWatch micro-gesture classification, trained FROM
+        # SCRATCH: encoder + LinearHead trained end-to-end from random init (no
+        # frozen/pretrained weights). Mirrors openwatch_gesture_probe's data
+        # config (same objective_key convention) so the two are directly
+        # comparable — this is the "no self-supervised pretraining" baseline.
+        from imu_lm.data.openwatch_loader import make_openwatch_loaders_from_cfg
+        import logging as _logging
+        _ows_log = _logging.getLogger(__name__)
+
+        if bool(cfg_get(cfg, ["vit1d", "encoder", "alt_attention"], False)):
+            from imu_lm.models.ViT1D.model import ViT1DEncoderAltAttn
+            encoder = ViT1DEncoderAltAttn(cfg)
+            _ows_log.info("[openwatch_gesture_supervised] using alternating frame/global "
+                          "attention encoder (VGGT-style)")
+
+        ows_cfg = cfg_get(cfg, ["objective", "openwatch_gesture_supervised"], {}) or {}
+        num_classes = int(ows_cfg.get("num_classes", 59))
+
+        loaders = make_openwatch_loaders_from_cfg(cfg, objective_key="openwatch_gesture_supervised")
+        head = LinearHead(encoder.embed_dim, num_classes)
+        _ce_w = _openwatch_ce_weight(loaders, ows_cfg, num_classes)
+
+        _ows_log.info(
+            "[openwatch_gesture_supervised] num_classes=%d (trained from scratch)", num_classes,
+        )
+
+        def objective_fn(batch, model, cfg):
+            x_b, y_b = batch
+            z = encoder(x_b.float())
+            logits = head(z)
+            _w = _ce_w.to(logits.device) if _ce_w is not None else None
+            loss = torch.nn.functional.cross_entropy(logits, y_b.long(), weight=_w)
+            preds = logits.argmax(dim=-1)
+            acc = float((preds == y_b).float().mean())
+            y_true = y_b.detach().cpu().tolist()
+            y_pred = preds.detach().cpu().tolist()
+            metrics = compute_metrics(y_true, y_pred)
+            return loss, {
+                "loss": float(loss.detach()), "acc": acc,
+                "bal_acc": metrics["bal_acc"], "macro_f1": metrics["macro_f1"],
+                "macro_precision": metrics["macro_precision"], "macro_recall": metrics["macro_recall"],
+                "_y_true": y_true, "_y_pred": y_pred,
+            }
+
+        all_params = list(encoder.parameters()) + list(head.parameters())
 
     elif objective_type == "watchhand_gesture_supervised":
         # Fully-supervised gesture classification on WatchHand IMU data.
@@ -4195,7 +5158,7 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
                 )
             _wh_log.info("[watchhand_gesture_supervised] warm-starting encoder from %s", enc_ckpt_path)
             enc_state = torch.load(enc_ckpt_path, map_location="cpu", weights_only=False)
-            encoder.load_state_dict(_remap_encoder_state_dict(enc_state["model"]), strict=True)
+            _load_encoder_state_dict(encoder, enc_state)
 
         # Labels are already remapped to 0-based by WatchHandDataset; no raw_to_idx needed
         def objective_fn(batch, model, cfg):
@@ -4296,7 +5259,7 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
                 )
             _wh_log.info("[watchhand_gesture_supervised_within_subject] warm-starting encoder from %s", enc_ckpt_path)
             enc_state = torch.load(enc_ckpt_path, map_location="cpu", weights_only=False)
-            encoder.load_state_dict(_remap_encoder_state_dict(enc_state["model"]), strict=True)
+            _load_encoder_state_dict(encoder, enc_state)
 
         def objective_fn(batch, model, cfg):
             return supervised_obj.forward_loss(batch, encoder, head, cfg, raw_to_idx=None)
@@ -4324,7 +5287,7 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
             raise FileNotFoundError(f"[har_probe] pretrained encoder not found: {enc_ckpt_path}")
         _har_log.info("[har_probe] loading pretrained encoder from %s", enc_ckpt_path)
         enc_state = torch.load(enc_ckpt_path, map_location="cpu", weights_only=False)
-        encoder.load_state_dict(_remap_encoder_state_dict(enc_state["model"]), strict=True)
+        _load_encoder_state_dict(encoder, enc_state)
         _har_log.info("[har_probe] encoder loaded — freezing all encoder parameters")
         encoder.requires_grad_(False)
         encoder.eval()
@@ -4381,9 +5344,17 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
             raise FileNotFoundError(
                 f"[utd_mhad_probe] pretrained encoder not found: {enc_ckpt_path}"
             )
+        if bool(cfg_get(cfg, ["vit1d", "encoder", "alt_attention"], False)):
+            from imu_lm.models.ViT1D.model import ViT1DEncoderAltAttn
+            encoder = ViT1DEncoderAltAttn(cfg)
+            _utd_log.info("[utd_mhad_probe] using alternating frame/global attention encoder (VGGT-style)")
         _utd_log.info("[utd_mhad_probe] loading pretrained encoder from %s", enc_ckpt_path)
         enc_state = torch.load(enc_ckpt_path, map_location="cpu", weights_only=False)
-        encoder.load_state_dict(_remap_encoder_state_dict(enc_state["model"]), strict=True)
+        if (cfg_get(cfg, ['dual_stream'], None) or {}).get('enabled', False):
+            from imu_lm.models.ViT1D.model import build_dual_stream
+            encoder = build_dual_stream(cfg)      # two pretrained stems + gated fusion
+        encoder = maybe_stats_wrap(encoder, cfg)   # stats_concat diagnostic (no-op unless enabled)
+        _load_encoder_state_dict(encoder, enc_state)
         _utd_log.info("[utd_mhad_probe] encoder loaded — freezing all encoder parameters")
         encoder.requires_grad_(False)
         encoder.eval()
@@ -4395,13 +5366,20 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
         num_classes = label_map["num_classes"]
         head = LinearHead(encoder.embed_dim, num_classes)
 
+        # optional inverse-frequency class-weighted CE (Inertia-1 paper protocol; off by default)
+        _utd_cw = None
+        if bool(utd_cfg.get("class_weighted_ce", False)):
+            _c = torch.tensor(label_map["class_counts"], dtype=torch.float32)
+            _utd_cw = _c.sum() / (num_classes * _c.clamp(min=1))
+            _utd_cw = _utd_cw / _utd_cw.sum() * num_classes
+            _utd_log.info("[utd_mhad_probe] class_weighted_ce on: imbalance=%.1f", float(_c.max() / _c.clamp(min=1).min()))
         _utd_log.info(
             "[utd_mhad_probe] num_classes=%d pretrained_run=%s", num_classes, pretrained_run,
         )
 
         def objective_fn(batch, model, cfg):
             encoder.eval()
-            return supervised_obj.forward_loss(batch, encoder, head, cfg, raw_to_idx=raw_to_idx)
+            return supervised_obj.forward_loss(batch, encoder, head, cfg, raw_to_idx=raw_to_idx, class_weights=_utd_cw)
 
         all_params = list(head.parameters())
 
@@ -4436,7 +5414,7 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
             )
         _ocd_log.info("[ocdetect_probe] loading pretrained encoder from %s", enc_ckpt_path)
         enc_state = torch.load(enc_ckpt_path, map_location="cpu", weights_only=False)
-        encoder.load_state_dict(_remap_encoder_state_dict(enc_state["model"]), strict=True)
+        _load_encoder_state_dict(encoder, enc_state)
         _ocd_log.info("[ocdetect_probe] encoder loaded — freezing")
         encoder.requires_grad_(False)
         encoder.eval()
@@ -4497,6 +5475,12 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
 
         utd_cfg = cfg_get(cfg, ["objective", "utd_mhad_finetune"], {}) or {}
 
+        if bool(cfg_get(cfg, ["vit1d", "encoder", "alt_attention"], False)):
+            from imu_lm.models.ViT1D.model import ViT1DEncoderAltAttn
+            encoder = ViT1DEncoderAltAttn(cfg)
+            _utd_log.info("[utd_mhad_finetune] using alternating frame/global "
+                          "attention encoder (VGGT-style)")
+
         pretrained_run  = utd_cfg.get("pretrained_run")
         pretrained_ckpt = utd_cfg.get("pretrained_ckpt", "best")
         if not pretrained_run:
@@ -4513,7 +5497,11 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
             )
         _utd_log.info("[utd_mhad_finetune] warm-starting encoder from %s", enc_ckpt_path)
         enc_state = torch.load(enc_ckpt_path, map_location="cpu", weights_only=False)
-        encoder.load_state_dict(_remap_encoder_state_dict(enc_state["model"]), strict=True)
+        if (cfg_get(cfg, ['dual_stream'], None) or {}).get('enabled', False):
+            from imu_lm.models.ViT1D.model import build_dual_stream
+            encoder = build_dual_stream(cfg)      # two pretrained stems + gated fusion
+        encoder = maybe_stats_wrap(encoder, cfg)   # stats_concat diagnostic (no-op unless enabled)
+        _load_encoder_state_dict(encoder, enc_state)
 
         loaders    = make_loaders(cfg)
         label_map  = build_label_map(loaders["train_loader"], cfg)
@@ -4522,12 +5510,18 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
         num_classes = label_map["num_classes"]
         head = LinearHead(encoder.embed_dim, num_classes)
 
+        _utd_cw = None
+        if bool(utd_cfg.get("class_weighted_ce", False)):
+            _c = torch.tensor(label_map["class_counts"], dtype=torch.float32)
+            _utd_cw = _c.sum() / (num_classes * _c.clamp(min=1))
+            _utd_cw = _utd_cw / _utd_cw.sum() * num_classes
+            _utd_log.info("[utd_mhad_finetune] class_weighted_ce on: imbalance=%.1f", float(_c.max() / _c.clamp(min=1).min()))
         _utd_log.info(
             "[utd_mhad_finetune] num_classes=%d pretrained_run=%s", num_classes, pretrained_run,
         )
 
         def objective_fn(batch, model, cfg):
-            return supervised_obj.forward_loss(batch, encoder, head, cfg, raw_to_idx=raw_to_idx)
+            return supervised_obj.forward_loss(batch, encoder, head, cfg, raw_to_idx=raw_to_idx, class_weights=_utd_cw)
 
         all_params = list(encoder.parameters()) + list(head.parameters())
 
@@ -4555,13 +5549,17 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
                           "watchhand_gesture_supervised_within_subject",
                           "surfacexr_gesture_supervised", "surfacexr_gesture_probe",
                           "har_probe", "utd_mhad_probe", "utd_mhad_finetune",
-                          "ocdetect_probe"):
+                          "ocdetect_probe",
+                          "openwatch_gesture_probe", "openwatch_gesture_supervised",
+                          "openwatch_gesture_finetune"):
         extra_modules = {"head": head}
     elif objective_type in ("pose", "pose_probe"):
         extra_modules = {"pose_decoder": pose_decoder}
     elif objective_type in ("odom_nymeria", "odom_nymeria_real_wrist_flu",
+                            "odom_nymeria_real_wrist_worldframe_flu",
                             "odom_probe_nymeria_real_wrist_flu",
                             "odom_finetune_nymeria_real_wrist_flu",
+                            "odom_finetune_nymeria_real_wrist_worldframe_flu",
                             "odom_probe", "odom_finetune", "odom_imuposer_flu",
                             "odom_probe_imuposer_flu", "odom_finetune_imuposer_flu",
                             "odom_totalcapture_flu", "odom_probe_totalcapture_flu",
@@ -4572,10 +5570,17 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
                             "odom_probe_nymeria_syn_wrist_flu",
                             "odom_finetune_nymeria_syn_wrist_flu"):
         extra_modules = {"odom_decoder": odom_decoder}
-    elif objective_type in ("imu_text_clip", "imu_text_clip_flu", "imu_text_clip_realdata"):
+    elif objective_type in ("imu_text_clip", "imu_text_clip_flu", "imu_text_clip_nymeria_flu", "imu_text_clip_realdata"):
         # Save projection head + logit_scale; text encoder can be reloaded from HuggingFace
+        # UNLESS it was trained (freeze_text_encoder: false) -- in that case its
+        # fine-tuned weights must be checkpointed too, or they're silently lost
+        # and any eval script re-fetching the plain pretrained HF weights would
+        # discard everything the joint text-tower training did.
         extra_modules = {"clip_head": clip_head}
-        if objective_type == "imu_text_clip_flu" and text_mlp is not None:
+        if objective_type in ("imu_text_clip", "imu_text_clip_flu", "imu_text_clip_nymeria_flu") \
+                and not freeze_text and text_encoder is not None:
+            extra_modules["text_enc"] = text_encoder
+        if objective_type in ("imu_text_clip_flu", "imu_text_clip_nymeria_flu") and text_mlp is not None:
             extra_modules["text_mlp"] = text_mlp
         if objective_type == "imu_text_clip_realdata":
             if text_enc is not None:

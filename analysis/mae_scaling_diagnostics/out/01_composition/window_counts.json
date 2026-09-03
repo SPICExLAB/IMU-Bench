@@ -1,0 +1,23 @@
+{
+  "total_train_by_fraction": {
+    "0.1pct": 487,
+    "1pct": 4873,
+    "5pct": 24365,
+    "25pct": 121824,
+    "50pct": 243648,
+    "100pct": 487295
+  },
+  "full_source_sizes": {
+    "realdata": 93510,
+    "ocdetect": 10873,
+    "nymeria": 157885,
+    "totalcapture": 461,
+    "imuposer": 137,
+    "eatingspeed": 57536,
+    "motionx": 4683,
+    "humanml3d": 2825,
+    "sonic": 32662,
+    "capture24": 124881,
+    "openwatch": 1842
+  }
+}

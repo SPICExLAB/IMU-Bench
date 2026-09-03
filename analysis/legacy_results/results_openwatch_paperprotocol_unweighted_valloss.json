@@ -1,0 +1,138 @@
+[
+  {
+    "name": "Ours (MAE) probe win/noaug",
+    "run": "vit1d_gesture_probe_openwatch_6class_mae_windowed_strat",
+    "split": "val",
+    "n_clips": 102,
+    "n_windows": 612,
+    "window": {
+      "acc": 0.7026143790849673,
+      "macro_f1": 0.601481068107315,
+      "macro_recall": 0.5788188742930122
+    },
+    "clip": {
+      "acc": 0.7941176470588235,
+      "macro_f1": 0.7201489254445411,
+      "macro_recall": 0.6900634008392629
+    }
+  },
+  {
+    "name": "Ours (MAE) probe win/noaug",
+    "run": "vit1d_gesture_probe_openwatch_6class_mae_windowed_strat",
+    "split": "test",
+    "n_clips": 87,
+    "n_windows": 522,
+    "window": {
+      "acc": 0.6091954022988506,
+      "macro_f1": 0.4810620847886271,
+      "macro_recall": 0.4539241622574956
+    },
+    "clip": {
+      "acc": 0.6666666666666666,
+      "macro_f1": 0.5358590656487853,
+      "macro_recall": 0.5139550264550264
+    }
+  },
+  {
+    "name": "Ours (MAE) probe win/aug",
+    "run": "vit1d_gesture_probe_openwatch_6class_mae_windowed_strat_aug",
+    "split": "val",
+    "n_clips": 102,
+    "n_windows": 612,
+    "window": {
+      "acc": 0.6977124183006536,
+      "macro_f1": 0.5796760555069629,
+      "macro_recall": 0.5497787812442986
+    },
+    "clip": {
+      "acc": 0.803921568627451,
+      "macro_f1": 0.7381917579426173,
+      "macro_recall": 0.682817916438606
+    }
+  },
+  {
+    "name": "Ours (MAE) probe win/aug",
+    "run": "vit1d_gesture_probe_openwatch_6class_mae_windowed_strat_aug",
+    "split": "test",
+    "n_clips": 87,
+    "n_windows": 522,
+    "window": {
+      "acc": 0.6111111111111112,
+      "macro_f1": 0.4659839185711851,
+      "macro_recall": 0.41894841269841265
+    },
+    "clip": {
+      "acc": 0.6666666666666666,
+      "macro_f1": 0.5298767112926406,
+      "macro_recall": 0.482010582010582
+    }
+  },
+  {
+    "name": "Ours (MAE) finetune win/noaug",
+    "run": "vit1d_gesture_finetune_openwatch_6class_mae_windowed_strat",
+    "split": "val",
+    "n_clips": 102,
+    "n_windows": 612,
+    "window": {
+      "acc": 0.7189542483660131,
+      "macro_f1": 0.5959407644608917,
+      "macro_recall": 0.5795577905491699
+    },
+    "clip": {
+      "acc": 0.7745098039215687,
+      "macro_f1": 0.6779855936413313,
+      "macro_recall": 0.6497559751870096
+    }
+  },
+  {
+    "name": "Ours (MAE) finetune win/noaug",
+    "run": "vit1d_gesture_finetune_openwatch_6class_mae_windowed_strat",
+    "split": "test",
+    "n_clips": 87,
+    "n_windows": 522,
+    "window": {
+      "acc": 0.6475095785440613,
+      "macro_f1": 0.5392089841134301,
+      "macro_recall": 0.5129960317460318
+    },
+    "clip": {
+      "acc": 0.6896551724137931,
+      "macro_f1": 0.5723622782446313,
+      "macro_recall": 0.5359788359788359
+    }
+  },
+  {
+    "name": "Ours (MAE) finetune win/aug",
+    "run": "vit1d_gesture_finetune_openwatch_6class_mae_windowed_strat_aug",
+    "split": "val",
+    "n_clips": 102,
+    "n_windows": 612,
+    "window": {
+      "acc": 0.7581699346405228,
+      "macro_f1": 0.6673329301405483,
+      "macro_recall": 0.6620974730888524
+    },
+    "clip": {
+      "acc": 0.8627450980392157,
+      "macro_f1": 0.7944147355912062,
+      "macro_recall": 0.7702449370552819
+    }
+  },
+  {
+    "name": "Ours (MAE) finetune win/aug",
+    "run": "vit1d_gesture_finetune_openwatch_6class_mae_windowed_strat_aug",
+    "split": "test",
+    "n_clips": 87,
+    "n_windows": 522,
+    "window": {
+      "acc": 0.6264367816091954,
+      "macro_f1": 0.5298117272664701,
+      "macro_recall": 0.49770723104056436
+    },
+    "clip": {
+      "acc": 0.6781609195402298,
+      "macro_f1": 0.5859608228029282,
+      "macro_recall": 0.5468915343915344
+    }
+  }
+]

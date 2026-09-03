@@ -1,0 +1,219 @@
+# ============================================================================
+# MASK-RATIO ABLATION arm: mask_ratio = 0.5  (baseline arm is 0.75)
+#
+# Byte-identical to vit1d_ssl_mae_stage1_acconly_flu.yaml except objective.mask_ratio,
+# so the mask ratio is the ONLY variable: same cache, same 300k/100k step
+# budget, same seed, same architecture, same augmentation.
+#
+# ** Val losses across arms are NOT directly comparable. ** The MAE loss is
+# computed only over MASKED patches, so a 0.90 arm is scored on a strictly
+# harder inference task than a 0.50 arm -- a lower raw val loss at 0.50 would
+# mean "easier task", not "better model". Comparing arms therefore requires
+# rescoring every checkpoint at ONE fixed mask ratio on ONE common val set;
+# see analysis/mae_scaling_diagnostics/checks/rescore_mask_ratio.py.
+# ============================================================================
+axis_bias:
+  enabled: false
+data:
+  batch_size: 128
+  dataset_column: dataset
+  drop_na: false
+  eval_batch_size: 128
+  label_column: dataset_activity_id
+  label_name_column: dataset_activity_label
+  num_workers: 15
+  pin_memory: true
+  session_column: session_id
+  subject_column: subject_id
+  time_column: timestamp_ns
+  variable_length:
+    enabled: true
+    max_samples: 512
+    min_samples: 64
+gain_jitter:
+  enabled: false
+gaussian_noise:
+  enabled: false
+logging:
+  ckpt_every_steps: 10000
+  log_every_steps: 5
+  save_step_checkpoints: false
+objective:
+  loss_type: full_mse
+  mae_multidata_varlen_altattn_flu:
+    cache_dir: /projects/b53017/vbc1591/mae_multidata_cache_stage1_acconly
+    sampling_mode: natural
+    sources:
+      capture24:
+        enabled: true
+        root: /projects/b53017/vbc1591/capture24/capture24
+        target_hz: 50
+      eatingspeed:
+        enabled: false
+        root: /projects/b53017/vbc1591/EatingSpeed
+        splits:
+        - 0.8
+        - 0.1
+        - 0.1
+        subsets:
+        - FD-I
+        - FD-II
+        - MO
+      humanml3d:
+        enabled: false
+        root: /projects/b53017/vbc1591/HumanML3D
+        t_min: 64
+      imuposer:
+        add_gravity: false
+        enabled: false
+        root: /projects/b53017/vbc1591/imuposer_dataset
+        target_hz: 50
+        val_participants:
+        - P9
+        - P10
+      motionx:
+        add_gravity: true
+        enabled: false
+        root: /projects/b53017/vbc1591/Motion-Xplusplus
+        val_frac: 0.05
+      nhanes:
+        enabled: true
+        max_hours: 185185.0
+        max_hours_val: 400.0
+        root: /projects/b53017/vbc1591/nhanes_pax
+        sample_fraction: 0.154
+        splits:
+        - 0.9
+        - 0.1
+        target_hz: 50
+      nymeria:
+        add_gravity: true
+        enabled: false
+        train_root: /projects/b53017/vbc1591/processed_data_body_Ty_rwrist
+        val_root: /projects/b53017/vbc1591/processed_data_test_body_Ty_rwrist
+      ocdetect:
+        data_dir: /projects/b53017/vbc1591/OCDetect_extracted/preprocessed
+        enabled: false
+        max_files: null
+        max_hours: 100000.0
+        splits:
+        - 0.8
+        - 0.1
+        - 0.1
+      openwatch:
+        coordinate_frame: flu
+        enabled: false
+        root: /projects/b53017/vbc1591/openwatch_raw/open_watch_without_augmentations
+      realdata:
+        enabled: false
+        train_on_datasets:
+        - pamap2
+        - recofit
+        - samosa
+        - shoaib
+        - ut_watch
+        - utd_mhad
+        - wisdm
+      sonic:
+        add_gravity: true
+        enabled: false
+        root: /projects/b53017/vbc1591/bones-seed
+      totalcapture:
+        add_gravity: true
+        enabled: false
+        root: /projects/b53017/vbc1591/DIP_recalculate
+        target_hz: 50
+        train_subjects:
+        - s1
+        - s2
+        - s3
+        - s4
+        val_subjects:
+        - s5
+  mask_ratio: 0.5
+  mask_strategy: composite
+  type: mae_multidata_varlen_altattn_flu
+paths:
+  dataset_path: /projects/b53017/vbc1591/IMULM_master_dataset_v2.parquet
+  runs_root: /gpfs/home/vbc1591/IMU-SSL/runs
+preprocess:
+  filter:
+    enabled: true
+    high_hz: 24
+    low_hz: 0.25
+    order: 4
+    type: lowpass
+  impute:
+    enabled: true
+    max_missing_frac: 0.2
+    method: linear
+  normalize:
+    enabled: true
+    eps: 1.0e-06
+    method: zscore
+random_rotation:
+  enabled: true
+  rotation_set: octahedral
+splits:
+  group_key: subject_id
+  seed: 42
+  shuffle: true
+  test_ratio: 0
+  val_ratio: 0.05
+time_warp:
+  enabled: false
+trainer:
+  amp: true
+  early_stopping:
+    enabled: true
+    min_delta: 0.0001
+    monitor: val_loss
+    patience: 60
+  grad_accum_steps: 1
+  grad_clip_norm: 1.0
+  max_steps: 300000
+  optim:
+    betas:
+    - 0.9
+    - 0.95
+    eps: 1.0e-08
+    lr: 0.0001
+    name: adamw
+    weight_decay: 0.0001
+  sched:
+    name: cosine
+    warmup_steps: 500
+  seed: 42
+  val_every_steps: 1000
+vit1d:
+  decoder:
+    hidden_size: 192
+    intermediate_size: 768
+    num_attention_heads: 4
+    num_hidden_layers: 4
+  encoder:
+    alt_attention: true
+    attention_probs_dropout_prob: 0.0
+    hidden_dropout_prob: 0.0
+    hidden_size: 384
+    intermediate_size: 1536
+    layer_norm_eps: 1.0e-06
+    num_attention_heads: 6
+    num_hidden_layers: 12
+  max_patches_per_channel: 256
+  patch_size: 16
+  pooling: mean
+  pos_embed_type: 2d
+  shared_kernel: acc_gyro
+wandb:
+  entity: yli32258-northwestern-university
+  project: TransfHAR_project
+windowing:
+  gap_method: interpolate
+  handle_gaps: true
+  label_policy: center
+  majority_threshold: 0.8
+  max_gap_ms: 200
+  max_gaps_per_session: 100
+  window_hop_ratio: 0.5
+  window_seconds: 10.24

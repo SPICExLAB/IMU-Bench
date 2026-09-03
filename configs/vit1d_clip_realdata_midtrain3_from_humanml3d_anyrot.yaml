@@ -1,0 +1,130 @@
+# "Midtraining" v3: continue CLIP language-alignment from the
+# ROTATION-AUGMENTED HumanML3D-CLIP checkpoint
+# (vit1d_clip_humanml3d_finetune_mae_multidata_anyrot -- Stage 2 retrained
+# with random_rotation.enabled: true, SO(3), mirroring UniMTS's own
+# augment_data() rotation-invariance trick) instead of the plain
+# HumanML3D-CLIP checkpoint used by midtrain v1/v2 -- and KEEPS rotation
+# augmentation ON during this stage too (RealdataCLIPDataset already
+# correctly gates apply_augment to split_name=="train" only -- see
+# imu_lm/data/realdata_clip_loader.py -- so this is safe, no val-loss noise
+# concern unlike the base WindowDataset class).
+#
+# Why: midtrain v1 (4 datasets, lr 3e-5) and midtrain v2 (7 datasets incl.
+# capture24, 10x lower lr) BOTH made zero-shot on wisdm/utd_mhad/pamap2
+# WORSE than the plain checkpoint, not better -- a twice-replicated negative
+# result (see EXPERIMENTS.md §10). Ruled out data-scale and LR as the
+# explanation (v2 had 10x more data and 10x lower LR than v1, yet did worse).
+# Leading hypothesis: continuing CLIP training on real datasets (each with
+# its own fixed, canonical sensor mounting/orientation) taught the encoder
+# to overfit to THOSE datasets' specific orientation statistics, actively
+# eroding whatever cross-dataset generalization the HumanML3D-CLIP init
+# started with -- i.e. the midtraining itself needed orientation invariance
+# and never had any. This config tests that hypothesis directly: same
+# recipe as midtrain v1 (smallest, least-overfit-prone dataset mix; same lr)
+# but starting from an already rotation-invariant checkpoint and keeping
+# rotation augmentation on throughout, so continued real-data exposure can
+# no longer be captured by memorizing per-dataset sensor orientation.
+#
+# Same exclusions as midtrain v1/v2: wisdm/utd_mhad/pamap2 (zero-shot/finetune
+# targets) and prism (reserved probe dataset) are NOT in train_on_datasets.
+
+vit1d:
+  patch_size: 16
+  shared_kernel: acc_gyro
+  pos_embed_type: 2d
+  max_patches_per_channel: 256
+  max_channels: 32
+  pooling: "mean"
+
+  encoder:
+    hidden_size: 384
+    num_hidden_layers: 12
+    num_attention_heads: 6
+    intermediate_size: 1536
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-6
+    alt_attention: true
+
+objective:
+  type: imu_text_clip_realdata
+  imu_text_clip_realdata:
+    clip_model:        openai/clip-vit-base-patch32
+    clip_embed_dim:    512
+    local_files_only:  true
+
+    pretrained_run:  vit1d_clip_humanml3d_finetune_mae_multidata_anyrot
+    pretrained_ckpt: best
+
+    sentence_template: "The person is {}"
+
+    freeze_imu_encoder:  false
+    freeze_text_encoder: true
+    text_projection_mlp: true
+    text_mlp_hidden_dim: null
+
+paths:
+  dataset_path: /projects/b53017/vbc1591/IMULM_master_dataset_v2.parquet
+  runs_root: /gpfs/home/vbc1591/IMU-SSL/runs
+
+preprocess:
+  normalize:
+    enabled: false            # HumanML3D-CLIP checkpoint expects raw scale (see §10 configs)
+
+windowing:
+  window_seconds: 2.56
+
+splits:
+  seed: 42
+  group_key: subject_id
+  shuffle: true
+  val_ratio: 0.1
+  test_ratio: 0.0
+
+data:
+  sensor_columns: [acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z]
+  train_on_datasets: ["recofit", "samosa", "shoaib", "ut_watch"]
+  batch_size: 256
+  eval_batch_size: 256
+  num_workers: 8
+  pin_memory: true
+
+# NEW vs. midtrain v1/v2: keep the same SO(3) rotation invariance training
+# active during midtraining that Stage 2 was retrained with.
+random_rotation:
+  enabled: true
+  rotation_set: so3
+
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 10000000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 500
+  val_max_batches: 100
+
+  optim:
+    name: adamw
+    lr: 3.0e-5
+    weight_decay: 0.01
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+
+  sched:
+    name: cosine
+    warmup_steps: 500
+
+  early_stopping:
+    enabled: true
+    monitor: val_loss
+    patience: 20
+
+logging:
+  log_every_steps: 5
+  ckpt_every_steps: 500
+  save_step_checkpoints: false
+
+wandb:
+  entity: yli32258-northwestern-university
+  project: TransfHAR_project

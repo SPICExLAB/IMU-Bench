@@ -1,0 +1,8 @@
+lr1e-4_tau0.1fixed_latest 9435922
+base_s42_latest 9435923
+base_s43_latest 9435924
+lr1e-4_latest 9435925
+steps16k_latest 9435926
+tau0.1_fixed_latest 9435927
+wd0.1_nodecay1d_latest 9435928
+bs32_steps16k_latest 9435929

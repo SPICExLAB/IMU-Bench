@@ -1,0 +1,362 @@
+{
+ "diag_har_hhar__inertia1_patchtst_probe__zscore": {
+  "metrics": {
+   "macro_f1": 0.4990653714310165,
+   "bal_acc": 0.5122303652186991,
+   "acc": 0.5009394964299135,
+   "val_loss": 1.262676
+  },
+  "info": {
+   "checkpoint_step": 19600,
+   "n_val_samples": 2661
+  }
+ },
+ "diag_har_hhar__mae_11src_finetune__stats": {
+  "metrics": {
+   "macro_f1": 0.6639875958225906,
+   "bal_acc": 0.6741557740197742,
+   "acc": 0.6561443066516347,
+   "val_loss": 1.003338
+  },
+  "info": {
+   "checkpoint_step": 200,
+   "n_val_samples": 2661
+  }
+ },
+ "diag_har_hhar__mae_11src_probe__nonorm": {
+  "metrics": {
+   "macro_f1": 0.5472820150362628,
+   "bal_acc": 0.5616435642264693,
+   "acc": 0.5535512965050733,
+   "val_loss": 1.091826
+  },
+  "info": {
+   "checkpoint_step": 2200,
+   "n_val_samples": 2661
+  }
+ },
+ "diag_har_hhar__mae_11src_probe__stats": {
+  "metrics": {
+   "macro_f1": 0.6796767799362775,
+   "bal_acc": 0.6808766840249504,
+   "acc": 0.6647876738068396,
+   "val_loss": 0.901642
+  },
+  "info": {
+   "checkpoint_step": 3200,
+   "n_val_samples": 2661
+  }
+ },
+ "diag_har_hhar__scratch__nonorm": {
+  "metrics": {
+   "macro_f1": 0.6188143531598449,
+   "bal_acc": 0.6218854420529485,
+   "acc": 0.5809845922585494,
+   "val_loss": 0.929043
+  },
+  "info": {
+   "checkpoint_step": 200,
+   "n_val_samples": 2661
+  }
+ },
+ "diag_har_hhar__scratch_scratch__stats": {
+  "metrics": {
+   "macro_f1": 0.49448472659729026,
+   "bal_acc": 0.5044611783847172,
+   "acc": 0.498684704998121,
+   "val_loss": 1.245033
+  },
+  "info": {
+   "checkpoint_step": 800,
+   "n_val_samples": 2661
+  }
+ },
+ "diag_har_mhealth__inertia1_patchtst_probe__zscore": {
+  "metrics": {
+   "macro_f1": 0.5530392102302283,
+   "bal_acc": 0.5662265154200639,
+   "acc": 0.5938989513822688,
+   "val_loss": 1.116584
+  },
+  "info": {
+   "checkpoint_step": 17600,
+   "n_val_samples": 1049
+  }
+ },
+ "diag_har_mhealth__mae_11src_finetune__stats": {
+  "metrics": {
+   "macro_f1": 0.6630265584140873,
+   "bal_acc": 0.6849779636305889,
+   "acc": 0.6825548141086749,
+   "val_loss": 1.071625
+  },
+  "info": {
+   "checkpoint_step": 200,
+   "n_val_samples": 1049
+  }
+ },
+ "diag_har_mhealth__mae_11src_probe__nonorm": {
+  "metrics": {
+   "macro_f1": 0.7235579478588607,
+   "bal_acc": 0.7163311951146542,
+   "acc": 0.7206863679694948,
+   "val_loss": 0.56817
+  },
+  "info": {
+   "checkpoint_step": 6600,
+   "n_val_samples": 1049
+  }
+ },
+ "diag_har_mhealth__mae_11src_probe__stats": {
+  "metrics": {
+   "macro_f1": 0.7935692595366971,
+   "bal_acc": 0.7957882816775234,
+   "acc": 0.7883698760724499,
+   "val_loss": 0.459412
+  },
+  "info": {
+   "checkpoint_step": 15800,
+   "n_val_samples": 1049
+  }
+ },
+ "diag_har_mhealth__scratch__nonorm": {
+  "metrics": {
+   "macro_f1": 0.6078507822460432,
+   "bal_acc": 0.6305836555536282,
+   "acc": 0.6177311725452812,
+   "val_loss": 0.858189
+  },
+  "info": {
+   "checkpoint_step": 400,
+   "n_val_samples": 1049
+  }
+ },
+ "diag_har_mhealth__scratch_scratch__stats": {
+  "metrics": {
+   "macro_f1": 0.619881930830601,
+   "bal_acc": 0.6592428907266759,
+   "acc": 0.6539561487130601,
+   "val_loss": 0.884408
+  },
+  "info": {
+   "checkpoint_step": 600,
+   "n_val_samples": 1049
+  }
+ },
+ "diag_har_pamap2__mae_11src_finetune__stats": {
+  "metrics": {
+   "macro_f1": 0.48239972019480376,
+   "bal_acc": 0.5110515002853724,
+   "acc": 0.5325402379286214,
+   "val_loss": 1.70864
+  },
+  "info": {
+   "checkpoint_step": 400,
+   "n_val_samples": 4287
+  }
+ },
+ "diag_har_pamap2__mae_11src_probe__stats": {
+  "metrics": {
+   "macro_f1": 0.5526741060269315,
+   "bal_acc": 0.5432929580841986,
+   "acc": 0.5679962677863307,
+   "val_loss": 1.262927
+  },
+  "info": {
+   "checkpoint_step": 2400,
+   "n_val_samples": 4287
+  }
+ },
+ "diag_har_pamap2__scratch__nonorm": {
+  "metrics": {
+   "macro_f1": 0.34550249118452103,
+   "bal_acc": 0.38072501734345715,
+   "acc": 0.39281548868672733,
+   "val_loss": 2.150427
+  },
+  "info": {
+   "checkpoint_step": 800,
+   "n_val_samples": 4287
+  }
+ },
+ "diag_har_pamap2__scratch_scratch__stats": {
+  "metrics": {
+   "macro_f1": 0.23995089605564918,
+   "bal_acc": 0.27059435550654765,
+   "acc": 0.30580825752274315,
+   "val_loss": 2.454517
+  },
+  "info": {
+   "checkpoint_step": 800,
+   "n_val_samples": 4287
+  }
+ },
+ "diag_har_recofit__mae_11src_finetune__stats": {
+  "metrics": {
+   "macro_f1": 0.7731147199351043,
+   "bal_acc": 0.7826171635136555,
+   "acc": 0.8840591824793113,
+   "val_loss": 0.418769
+  },
+  "info": {
+   "checkpoint_step": 2400,
+   "n_val_samples": 23926
+  }
+ },
+ "diag_har_recofit__mae_11src_probe__stats": {
+  "metrics": {
+   "macro_f1": 0.6995954277647164,
+   "bal_acc": 0.6863867176343468,
+   "acc": 0.8154309119786007,
+   "val_loss": 0.603208
+  },
+  "info": {
+   "checkpoint_step": 17600,
+   "n_val_samples": 23926
+  }
+ },
+ "diag_har_recofit__scratch__nonorm": {
+  "metrics": {
+   "macro_f1": 0.7018491496557139,
+   "bal_acc": 0.7324314980842337,
+   "acc": 0.8327342639806069,
+   "val_loss": 0.640614
+  },
+  "info": {
+   "checkpoint_step": 11600,
+   "n_val_samples": 23926
+  }
+ },
+ "diag_har_recofit__scratch_scratch__stats": {
+  "metrics": {
+   "macro_f1": 0.6503885105312015,
+   "bal_acc": 0.6483206292686882,
+   "acc": 0.8061940984702833,
+   "val_loss": 0.668894
+  },
+  "info": {
+   "checkpoint_step": 6000,
+   "n_val_samples": 23926
+  }
+ },
+ "diag_har_utd_mhad__mae_11src_finetune__stats": {
+  "metrics": {
+   "macro_f1": 0.730744285822839,
+   "bal_acc": 0.7412760519903377,
+   "acc": 0.7439613526570048,
+   "val_loss": 0.798764
+  },
+  "info": {
+   "checkpoint_step": 200,
+   "n_val_samples": 207
+  }
+ },
+ "diag_har_utd_mhad__mae_11src_probe__stats": {
+  "metrics": {
+   "macro_f1": 0.6643032088684263,
+   "bal_acc": 0.666058412486984,
+   "acc": 0.6666666666666666,
+   "val_loss": 1.028668
+  },
+  "info": {
+   "checkpoint_step": 400,
+   "n_val_samples": 207
+  }
+ },
+ "diag_har_utd_mhad__scratch__nonorm": {
+  "metrics": {
+   "macro_f1": 0.7986322823817295,
+   "bal_acc": 0.8009100687672117,
+   "acc": 0.8019323671497585,
+   "val_loss": 1.017992
+  },
+  "info": {
+   "checkpoint_step": 13000,
+   "n_val_samples": 207
+  }
+ },
+ "diag_har_utd_mhad__scratch_scratch__stats": {
+  "metrics": {
+   "macro_f1": 0.6606359188739052,
+   "bal_acc": 0.6689619243190672,
+   "acc": 0.6714975845410628,
+   "val_loss": 1.327879
+  },
+  "info": {
+   "checkpoint_step": 200,
+   "n_val_samples": 207
+  }
+ },
+ "diag_har_wisdm__inertia1_patchtst_probe__zscore": {
+  "metrics": {
+   "macro_f1": 0.409478965928078,
+   "bal_acc": 0.44184652278177455,
+   "acc": 0.44184652278177455,
+   "val_loss": 2.008077
+  },
+  "info": {
+   "checkpoint_step": 19600,
+   "n_val_samples": 25020
+  }
+ },
+ "diag_har_wisdm__mae_11src_finetune__stats": {
+  "metrics": {
+   "macro_f1": 0.7063106184407315,
+   "bal_acc": 0.7142286171063149,
+   "acc": 0.7142286171063149,
+   "val_loss": 0.856547
+  },
+  "info": {
+   "checkpoint_step": 2200,
+   "n_val_samples": 25020
+  }
+ },
+ "diag_har_wisdm__mae_11src_probe__nonorm": {
+  "metrics": {
+   "macro_f1": 0.620663568904592,
+   "bal_acc": 0.6422062350119905,
+   "acc": 0.6422062350119904,
+   "val_loss": 1.129446
+  },
+  "info": {
+   "checkpoint_step": 15800,
+   "n_val_samples": 25020
+  }
+ },
+ "diag_har_wisdm__mae_11src_probe__stats": {
+  "metrics": {
+   "macro_f1": 0.6869703289399617,
+   "bal_acc": 0.7016786570743405,
+   "acc": 0.7016786570743405,
+   "val_loss": 0.908474
+  },
+  "info": {
+   "checkpoint_step": 17200,
+   "n_val_samples": 25020
+  }
+ },
+ "diag_har_wisdm__scratch__nonorm": {
+  "metrics": {
+   "macro_f1": 0.7297387168914002,
+   "bal_acc": 0.7386490807354117,
+   "acc": 0.7386490807354117,
+   "val_loss": 0.862619
+  },
+  "info": {
+   "checkpoint_step": 10600,
+   "n_val_samples": 25020
+  }
+ },
+ "diag_har_wisdm__scratch_scratch__stats": {
+  "metrics": {
+   "macro_f1": 0.6192099272968363,
+   "bal_acc": 0.6223021582733814,
+   "acc": 0.6223021582733813,
+   "val_loss": 1.185677
+  },
+  "info": {
+   "checkpoint_step": 9000,
+   "n_val_samples": 25020
+  }
+ }
+}

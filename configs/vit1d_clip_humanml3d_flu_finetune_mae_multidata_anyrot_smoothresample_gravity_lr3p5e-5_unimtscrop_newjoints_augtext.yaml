@@ -1,0 +1,236 @@
+# FINER LR SWEEP (2026-07-28): identical to the best-of-session
+# "unimtscrop_newjoints_augtext" config (job 7959342, lr=5e-5, best val_loss
+# 2.477, 5-dataset zero-shot avg 26.19%/22.08%) with ONE change: lr 5e-5 ->
+# 3.5e-5. The original coarse LR sweep on this recipe family only tested
+# {3e-5, 5e-5, 1e-4, 2e-4} (see EXPERIMENTS.md ~3715-3728) and flagged "a
+# finer LR sweep around 5e-5" as not yet done -- this is that follow-up,
+# bracketing 5e-5 from below. Same effectively-constant-lr schedule as the
+# 5e-5 baseline (max_steps=10000000 -> cosine decay negligible in practice
+# over a several-thousand-step run) so this isolates the LR *value* from
+# the schedule-shape question (see the separate _cosine8k config for that).
+#
+# Identical to the "unimtscrop_newjoints" config (jobs 7957775 crash /
+# 7958415 successful retrain, best val_loss 2.82, 5-dataset zero-shot avg
+# 25.11%/19.12% -- see EXPERIMENTS.md) with ONE further change:
+# humanml3d.captions_subpath: aug_texts (was 'texts') -- adds GPT-
+# paraphrased caption variants on top of the original 4/clip captions.
+# Root rotation for the new_joint_vecs path is now read explicitly from
+# root_rotations_3d/ (user-provided) when available, composed with
+# new_joint_vecs' own non-root local rotations via the SMPL/T2M kinematic
+# chain -- verified numerically IDENTICAL (max abs diff 2.1e-7) to the
+# previous internal re-derivation, so this is a data-provenance cleanup,
+# not a behavior change; job 7958415's results are unaffected by it.
+#
+# unimtscrop_newjoints header below (still accurate for the position/
+# rotation-source changes vs. the original "unimtscrop" baseline):
+#
+# Identical to the "unimtscrop" config (this session's best "Ours" 6-dataset
+# zero-shot checkpoint, 24.99%/19.94% avg acc/f1) with TWO changes:
+# humanml3d.joints_subpath: HumanML3D/new_joints (was 'joints') and
+# humanml3d.rotation_source: new_joint_vecs (was 'amass') -- i.e. drops the
+# local AMASS mocap mirror entirely for BOTH position and rotation.
+#
+# Motivation: this cluster's local joints/ mirror degraded during an
+# ongoing data reorganization (9,933 files at last check, down from ~20,696
+# earlier this session, some files also found corrupted/truncated), and the
+# local AMASS archive was already known to be incomplete (~35% clip
+# coverage, see EXPERIMENTS.md 2026-07-26 all-joint-from-scratch section).
+# User explicitly asked to stop using joints/ AND to stop depending on
+# AMASS for rotation, accepting the resulting fidelity cost for full
+# coverage: "no do not use keeping AMASS for rotation, estimating rotation
+# from [new_joint_vecs], it is ok if it is not similar to AMASS."
+#
+# HumanML3D/new_joints/ (positions) is the official post-processed
+# representation (motion_representation.ipynb) -- full ~29,228-clip
+# coverage, confirmed high-fidelity (0.9998 correlation against
+# independently-computed AMASS-FK positions on spot checks).
+# HumanML3D/new_joint_vecs/ (rotation, via new _load_all_joint_rotmat_from_vecs,
+# bit-exact validated against HumanML3D's own reference recover_from_rot
+# pipeline) is position-only inverse kinematics -- structurally cannot
+# recover twist about a bone's own axis, quantified at a median 56deg
+# wrist-rotation disagreement vs. AMASS ground truth on 150 overlapping
+# clips (72% of clips >30deg, 45% >60deg) -- a real, accepted fidelity cost.
+#
+# Combined smoke test (both new_joints + new_joint_vecs, no AMASS at all):
+# 493/500 train clips succeeded (98.6% yield, zero errors) -- essentially
+# complete coverage, vs. ~35% with AMASS as the bottleneck for the entire
+# rest of this session's "Ours" checkpoints.
+#
+# Original unimtscrop header below (still accurate for everything else this
+# config does -- rotation augmentation, cubic resample, gravity, crop_mode:
+# first, fixed 10.24s window):
+#
+# Motivation: investigating why Ours(MAE+HumanML3D-CLIP) badly underperforms
+# UniMTS on zero-shot HAR classification (see EXPERIMENTS.md §10). Checked
+# UniMTS's own training code directly (baselines/language_alignment/UniMTS/
+# pretrain.py + utils.py::augment_data) and found it applies a fresh random
+# 3D rotation to every training sample's acc+gyro every batch -- explicit
+# training for sensor-orientation invariance. Our HumanML3D-CLIP training
+# has NEVER done this: it was trained purely on HumanML3D's one fixed,
+# perfectly-canonical synthetic FLU-frame convention, with zero exposure to
+# orientation variation. Real target-dataset sensors (WISDM/UTD-MHAD/PAMAP2)
+# inevitably have calibration/mounting-angle variance relative to that one
+# fixed synthetic convention -- a rotation-naive model has no way to be
+# robust to that. This repo already has the exact same augmentation
+# UniMTS uses (imu_lm/data/augmentations/transform.py::apply_random_rotation,
+# uniform SO(3) via unit quaternion) already wired into HumanML3D's own
+# loader (imu_lm/data/humanml3d_dataset_FLU.py calls apply_augment on the
+# train split) -- just never turned on for this specific config. Retraining
+# Stage 2 (not just continuing from the existing checkpoint, since we want a
+# clean encoder that was rotation-augmented from the start) with this one
+# change turned on to test the hypothesis directly, holding everything else
+# fixed. This is a DIFFERENT axis of change than the earlier midtraining v1/v2
+# experiments (which changed the DATA MIX/scale, not the augmentation) --
+# both of those made zero-shot worse, so this tests a genuinely different
+# mechanism instead of re-tuning the same one.
+
+vit1d:
+  patch_size: 16
+  shared_kernel: acc_gyro
+  pos_embed_type: 2d
+  max_patches_per_channel: 256
+  max_channels: 32
+  pooling: "mean"
+
+  encoder:
+    hidden_size: 384
+    num_hidden_layers: 12
+    num_attention_heads: 6
+    intermediate_size: 1536
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-6
+    alt_attention: true
+
+objective:
+  type: imu_text_clip_flu
+  imu_text_clip_flu:
+    pretrained_run:  vit1d_ssl_mae_varlen_altattn_multidata
+    pretrained_ckpt: best
+    freeze_imu_encoder:  false
+    freeze_text_encoder: true
+
+    humanml3d_root: /projects/b53017/vbc1591/HumanML3D
+    clip_model:     openai/clip-vit-base-patch32
+    clip_embed_dim: 512
+    local_files_only: true
+    text_cache_path: /projects/b53017/vbc1591/HumanML3D/clip_text_emb_cache.pt
+
+paths:
+  dataset_path: /projects/b53017/vbc1591/IMULM_master_dataset_v2.parquet
+  runs_root: /gpfs/home/vbc1591/IMU-SSL/runs
+
+random_rotation:
+  enabled: true               # uniform SO(3) on acc+gyro together -- see header note
+  rotation_set: so3
+
+# NEW (2026-07-25): _resample_joints upsamples HumanML3D's native 20Hz joint
+# positions to 50Hz via LINEAR interpolation before acceleration is derived
+# via second-order finite difference downstream. Linear interpolation has
+# piecewise-constant velocity between the original 20Hz sample points, so its
+# second derivative is a series of artificial spikes exactly at each 20Hz
+# breakpoint -- a pure numerical artifact of the interpolation method, not
+# real motion (mirrors why IMUSim, UniMTS's own synthesis tool, uses a
+# SplinedBodyModel for smooth trajectory representation before deriving
+# physical quantities). Confirmed empirically end-to-end through this exact
+# FLU pipeline: switching to cubic-spline resampling drops a 2nd-difference
+# "roughness" proxy from ~14-21 down to ~0.2-0.7 (a 20-40x reduction) while
+# leaving the overall acceleration MAGNITUDE essentially unchanged (5.53->5.69,
+# 1.40->1.47) -- i.e. this removes a spurious numerical artifact, not real
+# signal. Real accelerometer data (WISDM/PAMAP2) shows this same roughness
+# proxy at ~0.8-2.4 -- cubic resampling brings HumanML3D's synthetic
+# acceleration in line with real sensor characteristics for the first time,
+# whereas the current default (linear) was ~10-20x rougher than any real
+# target dataset. gravity_mps2 is deliberately left at its default (0.0,
+# unset) here to isolate this fix as a single clean variable, separate from
+# the already-tested (and negative) gravity experiment.
+humanml3d:
+  resample_method: cubic
+  joints_subpath: HumanML3D/new_joints   # NEW vs. unimtscrop -- see header
+  rotation_source: new_joint_vecs        # NEW vs. unimtscrop -- see header (drops AMASS entirely;
+                                          # root taken from root_rotations_3d/ when present, composed
+                                          # with new_joint_vecs' non-root local rotations -- numerically
+                                          # identical to the pure new_joint_vecs derivation, verified)
+  captions_subpath: aug_texts            # NEW vs. unimtscrop_newjoints -- GPT-paraphrased captions
+                                          # appended to the original 4/clip, falls back to texts/ for
+                                          # the small number of clips without an aug_texts file
+  crop_mode: first   # NEW (2026-07-26): matches UniMTS's own CLIPDataset.__getitem__
+                      # (baselines/language_alignment/UniMTS/data.py) exactly for clips
+                      # longer than the target window -- deterministic imu[:T], not a
+                      # random crop. Combined with pad_mode: wrap below (already
+                      # identical to UniMTS's own np.pad(mode='wrap') for short clips),
+                      # this makes the windowing/truncation strategy match UniMTS's own
+                      # pretraining data loader exactly, modulo window length (10.24s
+                      # @ 50Hz = 512 samples here vs UniMTS's 10s @ 20Hz = 200 samples).
+  gravity_mps2: 9.81   # NEW: combine with the resample fix now that the roughness
+                       # artifact (hypothesized cause of gravity's earlier negative
+                       # result -- z-score normalization dividing by a variance
+                       # dominated by artifact-inflated roughness rather than real
+                       # movement) is fixed. Isolated gravity test alone was negative
+                       # (see vit1d_clip_humanml3d_flu_finetune_mae_multidata_anyrot_gravity.yaml);
+                       # this tests whether it behaves differently on a properly
+                       # smoothed signal.
+
+# NEW (2026-07-26): FIXED window size (was variable 1.28-10.24s, matching
+# MAE Stage-1 pretraining's own random-per-batch windowing convention --
+# confirmed via imu_lm/data/combined_mae_multidata_loader.py::_collate_train,
+# which draws a fresh random length in {64,80,...,512 samples} = {1.28-10.24s}
+# every training batch). This config instead fixes Stage 2 at the single
+# LONGEST window (10.24s) throughout, matching what zero-shot eval will also
+# use (--window-seconds 10.24), to remove the train/eval window-size
+# mismatch this session's zero-shot evals have had all along (training saw
+# variable/mostly-shorter windows on average; eval always used a fixed 2.56s
+# window, chosen originally to accommodate UTD-MHAD's short ~3.5s median
+# session length -- WISDM/PAMAP2 sessions are far longer so were never
+# window-length-constrained there).
+windowing:
+  min_window_seconds: 10.24
+  max_window_seconds: 10.24
+  pad_mode: wrap   # REQUIRED: HumanML3D clips cap out at ~10.0s (500 samples),
+                   # just under 512 -- with min==max==512 and the default
+                   # pad_mode='zero', _clip_min_T falls back to T_min=512 and
+                   # EVERY clip gets dropped as "too short" (documented trap,
+                   # see HumanML3DIMUVarLenDatasetFLU.__init__ comment) ->
+                   # zero valid batches, silent infinite retry hang. wrap
+                   # mode sets _clip_min_T=patch_size instead, so every clip
+                   # is valid and gets cyclically wrap-padded up to 512
+                   # samples instead of being skipped.
+
+data:
+  sensor_columns: [acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z]
+  batch_size: 64
+  num_workers: 4
+
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 10000000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 500
+  val_max_batches: 100
+
+  optim:
+    name: adamw
+    lr: 3.5e-5   # Finer LR sweep -- bracketing best-known 5e-5 from below
+    weight_decay: 0.01
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+
+  sched:
+    name: cosine
+    warmup_steps: 200
+
+  early_stopping:
+    enabled: true
+    monitor: val_loss
+    patience: 20
+
+logging:
+  log_every_steps: 5
+  ckpt_every_steps: 500
+  save_step_checkpoints: false
+
+wandb:
+  entity: yli32258-northwestern-university
+  project: TransfHAR_project

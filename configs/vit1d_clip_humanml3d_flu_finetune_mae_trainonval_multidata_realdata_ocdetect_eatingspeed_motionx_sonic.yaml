@@ -1,0 +1,113 @@
+# 5-source SSL MAE pretrain variant of vit1d_clip_humanml3d_flu_finetune_mae_trainonval_multidata.yaml.
+# ONLY pretrained_run changed: vit1d_ssl_mae_varlen_altattn_multidata -> vit1d_ssl_mae_varlen_altattn_realdata_ocdetect_eatingspeed_motionx_sonic.
+# LEAKAGE CONTROL — NOT a valid held-out comparison. See EXPERIMENTS.md
+# Section 6b before reading any number from this run's checkpoint as a
+# genuine result.
+#
+# Identical in every respect to the baseline
+# vit1d_clip_humanml3d_flu_finetune_mae_multidata.yaml (same warm-started
+# trainable encoder, same frozen-CLIP-text-embedding-cache setup, same
+# hyperparameters) except one change: objective.imu_text_clip_flu.
+# train_split_name is set to "train_val" -- HumanML3D's own official
+# train+val union file (/projects/b53017/vbc1591/HumanML3D/HumanML3D/
+# train_val.txt, verified to be exactly the sorted union of train.txt+val.txt
+# with zero overlap between the two). The val loader still reads the
+# official val.txt, so every clip we score retrieval accuracy on has ALSO
+# been directly trained on.
+#
+# Purpose: quantify how much train/eval overlap alone can inflate retrieval
+# accuracy on this exact task/metric, as a sanity check on the theory that
+# UniMTS's outsized finetuned numbers (Section 6) are partly explained by
+# its officially released checkpoint having been pretrained directly on
+# HumanML3D (train+val, no split respected) rather than genuine superior
+# generalization. This run's number is a ceiling/leakage-effect estimate,
+# not a result to compare against any other row in Section 6's main table.
+
+vit1d:
+  patch_size: 16
+  shared_kernel: acc_gyro       # must match the MAE checkpoint's patch embed
+  pos_embed_type: 2d            # must match the MAE checkpoint (learned 2D pos-embed)
+  max_patches_per_channel: 256  # must match the MAE checkpoint's pos-embed table size
+  max_channels: 32
+  pooling: "mean"
+
+  encoder:
+    hidden_size: 384
+    num_hidden_layers: 12
+    num_attention_heads: 6
+    intermediate_size: 1536
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-6
+    alt_attention: true         # checkpoint was trained with the alt-attn encoder
+
+objective:
+  type: imu_text_clip_flu
+  imu_text_clip_flu:
+    pretrained_run:  vit1d_ssl_mae_varlen_altattn_realdata_ocdetect_eatingspeed_motionx_sonic
+    pretrained_ckpt: best
+    freeze_imu_encoder:  false  # FINETUNE: encoder warm-started but trainable
+    freeze_text_encoder: true
+
+    humanml3d_root: /projects/b53017/vbc1591/HumanML3D
+    clip_model:     openai/clip-vit-base-patch32
+    clip_embed_dim: 512
+    local_files_only: true
+    text_cache_path: /projects/b53017/vbc1591/HumanML3D/clip_text_emb_cache.pt
+
+    train_split_name: train_val   # LEAKAGE CONTROL: train on train+val union; val.txt clips are now in training data
+
+paths:
+  dataset_path: /projects/b53017/vbc1591/IMULM_master_dataset_v2.parquet
+  runs_root: /gpfs/home/vbc1591/IMU-SSL/runs
+
+windowing:
+  min_window_seconds: 1.28    # T_min =  64 frames =  4 patches
+  max_window_seconds: 10.24   # T_max = 512 frames = 32 patches -> matches pretrain window
+
+data:
+  sensor_columns: [acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z]
+  batch_size: 64
+  num_workers: 4
+
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 10000000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 500
+  val_max_batches: 100   # val loader is infinite (resampled captions)
+
+  optim:
+    name: adamw
+    lr: 1.0e-4             # full end-to-end finetune -> lower LR than head-only probing
+    weight_decay: 0.01
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+
+  sched:
+    name: cosine
+    warmup_steps: 200
+
+  early_stopping:
+    enabled: true
+    monitor: val_loss
+    patience: 20
+
+logging:
+  log_every_steps: 5
+  ckpt_every_steps: 500
+  save_step_checkpoints: false
+
+wandb:
+  entity: yli32258-northwestern-university
+  project: TransfHAR_project
+
+# data reorg fix (see memory 5src-full-table-replication-inflight): the
+# on-disk HumanML3D/joints/ mirror was removed from the cluster; the real
+# data lives under HumanML3D/new_joints/ (this is a pre-existing repo-level
+# fix already used by other configs, e.g. imu_text_clip_realdata ones --
+# unrelated to the pretrained_run swap, needed for ANY fresh run today).
+humanml3d:
+  joints_subpath: HumanML3D/new_joints

@@ -1,0 +1,44 @@
+{
+  "run": "vit1d_pddd_finetune_pads_mae",
+  "ckpt": "/gpfs/home/vbc1591/IMU-SSL/runs/vit1d_pddd_finetune_pads_mae/checkpoints/best.pt",
+  "num_classes": 2,
+  "n_windows": 14040,
+  "n_subjects": 78,
+  "window": {
+    "acc": 0.7285612535612536,
+    "bal_acc": 0.5864267676767676,
+    "macro_f1": 0.5897428458057876
+  },
+  "subject_mean_prob": {
+    "acc": 0.7692307692307693,
+    "bal_acc": 0.5909090909090909,
+    "macro_f1": 0.5846153846153846
+  },
+  "subject_vote": {
+    "acc": 0.7692307692307693,
+    "bal_acc": 0.5909090909090909,
+    "macro_f1": 0.5846153846153846
+  },
+  "subject_confusion_mean_prob": [
+    [
+      4,
+      18
+    ],
+    [
+      0,
+      56
+    ]
+  ],
+  "binary_extras": {
+    "window": {
+      "auroc": 0.6417241111511945,
+      "bal_acc_best_threshold": 0.6098710317460317,
+      "best_threshold": 0.6193613409996033
+    },
+    "subject_mean_prob": {
+      "auroc": 0.7256493506493507,
+      "bal_acc_best_threshold": 0.7061688311688312,
+      "best_threshold": 0.6140244654483266
+    }
+  }
+}

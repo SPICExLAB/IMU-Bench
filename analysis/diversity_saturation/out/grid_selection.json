@@ -1,0 +1,286 @@
+{
+  "pool_n": 1959288,
+  "seed": 42,
+  "cluster_choice": "largest_first",
+  "selection": "equal_per_cluster_waterfill",
+  "cells": {
+    "k1_f0p01": {
+      "K": 1,
+      "fraction": 0.0001,
+      "frac_tag": "0p01",
+      "n_windows": 196,
+      "types_realised": 1,
+      "windows_per_type": 196.0,
+      "index_file": "/projects/b53017/vbc1591/diversity_saturation/grid/idx_k1_f0p01.npy"
+    },
+    "k1_f0p1": {
+      "K": 1,
+      "fraction": 0.001,
+      "frac_tag": "0p1",
+      "n_windows": 1959,
+      "types_realised": 1,
+      "windows_per_type": 1959.0,
+      "index_file": "/projects/b53017/vbc1591/diversity_saturation/grid/idx_k1_f0p1.npy"
+    },
+    "k5_f0p01": {
+      "K": 5,
+      "fraction": 0.0001,
+      "frac_tag": "0p01",
+      "n_windows": 196,
+      "types_realised": 5,
+      "windows_per_type": 39.2,
+      "index_file": "/projects/b53017/vbc1591/diversity_saturation/grid/idx_k5_f0p01.npy"
+    },
+    "k5_f0p1": {
+      "K": 5,
+      "fraction": 0.001,
+      "frac_tag": "0p1",
+      "n_windows": 1959,
+      "types_realised": 5,
+      "windows_per_type": 391.8,
+      "index_file": "/projects/b53017/vbc1591/diversity_saturation/grid/idx_k5_f0p1.npy"
+    },
+    "k5_f1": {
+      "K": 5,
+      "fraction": 0.01,
+      "frac_tag": "1",
+      "n_windows": 19593,
+      "types_realised": 5,
+      "windows_per_type": 3918.6,
+      "index_file": "/projects/b53017/vbc1591/diversity_saturation/grid/idx_k5_f1.npy"
+    },
+    "k10_f0p01": {
+      "K": 10,
+      "fraction": 0.0001,
+      "frac_tag": "0p01",
+      "n_windows": 196,
+      "types_realised": 10,
+      "windows_per_type": 19.6,
+      "index_file": "/projects/b53017/vbc1591/diversity_saturation/grid/idx_k10_f0p01.npy"
+    },
+    "k10_f0p1": {
+      "K": 10,
+      "fraction": 0.001,
+      "frac_tag": "0p1",
+      "n_windows": 1959,
+      "types_realised": 10,
+      "windows_per_type": 195.9,
+      "index_file": "/projects/b53017/vbc1591/diversity_saturation/grid/idx_k10_f0p1.npy"
+    },
+    "k10_f1": {
+      "K": 10,
+      "fraction": 0.01,
+      "frac_tag": "1",
+      "n_windows": 19593,
+      "types_realised": 10,
+      "windows_per_type": 1959.3,
+      "index_file": "/projects/b53017/vbc1591/diversity_saturation/grid/idx_k10_f1.npy"
+    },
+    "k25_f0p01": {
+      "K": 25,
+      "fraction": 0.0001,
+      "frac_tag": "0p01",
+      "n_windows": 196,
+      "types_realised": 25,
+      "windows_per_type": 7.8,
+      "index_file": "/projects/b53017/vbc1591/diversity_saturation/grid/idx_k25_f0p01.npy"
+    },
+    "k25_f0p1": {
+      "K": 25,
+      "fraction": 0.001,
+      "frac_tag": "0p1",
+      "n_windows": 1959,
+      "types_realised": 25,
+      "windows_per_type": 78.4,
+      "index_file": "/projects/b53017/vbc1591/diversity_saturation/grid/idx_k25_f0p1.npy"
+    },
+    "k25_f1": {
+      "K": 25,
+      "fraction": 0.01,
+      "frac_tag": "1",
+      "n_windows": 19593,
+      "types_realised": 25,
+      "windows_per_type": 783.7,
+      "index_file": "/projects/b53017/vbc1591/diversity_saturation/grid/idx_k25_f1.npy"
+    },
+    "k50_f0p01": {
+      "K": 50,
+      "fraction": 0.0001,
+      "frac_tag": "0p01",
+      "n_windows": 196,
+      "types_realised": 50,
+      "windows_per_type": 3.9,
+      "index_file": "/projects/b53017/vbc1591/diversity_saturation/grid/idx_k50_f0p01.npy"
+    },
+    "k50_f0p1": {
+      "K": 50,
+      "fraction": 0.001,
+      "frac_tag": "0p1",
+      "n_windows": 1959,
+      "types_realised": 50,
+      "windows_per_type": 39.2,
+      "index_file": "/projects/b53017/vbc1591/diversity_saturation/grid/idx_k50_f0p1.npy"
+    },
+    "k50_f1": {
+      "K": 50,
+      "fraction": 0.01,
+      "frac_tag": "1",
+      "n_windows": 19593,
+      "types_realised": 50,
+      "windows_per_type": 391.9,
+      "index_file": "/projects/b53017/vbc1591/diversity_saturation/grid/idx_k50_f1.npy"
+    },
+    "k100_f0p01": {
+      "K": 100,
+      "fraction": 0.0001,
+      "frac_tag": "0p01",
+      "n_windows": 196,
+      "types_realised": 100,
+      "windows_per_type": 2.0,
+      "index_file": "/projects/b53017/vbc1591/diversity_saturation/grid/idx_k100_f0p01.npy"
+    },
+    "k100_f0p1": {
+      "K": 100,
+      "fraction": 0.001,
+      "frac_tag": "0p1",
+      "n_windows": 1959,
+      "types_realised": 100,
+      "windows_per_type": 19.6,
+      "index_file": "/projects/b53017/vbc1591/diversity_saturation/grid/idx_k100_f0p1.npy"
+    },
+    "k100_f1": {
+      "K": 100,
+      "fraction": 0.01,
+      "frac_tag": "1",
+      "n_windows": 19593,
+      "types_realised": 100,
+      "windows_per_type": 195.9,
+      "index_file": "/projects/b53017/vbc1591/diversity_saturation/grid/idx_k100_f1.npy"
+    },
+    "k100_f10": {
+      "K": 100,
+      "fraction": 0.1,
+      "frac_tag": "10",
+      "n_windows": 195929,
+      "types_realised": 100,
+      "windows_per_type": 1959.3,
+      "index_file": "/projects/b53017/vbc1591/diversity_saturation/grid/idx_k100_f10.npy"
+    },
+    "k1000_f0p1": {
+      "K": 1000,
+      "fraction": 0.001,
+      "frac_tag": "0p1",
+      "n_windows": 1959,
+      "types_realised": 1000,
+      "windows_per_type": 2.0,
+      "index_file": "/projects/b53017/vbc1591/diversity_saturation/grid/idx_k1000_f0p1.npy"
+    },
+    "k1000_f1": {
+      "K": 1000,
+      "fraction": 0.01,
+      "frac_tag": "1",
+      "n_windows": 19593,
+      "types_realised": 1000,
+      "windows_per_type": 19.6,
+      "index_file": "/projects/b53017/vbc1591/diversity_saturation/grid/idx_k1000_f1.npy"
+    },
+    "k1000_f10": {
+      "K": 1000,
+      "fraction": 0.1,
+      "frac_tag": "10",
+      "n_windows": 195929,
+      "types_realised": 1000,
+      "windows_per_type": 195.9,
+      "index_file": "/projects/b53017/vbc1591/diversity_saturation/grid/idx_k1000_f10.npy"
+    },
+    "k1000_f100": {
+      "K": 1000,
+      "fraction": 1.0,
+      "frac_tag": "100",
+      "n_windows": 1959288,
+      "types_realised": 1000,
+      "windows_per_type": 1959.3,
+      "index_file": "/projects/b53017/vbc1591/diversity_saturation/grid/idx_k1000_f100.npy"
+    }
+  },
+  "skipped": [
+    {
+      "cell": "k1_f1",
+      "reason": "not enough data in K clusters",
+      "need": 19593,
+      "available": 7114
+    },
+    {
+      "cell": "k1_f10",
+      "reason": "not enough data in K clusters",
+      "need": 195929,
+      "available": 7114
+    },
+    {
+      "cell": "k1_f100",
+      "reason": "not enough data in K clusters",
+      "need": 1959288,
+      "available": 7114
+    },
+    {
+      "cell": "k5_f10",
+      "reason": "not enough data in K clusters",
+      "need": 195929,
+      "available": 26654
+    },
+    {
+      "cell": "k5_f100",
+      "reason": "not enough data in K clusters",
+      "need": 1959288,
+      "available": 26654
+    },
+    {
+      "cell": "k10_f10",
+      "reason": "not enough data in K clusters",
+      "need": 195929,
+      "available": 47240
+    },
+    {
+      "cell": "k10_f100",
+      "reason": "not enough data in K clusters",
+      "need": 1959288,
+      "available": 47240
+    },
+    {
+      "cell": "k25_f10",
+      "reason": "not enough data in K clusters",
+      "need": 195929,
+      "available": 103876
+    },
+    {
+      "cell": "k25_f100",
+      "reason": "not enough data in K clusters",
+      "need": 1959288,
+      "available": 103876
+    },
+    {
+      "cell": "k50_f10",
+      "reason": "not enough data in K clusters",
+      "need": 195929,
+      "available": 190477
+    },
+    {
+      "cell": "k50_f100",
+      "reason": "not enough data in K clusters",
+      "need": 1959288,
+      "available": 190477
+    },
+    {
+      "cell": "k100_f100",
+      "reason": "not enough data in K clusters",
+      "need": 1959288,
+      "available": 347609
+    },
+    {
+      "cell": "k1000_f0p01",
+      "reason": "fewer windows than types",
+      "need": 196,
+      "K": 1000
+    }
+  ]
+}

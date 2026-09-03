@@ -1,0 +1,1200 @@
+# IMU-Bench task registry (v1).
+#
+# One card per benchmark task. Everything the leaderboard, the config
+# generator, the launcher and the scorer need to know about a task lives here.
+#
+# UNIFIED INPUT (all tasks): a single wrist IMU stream, x in R^{C x T},
+#   C = 6 channels [acc_F, acc_L, acc_U, gyro_F, gyro_L, gyro_U] in the FLU
+#   (forward-left-up) sensor frame, acc in m/s^2 WITH gravity, gyro in rad/s,
+#   50 Hz (microgesture: native 100 Hz, see card), z-scored per window.
+#   The acc-only ablation encoder receives x[:3].
+#   T = 512 (10.24 s) for pose / language; 128 (2.56 s) for odometry and PD;
+#   128 (1 s @ 100 Hz zero-padded) for microgesture.
+#
+# UNIFIED OUTPUT: declared per card (`output`) as the tensor the task head
+#   emits per window; the scorer maps it to the primary metric.
+#
+# CONTROL VARIABLES (identical for every encoder within a task):
+#   the training template + `recipe` block (LR/steps/patience/monitor), the
+#   split, the seed, the checkpoint-selection rule and the scorer.
+#
+# Metric direction: `higher_is_better` per metric. `primary` is the single
+#   number ranked on the leaderboard; everything else is shown in the
+#   per-task detail table.
+#
+# `legacy_runs`: existing runs/<name> that were trained with a config
+#   equivalent to what make_config.py would generate (same template, same
+#   recipe) -> harvest.py imports them so the leaderboard starts populated;
+#   the cell keeps provenance "harvest:<run>" until re-run through the harness.
+
+version: 1
+
+tasks:
+
+  # ───────────────────────────────────────────────────────────────────────
+  arm_pose_nymeria:
+    name: "Arm pose"
+    subtitle: "Nymeria real right-wrist IMU → 5-joint right-arm chain rotations"
+    family: pose
+    order: 1
+    dataset:
+      name: Nymeria (real wrist IMU + Project-Aria mocap)
+      train: /projects/b53017/vbc1591/processed_data_body_Ty_rwrist   # 867 sessions
+      val:   /projects/b53017/vbc1591/processed_data_test_body_Ty_rwrist  # 101 sessions
+      test:  null                       # v1: no held-out test split (val is reported)
+      split_rule: "fixed pre-partitioned session directories (session-disjoint)"
+    input:
+      channels: 6
+      hz: 50
+      window_seconds: 10.24
+      T: 512
+      frame: FLU
+      gravity: included
+    output:
+      shape: "[P_t=32, J=5, 6]"
+      desc: "6D-continuous local rotations of SMPL joints [14,17,19,21,23] (collar, shoulder, elbow, wrist, hand), one per 0.32 s patch"
+      head: ViT1DPoseDecoder (2 layers, hidden 192)
+    selection: {split: val, monitor: val_loss, mode: min}
+    eval_split: val
+    metrics:
+      primary: pos_err_cm
+      pos_err_cm:  {higher_is_better: false, fmt: "{:.2f}", label: "pos err (cm)", desc: "FK joint-position error at the 5 arm joints with GT ancestors (scripts/eval_arm_pose_position_error.py)"}
+      ang_err_deg: {higher_is_better: false, fmt: "{:.2f}", label: "ang err (°)"}
+      val_pose_mse: {higher_is_better: false, fmt: "{:.5f}", label: "val 6D-MSE"}
+    scorer: bench.score.arm_pose
+    templates:
+      probe:    {config: configs/vit1d_arm_pose_probe_nymeria_mae_multidata_flu.yaml, objective_type: pose_probe}
+      finetune: {config: configs/vit1d_arm_pose_finetune_nymeria_mae_multidata_flu.yaml, objective_type: pose}
+      scratch:  {config: configs/vit1d_arm_pose_supervised_nymeria_altattn_scratch.yaml, objective_type: pose}
+    recipe:
+      trainer.early_stopping: {enabled: true, monitor: val_loss, patience: 20}
+      logging.save_step_checkpoints: false
+    slurm: {time: "06:00:00", gres: "gpu:1", mem: 64G, cpus: 8}
+    legacy_runs:
+      mae_11src/probe:      vit1d_arm_pose_probe_nymeria_mae_multidata
+      mae_11src/finetune:   vit1d_arm_pose_finetune_nymeria_mae_multidata
+      mae_5src/probe:       vit1d_arm_pose_probe_nymeria_mae_realdata_ocdetect_eatingspeed_motionx_sonic
+      mae_5src/finetune:    vit1d_arm_pose_finetune_nymeria_mae_realdata_ocdetect_eatingspeed_motionx_sonic
+      mae_noaltattn/probe:  vit1d_arm_pose_probe_nymeria_mae_noaltattn_multidata
+      mae_acconly/probe:    vit1d_arm_pose_probe_nymeria_mae_acconly_multidata
+      focal/probe:          vit1d_arm_pose_probe_nymeria_focal_multidata
+      simmtm/probe:         vit1d_arm_pose_probe_nymeria_simmtm_multidata
+      relcon/probe:         vit1d_arm_pose_probe_nymeria_relcon_multidata
+      scratch/scratch:      vit1d_arm_pose_supervised_nymeria_altattn_scratch
+    external:
+      mobileposer: {metrics: {pos_err_cm: 9.74, ang_err_deg: 24.28}, source: "Experiments_table.md §1 / baselines/full_body_pose/SimplePoser", notes: "MobilePoser predicts the torso chain too (compounding); our metric holds ancestors at GT."}
+
+  # ───────────────────────────────────────────────────────────────────────
+  full_body_pose_nymeria:
+    name: "Full-body pose"
+    subtitle: "Nymeria real right-wrist IMU → 23-joint SMPL body (root excluded)"
+    family: pose
+    order: 2
+    dataset:
+      name: Nymeria (real wrist IMU + Project-Aria mocap)
+      train: /projects/b53017/vbc1591/processed_data_body_Ty_rwrist
+      val:   /projects/b53017/vbc1591/processed_data_test_body_Ty_rwrist
+      test:  null
+      split_rule: "fixed pre-partitioned session directories (session-disjoint)"
+    input: {channels: 6, hz: 50, window_seconds: 10.24, T: 512, frame: FLU, gravity: included}
+    output:
+      shape: "[P_t=32, J=23, 6]"
+      desc: "6D local rotations for SMPL joints 1..23, one per 0.32 s patch (sub_patches=1)"
+      head: ViT1DPoseDecoder
+    selection: {split: val, monitor: mpjpe_mm, mode: min}
+    eval_split: val
+    metrics:
+      primary: mpjpe_mm
+      mpjpe_mm:  {higher_is_better: false, fmt: "{:.2f}", label: "MPJPE (mm)", desc: "root-relative FK joint position error, joints 1-23 (imu_lm/objectives/pose_1d.py::_compute_val_mpjpe), at the selected checkpoint"}
+      val_pose_mse: {higher_is_better: false, fmt: "{:.5f}", label: "val 6D-MSE"}
+    scorer: bench.score.full_body_pose
+    templates:
+      probe:    {config: configs/vit1d_full_body_pose_probe_nymeria_mae_multidata_flu.yaml, objective_type: pose_probe}
+      finetune: {config: configs/vit1d_full_body_pose_finetune_nymeria_mae_multidata_flu.yaml, objective_type: pose}
+      scratch:  {config: configs/vit1d_full_body_pose_supervised_nymeria_altattn_scratch.yaml, objective_type: pose}
+    recipe:
+      # legacy probe/scratch configs had early stopping DISABLED (runaway jobs, only
+      # best_mpjpe.pt written); the bench recipe selects on val mpjpe with patience.
+      trainer.early_stopping: {enabled: true, monitor: mpjpe_mm, mode: min, patience: 20}
+      logging.save_step_checkpoints: false
+    recipe_by_protocol:
+      # Finetune LR = 1e-3 for EVERY encoder (2026-08-17): the template's 1e-4 was
+      # untuned; the LR-only sweep (Experiments_table §2a) showed a flat plateau over
+      # 5e-4..2e-3 (87.8 mm) vs 92.4 mm at 1e-4 for MAE. One recipe per task, so all
+      # encoders get it. Legacy 1e-4 finetune results are archived under
+      # bench/results/_archive/full_body_pose_nymeria_finetune_lr1e-4/.
+      finetune: {trainer.optim.lr: 0.001}
+    checkpoint: best_mpjpe        # min-val-MPJPE checkpoint for legacy AND bench runs (bench best.pt == best_mpjpe.pt)
+    slurm: {time: "12:00:00", gres: "gpu:1", mem: 64G, cpus: 8}
+    legacy_runs:
+      mae_11src/probe:      vit1d_full_body_pose_probe_nymeria_mae_multidata
+      mae_11src/finetune:   vit1d_full_body_pose_finetune_nymeria_mae_multidata_lr1e-3   # LR-sweep run, config == template + lr 1e-3
+      mae_5src/probe:       vit1d_full_body_pose_probe_nymeria_mae_realdata_ocdetect_eatingspeed_motionx_sonic
+      mae_noaltattn/probe:  vit1d_full_body_pose_probe_nymeria_mae_noaltattn_multidata
+      mae_acconly/probe:    vit1d_full_body_pose_probe_nymeria_mae_acconly_multidata
+      focal/probe:          vit1d_full_body_pose_probe_nymeria_focal_multidata
+      simmtm/probe:         vit1d_full_body_pose_probe_nymeria_simmtm_multidata
+      relcon/probe:         vit1d_full_body_pose_probe_nymeria_relcon_multidata
+      scratch/scratch:      vit1d_full_body_pose_supervised_nymeria_altattn_scratch
+    external:
+      mobileposer: {metrics: {mpjpe_mm: 91.88}, source: "Experiments_table.md §2 / baselines/full_body_pose/SimplePoser"}
+
+  # ───────────────────────────────────────────────────────────────────────
+  odometry_nymeria_worldframe:
+    name: "Odometry"
+    subtitle: "Nymeria real right-wrist IMU → pelvis velocity in a per-window canonical world frame"
+    family: odometry
+    order: 3
+    dataset:
+      name: Nymeria (real wrist IMU + Project-Aria pelvis trajectory)
+      train: /projects/b53017/vbc1591/processed_data_body_Ty_rwrist
+      val:   /projects/b53017/vbc1591/processed_data_test_body_Ty_rwrist
+      test:  null
+      split_rule: "fixed pre-partitioned session directories (session-disjoint)"
+    input: {channels: 6, hz: 50, window_seconds: 2.56, T: 128, frame: FLU, gravity: included}
+    output:
+      shape: "[P_t=8, K=4, 3]"
+      desc: "3-D pelvis velocity (m/s) in the window's canonical world frame (heading of net displacement → +X), 4 sub-patches per 0.32 s patch (0.08 s resolution)"
+      head: ViT1DOdomDecoder (1 layer, hidden 192)
+    selection: {split: val, monitor: val_loss, mode: min}
+    eval_split: val
+    metrics:
+      primary: ate_m
+      ate_m:     {higher_is_better: false, fmt: "{:.4f}", label: "ATE (m)", desc: "mean absolute trajectory error of the cumulative-sum reconstruction over all val windows (scripts/eval_odom_nymeria_worldframe.py::reconstruct_and_score)"}
+      drift_pct: {higher_is_better: false, fmt: "{:.2f}", label: "drift (%)", desc: "final-position error / path length over windows with path > 0.1 m"}
+      vel_mse:   {higher_is_better: false, fmt: "{:.5f}", label: "vel MSE"}
+    scorer: bench.score.odometry
+    templates:
+      # probe = the finetune objective with freeze_encoder: true (added to run.py) so
+      # probe/finetune/scratch share ONE loader, window (2.56 s) and decoder.
+      probe:    {config: configs/vit1d_odom_worldframe_finetune_nymeria_mae_multidata_flu.yaml, objective_type: odom_finetune_nymeria_real_wrist_worldframe_flu, extra: {freeze_encoder: true}}
+      finetune: {config: configs/vit1d_odom_worldframe_finetune_nymeria_mae_multidata_flu.yaml, objective_type: odom_finetune_nymeria_real_wrist_worldframe_flu}
+      scratch:  {config: configs/vit1d_odom_worldframe_supervised_nymeria_altattn_scratch.yaml, objective_type: odom_nymeria_real_wrist_worldframe_flu}
+    recipe:
+      trainer.early_stopping: {enabled: true, monitor: val_loss, patience: 20, min_delta: 0.0001}
+      logging.save_step_checkpoints: false
+    recipe_by_protocol:
+      probe: {trainer.optim.lr: 0.0003}
+    slurm: {time: "08:00:00", gres: "gpu:1", mem: 64G, cpus: 8}
+    legacy_runs:
+      mae_11src/finetune:   vit1d_odom_worldframe_finetune_nymeria_mae_multidata
+      mae_5src/finetune:    vit1d_odom_worldframe_finetune_nymeria_mae_realdata_ocdetect_eatingspeed_motionx_sonic
+      scratch/scratch:      vit1d_odom_worldframe_supervised_nymeria_altattn_scratch
+    external:
+      # scored on THIS protocol by baselines/full_body_pose/SimplePoser/eval_nymeria_worldframe_odom.py
+      # (writes the result JSON itself; `scored: true` tells --harvest-external not to overwrite it).
+      # Its native "root translation error over 1 s" (15.0 cm) is NOT an ATE and is no longer shown.
+      mobileposer: {scored: true, source: "baselines/full_body_pose/SimplePoser/eval_nymeria_worldframe_odom.py"}
+      tlio:        {metrics: {ate_m: 0.1510, drift_pct: 38.79, vel_mse: 0.02419}, source: "Experiments_table.md §4b / baselines/odometry/TLIO"}
+      airio:       {metrics: {ate_m: 0.1444, drift_pct: 38.56, vel_mse: 0.02461}, source: "Experiments_table.md §4b / baselines/odometry/Air-IO"}
+
+  # ───────────────────────────────────────────────────────────────────────
+  microgesture_openwatch:
+    name: "Microgesture"
+    subtitle: "OpenWatch wrist IMU → 5 gestures + background (paper protocol, real recordings)"
+    family: classification
+    order: 4
+    dataset:
+      name: OpenWatch (Bonazzi et al.), open_watch_without_augmentations
+      root: /projects/b53017/vbc1591/openwatch_raw/open_watch_without_augmentations
+      split_rule: "contamination-safe posture-stratified subject split over canonical identities, seed 42, 80/10/10 (33/5/5 subjects; val 102 clips / test 87 clips)"
+      test: "yes — paper-comparable"
+    input:
+      channels: 6
+      hz: 100
+      window_seconds: 1.0
+      T: 128
+      frame: FLU
+      gravity: included
+      note: "1 s (100-sample) windows at stride 20 from a centred 2.0 s sub-interval (6 windows/clip), zero-padded to 128 samples after preprocessing"
+    output:
+      shape: "[6]"
+      desc: "class logits per 1 s window; clip label = first run of k=3 identical window predictions, else majority (imu_lm/utils/clip_voting.py)"
+      head: LinearHead(384, 6)
+    selection: {split: val, monitor: macro_f1, mode: max, note: "window-level val macro-F1 (paper §3.3.3), inverse-frequency class-weighted CE"}
+    eval_split: test
+    metrics:
+      primary: clip_macro_f1
+      clip_macro_f1:   {higher_is_better: true, fmt: "{:.3f}", label: "clip F1 (test)"}
+      clip_acc:        {higher_is_better: true, fmt: "{:.3f}", label: "clip acc (test)"}
+      window_macro_f1: {higher_is_better: true, fmt: "{:.3f}", label: "win F1 (test)"}
+      window_acc:      {higher_is_better: true, fmt: "{:.3f}", label: "win acc (test)"}
+      val_clip_macro_f1: {higher_is_better: true, fmt: "{:.3f}", label: "clip F1 (val)"}
+      val_window_macro_f1: {higher_is_better: true, fmt: "{:.3f}", label: "win F1 (val)"}
+    recipe_by_protocol:
+      finetune:
+        trainer.optim.lr: 1.0e-5   # 2026-08-27: 1e-4 overfits OpenWatch's ~200 train clips (val loss
+                                   # 1.05 -> 2.5 by step 2.4k while val F1 only oscillates), and selection
+                                   # then picks a noise peak that does not transfer (val 0.694 -> test 0.582).
+                                   # At 1e-5 the same encoder scores test 0.638 with val 0.722, and a second
+                                   # low-LR variant reproduces it (0.635). Applies to EVERY encoder.
+    scorer: bench.score.microgesture
+    templates:
+      probe:    {config: configs/vit1d_gesture_probe_openwatch_6class_mae_multidata_flu_windowed_stratified.yaml, objective_type: openwatch_gesture_probe}
+      finetune: {config: configs/vit1d_gesture_finetune_openwatch_6class_mae_multidata_flu_windowed_stratified.yaml, objective_type: openwatch_gesture_finetune}
+      scratch:  {config: configs/vit1d_gesture_supervised_openwatch_6class_altattn_scratch_windowed_stratified.yaml, objective_type: openwatch_gesture_supervised}
+    recipe:
+      trainer.early_stopping: {enabled: true, monitor: macro_f1, mode: max, patience: 20}
+      logging.save_step_checkpoints: false
+      # OpenWatch CSVs are raw integer sensor counts (Huawei Watch GT 4, 100 Hz): |acc| at rest = 4,096
+      # LSB/g; gyro 14.3 LSB/dps (+-2000 dps, fitted 13.4 from gravity-direction rotation). Convert to
+      # m/s^2 and rad/s so physical / raw encoders see real units (z-score encoders: no-op). 2026-08-23
+      data.acc_scale: 0.0023942
+      data.gyro_scale: 0.0012217
+    slurm: {time: "03:00:00", gres: "gpu:1", mem: 64G, cpus: 8}
+    legacy_runs:
+      mae_11src/probe:      vit1d_gesture_probe_openwatch_6class_mae_windowed_strat
+      mae_11src/finetune:   vit1d_gesture_finetune_openwatch_6class_mae_windowed_strat
+      mae_noaltattn/probe:  vit1d_gesture_probe_openwatch_6class_mae_noaltattn_windowed_strat
+      mae_acconly/probe:    vit1d_gesture_probe_openwatch_6class_mae_acconly_windowed_strat
+      focal/probe:          vit1d_gesture_probe_openwatch_6class_focal_windowed_strat
+      simmtm/probe:         vit1d_gesture_probe_openwatch_6class_simmtm_windowed_strat
+      relcon/probe:         vit1d_gesture_probe_openwatch_6class_relcon_windowed_strat
+      scratch/scratch:      vit1d_gesture_supervised_openwatch_6class_altattn_scratch_windowed_strat
+    external:
+      mixtoken: {metrics: {clip_macro_f1: 0.500, clip_acc: 0.621, window_macro_f1: 0.490, window_acc: 0.592}, source: "results_openwatch_mixtoken_noaug.json (test)", eval_split: test}
+      normwear: {metrics: {clip_macro_f1: 0.453, clip_acc: 0.517, window_macro_f1: 0.425, window_acc: 0.504}, source: "results_openwatch_normwear_protocol_noaug.json (test)", eval_split: test}
+
+  # ───────────────────────────────────────────────────────────────────────
+  language_humanml3d:
+    name: "Language alignment"
+    subtitle: "HumanML3D synthetic wrist IMU (UniMTS_data) ↔ text retrieval"
+    family: retrieval
+    order: 5
+    dataset:
+      name: HumanML3D / UniMTS_data sim (right-wrist channel), aug_texts captions
+      root: /projects/b53017/vbc1591/HumanML3D
+      split_rule: "HumanML3D official train/val/test lists (val 1,197 clips; test 3,701 clips)"
+      test: "yes"
+    input: {channels: 6, hz: 50, window_seconds: 10.24, T: 512, frame: FLU, gravity: included, note: "clips wrap-padded to 512, deterministic first-crop; SO(3) rotation aug at train time"}
+    output:
+      shape: "[512]"
+      desc: "L2-normalised IMU embedding in CLIP ViT-B/32 text space (ContrastiveCLIPHead); text tower trainable, i2t InfoNCE, τ=0.1 fixed"
+      head: ContrastiveCLIPHead(384→512) + CLIP text tower
+    selection: {split: none, monitor: fixed_budget, mode: latest, note: "fixed 8k-step budget, final checkpoint (latest.pt); §13e: val-loss best.pt under-selects for retrieval, latest ≥ best on every arm"}
+    eval_split: test
+    metrics:
+      primary: r1_g100
+      r1_g100:      {higher_is_better: true, fmt: "{:.1f}", label: "R@1 G=100 (mean i2t/t2i)", desc: "mean of IMU→Text and Text→IMU Recall@1 over 200 random 100-item galleries, first-caption protocol"}
+      r1_i2t_g100:  {higher_is_better: true, fmt: "{:.1f}", label: "i2t R@1"}
+      r1_t2i_g100:  {higher_is_better: true, fmt: "{:.1f}", label: "t2i R@1"}
+      mrr_i2t_g100: {higher_is_better: true, fmt: "{:.1f}", label: "i2t MRR"}
+      mrr_t2i_g100: {higher_is_better: true, fmt: "{:.1f}", label: "t2i MRR"}
+      r1_i2t_full:  {higher_is_better: true, fmt: "{:.1f}", label: "i2t R@1 full"}
+      r1_t2i_full:  {higher_is_better: true, fmt: "{:.1f}", label: "t2i R@1 full"}
+      mrr_i2t_full: {higher_is_better: true, fmt: "{:.1f}", label: "i2t MRR full"}
+      mrr_t2i_full: {higher_is_better: true, fmt: "{:.1f}", label: "t2i MRR full"}
+      val_r1_g100:  {higher_is_better: true, fmt: "{:.1f}", label: "R@1 G=100 (val)"}
+    scorer: bench.score.language
+    templates:
+      # §13e tuned recipe (lr 1e-4, τ 0.1 fixed) is the single template; protocol
+      # toggles freeze_imu_encoder / pretrained_run.
+      probe:    {config: configs/retrieval_tune/lr1e-4_tau0.1fixed.yaml, objective_type: imu_text_clip_flu, extra: {freeze_imu_encoder: true}}
+      finetune: {config: configs/retrieval_tune/lr1e-4_tau0.1fixed.yaml, objective_type: imu_text_clip_flu, extra: {freeze_imu_encoder: false}}
+      scratch:  {config: configs/retrieval_tune/lr1e-4_tau0.1fixed.yaml, objective_type: imu_text_clip_flu, extra: {freeze_imu_encoder: false}}
+    recipe:
+      trainer.max_steps: 8000
+      trainer.early_stopping: {enabled: true, monitor: val_loss, patience: 1000}   # never fires; best.pt kept for reference, latest.pt is scored
+      logging.save_step_checkpoints: false
+    checkpoint: latest
+    slurm: {time: "03:00:00", gres: "gpu:1", mem: 64G, cpus: 8}
+    legacy_runs:
+      mae_11src/finetune:   rtune_lr1e-4_tau0.1fixed
+    external:
+      unimts:         {metrics: {r1_g100: 17.6, r1_i2t_g100: 33.6, r1_t2i_g100: 1.6, mrr_i2t_g100: 49.3, mrr_t2i_g100: 6.4}, source: "analysis/retrieval_eval/humanml3d__unimts_official_wrist.json (VAL split; contaminated: pretrained on HumanML3D)", eval_split: val, status: invalid}
+      unimts_scratch: {metrics: {r1_g100: 13.05, r1_i2t_g100: 24.4, r1_t2i_g100: 1.7, mrr_i2t_g100: 39.1, mrr_t2i_g100: 6.7}, source: "analysis/retrieval_eval/humanml3d__unimts_scratch_jointmask_wrist.json (VAL split)", eval_split: val}
+
+  # ───────────────────────────────────────────────────────────────────────
+  pd_pads:
+    name: "Parkinson's disease"
+    subtitle: "PADS smartwatch IMU → {Healthy, PD, Differential diagnosis} per subject"
+    family: classification
+    order: 6
+    dataset:
+      name: PADS (PhysioNet 1.0.0), 469 patients, 11 tasks × 2 wrists
+      parquet: /projects/b53017/vbc1591/pads_dataset.parquet
+      split_rule: "subject-disjoint 80/20 (375 / 94 subjects), splits.group_key=subject_id, seed 0"
+      test: null
+    input: {channels: 6, hz: 50, window_seconds: 2.56, T: 128, frame: FLU, gravity: "NOT included (Apple CoreMotion userAcceleration)"}
+    output:
+      shape: "[3]"
+      desc: "class logits per 2.56 s window; subject prediction = argmax of mean softmax over all of the subject's windows"
+      head: LinearHead(384, 3)
+    selection: {split: val, monitor: bal_acc, mode: max, note: "window-level val balanced accuracy"}
+    eval_split: val
+    metrics:
+      # primary switched bal-acc -> macro-F1 on 2026-08-18: with 14 HC / 58 PD / 22 DD val subjects a
+      # classifier that never predicts the majority class scores bal-acc 0.54 while getting 31 % of
+      # subjects right (ART-large probe); macro-F1 charges a zero for any class never predicted.
+      primary: subject_macro_f1
+      subject_macro_f1: {higher_is_better: true, fmt: "{:.3f}", label: "subject macro-F1", desc: "mean-prob aggregation over ~180 windows/subject (scripts/eval_pads_subject_level.py), macro-F1 over HC/PD/DD; a class never predicted contributes F1=0. Chance ≈ 0.25-0.33"}
+      subject_bal_acc:  {higher_is_better: true, fmt: "{:.1%}", label: "subject bal-acc", desc: "mean per-class subject recall; can reward degenerate classifiers (see caveats)"}
+      n_classes_predicted: {higher_is_better: true, fmt: "{:.0f}", label: "#classes predicted (of 3)", desc: "sanity flag: number of distinct classes the subject-level classifier ever predicts"}
+      window_bal_acc:   {higher_is_better: true, fmt: "{:.1%}", label: "window bal-acc"}
+      window_macro_f1:  {higher_is_better: true, fmt: "{:.3f}", label: "window macro-F1"}
+      window_acc:       {higher_is_better: true, fmt: "{:.1%}", label: "window acc"}
+    scorer: bench.score.pd
+    templates:
+      probe:    {config: configs/vit1d_pd_probe_pads_mae_multidata_flu.yaml, objective_type: utd_mhad_probe}
+      finetune: {config: configs/vit1d_pd_finetune_pads_mae_multidata_flu.yaml, objective_type: utd_mhad_finetune}
+      scratch:  {config: configs/vit1d_pd_supervised_pads_altattn_scratch.yaml, objective_type: supervised}
+    recipe:
+      preprocess.normalize.acc_units: m/s2   # CoreMotion userAcceleration: gravity removed, so |mean acc| is small but the unit IS m/s^2
+      # legacy runs selected on val_loss, which understates bal_acc by 3-7 pp
+      # (Experiments_table §14); bench selects on val bal_acc for every row.
+      trainer.early_stopping: {enabled: true, monitor: bal_acc, mode: max, patience: 20}
+      logging.save_step_checkpoints: false
+    slurm: {time: "03:00:00", gres: "gpu:1", mem: 64G, cpus: 8}
+    legacy_runs: {}       # all legacy PD runs used val_loss selection -> not recipe-equivalent; re-run
+    legacy_runs_valloss:  # kept for the "legacy (val_loss sel.)" harvest, status=partial
+      mae_11src/probe:      vit1d_pd_probe_pads_mae
+      mae_11src/finetune:   vit1d_pd_finetune_pads_mae
+      mae_5src/probe:       vit1d_pd_probe_pads_mae_realdata_ocdetect_eatingspeed_motionx_sonic
+      mae_5src/finetune:    vit1d_pd_finetune_pads_mae_realdata_ocdetect_eatingspeed_motionx_sonic
+      focal/probe:          vit1d_pd_probe_pads_focal
+      focal/finetune:       vit1d_pd_finetune_pads_focal
+      simmtm/probe:         vit1d_pd_probe_pads_simmtm
+      simmtm/finetune:      vit1d_pd_finetune_pads_simmtm
+      relcon/probe:         vit1d_pd_probe_pads_relcon
+      relcon/finetune:      vit1d_pd_finetune_pads_relcon
+      scratch/scratch:      vit1d_pd_supervised_pads_scratch
+    external: {}
+
+# Encoders × protocols that make up the controlled grid (every task).
+  # ───────────────────────────────────────────────────────────────────────
+  har_wisdm:
+    name: "HAR · WISDM"
+    subtitle: "WISDM activity recognition from one wrist/arm IMU (18 classes)"
+    family: har
+    aggregate_into: har_mean          # shown in the main tables only through the HAR mean column
+    order: 20
+    dataset:
+      name: "WISDM: smartwatch (Weiss et al. 2019), 18 activities, 51 subjects; wrist acc+gyro at 20 Hz -> 50 Hz canonical"
+      path: /projects/b53017/vbc1591/IMULM_master_dataset_v2.parquet
+      train_on_datasets: [wisdm]
+      test: null
+      split_rule: "subject-disjoint 20 % val split (splits.val_ratio 0.2, seed 42); val is reported (no test split in v1)"
+    input: {channels: 6, hz: 50, window_seconds: 2.56, T: 128, frame: sensor, gravity: included}
+    output:
+      shape: "[K=18]"
+      desc: "class logits over the 18 activity labels, one per 2.56 s window"
+      head: LinearHead on mean-pooled tokens
+    selection: {split: val, monitor: val_loss, mode: min, note: "same convention as Experiments_table §3 (metrics read at the min-val-loss checkpoint)"}
+    eval_split: val
+    metrics:
+      primary: macro_f1
+      macro_f1: {higher_is_better: true, fmt: "{:.3f}", label: "macro-F1", desc: "window-level macro-F1 on the val split at the min-val-loss checkpoint (trainer eval, imu_lm/objectives/supervised.py)"}
+      bal_acc:  {higher_is_better: true, fmt: "{:.1%}", label: "bal-acc"}
+      acc:      {higher_is_better: true, fmt: "{:.1%}", label: "acc"}
+      val_loss: {higher_is_better: false, fmt: "{:.4f}", label: "val loss"}
+    scorer: bench.score.har
+    templates:
+      probe:    {config: configs/vit1d_har_probe_wisdm_mae_multidata_flu.yaml, objective_type: utd_mhad_probe}
+      finetune: {config: configs/vit1d_har_finetune_wisdm_mae_multidata_flu.yaml, objective_type: utd_mhad_finetune}
+      scratch:  {config: configs/vit1d_har_supervised_wisdm_altattn_scratch.yaml, objective_type: supervised}
+    recipe:
+      trainer.early_stopping: {enabled: true, monitor: val_loss, patience: 20}
+      logging.save_step_checkpoints: false
+    slurm: {time: "04:00:00", gres: "gpu:1", mem: 48G, cpus: 8}
+    legacy_runs:
+      mae_11src/probe:      vit1d_har_probe_wisdm_mae_multidata
+      mae_11src/finetune:   vit1d_har_finetune_wisdm_mae_multidata
+      mae_5src/probe:       vit1d_har_probe_wisdm_mae_realdata_ocdetect_eatingspeed_motionx_sonic
+      mae_5src/finetune:    vit1d_har_finetune_wisdm_mae_realdata_ocdetect_eatingspeed_motionx_sonic
+      mae_noaltattn/probe:  vit1d_har_probe_wisdm_mae_noaltattn_multidata
+      mae_acconly/probe:    vit1d_har_probe_wisdm_mae_acconly_multidata
+      focal/probe:          vit1d_har_probe_wisdm_focal_multidata
+      simmtm/probe:         vit1d_har_probe_wisdm_simmtm_multidata
+      relcon/probe:         vit1d_har_probe_wisdm_relcon_multidata
+      scratch/scratch:      vit1d_har_supervised_wisdm_altattn_scratch
+    external:
+      deepconvlstm: {scored: true, source: "runs/deepconvlstm_har_wisdm (Experiments_table §3; scored by bench.score.har --run)"}
+
+  # ───────────────────────────────────────────────────────────────────────
+  har_utd_mhad:
+    name: "HAR · UTD-MHAD"
+    subtitle: "UTD-MHAD activity recognition from one wrist/arm IMU (21 classes)"
+    family: har
+    aggregate_into: har_mean          # shown in the main tables only through the HAR mean column
+    order: 21
+    dataset:
+      name: "UTD-MHAD: wrist inertial sensor (Chen et al. 2015), 21 actions, 8 subjects; acc+gyro 50 Hz"
+      path: /projects/b53017/vbc1591/IMULM_master_dataset_v2.parquet
+      train_on_datasets: [utd_mhad]
+      test: null
+      split_rule: "subject-disjoint 20 % val split (splits.val_ratio 0.2, seed 42); val is reported (no test split in v1)"
+    input: {channels: 6, hz: 50, window_seconds: 2.56, T: 128, frame: sensor, gravity: included}
+    output:
+      shape: "[K=21]"
+      desc: "class logits over the 21 activity labels, one per 2.56 s window"
+      head: LinearHead on mean-pooled tokens
+    selection: {split: val, monitor: val_loss, mode: min, note: "same convention as Experiments_table §3 (metrics read at the min-val-loss checkpoint)"}
+    eval_split: val
+    metrics:
+      primary: macro_f1
+      macro_f1: {higher_is_better: true, fmt: "{:.3f}", label: "macro-F1", desc: "window-level macro-F1 on the val split at the min-val-loss checkpoint (trainer eval, imu_lm/objectives/supervised.py)"}
+      bal_acc:  {higher_is_better: true, fmt: "{:.1%}", label: "bal-acc"}
+      acc:      {higher_is_better: true, fmt: "{:.1%}", label: "acc"}
+      val_loss: {higher_is_better: false, fmt: "{:.4f}", label: "val loss"}
+    scorer: bench.score.har
+    templates:
+      probe:    {config: configs/vit1d_har_probe_utd_mhad_mae_multidata_flu.yaml, objective_type: utd_mhad_probe}
+      finetune: {config: configs/vit1d_har_finetune_utd_mhad_mae_multidata_flu.yaml, objective_type: utd_mhad_finetune}
+      scratch:  {config: configs/vit1d_har_supervised_utd_mhad_altattn_scratch.yaml, objective_type: supervised}
+    recipe:
+      trainer.early_stopping: {enabled: true, monitor: val_loss, patience: 20}
+      logging.save_step_checkpoints: false
+    slurm: {time: "04:00:00", gres: "gpu:1", mem: 48G, cpus: 8}
+    legacy_runs:
+      mae_11src/probe:      vit1d_har_probe_utd_mhad_mae_multidata
+      mae_11src/finetune:   vit1d_har_finetune_utd_mhad_mae_multidata
+      mae_5src/probe:       vit1d_har_probe_utd_mhad_mae_realdata_ocdetect_eatingspeed_motionx_sonic
+      mae_5src/finetune:    vit1d_har_finetune_utd_mhad_mae_realdata_ocdetect_eatingspeed_motionx_sonic
+      mae_noaltattn/probe:  vit1d_har_probe_utd_mhad_mae_noaltattn_multidata
+      mae_acconly/probe:    vit1d_har_probe_utd_mhad_mae_acconly_multidata
+      focal/probe:          vit1d_har_probe_utd_mhad_focal_multidata
+      simmtm/probe:         vit1d_har_probe_utd_mhad_simmtm_multidata
+      relcon/probe:         vit1d_har_probe_utd_mhad_relcon_multidata
+      scratch/scratch:      vit1d_har_supervised_utd_mhad_altattn_scratch
+    external:
+      deepconvlstm: {scored: true, source: "runs/deepconvlstm_har_utd_mhad (Experiments_table §3; scored by bench.score.har --run)"}
+
+  # ───────────────────────────────────────────────────────────────────────
+  har_pamap2:
+    name: "HAR · PAMAP2"
+    subtitle: "PAMAP2 activity recognition from one wrist/arm IMU (18 classes)"
+    family: har
+    aggregate_into: har_mean          # shown in the main tables only through the HAR mean column
+    order: 22
+    dataset:
+      name: "PAMAP2: wrist IMU (Reiss & Stricker 2012), 18 activities, 9 subjects; acc+gyro 100 Hz -> 50 Hz"
+      path: /projects/b53017/vbc1591/IMULM_master_dataset_v2.parquet
+      train_on_datasets: [pamap2]
+      test: null
+      split_rule: "subject-disjoint 20 % val split (splits.val_ratio 0.2, seed 42); val is reported (no test split in v1)"
+    input: {channels: 6, hz: 50, window_seconds: 2.56, T: 128, frame: sensor, gravity: included}
+    output:
+      shape: "[K=18]"
+      desc: "class logits over the 18 activity labels, one per 2.56 s window"
+      head: LinearHead on mean-pooled tokens
+    selection: {split: val, monitor: val_loss, mode: min, note: "same convention as Experiments_table §3 (metrics read at the min-val-loss checkpoint)"}
+    eval_split: val
+    metrics:
+      primary: macro_f1
+      macro_f1: {higher_is_better: true, fmt: "{:.3f}", label: "macro-F1", desc: "window-level macro-F1 on the val split at the min-val-loss checkpoint (trainer eval, imu_lm/objectives/supervised.py)"}
+      bal_acc:  {higher_is_better: true, fmt: "{:.1%}", label: "bal-acc"}
+      acc:      {higher_is_better: true, fmt: "{:.1%}", label: "acc"}
+      val_loss: {higher_is_better: false, fmt: "{:.4f}", label: "val loss"}
+    scorer: bench.score.har
+    templates:
+      probe:    {config: configs/vit1d_har_probe_pamap2_mae_multidata_flu.yaml, objective_type: utd_mhad_probe}
+      finetune: {config: configs/vit1d_har_finetune_pamap2_mae_multidata_flu.yaml, objective_type: utd_mhad_finetune}
+      scratch:  {config: configs/vit1d_har_supervised_pamap2_altattn_scratch.yaml, objective_type: supervised}
+    recipe:
+      trainer.early_stopping: {enabled: true, monitor: val_loss, patience: 20}
+      logging.save_step_checkpoints: false
+    slurm: {time: "04:00:00", gres: "gpu:1", mem: 48G, cpus: 8}
+    legacy_runs:
+      mae_11src/probe:      vit1d_har_probe_pamap2_mae_multidata
+      mae_11src/finetune:   vit1d_har_finetune_pamap2_mae_multidata
+      mae_5src/probe:       vit1d_har_probe_pamap2_mae_realdata_ocdetect_eatingspeed_motionx_sonic
+      mae_5src/finetune:    vit1d_har_finetune_pamap2_mae_realdata_ocdetect_eatingspeed_motionx_sonic
+      mae_noaltattn/probe:  vit1d_har_probe_pamap2_mae_noaltattn_multidata
+      mae_acconly/probe:    vit1d_har_probe_pamap2_mae_acconly_multidata
+      focal/probe:          vit1d_har_probe_pamap2_focal_multidata
+      simmtm/probe:         vit1d_har_probe_pamap2_simmtm_multidata
+      relcon/probe:         vit1d_har_probe_pamap2_relcon_multidata
+      scratch/scratch:      vit1d_har_supervised_pamap2_altattn_scratch
+    external:
+      deepconvlstm: {scored: true, source: "runs/deepconvlstm_har_pamap2 (Experiments_table §3; scored by bench.score.har --run)"}
+
+  # ───────────────────────────────────────────────────────────────────────
+  har_recofit:
+    name: "HAR · RecoFit"
+    subtitle: "RecoFit activity recognition from one wrist/arm IMU (13 classes)"
+    family: har
+    aggregate_into: har_mean          # shown in the main tables only through the HAR mean column
+    order: 23
+    dataset:
+      name: "RecoFit: arm-worn IMU gym exercises (Morris et al. 2014), 13 classes; acc+gyro 50 Hz"
+      path: /projects/b53017/vbc1591/IMULM_master_dataset_v2.parquet
+      train_on_datasets: [recofit]
+      test: null
+      split_rule: "subject-disjoint 20 % val split (splits.val_ratio 0.2, seed 42); val is reported (no test split in v1)"
+    input: {channels: 6, hz: 50, window_seconds: 2.56, T: 128, frame: sensor, gravity: included}
+    output:
+      shape: "[K=13]"
+      desc: "class logits over the 13 activity labels, one per 2.56 s window"
+      head: LinearHead on mean-pooled tokens
+    selection: {split: val, monitor: val_loss, mode: min, note: "same convention as Experiments_table §3 (metrics read at the min-val-loss checkpoint)"}
+    eval_split: val
+    metrics:
+      primary: macro_f1
+      macro_f1: {higher_is_better: true, fmt: "{:.3f}", label: "macro-F1", desc: "window-level macro-F1 on the val split at the min-val-loss checkpoint (trainer eval, imu_lm/objectives/supervised.py)"}
+      bal_acc:  {higher_is_better: true, fmt: "{:.1%}", label: "bal-acc"}
+      acc:      {higher_is_better: true, fmt: "{:.1%}", label: "acc"}
+      val_loss: {higher_is_better: false, fmt: "{:.4f}", label: "val loss"}
+    scorer: bench.score.har
+    templates:
+      probe:    {config: configs/vit1d_har_probe_recofit_mae_multidata_flu.yaml, objective_type: utd_mhad_probe}
+      finetune: {config: configs/vit1d_har_finetune_recofit_mae_multidata_flu.yaml, objective_type: utd_mhad_finetune}
+      scratch:  {config: configs/vit1d_har_supervised_recofit_altattn_scratch.yaml, objective_type: supervised}
+    recipe:
+      trainer.early_stopping: {enabled: true, monitor: val_loss, patience: 20}
+      logging.save_step_checkpoints: false
+    slurm: {time: "04:00:00", gres: "gpu:1", mem: 48G, cpus: 8}
+    legacy_runs:
+      mae_11src/probe:      vit1d_har_probe_recofit_mae_multidata
+      mae_11src/finetune:   vit1d_har_finetune_recofit_mae_multidata
+      mae_5src/probe:       vit1d_har_probe_recofit_mae_realdata_ocdetect_eatingspeed_motionx_sonic
+      mae_5src/finetune:    vit1d_har_finetune_recofit_mae_realdata_ocdetect_eatingspeed_motionx_sonic
+      mae_noaltattn/probe:  vit1d_har_probe_recofit_mae_noaltattn_multidata
+      mae_acconly/probe:    vit1d_har_probe_recofit_mae_acconly_multidata
+      focal/probe:          vit1d_har_probe_recofit_focal_multidata
+      simmtm/probe:         vit1d_har_probe_recofit_simmtm_multidata
+      relcon/probe:         vit1d_har_probe_recofit_relcon_multidata
+      scratch/scratch:      vit1d_har_supervised_recofit_altattn_scratch
+    external:
+      deepconvlstm: {scored: true, source: "runs/deepconvlstm_har_recofit (Experiments_table §3; scored by bench.score.har --run)"}
+
+  # ───────────────────────────────────────────────────────────────────────
+  har_hhar:
+    name: "HAR · HHAR"
+    subtitle: "HHAR activity recognition from one wrist/arm IMU (6 classes)"
+    family: har
+    aggregate_into: har_mean          # shown in the main tables only through the HAR mean column
+    order: 24
+    dataset:
+      name: "HHAR: smartwatch acc+gyro (Stisen et al. 2015), 6 activities, 9 users x 4 watches; asof-aligned, 50 Hz canonical"
+      path: /projects/b53017/vbc1591/hhar_dataset.parquet
+      train_on_datasets: [hhar]
+      test: null
+      split_rule: "subject-disjoint 20 % val split (splits.val_ratio 0.2, seed 42); val is reported (no test split in v1)"
+    input: {channels: 6, hz: 50, window_seconds: 2.56, T: 128, frame: sensor, gravity: included}
+    output:
+      shape: "[K=6]"
+      desc: "class logits over the 6 activity labels, one per 2.56 s window"
+      head: LinearHead on mean-pooled tokens
+    selection: {split: val, monitor: val_loss, mode: min, note: "same convention as Experiments_table §3 (metrics read at the min-val-loss checkpoint)"}
+    eval_split: val
+    metrics:
+      primary: macro_f1
+      macro_f1: {higher_is_better: true, fmt: "{:.3f}", label: "macro-F1", desc: "window-level macro-F1 on the val split at the min-val-loss checkpoint (trainer eval, imu_lm/objectives/supervised.py)"}
+      bal_acc:  {higher_is_better: true, fmt: "{:.1%}", label: "bal-acc"}
+      acc:      {higher_is_better: true, fmt: "{:.1%}", label: "acc"}
+      val_loss: {higher_is_better: false, fmt: "{:.4f}", label: "val loss"}
+    scorer: bench.score.har
+    templates:
+      probe:    {config: configs/vit1d_har_probe_hhar_mae_multidata_flu.yaml, objective_type: utd_mhad_probe}
+      finetune: {config: configs/vit1d_har_finetune_hhar_mae_multidata_flu.yaml, objective_type: utd_mhad_finetune}
+      scratch:  {config: configs/vit1d_har_supervised_hhar_altattn_scratch.yaml, objective_type: supervised}
+    recipe:
+      trainer.early_stopping: {enabled: true, monitor: val_loss, patience: 20}
+      logging.save_step_checkpoints: false
+    slurm: {time: "04:00:00", gres: "gpu:1", mem: 48G, cpus: 8}
+    legacy_runs:
+      mae_11src/probe:      vit1d_har_probe_hhar_mae_multidata
+      mae_11src/finetune:   vit1d_har_finetune_hhar_mae_multidata
+      mae_5src/probe:       vit1d_har_probe_hhar_mae_realdata_ocdetect_eatingspeed_motionx_sonic
+      mae_5src/finetune:    vit1d_har_finetune_hhar_mae_realdata_ocdetect_eatingspeed_motionx_sonic
+      mae_noaltattn/probe:  vit1d_har_probe_hhar_mae_noaltattn_multidata
+      mae_acconly/probe:    vit1d_har_probe_hhar_mae_acconly_multidata
+      focal/probe:          vit1d_har_probe_hhar_focal_multidata
+      simmtm/probe:         vit1d_har_probe_hhar_simmtm_multidata
+      relcon/probe:         vit1d_har_probe_hhar_relcon_multidata
+      scratch/scratch:      vit1d_har_supervised_hhar_altattn_scratch
+    external:
+      deepconvlstm: {scored: true, source: "runs/deepconvlstm_har_hhar (Experiments_table §3; scored by bench.score.har --run)"}
+
+  # ───────────────────────────────────────────────────────────────────────
+  har_mhealth:
+    name: "HAR · MHEALTH"
+    subtitle: "MHEALTH activity recognition from one wrist/arm IMU (12 classes)"
+    family: har
+    aggregate_into: har_mean          # shown in the main tables only through the HAR mean column
+    order: 25
+    dataset:
+      name: "MHEALTH: right-lower-arm Shimmer2 acc+gyro (Banos et al. 2014), 12 activities, 10 subjects, 50 Hz; raw gyro is bias-dominated"
+      path: /projects/b53017/vbc1591/mhealth_dataset.parquet
+      train_on_datasets: [mhealth]
+      test: null
+      split_rule: "subject-disjoint 20 % val split (splits.val_ratio 0.2, seed 42); val is reported (no test split in v1)"
+    input: {channels: 6, hz: 50, window_seconds: 2.56, T: 128, frame: sensor, gravity: included}
+    output:
+      shape: "[K=12]"
+      desc: "class logits over the 12 activity labels, one per 2.56 s window"
+      head: LinearHead on mean-pooled tokens
+    selection: {split: val, monitor: val_loss, mode: min, note: "same convention as Experiments_table §3 (metrics read at the min-val-loss checkpoint)"}
+    eval_split: val
+    metrics:
+      primary: macro_f1
+      macro_f1: {higher_is_better: true, fmt: "{:.3f}", label: "macro-F1", desc: "window-level macro-F1 on the val split at the min-val-loss checkpoint (trainer eval, imu_lm/objectives/supervised.py)"}
+      bal_acc:  {higher_is_better: true, fmt: "{:.1%}", label: "bal-acc"}
+      acc:      {higher_is_better: true, fmt: "{:.1%}", label: "acc"}
+      val_loss: {higher_is_better: false, fmt: "{:.4f}", label: "val loss"}
+    scorer: bench.score.har
+    templates:
+      probe:    {config: configs/vit1d_har_probe_mhealth_mae_multidata_flu.yaml, objective_type: utd_mhad_probe}
+      finetune: {config: configs/vit1d_har_finetune_mhealth_mae_multidata_flu.yaml, objective_type: utd_mhad_finetune}
+      scratch:  {config: configs/vit1d_har_supervised_mhealth_altattn_scratch.yaml, objective_type: supervised}
+    recipe:
+      trainer.early_stopping: {enabled: true, monitor: val_loss, patience: 20}
+      logging.save_step_checkpoints: false
+    slurm: {time: "04:00:00", gres: "gpu:1", mem: 48G, cpus: 8}
+    legacy_runs:
+      mae_11src/probe:      vit1d_har_probe_mhealth_mae_multidata
+      mae_11src/finetune:   vit1d_har_finetune_mhealth_mae_multidata
+      mae_5src/probe:       vit1d_har_probe_mhealth_mae_realdata_ocdetect_eatingspeed_motionx_sonic
+      mae_5src/finetune:    vit1d_har_finetune_mhealth_mae_realdata_ocdetect_eatingspeed_motionx_sonic
+      mae_noaltattn/probe:  vit1d_har_probe_mhealth_mae_noaltattn_multidata
+      mae_acconly/probe:    vit1d_har_probe_mhealth_mae_acconly_multidata
+      focal/probe:          vit1d_har_probe_mhealth_focal_multidata
+      simmtm/probe:         vit1d_har_probe_mhealth_simmtm_multidata
+      relcon/probe:         vit1d_har_probe_mhealth_relcon_multidata
+      scratch/scratch:      vit1d_har_supervised_mhealth_altattn_scratch
+    external:
+      deepconvlstm: {scored: true, source: "runs/deepconvlstm_har_mhealth (Experiments_table §3; scored by bench.score.har --run)"}
+
+  # ───────────────────────────────────────────────────────────────────────
+  har_samosa:
+    name: "HAR · SAMoSA"
+    subtitle: "SAMoSA activity recognition from one wrist IMU (27 raw labels, 20 subjects)"
+    family: har
+    aggregate_into: har_mean
+    order: 26
+    dataset:
+      name: "SAMoSA: kitchen/household micro-activities, 20 subjects, 125 sessions; 6.7 h, 125 sessions, 27 dataset_activity_id labels (head size = the trainer's own label map)"
+      path: /projects/b53017/vbc1591/IMULM_master_dataset_v2.parquet
+      train_on_datasets: [samosa]
+      test: null
+      split_rule: "subject-disjoint 20 % val split (splits.val_ratio 0.2, seed 42); val is reported"
+      leakage: "none — added 2026-08-19; this dataset is absent from every pretraining pool the bench evaluates"
+    input: {channels: 6, hz: 50, window_seconds: 2.56, T: 128, frame: sensor, gravity: included}
+    output:
+      shape: "[K]"
+      desc: "class logits over the dataset's activity labels, one per 2.56 s window"
+      head: LinearHead on mean-pooled tokens
+    selection: {split: val, monitor: val_loss, mode: min}
+    eval_split: val
+    metrics:
+      primary: macro_f1
+      macro_f1: {higher_is_better: true, fmt: "{:.3f}", label: "macro-F1", desc: "window-level macro-F1 on the val split at the min-val-loss checkpoint, re-evaluated with pooled predictions (bench.score.har)"}
+      bal_acc:  {higher_is_better: true, fmt: "{:.1%}", label: "bal-acc"}
+      acc:      {higher_is_better: true, fmt: "{:.1%}", label: "acc"}
+      val_loss: {higher_is_better: false, fmt: "{:.4f}", label: "val loss"}
+    scorer: bench.score.har
+    templates:
+      probe:    {config: configs/har_extra/vit1d_har_probe_samosa_mae_multidata_flu.yaml, objective_type: utd_mhad_probe}
+      finetune: {config: configs/har_extra/vit1d_har_finetune_samosa_mae_multidata_flu.yaml, objective_type: utd_mhad_finetune}
+      scratch:  {config: configs/har_extra/vit1d_har_supervised_samosa_altattn_scratch.yaml, objective_type: supervised}
+    recipe:
+      trainer.early_stopping: {enabled: true, monitor: val_loss, patience: 20}
+      logging.save_step_checkpoints: false
+    slurm: {time: "04:00:00", gres: "gpu:1", mem: 48G, cpus: 8}
+
+  # ───────────────────────────────────────────────────────────────────────
+  har_shoaib:
+    enabled: false   # DROPPED 2026-08-20: unsplittable — 1 subject_id, and each of the 13 sessions is exactly one activity, so a session-disjoint split gives disjoint train/val label sets
+    name: "HAR · Shoaib"
+    subtitle: "Shoaib activity recognition from one wrist IMU (13 raw labels, 1 subjects)"
+    family: har
+    aggregate_into: har_mean
+    order: 27
+    dataset:
+      name: "Shoaib: wrist smartphone activities (Shoaib et al. 2014), 13 sessions; 6.5 h, 13 sessions, 13 dataset_activity_id labels (head size = the trainer's own label map)"
+      path: /projects/b53017/vbc1591/IMULM_master_dataset_v2.parquet
+      train_on_datasets: [shoaib]
+      test: null
+      split_rule: "SESSION-disjoint (not subject-disjoint): the release has a single subject_id, so train and val share the same participant — weaker generalisation test than the other HAR sets. subject-disjoint 20 % val split (splits.val_ratio 0.2, seed 42); val is reported"
+      leakage: "none — added 2026-08-19; this dataset is absent from every pretraining pool the bench evaluates"
+    input: {channels: 6, hz: 50, window_seconds: 2.56, T: 128, frame: sensor, gravity: included}
+    output:
+      shape: "[K]"
+      desc: "class logits over the dataset's activity labels, one per 2.56 s window"
+      head: LinearHead on mean-pooled tokens
+    selection: {split: val, monitor: val_loss, mode: min}
+    eval_split: val
+    metrics:
+      primary: macro_f1
+      macro_f1: {higher_is_better: true, fmt: "{:.3f}", label: "macro-F1", desc: "window-level macro-F1 on the val split at the min-val-loss checkpoint, re-evaluated with pooled predictions (bench.score.har)"}
+      bal_acc:  {higher_is_better: true, fmt: "{:.1%}", label: "bal-acc"}
+      acc:      {higher_is_better: true, fmt: "{:.1%}", label: "acc"}
+      val_loss: {higher_is_better: false, fmt: "{:.4f}", label: "val loss"}
+    scorer: bench.score.har
+    templates:
+      probe:    {config: configs/har_extra/vit1d_har_probe_shoaib_mae_multidata_flu.yaml, objective_type: utd_mhad_probe}
+      finetune: {config: configs/har_extra/vit1d_har_finetune_shoaib_mae_multidata_flu.yaml, objective_type: utd_mhad_finetune}
+      scratch:  {config: configs/har_extra/vit1d_har_supervised_shoaib_altattn_scratch.yaml, objective_type: supervised}
+    recipe:
+      splits.group_key: session_id   # Shoaib has ONE subject_id in the parquet; group by session instead
+      trainer.early_stopping: {enabled: true, monitor: val_loss, patience: 20}
+      logging.save_step_checkpoints: false
+    slurm: {time: "04:00:00", gres: "gpu:1", mem: 48G, cpus: 8}
+
+  # ───────────────────────────────────────────────────────────────────────
+  har_ut_watch:
+    name: "HAR · UT-Watch"
+    subtitle: "UT-Watch activity recognition from one wrist IMU (24 raw labels, 20 subjects)"
+    family: har
+    aggregate_into: har_mean
+    order: 28
+    dataset:
+      name: "UT-Watch: smartwatch daily activities, 20 subjects; 45.3 h, 4 sessions, 24 dataset_activity_id labels (head size = the trainer's own label map)"
+      path: /projects/b53017/vbc1591/IMULM_master_dataset_v2.parquet
+      train_on_datasets: [ut_watch]
+      test: null
+      split_rule: "subject-disjoint 20 % val split (splits.val_ratio 0.2, seed 42); val is reported"
+      leakage: "none — added 2026-08-19; this dataset is absent from every pretraining pool the bench evaluates"
+    input: {channels: 6, hz: 50, window_seconds: 2.56, T: 128, frame: sensor, gravity: included}
+    output:
+      shape: "[K]"
+      desc: "class logits over the dataset's activity labels, one per 2.56 s window"
+      head: LinearHead on mean-pooled tokens
+    selection: {split: val, monitor: val_loss, mode: min}
+    eval_split: val
+    metrics:
+      primary: macro_f1
+      macro_f1: {higher_is_better: true, fmt: "{:.3f}", label: "macro-F1", desc: "window-level macro-F1 on the val split at the min-val-loss checkpoint, re-evaluated with pooled predictions (bench.score.har)"}
+      bal_acc:  {higher_is_better: true, fmt: "{:.1%}", label: "bal-acc"}
+      acc:      {higher_is_better: true, fmt: "{:.1%}", label: "acc"}
+      val_loss: {higher_is_better: false, fmt: "{:.4f}", label: "val loss"}
+    notes: "UT-Watch: the raw release is 86 % 'none'; that null class plus 'other' are dropped and the 5 remaining global ADL classes are used (2026-08-19)."
+    scorer: bench.score.har
+    templates:
+      probe:    {config: configs/har_extra/vit1d_har_probe_ut_watch_mae_multidata_flu.yaml, objective_type: utd_mhad_probe}
+      finetune: {config: configs/har_extra/vit1d_har_finetune_ut_watch_mae_multidata_flu.yaml, objective_type: utd_mhad_finetune}
+      scratch:  {config: configs/har_extra/vit1d_har_supervised_ut_watch_altattn_scratch.yaml, objective_type: supervised}
+    recipe:
+      data.label_column: global_activity_id
+      data.drop_label_values: [0, 9000]   # rest_inactive (86 %) and 'other'
+      trainer.early_stopping: {enabled: true, monitor: val_loss, patience: 20}
+      logging.save_step_checkpoints: false
+    slurm: {time: "04:00:00", gres: "gpu:1", mem: 48G, cpus: 8}
+
+  # ───────────────────────────────────────────────────────────────────────
+  har_prism:
+    name: "HAR · PRISM"
+    subtitle: "PrISM-Tracker (Arakawa et al.) — PRISM activity recognition from one wrist IMU (96 raw labels, 31 subjects)"
+    family: har
+    aggregate_into: har_mean
+    order: 29
+    dataset:
+      name: "PRISM: held-out probe dataset (base.yaml splits.probe_dataset), 31 subjects, never in any pretraining pool; 16.3 h, 20 sessions, 96 dataset_activity_id labels (head size = the trainer's own label map)"
+      path: /projects/b53017/vbc1591/IMULM_master_dataset_v2.parquet
+      train_on_datasets: [prism]
+      label_column: global_activity_id   # 6 ADL classes; dataset_activity_id has 96 procedure steps
+      test: null
+      split_rule: "subject-disjoint 20 % val split (splits.val_ratio 0.2, seed 42); val is reported"
+      leakage: "none — added 2026-08-19; this dataset is absent from every pretraining pool the bench evaluates"
+    input: {channels: 6, hz: 50, window_seconds: 2.56, T: 128, frame: sensor, gravity: included}
+    output:
+      shape: "[K]"
+      desc: "class logits over the dataset's activity labels, one per 2.56 s window"
+      head: LinearHead on mean-pooled tokens
+    selection: {split: val, monitor: val_loss, mode: min}
+    eval_split: val
+    metrics:
+      primary: macro_f1
+      macro_f1: {higher_is_better: true, fmt: "{:.3f}", label: "macro-F1", desc: "window-level macro-F1 on the val split at the min-val-loss checkpoint, re-evaluated with pooled predictions (bench.score.har)"}
+      bal_acc:  {higher_is_better: true, fmt: "{:.1%}", label: "bal-acc"}
+      acc:      {higher_is_better: true, fmt: "{:.1%}", label: "acc"}
+      val_loss: {higher_is_better: false, fmt: "{:.4f}", label: "val loss"}
+    notes: "PrISM-Tracker (Arakawa et al.): 5 global ADL classes; the 96 fine-grained procedure steps in dataset_activity_id are a separate, much harder task (best macro-F1 0.11)."
+    scorer: bench.score.har
+    templates:
+      probe:    {config: configs/har_extra/vit1d_har_probe_prism_mae_multidata_flu.yaml, objective_type: utd_mhad_probe}
+      finetune: {config: configs/har_extra/vit1d_har_finetune_prism_mae_multidata_flu.yaml, objective_type: utd_mhad_finetune}
+      scratch:  {config: configs/har_extra/vit1d_har_supervised_prism_altattn_scratch.yaml, objective_type: supervised}
+    recipe:
+      data.drop_label_values: [0]   # rest_inactive (0.2 %)
+      data.label_column: global_activity_id
+      trainer.early_stopping: {enabled: true, monitor: val_loss, patience: 20}
+      logging.save_step_checkpoints: false
+    slurm: {time: "04:00:00", gres: "gpu:1", mem: 48G, cpus: 8}
+
+
+  # ─────────────────────────────────────────────────────────────────────
+  # FRAME-MATCH ABLATION: rotated-frame eval variants (2026-08-20).
+  # Same dataset, same split, same recipe as the base card -- the ONLY
+  # difference is `frame_perturb`, one fixed random SO(3) rotation of the
+  # raw window applied to train AND val alike (imu_lm/data/augmentations/
+  # transform.py::apply_frame_perturb, called from preprocess_window). They
+  # measure what a frozen encoder loses when the sensor is mounted in a
+  # frame it never saw. `in_grid: false` keeps them out of --fill-missing;
+  # `hidden: true` keeps them out of the leaderboard's main tables.
+  arm_pose_nymeria_rot7:
+    name: "Arm pose \xB7 rotated frame"
+    subtitle: "Nymeria real right-wrist IMU \u2192 5-joint right-arm chain rotations \u2014 identical task,\
+      \ re-expressed in ONE fixed random SO(3) frame (frame_perturb seed 7), applied to every split"
+    family: pose
+    order: 900
+    dataset:
+      name: Nymeria (real wrist IMU + Project-Aria mocap)
+      train: /projects/b53017/vbc1591/processed_data_body_Ty_rwrist
+      val: /projects/b53017/vbc1591/processed_data_test_body_Ty_rwrist
+      test: null
+      split_rule: fixed pre-partitioned session directories (session-disjoint)
+    input:
+      channels: 6
+      hz: 50
+      window_seconds: 10.24
+      T: 512
+      frame: FLU
+      gravity: included
+    output:
+      shape: '[P_t=32, J=5, 6]'
+      desc: 6D-continuous local rotations of SMPL joints [14,17,19,21,23] (collar, shoulder, elbow, wrist,
+        hand), one per 0.32 s patch
+      head: ViT1DPoseDecoder (2 layers, hidden 192)
+    selection:
+      split: val
+      monitor: val_loss
+      mode: min
+    eval_split: val
+    metrics:
+      primary: pos_err_cm
+      pos_err_cm:
+        higher_is_better: false
+        fmt: '{:.2f}'
+        label: pos err (cm)
+        desc: FK joint-position error at the 5 arm joints with GT ancestors (scripts/eval_arm_pose_position_error.py)
+      ang_err_deg:
+        higher_is_better: false
+        fmt: '{:.2f}'
+        label: "ang err (\xB0)"
+      val_pose_mse:
+        higher_is_better: false
+        fmt: '{:.5f}'
+        label: val 6D-MSE
+    scorer: bench.score.arm_pose
+    templates:
+      probe:
+        config: configs/vit1d_arm_pose_probe_nymeria_mae_multidata_flu.yaml
+        objective_type: pose_probe
+      finetune:
+        config: configs/vit1d_arm_pose_finetune_nymeria_mae_multidata_flu.yaml
+        objective_type: pose
+      scratch:
+        config: configs/vit1d_arm_pose_supervised_nymeria_altattn_scratch.yaml
+        objective_type: pose
+    recipe:
+      trainer.early_stopping:
+        enabled: true
+        monitor: val_loss
+        patience: 20
+      logging.save_step_checkpoints: false
+      frame_perturb:
+        enabled: true
+        mode: fixed
+        rotation_set: so3
+        seed: 7
+    slurm:
+      time: 06:00:00
+      gres: gpu:1
+      mem: 64G
+      cpus: 8
+    in_grid: false
+    hidden: true
+    frame_variant:
+      of: arm_pose_nymeria
+      frame_perturb:
+        enabled: true
+        mode: fixed
+        rotation_set: so3
+        seed: 7
+  microgesture_openwatch_rot7:
+    name: "Microgesture \xB7 rotated frame"
+    subtitle: "OpenWatch wrist IMU \u2192 5 gestures + background (paper protocol, real recordings) \u2014\
+      \ identical task, re-expressed in ONE fixed random SO(3) frame (frame_perturb seed 7), applied to\
+      \ every split"
+    family: classification
+    order: 901
+    dataset:
+      name: OpenWatch (Bonazzi et al.), open_watch_without_augmentations
+      root: /projects/b53017/vbc1591/openwatch_raw/open_watch_without_augmentations
+      split_rule: contamination-safe posture-stratified subject split over canonical identities, seed 42,
+        80/10/10 (33/5/5 subjects; val 102 clips / test 87 clips)
+      test: "yes \u2014 paper-comparable"
+    input:
+      channels: 6
+      hz: 100
+      window_seconds: 1.0
+      T: 128
+      frame: FLU
+      gravity: included
+      note: 1 s (100-sample) windows at stride 20 from a centred 2.0 s sub-interval (6 windows/clip), zero-padded
+        to 128 samples after preprocessing
+    output:
+      shape: '[6]'
+      desc: class logits per 1 s window; clip label = first run of k=3 identical window predictions, else
+        majority (imu_lm/utils/clip_voting.py)
+      head: LinearHead(384, 6)
+    selection:
+      split: val
+      monitor: macro_f1
+      mode: max
+      note: "window-level val macro-F1 (paper \xA73.3.3), inverse-frequency class-weighted CE"
+    eval_split: test
+    metrics:
+      primary: clip_macro_f1
+      clip_macro_f1:
+        higher_is_better: true
+        fmt: '{:.3f}'
+        label: clip F1 (test)
+      clip_acc:
+        higher_is_better: true
+        fmt: '{:.3f}'
+        label: clip acc (test)
+      window_macro_f1:
+        higher_is_better: true
+        fmt: '{:.3f}'
+        label: win F1 (test)
+      window_acc:
+        higher_is_better: true
+        fmt: '{:.3f}'
+        label: win acc (test)
+      val_clip_macro_f1:
+        higher_is_better: true
+        fmt: '{:.3f}'
+        label: clip F1 (val)
+      val_window_macro_f1:
+        higher_is_better: true
+        fmt: '{:.3f}'
+        label: win F1 (val)
+    recipe_by_protocol:
+      finetune:
+        trainer.optim.lr: 1.0e-5   # 2026-08-27: 1e-4 overfits OpenWatch's ~200 train clips (val loss
+                                   # 1.05 -> 2.5 by step 2.4k while val F1 only oscillates), and selection
+                                   # then picks a noise peak that does not transfer (val 0.694 -> test 0.582).
+                                   # At 1e-5 the same encoder scores test 0.638 with val 0.722, and a second
+                                   # low-LR variant reproduces it (0.635). Applies to EVERY encoder.
+    scorer: bench.score.microgesture
+    templates:
+      probe:
+        config: configs/vit1d_gesture_probe_openwatch_6class_mae_multidata_flu_windowed_stratified.yaml
+        objective_type: openwatch_gesture_probe
+      finetune:
+        config: configs/vit1d_gesture_finetune_openwatch_6class_mae_multidata_flu_windowed_stratified.yaml
+        objective_type: openwatch_gesture_finetune
+      scratch:
+        config: configs/vit1d_gesture_supervised_openwatch_6class_altattn_scratch_windowed_stratified.yaml
+        objective_type: openwatch_gesture_supervised
+    recipe:
+      trainer.early_stopping:
+        enabled: true
+        monitor: macro_f1
+        mode: max
+        patience: 20
+      logging.save_step_checkpoints: false
+      frame_perturb:
+        enabled: true
+        mode: fixed
+        rotation_set: so3
+        seed: 7
+    slurm:
+      time: 03:00:00
+      gres: gpu:1
+      mem: 64G
+      cpus: 8
+    in_grid: false
+    hidden: true
+    frame_variant:
+      of: microgesture_openwatch
+      frame_perturb:
+        enabled: true
+        mode: fixed
+        rotation_set: so3
+        seed: 7
+  har_wisdm_rot7:
+    name: "HAR \xB7 WISDM \xB7 rotated frame"
+    subtitle: "WISDM activity recognition from one wrist/arm IMU (18 classes) \u2014 identical task, re-expressed\
+      \ in ONE fixed random SO(3) frame (frame_perturb seed 7), applied to every split"
+    family: har
+    order: 902
+    dataset:
+      name: 'WISDM: smartwatch (Weiss et al. 2019), 18 activities, 51 subjects; wrist acc+gyro at 20 Hz
+        -> 50 Hz canonical'
+      path: /projects/b53017/vbc1591/IMULM_master_dataset_v2.parquet
+      train_on_datasets:
+      - wisdm
+      test: null
+      split_rule: subject-disjoint 20 % val split (splits.val_ratio 0.2, seed 42); val is reported (no test
+        split in v1)
+    input:
+      channels: 6
+      hz: 50
+      window_seconds: 2.56
+      T: 128
+      frame: sensor
+      gravity: included
+    output:
+      shape: '[K=18]'
+      desc: class logits over the 18 activity labels, one per 2.56 s window
+      head: LinearHead on mean-pooled tokens
+    selection:
+      split: val
+      monitor: val_loss
+      mode: min
+      note: "same convention as Experiments_table \xA73 (metrics read at the min-val-loss checkpoint)"
+    eval_split: val
+    metrics:
+      primary: macro_f1
+      macro_f1:
+        higher_is_better: true
+        fmt: '{:.3f}'
+        label: macro-F1
+        desc: window-level macro-F1 on the val split at the min-val-loss checkpoint (trainer eval, imu_lm/objectives/supervised.py)
+      bal_acc:
+        higher_is_better: true
+        fmt: '{:.1%}'
+        label: bal-acc
+      acc:
+        higher_is_better: true
+        fmt: '{:.1%}'
+        label: acc
+      val_loss:
+        higher_is_better: false
+        fmt: '{:.4f}'
+        label: val loss
+    scorer: bench.score.har
+    templates:
+      probe:
+        config: configs/vit1d_har_probe_wisdm_mae_multidata_flu.yaml
+        objective_type: utd_mhad_probe
+      finetune:
+        config: configs/vit1d_har_finetune_wisdm_mae_multidata_flu.yaml
+        objective_type: utd_mhad_finetune
+      scratch:
+        config: configs/vit1d_har_supervised_wisdm_altattn_scratch.yaml
+        objective_type: supervised
+    recipe:
+      trainer.early_stopping:
+        enabled: true
+        monitor: val_loss
+        patience: 20
+      logging.save_step_checkpoints: false
+      frame_perturb:
+        enabled: true
+        mode: fixed
+        rotation_set: so3
+        seed: 7
+    slurm:
+      time: 04:00:00
+      gres: gpu:1
+      mem: 48G
+      cpus: 8
+    in_grid: false
+    hidden: true
+    frame_variant:
+      of: har_wisdm
+      frame_perturb:
+        enabled: true
+        mode: fixed
+        rotation_set: so3
+        seed: 7
+  har_pamap2_rot7:
+    name: "HAR \xB7 PAMAP2 \xB7 rotated frame"
+    subtitle: "PAMAP2 activity recognition from one wrist/arm IMU (18 classes) \u2014 identical task, re-expressed\
+      \ in ONE fixed random SO(3) frame (frame_perturb seed 7), applied to every split"
+    family: har
+    order: 903
+    dataset:
+      name: 'PAMAP2: wrist IMU (Reiss & Stricker 2012), 18 activities, 9 subjects; acc+gyro 100 Hz -> 50
+        Hz'
+      path: /projects/b53017/vbc1591/IMULM_master_dataset_v2.parquet
+      train_on_datasets:
+      - pamap2
+      test: null
+      split_rule: subject-disjoint 20 % val split (splits.val_ratio 0.2, seed 42); val is reported (no test
+        split in v1)
+    input:
+      channels: 6
+      hz: 50
+      window_seconds: 2.56
+      T: 128
+      frame: sensor
+      gravity: included
+    output:
+      shape: '[K=18]'
+      desc: class logits over the 18 activity labels, one per 2.56 s window
+      head: LinearHead on mean-pooled tokens
+    selection:
+      split: val
+      monitor: val_loss
+      mode: min
+      note: "same convention as Experiments_table \xA73 (metrics read at the min-val-loss checkpoint)"
+    eval_split: val
+    metrics:
+      primary: macro_f1
+      macro_f1:
+        higher_is_better: true
+        fmt: '{:.3f}'
+        label: macro-F1
+        desc: window-level macro-F1 on the val split at the min-val-loss checkpoint (trainer eval, imu_lm/objectives/supervised.py)
+      bal_acc:
+        higher_is_better: true
+        fmt: '{:.1%}'
+        label: bal-acc
+      acc:
+        higher_is_better: true
+        fmt: '{:.1%}'
+        label: acc
+      val_loss:
+        higher_is_better: false
+        fmt: '{:.4f}'
+        label: val loss
+    scorer: bench.score.har
+    templates:
+      probe:
+        config: configs/vit1d_har_probe_pamap2_mae_multidata_flu.yaml
+        objective_type: utd_mhad_probe
+      finetune:
+        config: configs/vit1d_har_finetune_pamap2_mae_multidata_flu.yaml
+        objective_type: utd_mhad_finetune
+      scratch:
+        config: configs/vit1d_har_supervised_pamap2_altattn_scratch.yaml
+        objective_type: supervised
+    recipe:
+      trainer.early_stopping:
+        enabled: true
+        monitor: val_loss
+        patience: 20
+      logging.save_step_checkpoints: false
+      frame_perturb:
+        enabled: true
+        mode: fixed
+        rotation_set: so3
+        seed: 7
+    slurm:
+      time: 04:00:00
+      gres: gpu:1
+      mem: 48G
+      cpus: 8
+    in_grid: false
+    hidden: true
+    frame_variant:
+      of: har_pamap2
+      frame_perturb:
+        enabled: true
+        mode: fixed
+        rotation_set: so3
+        seed: 7
+
+# ---------------------------------------------------------------------------
+# Aggregate columns: virtual tasks the leaderboard synthesises from member tasks
+# (mean of the members' primary metric; a cell exists only when EVERY member is
+# scored). Members carry `aggregate_into: <id>` and are hidden from the main
+# tables (still in coverage + per-task detail).
+aggregates:
+  har_mean:
+    name: "HAR (10 datasets)"
+    subtitle: "mean window macro-F1 over 10 wrist HAR datasets (WISDM, UTD-MHAD, PAMAP2, RecoFit, HHAR, MHEALTH, SAMoSA, Shoaib, UT-Watch, PRISM)"
+    order: 7
+    members: [har_wisdm, har_utd_mhad, har_pamap2, har_recofit, har_hhar, har_mhealth, har_samosa, har_ut_watch, har_prism]
+    min_members: 6      # show a partial mean (annotated with n) once this many members are scored
+    metric: {key: mean_macro_f1, higher_is_better: true, fmt: "{:.3f}", label: "mean macro-F1 (10 sets)"}
+
+grid:
+  encoders: [mae_11src, mae_5src, mae_noaltattn, mae_acconly, focal, simmtm, relcon]
+  protocols: [probe, finetune]
+  scratch_encoder: scratch      # + one scratch cell per task

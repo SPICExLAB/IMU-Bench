@@ -1,0 +1,95 @@
+vit1d:
+  patch_size: 16
+  max_patches_per_channel: 256
+  pooling: mean
+objective:
+  type: supervised
+  supervised: {}
+paths:
+  dataset_path: /projects/b53017/vbc1591/IMULM_master_dataset_v2.parquet
+  runs_root: /gpfs/home/vbc1591/IMU-SSL/runs
+windowing:
+  window_seconds: 2.56
+splits:
+  val_ratio: 0.2
+data:
+  train_on_datasets:
+  - utd_mhad
+  sensor_columns:
+  - acc_x
+  - acc_y
+  - acc_z
+  batch_size: 256
+  eval_batch_size: 256
+  num_workers: 8
+  pin_memory: true
+  acc_only: true
+preprocess:
+  filter:
+    enabled: false
+  impute:
+    enabled: true
+    method: linear
+    max_missing_frac: 0.2
+  normalize:
+    enabled: true
+    method: physical
+    eps: 1.0e-06
+    acc_scale: 9.81
+    gyro_scale: 5.0
+    clip_acc: 8.0
+    clip_gyro: 8.0
+    n_acc: 3
+    acc_units: auto
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 20000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 200
+  early_stopping:
+    enabled: true
+    patience: 20
+    monitor: val_loss
+  optim:
+    name: adamw
+    lr: 0.0001
+    weight_decay: 0.01
+    betas:
+    - 0.9
+    - 0.95
+    eps: 1.0e-08
+  sched:
+    name: cosine
+    warmup_steps: 200
+  extra_best:
+    macro_f1: max
+logging:
+  log_every_steps: 5
+  ckpt_every_steps: 500
+  save_step_checkpoints: false
+wandb:
+  entity: yli32258-northwestern-university
+  project: TransfHAR_project
+inertia1:
+  variant: patchtst
+  preset: small
+  input_hz: 50
+  acc_scale_to_g: 0.10197162129779283
+  acc_channels:
+  - 0
+  - 1
+  - 2
+  patch_len: 10
+  stride: 10
+  mask_ratio: 0.4
+  pretrain_window_sec: 30
+  model_hz: 20
+bench:
+  task: har_utd_mhad
+  encoder: inertia1_patchtst_scratch
+  protocol: scratch
+  seed: 42
+  template: configs/vit1d_har_supervised_utd_mhad_altattn_scratch.yaml
+  registry_version: 1

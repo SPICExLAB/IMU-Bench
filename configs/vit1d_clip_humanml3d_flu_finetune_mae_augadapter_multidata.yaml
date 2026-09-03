@@ -1,0 +1,122 @@
+# IMU<->text CLIP alignment FINETUNE on HumanML3D — combined-multidata MAE
+# encoder, "aug + adapter" ablation. Identical to
+# vit1d_clip_humanml3d_flu_finetune_mae_multidata.yaml (same warm-started
+# trainable encoder, same frozen-CLIP-text-embedding-cache setup, which
+# already randomly samples among HumanML3D's ~3-4 official per-clip
+# captions via HumanML3DIMUVarLenDatasetFLU's py_rng.choice(clip['caps']) --
+# no change needed there, caption diversity was already in use) except two
+# additions aimed at closing the gap to the UniMTS baseline (see
+# EXPERIMENTS.md Section 6):
+#   1. IMU-side augmentation during CLIP training (previously none) --
+#      random_rotation uses the same "octahedral" setting as this repo's own
+#      MAE pretraining config (vit1d_ssl_mae_varlen_altattn_multidata_flu.yaml)
+#      for consistency with what the encoder was already pretrained to be
+#      invariant to; gaussian_noise/gain_jitter/axis_bias/time_warp values
+#      copied from this repo's other CLIP objective config
+#      (vit1d_clip_realdata.yaml), the closest existing precedent for
+#      "augmentation tuned for a CLIP-style contrastive IMU objective".
+#   2. objective.imu_text_clip_flu.text_projection_mlp: true -- turns on the
+#      already-implemented (but previously unused) TextProjectionMLP adapter
+#      (imu_lm/objectives/contrastive_clip_1d.py) so the text side has a
+#      little trainable capacity on top of the frozen CLIP embedding instead
+#      of a bare linear IMU-side projection trying to hit a fixed target.
+
+vit1d:
+  patch_size: 16
+  shared_kernel: acc_gyro       # must match the MAE checkpoint's patch embed
+  pos_embed_type: 2d            # must match the MAE checkpoint (learned 2D pos-embed)
+  max_patches_per_channel: 256  # must match the MAE checkpoint's pos-embed table size
+  max_channels: 32
+  pooling: "mean"
+
+  encoder:
+    hidden_size: 384
+    num_hidden_layers: 12
+    num_attention_heads: 6
+    intermediate_size: 1536
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-6
+    alt_attention: true         # checkpoint was trained with the alt-attn encoder
+
+objective:
+  type: imu_text_clip_flu
+  imu_text_clip_flu:
+    pretrained_run:  vit1d_ssl_mae_varlen_altattn_multidata
+    pretrained_ckpt: best
+    freeze_imu_encoder:  false  # FINETUNE: encoder warm-started but trainable
+    freeze_text_encoder: true
+
+    humanml3d_root: /projects/b53017/vbc1591/HumanML3D
+    clip_model:     openai/clip-vit-base-patch32
+    clip_embed_dim: 512
+    local_files_only: true
+    text_cache_path: /projects/b53017/vbc1591/HumanML3D/clip_text_emb_cache.pt
+
+    text_projection_mlp: true   # NEW: trainable adapter on top of the frozen CLIP text embedding
+
+paths:
+  dataset_path: /projects/b53017/vbc1591/IMULM_master_dataset_v2.parquet
+  runs_root: /gpfs/home/vbc1591/IMU-SSL/runs
+
+windowing:
+  min_window_seconds: 1.28    # T_min =  64 frames =  4 patches
+  max_window_seconds: 10.24   # T_max = 512 frames = 32 patches -> matches pretrain window
+
+data:
+  sensor_columns: [acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z]
+  batch_size: 64
+  num_workers: 4
+
+# NEW: IMU-side augmentation (previously none for this objective).
+random_rotation:
+  enabled: true
+  rotation_set: octahedral   # matches vit1d_ssl_mae_varlen_altattn_multidata_flu.yaml's own pretraining augmentation
+gaussian_noise:
+  enabled: true
+  sigma: 0.02                # matches vit1d_clip_realdata.yaml
+gain_jitter:
+  enabled: true
+  min_scale: 0.9
+  max_scale: 1.1              # matches vit1d_clip_realdata.yaml
+axis_bias:
+  enabled: true
+  max_bias: 0.05               # matches vit1d_clip_realdata.yaml
+time_warp:
+  enabled: true
+  max_warp: 0.05
+  smooth_sigma: 3               # matches vit1d_clip_realdata.yaml
+
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 10000000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 500
+  val_max_batches: 100   # val loader is infinite (resampled captions)
+
+  optim:
+    name: adamw
+    lr: 1.0e-4             # full end-to-end finetune -> lower LR than head-only probing
+    weight_decay: 0.01
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+
+  sched:
+    name: cosine
+    warmup_steps: 200
+
+  early_stopping:
+    enabled: true
+    monitor: val_loss
+    patience: 20
+
+logging:
+  log_every_steps: 5
+  ckpt_every_steps: 500
+  save_step_checkpoints: false
+
+wandb:
+  entity: yli32258-northwestern-university
+  project: TransfHAR_project

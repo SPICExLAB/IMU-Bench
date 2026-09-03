@@ -1,0 +1,36 @@
+{
+  "task": "odometry_nymeria_worldframe",
+  "encoder": "mobileposer",
+  "protocol": "external",
+  "seed": 0,
+  "metrics": {
+    "ate_m": 0.23550205222329373,
+    "drift_pct": 59.419398575170376,
+    "vel_mse": 0.029630114389632284
+  },
+  "primary_metric": "ate_m",
+  "eval_split": "val",
+  "run": null,
+  "checkpoint": "checkpoints/nymeria_rw/best.pt",
+  "checkpoint_step": null,
+  "selection": {
+    "split": "val",
+    "monitor": "mobileposer best.pt (its own val loss)"
+  },
+  "job_ids": {},
+  "provenance": {
+    "source": "scorer:baselines/full_body_pose/SimplePoser/eval_nymeria_worldframe_odom.py",
+    "date": "2026-08-17T16:25:15-05:00",
+    "git": "unknown",
+    "info": {
+      "n_val_windows": 73515,
+      "n_val_sessions": 101,
+      "T": 128,
+      "context_seconds": 2.56,
+      "native_step_hz": 25
+    }
+  },
+  "status": "ok",
+  "notes": "MobilePoser (Nymeria-trained, right-wrist only) scored on the bench world-frame protocol: same 2.56 s windows/frame as every other row, its own predicted root trajectory (65 pts @ 25 Hz) interpolated onto the 33-pt grid exactly as TLIO/Air-IO. Its native metric (root translation error over 1 s) is 15.0 cm.",
+  "schema_version": 1
+}

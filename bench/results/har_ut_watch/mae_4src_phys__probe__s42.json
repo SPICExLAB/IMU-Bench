@@ -1,0 +1,43 @@
+{
+  "task": "har_ut_watch",
+  "encoder": "mae_4src_phys",
+  "protocol": "probe",
+  "seed": 42,
+  "metrics": {
+    "macro_f1": 0.4569310768939442,
+    "bal_acc": 0.4832423053836309,
+    "acc": 0.5162810625535561,
+    "val_loss": 1.269466
+  },
+  "primary_metric": "macro_f1",
+  "eval_split": "val",
+  "run": "bench_har_ut_watch__mae_4src_phys__probe__s42",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 11800,
+  "selection": {
+    "split": "val",
+    "monitor": "val_loss",
+    "mode": "min"
+  },
+  "job_ids": {
+    "train": null,
+    "score": "4324703"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.har",
+    "date": "2026-08-25T14:21:56-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_val_samples": 2334,
+      "n_classes_seen": 5,
+      "n_classes_head": 5,
+      "n_val_batches": 13,
+      "logged_macro_f1_at_ckpt": 0.456931,
+      "train_end": "unknown/incomplete"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

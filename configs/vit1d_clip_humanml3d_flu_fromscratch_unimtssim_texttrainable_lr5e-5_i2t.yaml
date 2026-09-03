@@ -1,0 +1,272 @@
+# I2T-ONLY LOSS VARIANT (2026-07-28, user request): identical to the parent
+# config except objective.imu_text_clip_flu.loss_direction: i2t -- the
+# contrastive loss optimizes ONLY the imu->text direction, exactly matching
+# UniMTS's own pretrain.py loss (F.cross_entropy(logits_per_imu, labels)
+# one-way, line 73), for a loss-matched comparison against the from-scratch
+# UniMTS alignment run (train_unimts_userdata.py, job 8163821). Both
+# retrieval directions are still logged; val_loss (early stopping) is now
+# the i2t loss alone.
+#
+# FROM-SCRATCH variant (2026-07-28, user request): identical to the final
+# "proj" recipe (vit1d_clip_humanml3d_flu_finetune_mae_unimtssim_texttrainable_lr5e-5.yaml,
+# job 8147232: unimts_sim data, aug_texts-only captions, raw-space SO(3)
+# rotation, trainable text tower WITH text_projection, 10.24s fixed window,
+# lr 5e-5) with TWO changes:
+#   1. objective.imu_text_clip_flu.pretrained_run REMOVED -- the ViT1D IMU
+#      encoder trains from random init instead of warm-starting from the MAE
+#      Stage-1 checkpoint (same convention as the earlier unimtscrop
+#      "fromscratch" ablations: the `if pretrained_run:` guard in run.py
+#      skips warm-start when the key is absent). Isolates how much the MAE
+#      SSL pretraining actually contributes under the new data/recipe.
+#   2. trainer.max_steps 8000 -> 20000 -- a random-init encoder needs a
+#      longer horizon than a warm-started one (which peaked ~step 4500);
+#      cosine still decays to ~0 over the full 20k so the real-annealing fix
+#      is preserved. Early stopping (patience 20) stays on as safety.
+#
+# DATA SOURCE SWITCH (2026-07-28): humanml3d.data_source: unimts_sim --
+# HumanML3D IMU now comes directly from the user-provided
+# /projects/b53017/vbc1591/HumanML3D/UniMTS_data/data/sim/<id>.npy export
+# (pre-synthesized [T,22,6] @ 20Hz, UniMTS node order; right-wrist channel
+# extracted and resampled 20Hz->50Hz -- see
+# imu_lm/data/humanml3d_dataset_FLU.py::_load_clip_imu_unimts_sim) instead of
+# this repo's own joints/new_joints + rotation-reconstruction pipeline used
+# by every prior "Ours" checkpoint this session. Gravity is already baked
+# into this signal (confirmed: pelvis-node acc norm ~9.97 m/s^2 at rest), so
+# humanml3d.gravity_mps2 is dropped entirely here (setting it would double-
+# count gravity). resample_method is also dropped -- _load_clip_imu_unimts_sim
+# defaults to 'cubic' internally, same choice as every recent config, just no
+# longer configurable at this call site since there's no joint-position
+# finite-difference step left to resample before.
+#
+# Stage-1 encoder: the ORIGINAL vit1d_ssl_mae_varlen_altattn_multidata MAE
+# checkpoint (explicit user correction, 2026-07-28: only Stage-2 CLIP-align
+# switches to the unimts_sim data source; Stage-1 MAE pretraining is left
+# as-is, no retrain). A same-data-source Stage-1 retrain was briefly
+# attempted first (cache rebuild job 8126631 completed, but the Stage-1
+# sbatch itself failed: "invalid partition specified: b1232", so no compute
+# was actually spent on it) before this correction landed.
+#
+# Below this point, identical to the "unimtscrop_texttrainable" config
+# (24.99%/19.94% avg 6-dataset zero-shot on the OLD AMASS-based data,
+# trainable text tower tested there in isolation and found net-negative:
+# -3.85pp acc/-2.94pp F1, WHARF nearly collapsed 16.18%->1.99% -- see
+# EXPERIMENTS.md 2026-07-26 "Trainable CLIP text encoder" section. Kept here
+# anyway per explicit user request to match UniMTS's own recipe -- worth
+# knowing that isolated prior test, on different data, went the other way)
+# with ONE change: freeze_text_encoder: false. Motivation: confirmed by
+# reading UniMTS's own
+# contrastive.py/pretrain.py that they train their ENTIRE CLIP text tower
+# jointly with the IMU encoder (no freezing anywhere -- optimizer is built
+# from plain model.parameters()), whereas every "Ours" HumanML3D-CLIP
+# checkpoint this whole investigation has kept the text tower frozen
+# (freeze_text_encoder: true in every other config) and only ever trained
+# the lightweight IMU-side projection head. This tests whether letting the
+# text side adapt to HumanML3D's caption phrasing/statistics -- the way
+# UniMTS's own recipe already does -- closes any more of the zero-shot gap,
+# isolating "frozen vs. trainable text" as its own variable while holding
+# architecture, data, augmentation, and every other setting fixed at the
+# current best recipe.
+#
+# NOTE: this required a real fix, not just a config flip. run.py's
+# extra_modules checkpointing for imu_text_clip_flu previously ONLY ever
+# saved clip_head (comment said "text encoder can be reloaded from
+# HuggingFace" -- true only when frozen). With freeze_text_encoder: false
+# the fine-tuned text tower weights would otherwise be silently discarded at
+# checkpoint time, and run_zeroshot_har.py would then re-fetch the vanilla
+# pretrained CLIP text weights at eval time, quietly erasing the entire
+# point of this experiment. Fixed both sides (2026-07-26): run.py now saves
+# extra_modules["text_enc"] whenever freeze_text_encoder: false, and
+# run_zeroshot_har.py's _load_model() now loads it into the CLIPTextEncoder
+# used to encode class labels instead of always using vanilla HF weights.
+#
+# Original header below (still accurate for everything else this config
+# does -- rotation augmentation, cubic resample, gravity, crop_mode: first):
+#
+# Motivation: investigating why Ours(MAE+HumanML3D-CLIP) badly underperforms
+# UniMTS on zero-shot HAR classification (see EXPERIMENTS.md §10). Checked
+# UniMTS's own training code directly (baselines/language_alignment/UniMTS/
+# pretrain.py + utils.py::augment_data) and found it applies a fresh random
+# 3D rotation to every training sample's acc+gyro every batch -- explicit
+# training for sensor-orientation invariance. Our HumanML3D-CLIP training
+# has NEVER done this: it was trained purely on HumanML3D's one fixed,
+# perfectly-canonical synthetic FLU-frame convention, with zero exposure to
+# orientation variation. Real target-dataset sensors (WISDM/UTD-MHAD/PAMAP2)
+# inevitably have calibration/mounting-angle variance relative to that one
+# fixed synthetic convention -- a rotation-naive model has no way to be
+# robust to that. This repo already has the exact same augmentation
+# UniMTS uses (imu_lm/data/augmentations/transform.py::apply_random_rotation,
+# uniform SO(3) via unit quaternion) already wired into HumanML3D's own
+# loader (imu_lm/data/humanml3d_dataset_FLU.py calls apply_augment on the
+# train split) -- just never turned on for this specific config. Retraining
+# Stage 2 (not just continuing from the existing checkpoint, since we want a
+# clean encoder that was rotation-augmented from the start) with this one
+# change turned on to test the hypothesis directly, holding everything else
+# fixed. This is a DIFFERENT axis of change than the earlier midtraining v1/v2
+# experiments (which changed the DATA MIX/scale, not the augmentation) --
+# both of those made zero-shot worse, so this tests a genuinely different
+# mechanism instead of re-tuning the same one.
+
+vit1d:
+  patch_size: 16
+  shared_kernel: acc_gyro
+  pos_embed_type: 2d
+  max_patches_per_channel: 256
+  max_channels: 32
+  pooling: "mean"
+
+  encoder:
+    hidden_size: 384
+    num_hidden_layers: 12
+    num_attention_heads: 6
+    intermediate_size: 1536
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-6
+    alt_attention: true
+
+objective:
+  type: imu_text_clip_flu
+  imu_text_clip_flu:
+    # pretrained_run intentionally OMITTED -- from-scratch encoder (see header)
+    pretrained_ckpt: best
+    freeze_imu_encoder:  false
+    loss_direction: i2t   # UniMTS-matched one-way loss -- see header
+    freeze_text_encoder: false   # CHANGED vs. unimtscrop (was true) -- see header
+
+    humanml3d_root: /projects/b53017/vbc1591/HumanML3D
+    clip_model:     openai/clip-vit-base-patch32
+    clip_embed_dim: 512
+    local_files_only: true
+    text_projection: true   # NEW (2026-07-28, code-review finding): apply CLIP's
+                            # learned text_projection after the final-LN [EOS]
+                            # state -- the official CLIP convention, and what
+                            # UniMTS's own encode_text does (contrastive.py:38).
+                            # The legacy pooler_output space this repo used has
+                            # only 0.01-0.04 cosine to the projected space, so
+                            # prior runs were aligning to a nonstandard text
+                            # space (internally consistent, but not CLIP's).
+    # text_cache_path DELIBERATELY OMITTED (bug found 2026-07-28, user
+    # caught it): imu_lm/models/ViT1D/run.py loads text_emb_cache from this
+    # path regardless of freeze_text_encoder, and whenever it's non-None,
+    # HumanML3DIMUVarLenDatasetFLU.__iter__ (humanml3d_dataset_FLU.py:1314)
+    # yields PRE-CACHED EMBEDDING TENSORS as the caption side of each batch
+    # instead of raw strings. contrastive_clip_1d.py::forward_loss then takes
+    # its "fast path" (isinstance(texts_or_embs, torch.Tensor)) and never
+    # calls text_encoder at all -- so even though freeze_text_encoder: false
+    # builds a trainable CLIPTextEncoder and adds its params to the
+    # optimizer, it never receives a single gradient; the loss is computed
+    # against the SAME frozen, pre-computed embeddings a frozen-text config
+    # would use. freeze_text_encoder: false was a complete no-op whenever
+    # text_cache_path was also set. This also retroactively casts doubt on
+    # the earlier "trainable text encoder is net-negative" finding
+    # (EXPERIMENTS.md 2026-07-26, job 7954257,
+    # unimtscrop_texttrainable.yaml) -- that config ALSO set text_cache_path,
+    # so it plausibly never actually trained the text tower either; that
+    # result should not be treated as reliable evidence either way.
+    # Cancelled the first run of this job (8126922, ran 500 steps) after
+    # finding this and relaunched with this key removed, so the loader now
+    # yields raw caption strings and text_encoder is genuinely exercised.
+
+paths:
+  dataset_path: /projects/b53017/vbc1591/IMULM_master_dataset_v2.parquet
+  runs_root: /gpfs/home/vbc1591/IMU-SSL/runs
+
+random_rotation:
+  enabled: true               # uniform SO(3) on acc+gyro together -- see header note
+  rotation_set: so3
+
+# NEW (2026-07-25): _resample_joints upsamples HumanML3D's native 20Hz joint
+# positions to 50Hz via LINEAR interpolation before acceleration is derived
+# via second-order finite difference downstream. Linear interpolation has
+# piecewise-constant velocity between the original 20Hz sample points, so its
+# second derivative is a series of artificial spikes exactly at each 20Hz
+# breakpoint -- a pure numerical artifact of the interpolation method, not
+# real motion (mirrors why IMUSim, UniMTS's own synthesis tool, uses a
+# SplinedBodyModel for smooth trajectory representation before deriving
+# physical quantities). Confirmed empirically end-to-end through this exact
+# FLU pipeline: switching to cubic-spline resampling drops a 2nd-difference
+# "roughness" proxy from ~14-21 down to ~0.2-0.7 (a 20-40x reduction) while
+# leaving the overall acceleration MAGNITUDE essentially unchanged (5.53->5.69,
+# 1.40->1.47) -- i.e. this removes a spurious numerical artifact, not real
+# signal. Real accelerometer data (WISDM/PAMAP2) shows this same roughness
+# proxy at ~0.8-2.4 -- cubic resampling brings HumanML3D's synthetic
+# acceleration in line with real sensor characteristics for the first time,
+# whereas the current default (linear) was ~10-20x rougher than any real
+# target dataset. gravity_mps2 is deliberately left at its default (0.0,
+# unset) here to isolate this fix as a single clean variable, separate from
+# the already-tested (and negative) gravity experiment.
+humanml3d:
+  data_source: unimts_sim        # NEW -- see header
+  captions_subpath: aug_texts
+  crop_mode: first   # matches UniMTS's own CLIPDataset.__getitem__
+                      # (baselines/language_alignment/UniMTS/data.py) exactly for clips
+                      # longer than the target window -- deterministic imu[:T], not a
+                      # random crop. Combined with pad_mode: wrap below (already
+                      # identical to UniMTS's own np.pad(mode='wrap') for short clips),
+                      # this makes the windowing/truncation strategy match UniMTS's own
+                      # pretraining data loader exactly, modulo window length (10.24s
+                      # @ 50Hz = 512 samples here vs UniMTS's 10s @ 20Hz = 200 samples).
+
+# NEW (2026-07-26): FIXED window size (was variable 1.28-10.24s, matching
+# MAE Stage-1 pretraining's own random-per-batch windowing convention --
+# confirmed via imu_lm/data/combined_mae_multidata_loader.py::_collate_train,
+# which draws a fresh random length in {64,80,...,512 samples} = {1.28-10.24s}
+# every training batch). This config instead fixes Stage 2 at the single
+# LONGEST window (10.24s) throughout, matching what zero-shot eval will also
+# use (--window-seconds 10.24), to remove the train/eval window-size
+# mismatch this session's zero-shot evals have had all along (training saw
+# variable/mostly-shorter windows on average; eval always used a fixed 2.56s
+# window, chosen originally to accommodate UTD-MHAD's short ~3.5s median
+# session length -- WISDM/PAMAP2 sessions are far longer so were never
+# window-length-constrained there).
+windowing:
+  min_window_seconds: 10.24
+  max_window_seconds: 10.24
+  pad_mode: wrap   # REQUIRED: HumanML3D clips cap out at ~10.0s (500 samples),
+                   # just under 512 -- with min==max==512 and the default
+                   # pad_mode='zero', _clip_min_T falls back to T_min=512 and
+                   # EVERY clip gets dropped as "too short" (documented trap,
+                   # see HumanML3DIMUVarLenDatasetFLU.__init__ comment) ->
+                   # zero valid batches, silent infinite retry hang. wrap
+                   # mode sets _clip_min_T=patch_size instead, so every clip
+                   # is valid and gets cyclically wrap-padded up to 512
+                   # samples instead of being skipped.
+
+data:
+  sensor_columns: [acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z]
+  batch_size: 64
+  num_workers: 4
+
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 20000   # from-scratch horizon -- see header
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 500
+  val_max_batches: 100
+
+  optim:
+    name: adamw
+    lr: 5.0e-5   # LR sweep value
+    weight_decay: 0.01
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+
+  sched:
+    name: cosine
+    warmup_steps: 200
+
+  early_stopping:
+    enabled: true
+    monitor: val_loss
+    patience: 20
+
+logging:
+  log_every_steps: 5
+  ckpt_every_steps: 500
+  save_step_checkpoints: false
+
+wandb:
+  entity: yli32258-northwestern-university
+  project: TransfHAR_project

@@ -1,0 +1,41 @@
+{
+  "task": "har_recofit",
+  "encoder": "deepconvlstm",
+  "protocol": "external",
+  "seed": 0,
+  "metrics": {
+    "macro_f1": 0.7210273771264902,
+    "bal_acc": 0.7214979348448142,
+    "acc": 0.8597759759257712,
+    "val_loss": 0.4899748022414895
+  },
+  "primary_metric": "macro_f1",
+  "eval_split": "val",
+  "run": "deepconvlstm_har_recofit",
+  "checkpoint": "best.pt",
+  "checkpoint_step": null,
+  "selection": {
+    "split": "val",
+    "monitor": "val_loss",
+    "mode": "min",
+    "note": "same convention as Experiments_table \u00a73 (metrics read at the min-val-loss checkpoint)"
+  },
+  "job_ids": {
+    "train": 7367713,
+    "score": "9725951"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.har",
+    "date": "2026-08-17T18:50:05-05:00",
+    "git": "unknown",
+    "legacy_run": true,
+    "info": {
+      "via": "summary.json (imu_lm/probe/eval.py pooled eval)",
+      "num_classes": 13,
+      "train_end": "early stopping at step=20800 epoch=57"
+    }
+  },
+  "status": "ok",
+  "notes": "harvested from a pre-harness run with a recipe-equivalent config.",
+  "schema_version": 1
+}

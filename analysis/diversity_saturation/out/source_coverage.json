@@ -1,0 +1,71 @@
+{
+ "k": 1000,
+ "per_source_sample": 40000,
+ "sources": {
+  "capture24": {
+   "windows": 42188,
+   "hours": 60.0,
+   "clusters_covered": 394,
+   "coverage": 0.394,
+   "exclusive_clusters": 15,
+   "exclusive_frac": 0.0381
+  },
+  "eatingspeed": {
+   "windows": 105469,
+   "hours": 150.0,
+   "clusters_covered": 596,
+   "coverage": 0.596,
+   "exclusive_clusters": 24,
+   "exclusive_frac": 0.0403
+  },
+  "motionx": {
+   "windows": 50395,
+   "hours": 72.1,
+   "clusters_covered": 520,
+   "coverage": 0.52,
+   "exclusive_clusters": 0,
+   "exclusive_frac": 0.0
+  },
+  "nhanes": {
+   "windows": 38250,
+   "hours": 54.4,
+   "clusters_covered": 459,
+   "coverage": 0.459,
+   "exclusive_clusters": 71,
+   "exclusive_frac": 0.1547
+  },
+  "ocdetect": {
+   "windows": 210938,
+   "hours": 300.0,
+   "clusters_covered": 706,
+   "coverage": 0.706,
+   "exclusive_clusters": 45,
+   "exclusive_frac": 0.0637
+  },
+  "sonic": {
+   "windows": 146944,
+   "hours": 216.0,
+   "clusters_covered": 569,
+   "coverage": 0.569,
+   "exclusive_clusters": 19,
+   "exclusive_frac": 0.0334
+  },
+  "totalcapture": {
+   "windows": 461,
+   "hours": 0.7,
+   "clusters_covered": 175,
+   "coverage": 0.175,
+   "exclusive_clusters": 0,
+   "exclusive_frac": 0.0
+  }
+ },
+ "suggested_source_weights": {
+  "capture24": 0.788,
+  "eatingspeed": 1.197,
+  "motionx": 0.966,
+  "nhanes": 1.117,
+  "ocdetect": 1.479,
+  "sonic": 1.128,
+  "totalcapture": 0.325
+ }
+}

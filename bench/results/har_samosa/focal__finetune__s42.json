@@ -1,0 +1,43 @@
+{
+  "task": "har_samosa",
+  "encoder": "focal",
+  "protocol": "finetune",
+  "seed": 42,
+  "metrics": {
+    "macro_f1": 0.3803901187853341,
+    "bal_acc": 0.37890651851821233,
+    "acc": 0.40490278951817416,
+    "val_loss": 2.067949
+  },
+  "primary_metric": "macro_f1",
+  "eval_split": "val",
+  "run": "bench_har_samosa__focal__finetune__s42",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 800,
+  "selection": {
+    "split": "val",
+    "monitor": "val_loss",
+    "mode": "min"
+  },
+  "job_ids": {
+    "train": null,
+    "score": "9893544"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.har",
+    "date": "2026-08-19T12:07:23-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_val_samples": 3549,
+      "n_classes_seen": 27,
+      "n_classes_head": 27,
+      "n_val_batches": 14,
+      "logged_macro_f1_at_ckpt": 0.380613,
+      "train_end": "unknown/incomplete"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

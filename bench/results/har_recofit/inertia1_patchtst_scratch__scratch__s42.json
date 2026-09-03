@@ -1,0 +1,44 @@
+{
+  "task": "har_recofit",
+  "encoder": "inertia1_patchtst_scratch",
+  "protocol": "scratch",
+  "seed": 42,
+  "metrics": {
+    "macro_f1": 0.6556520775362892,
+    "bal_acc": 0.6499340875981241,
+    "acc": 0.8031430243250021,
+    "val_loss": 0.661973
+  },
+  "primary_metric": "macro_f1",
+  "eval_split": "val",
+  "run": "bench_har_recofit__inertia1_patchtst_scratch__scratch__s42",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 15200,
+  "selection": {
+    "split": "val",
+    "monitor": "val_loss",
+    "mode": "min",
+    "note": "same convention as Experiments_table \u00a73 (metrics read at the min-val-loss checkpoint)"
+  },
+  "job_ids": {
+    "train": 9784562,
+    "score": "9784562"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.har",
+    "date": "2026-08-18T12:29:08-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_val_samples": 23926,
+      "n_classes_seen": 13,
+      "n_classes_head": 13,
+      "n_val_batches": 95,
+      "logged_macro_f1_at_ckpt": 0.655431,
+      "train_end": "early stopping at step=23200 epoch=64"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

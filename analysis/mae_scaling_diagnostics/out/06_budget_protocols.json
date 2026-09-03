@@ -1,0 +1,74 @@
+[
+  {
+    "fraction": "0.1pct",
+    "overall_fraction": 0.001,
+    "n_train": 487,
+    "batch_size": 128,
+    "steps_per_epoch": 3,
+    "actual_best_step": 29000,
+    "actual_best_epoch": 9667,
+    "fixed_epoch_budget_max_steps": 231,
+    "fixed_step_budget_max_steps": 291000,
+    "fixed_step_budget_epochs_equiv": 97000.0
+  },
+  {
+    "fraction": "1pct",
+    "overall_fraction": 0.01,
+    "n_train": 4873,
+    "batch_size": 128,
+    "steps_per_epoch": 38,
+    "actual_best_step": 135000,
+    "actual_best_epoch": 3649,
+    "fixed_epoch_budget_max_steps": 2926,
+    "fixed_step_budget_max_steps": 291000,
+    "fixed_step_budget_epochs_equiv": 7657.89
+  },
+  {
+    "fraction": "5pct",
+    "overall_fraction": 0.05,
+    "n_train": 24365,
+    "batch_size": 128,
+    "steps_per_epoch": 190,
+    "actual_best_step": 221000,
+    "actual_best_epoch": 1170,
+    "fixed_epoch_budget_max_steps": 14630,
+    "fixed_step_budget_max_steps": 291000,
+    "fixed_step_budget_epochs_equiv": 1531.58
+  },
+  {
+    "fraction": "25pct",
+    "overall_fraction": 0.25,
+    "n_train": 121824,
+    "batch_size": 128,
+    "steps_per_epoch": 951,
+    "actual_best_step": 221000,
+    "actual_best_epoch": 234,
+    "fixed_epoch_budget_max_steps": 73227,
+    "fixed_step_budget_max_steps": 291000,
+    "fixed_step_budget_epochs_equiv": 305.99
+  },
+  {
+    "fraction": "50pct",
+    "overall_fraction": 0.5,
+    "n_train": 243648,
+    "batch_size": 128,
+    "steps_per_epoch": 1903,
+    "actual_best_step": 221000,
+    "actual_best_epoch": 117,
+    "fixed_epoch_budget_max_steps": 146531,
+    "fixed_step_budget_max_steps": 291000,
+    "fixed_step_budget_epochs_equiv": 152.92
+  },
+  {
+    "fraction": "100pct",
+    "overall_fraction": 1.0,
+    "n_train": 487295,
+    "batch_size": 128,
+    "steps_per_epoch": 3806,
+    "actual_best_step": 291000,
+    "actual_best_epoch": 77,
+    "fixed_epoch_budget_max_steps": 293062,
+    "fixed_step_budget_max_steps": 291000,
+    "fixed_step_budget_epochs_equiv": 76.46
+  }
+]

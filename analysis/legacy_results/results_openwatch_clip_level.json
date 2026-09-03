@@ -1,0 +1,122 @@
+[
+  {
+    "name": "Ours (MAE)",
+    "run": "vit1d_gesture_probe_openwatch_6class_mae_multidata",
+    "n_clips": 98,
+    "window": {
+      "acc": 0.4931972789115646,
+      "macro_f1": 0.18110485852421335,
+      "macro_recall": 0.2195035460992908
+    },
+    "clip": {
+      "acc": 0.5102040816326531,
+      "macro_f1": 0.18725171542072952,
+      "macro_recall": 0.21666666666666667
+    }
+  },
+  {
+    "name": "Ours (MAE) finetune",
+    "run": "vit1d_gesture_finetune_openwatch_6class_mae_multidata",
+    "n_clips": 98,
+    "window": {
+      "acc": 0.4897959183673469,
+      "macro_f1": 0.1509433962264151,
+      "macro_recall": 0.19208037825059102
+    },
+    "clip": {
+      "acc": 0.4897959183673469,
+      "macro_f1": 0.13909932659932658,
+      "macro_recall": 0.18333333333333335
+    }
+  },
+  {
+    "name": "Ours (MAE, no alt-attn)",
+    "run": "vit1d_gesture_probe_openwatch_6class_mae_noaltattn_multidata",
+    "n_clips": 98,
+    "window": {
+      "acc": 0.4013605442176871,
+      "macro_f1": 0.13730498138908687,
+      "macro_recall": 0.1875886524822695
+    },
+    "clip": {
+      "acc": 0.47959183673469385,
+      "macro_f1": 0.16837548416495784,
+      "macro_recall": 0.21914893617021278
+    }
+  },
+  {
+    "name": "Ours (MAE, acc-only)",
+    "run": "vit1d_gesture_probe_openwatch_6class_mae_acconly_multidata",
+    "n_clips": 98,
+    "window": {
+      "acc": 0.42517006802721086,
+      "macro_f1": 0.14446033562166286,
+      "macro_recall": 0.20023640661938535
+    },
+    "clip": {
+      "acc": 0.46938775510204084,
+      "macro_f1": 0.16242578456318912,
+      "macro_recall": 0.21560283687943263
+    }
+  },
+  {
+    "name": "FOCAL",
+    "run": "vit1d_gesture_probe_openwatch_6class_focal_multidata",
+    "n_clips": 98,
+    "window": {
+      "acc": 0.4013605442176871,
+      "macro_f1": 0.17112760533813165,
+      "macro_recall": 0.19583064689447668
+    },
+    "clip": {
+      "acc": 0.4387755102040816,
+      "macro_f1": 0.14801864801864803,
+      "macro_recall": 0.19184397163120567
+    }
+  },
+  {
+    "name": "SimMTM",
+    "run": "vit1d_gesture_probe_openwatch_6class_simmtm_multidata",
+    "n_clips": 98,
+    "window": {
+      "acc": 0.43537414965986393,
+      "macro_f1": 0.16581165616018165,
+      "macro_recall": 0.1950354609929078
+    },
+    "clip": {
+      "acc": 0.45918367346938777,
+      "macro_f1": 0.1404798761609907,
+      "macro_recall": 0.18581560283687945
+    }
+  },
+  {
+    "name": "RelCon",
+    "run": "vit1d_gesture_probe_openwatch_6class_relcon_multidata",
+    "n_clips": 98,
+    "window": {
+      "acc": 0.47959183673469385,
+      "macro_f1": 0.18169758615160914,
+      "macro_recall": 0.21040189125295508
+    },
+    "clip": {
+      "acc": 0.5102040816326531,
+      "macro_f1": 0.18982683982683982,
+      "macro_recall": 0.21666666666666667
+    }
+  },
+  {
+    "name": "Scratch",
+    "run": "vit1d_gesture_supervised_openwatch_6class_altattn_scratch",
+    "n_clips": 98,
+    "window": {
+      "acc": 0.3945578231292517,
+      "macro_f1": 0.15789125710600618,
+      "macro_recall": 0.18959810874704494
+    },
+    "clip": {
+      "acc": 0.47959183673469385,
+      "macro_f1": 0.18434343434343434,
+      "macro_recall": 0.21914893617021278
+    }
+  }
+]

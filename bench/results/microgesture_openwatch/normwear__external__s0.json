@@ -1,0 +1,30 @@
+{
+  "task": "microgesture_openwatch",
+  "encoder": "normwear",
+  "protocol": "external",
+  "seed": 0,
+  "metrics": {
+    "clip_macro_f1": 0.453,
+    "clip_acc": 0.517,
+    "window_macro_f1": 0.425,
+    "window_acc": 0.504
+  },
+  "primary_metric": "clip_macro_f1",
+  "eval_split": "test",
+  "run": null,
+  "checkpoint": null,
+  "checkpoint_step": null,
+  "selection": {
+    "split": "n/a",
+    "monitor": "n/a"
+  },
+  "job_ids": {},
+  "provenance": {
+    "source": "harvest:results_openwatch_normwear_protocol_noaug.json (test)",
+    "date": "2026-08-16T17:13:19-05:00",
+    "git": "1b95aa3-dirty"
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

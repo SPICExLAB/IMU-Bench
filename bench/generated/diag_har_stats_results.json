@@ -1,0 +1,218 @@
+{
+ "diag_har_hhar__mae_11src_finetune__stats": {
+  "metrics": {
+   "macro_f1": 0.6639875958225906,
+   "bal_acc": 0.6741557740197742,
+   "acc": 0.6561443066516347,
+   "val_loss": 1.003338
+  },
+  "info": {
+   "checkpoint_step": 200,
+   "n_val_samples": 2661
+  }
+ },
+ "diag_har_hhar__mae_11src_probe__stats": {
+  "metrics": {
+   "macro_f1": 0.6796767799362775,
+   "bal_acc": 0.6808766840249504,
+   "acc": 0.6647876738068396,
+   "val_loss": 0.901642
+  },
+  "info": {
+   "checkpoint_step": 3200,
+   "n_val_samples": 2661
+  }
+ },
+ "diag_har_hhar__scratch_scratch__stats": {
+  "metrics": {
+   "macro_f1": 0.49448472659729026,
+   "bal_acc": 0.5044611783847172,
+   "acc": 0.498684704998121,
+   "val_loss": 1.245033
+  },
+  "info": {
+   "checkpoint_step": 800,
+   "n_val_samples": 2661
+  }
+ },
+ "diag_har_mhealth__mae_11src_finetune__stats": {
+  "metrics": {
+   "macro_f1": 0.6630265584140873,
+   "bal_acc": 0.6849779636305889,
+   "acc": 0.6825548141086749,
+   "val_loss": 1.071625
+  },
+  "info": {
+   "checkpoint_step": 200,
+   "n_val_samples": 1049
+  }
+ },
+ "diag_har_mhealth__mae_11src_probe__stats": {
+  "metrics": {
+   "macro_f1": 0.7925201828664173,
+   "bal_acc": 0.7947466150108567,
+   "acc": 0.7874165872259294,
+   "val_loss": 0.459412
+  },
+  "info": {
+   "checkpoint_step": 15800,
+   "n_val_samples": 1049
+  }
+ },
+ "diag_har_mhealth__scratch_scratch__stats": {
+  "metrics": {
+   "macro_f1": 0.619881930830601,
+   "bal_acc": 0.6592428907266759,
+   "acc": 0.6539561487130601,
+   "val_loss": 0.884408
+  },
+  "info": {
+   "checkpoint_step": 600,
+   "n_val_samples": 1049
+  }
+ },
+ "diag_har_pamap2__mae_11src_finetune__stats": {
+  "metrics": {
+   "macro_f1": 0.48239972019480376,
+   "bal_acc": 0.5110515002853724,
+   "acc": 0.5325402379286214,
+   "val_loss": 1.70864
+  },
+  "info": {
+   "checkpoint_step": 400,
+   "n_val_samples": 4287
+  }
+ },
+ "diag_har_pamap2__mae_11src_probe__stats": {
+  "metrics": {
+   "macro_f1": 0.5527145300737963,
+   "bal_acc": 0.5432437937983945,
+   "acc": 0.5679962677863307,
+   "val_loss": 1.262927
+  },
+  "info": {
+   "checkpoint_step": 2400,
+   "n_val_samples": 4287
+  }
+ },
+ "diag_har_pamap2__scratch_scratch__stats": {
+  "metrics": {
+   "macro_f1": 0.23995089605564918,
+   "bal_acc": 0.27059435550654765,
+   "acc": 0.30580825752274315,
+   "val_loss": 2.454517
+  },
+  "info": {
+   "checkpoint_step": 800,
+   "n_val_samples": 4287
+  }
+ },
+ "diag_har_recofit__mae_11src_finetune__stats": {
+  "metrics": {
+   "macro_f1": 0.7730977627660685,
+   "bal_acc": 0.7826171635136555,
+   "acc": 0.8840591824793113,
+   "val_loss": 0.418769
+  },
+  "info": {
+   "checkpoint_step": 2400,
+   "n_val_samples": 23926
+  }
+ },
+ "diag_har_recofit__mae_11src_probe__stats": {
+  "metrics": {
+   "macro_f1": 0.699579283292933,
+   "bal_acc": 0.6863639120971624,
+   "acc": 0.815389116442364,
+   "val_loss": 0.603208
+  },
+  "info": {
+   "checkpoint_step": 17600,
+   "n_val_samples": 23926
+  }
+ },
+ "diag_har_recofit__scratch_scratch__stats": {
+  "metrics": {
+   "macro_f1": 0.6501289676163983,
+   "bal_acc": 0.6483147559518257,
+   "acc": 0.8061940984702833,
+   "val_loss": 0.668894
+  },
+  "info": {
+   "checkpoint_step": 6000,
+   "n_val_samples": 23926
+  }
+ },
+ "diag_har_utd_mhad__mae_11src_finetune__stats": {
+  "metrics": {
+   "macro_f1": 0.730744285822839,
+   "bal_acc": 0.7412760519903377,
+   "acc": 0.7439613526570048,
+   "val_loss": 0.798764
+  },
+  "info": {
+   "checkpoint_step": 200,
+   "n_val_samples": 207
+  }
+ },
+ "diag_har_utd_mhad__mae_11src_probe__stats": {
+  "metrics": {
+   "macro_f1": 0.6643032088684263,
+   "bal_acc": 0.666058412486984,
+   "acc": 0.6666666666666666,
+   "val_loss": 1.028668
+  },
+  "info": {
+   "checkpoint_step": 400,
+   "n_val_samples": 207
+  }
+ },
+ "diag_har_utd_mhad__scratch_scratch__stats": {
+  "metrics": {
+   "macro_f1": 0.6606359188739052,
+   "bal_acc": 0.6689619243190672,
+   "acc": 0.6714975845410628,
+   "val_loss": 1.327879
+  },
+  "info": {
+   "checkpoint_step": 200,
+   "n_val_samples": 207
+  }
+ },
+ "diag_har_wisdm__mae_11src_finetune__stats": {
+  "metrics": {
+   "macro_f1": 0.7063603642102901,
+   "bal_acc": 0.7142685851318944,
+   "acc": 0.7142685851318945,
+   "val_loss": 0.856547
+  },
+  "info": {
+   "checkpoint_step": 2200,
+   "n_val_samples": 25020
+  }
+ },
+ "diag_har_wisdm__mae_11src_probe__stats": {
+  "metrics": {
+   "macro_f1": 0.68697396095182,
+   "bal_acc": 0.7016786570743405,
+   "acc": 0.7016786570743405,
+   "val_loss": 0.908474
+  },
+  "info": {
+   "checkpoint_step": 17200,
+   "n_val_samples": 25020
+  }
+ },
+ "diag_har_wisdm__scratch_scratch__stats": {
+  "metrics": {
+   "macro_f1": 0.6192276110544425,
+   "bal_acc": 0.6223021582733812,
+   "acc": 0.6223021582733813,
+   "val_loss": 1.185677
+  },
+  "info": {
+   "checkpoint_step": 9000,
+   "n_val_samples": 25020
+  }
+ }
+}

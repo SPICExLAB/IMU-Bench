@@ -1,0 +1,43 @@
+{
+  "task": "har_samosa",
+  "encoder": "inertia1_art",
+  "protocol": "probe",
+  "seed": 42,
+  "metrics": {
+    "macro_f1": 0.5578908201091655,
+    "bal_acc": 0.5600606349937298,
+    "acc": 0.5824175824175825,
+    "val_loss": 1.333128
+  },
+  "primary_metric": "macro_f1",
+  "eval_split": "val",
+  "run": "bench_har_samosa__inertia1_art__probe__s42",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 5200,
+  "selection": {
+    "split": "val",
+    "monitor": "val_loss",
+    "mode": "min"
+  },
+  "job_ids": {
+    "train": null,
+    "score": "9893558"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.har",
+    "date": "2026-08-19T12:33:02-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_val_samples": 3549,
+      "n_classes_seen": 27,
+      "n_classes_head": 27,
+      "n_val_batches": 14,
+      "logged_macro_f1_at_ckpt": 0.558233,
+      "train_end": "unknown/incomplete"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

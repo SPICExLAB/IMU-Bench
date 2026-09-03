@@ -1,0 +1,28 @@
+{
+  "task": "arm_pose_nymeria",
+  "encoder": "mobileposer",
+  "protocol": "external",
+  "seed": 0,
+  "metrics": {
+    "pos_err_cm": 9.74,
+    "ang_err_deg": 24.28
+  },
+  "primary_metric": "pos_err_cm",
+  "eval_split": "val",
+  "run": null,
+  "checkpoint": null,
+  "checkpoint_step": null,
+  "selection": {
+    "split": "n/a",
+    "monitor": "n/a"
+  },
+  "job_ids": {},
+  "provenance": {
+    "source": "harvest:Experiments_table.md \u00a71 / baselines/full_body_pose/SimplePoser",
+    "date": "2026-08-16T17:13:19-05:00",
+    "git": "1b95aa3-dirty"
+  },
+  "status": "ok",
+  "notes": "MobilePoser predicts the torso chain too (compounding); our metric holds ancestors at GT.",
+  "schema_version": 1
+}

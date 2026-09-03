@@ -1,0 +1,132 @@
+# Stage 1 of the RelCon SSL baseline: MotifDist distance network, trained
+# standalone via scripts/train_relcon_motifdist.py (NOT through run.py --
+# see that script's docstring). Reuses the exact SAME combined multidata
+# pretraining source as MAE/FOCAL/SimMTM (sources block copied verbatim from
+# vit1d_ssl_focal_multidata_flu.yaml) so Stage 2's frozen ranking signal is
+# trained on the same data distribution it will later be applied to.
+objective:
+  type: relcon_motifdist_pretrain   # informational only -- bypassed by the standalone script
+  mae_multidata_varlen_altattn_flu:
+    ssl_method: mae   # unused (standalone script only reads .sources/.cache_dir/.sampling_mode)
+    cache_dir: /projects/b53017/vbc1591/mae_multidata_cache
+    sampling_mode: natural
+    sources:
+      realdata:
+        enabled: true
+        train_on_datasets: [pamap2, recofit, samosa, shoaib, ut_watch, utd_mhad, wisdm]
+      ocdetect:
+        enabled: true
+        data_dir: /projects/b53017/vbc1591/OCDetect_extracted/preprocessed
+        splits: [0.8, 0.1, 0.1]
+        max_hours: 500.0
+        max_files: null
+        sample_fraction: 0.01
+      nymeria:
+        enabled: true
+        train_root: /projects/b53017/vbc1591/processed_data_body_Ty_rwrist
+        val_root: /projects/b53017/vbc1591/processed_data_test_body_Ty_rwrist
+        add_gravity: true
+      totalcapture:
+        enabled: true
+        root: /projects/b53017/vbc1591/DIP_recalculate
+        train_subjects: [s1, s2, s3, s4]
+        val_subjects: [s5]
+        target_hz: 50
+        add_gravity: true
+      imuposer:
+        enabled: true
+        root: /projects/b53017/vbc1591/imuposer_dataset
+        val_participants: [P9, P10]
+        target_hz: 50
+        add_gravity: false
+      eatingspeed:
+        enabled: true
+        root: /projects/b53017/vbc1591/EatingSpeed
+        subsets: [FD-I, FD-II, MO]
+        splits: [0.8, 0.1, 0.1]
+        sample_fraction: 0.1
+      motionx:
+        enabled: true
+        root: /projects/b53017/vbc1591/Motion-Xplusplus
+        val_frac: 0.05
+        add_gravity: true
+      humanml3d:
+        enabled: true
+        root: /projects/b53017/vbc1591/HumanML3D
+        t_min: 64
+      sonic:
+        enabled: true
+        root: /projects/b53017/vbc1591/bones-seed
+        add_gravity: true
+      capture24:
+        enabled: true
+        root: /projects/b53017/vbc1591/capture24/capture24
+        target_hz: 50
+        sample_fraction: 0.1
+      openwatch:
+        enabled: true
+        root: /projects/b53017/vbc1591/openwatch_raw/open_watch_without_augmentations
+        coordinate_frame: flu
+data:
+  batch_size: 128
+  eval_batch_size: 128
+  num_workers: 8
+  pin_memory: true
+  dataset_column: dataset
+  label_column: dataset_activity_id
+  label_name_column: dataset_activity_label
+  session_column: session_id
+  subject_column: subject_id
+  time_column: timestamp_ns
+  drop_na: false
+  variable_length:
+    enabled: true
+    min_samples: 64
+    max_samples: 512
+paths:
+  dataset_path: /projects/b53017/vbc1591/IMULM_master_dataset_v2.parquet
+  runs_root: /gpfs/home/vbc1591/IMU-SSL/runs
+preprocess:
+  filter:
+    enabled: true
+    type: lowpass
+    high_hz: 24
+    low_hz: 0.25
+    order: 4
+  impute:
+    enabled: true
+    method: linear
+    max_missing_frac: 0.2
+  normalize:
+    enabled: true
+    method: zscore
+    eps: 1.0e-06
+random_rotation:
+  enabled: true
+  rotation_set: octahedral
+axis_bias:
+  enabled: false
+gain_jitter:
+  enabled: false
+gaussian_noise:
+  enabled: false
+time_warp:
+  enabled: false
+splits:
+  group_key: subject_id
+  seed: 42
+  shuffle: true
+  test_ratio: 0
+  val_ratio: 0.05
+windowing:
+  window_seconds: 10.24
+  window_hop_ratio: 0.5
+  label_policy: center
+  majority_threshold: 0.8
+  handle_gaps: true
+  gap_method: interpolate
+  max_gap_ms: 200
+  max_gaps_per_session: 100
+wandb:
+  entity: yli32258-northwestern-university
+  project: TransfHAR_project

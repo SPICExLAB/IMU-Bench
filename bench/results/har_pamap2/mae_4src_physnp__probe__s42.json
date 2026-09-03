@@ -1,0 +1,44 @@
+{
+  "task": "har_pamap2",
+  "encoder": "mae_4src_physnp",
+  "protocol": "probe",
+  "seed": 42,
+  "metrics": {
+    "macro_f1": 0.34208267570148665,
+    "bal_acc": 0.4494637663154004,
+    "acc": 0.4606951247958946,
+    "val_loss": 2.586221
+  },
+  "primary_metric": "macro_f1",
+  "eval_split": "val",
+  "run": "bench_har_pamap2__mae_4src_physnp__probe__s42",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 9600,
+  "selection": {
+    "split": "val",
+    "monitor": "val_loss",
+    "mode": "min",
+    "note": "same convention as Experiments_table \u00a73 (metrics read at the min-val-loss checkpoint)"
+  },
+  "job_ids": {
+    "train": null,
+    "score": "4459818"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.har",
+    "date": "2026-08-25T23:44:01-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_val_samples": 4287,
+      "n_classes_seen": 16,
+      "n_classes_head": 18,
+      "n_val_batches": 17,
+      "logged_macro_f1_at_ckpt": 0.340908,
+      "train_end": "unknown/incomplete"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

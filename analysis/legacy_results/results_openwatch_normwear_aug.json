@@ -1,0 +1,8 @@
+{
+  "acc": 0.5396825396825397,
+  "bal_acc": 0.5961960661457566,
+  "macro_f1": 0.5172903135288655,
+  "macro_recall": 0.5961960661457566,
+  "n_val": 189,
+  "root": "/projects/b53017/vbc1591/openwatch_raw/open_watch_augmentations"
+}

@@ -153,7 +153,10 @@ def _load_nymeria_real_wrist_full_body_session_flu(
     import core.articulate as art
     from core.paths import Paths
 
-    logger.info("[nymeria_real_wrist_full_body_flu] loading: %s", os.path.basename(pkl_path))
+    # DEBUG, not INFO: this runs once per file inside a tqdm-wrapped loading
+    # loop (see __init__ below) — at INFO level it interleaves with (and
+    # visually buries) the progress bar's updates.
+    logger.debug("[nymeria_real_wrist_full_body_flu] loading: %s", os.path.basename(pkl_path))
     try:
         with open(pkl_path, "rb") as fh:
             raw = pickle.load(fh)
@@ -299,7 +302,7 @@ def _load_nymeria_real_wrist_full_body_session_flu(
     _, joint_pos = body_model.forward_kinematics(smpl_local_t)   # [N, 24, 3]
     joint_pos = joint_pos.cpu().numpy().astype(np.float32)       # [N, 24, 3]
 
-    logger.info(
+    logger.debug(
         "[nymeria_real_wrist_full_body_flu] loaded %s: N=%d fps=%.0f",
         os.path.basename(pkl_path), N, target_hz,
     )
@@ -372,6 +375,7 @@ class NymeriaRealWristFullBodyDatasetFLU(Dataset):
         self._reset_root = bool(pose_cfg.get("reset_root_orientation", False))
 
         self._sessions: List[Tuple[np.ndarray, np.ndarray, np.ndarray]] = []
+        self._session_files: List[str] = []  # pkl path per kept session, parallel to _sessions
         session_lengths: List[int] = []
 
         _n_workers = min(32, (os.cpu_count() or 4) * 2)
@@ -391,6 +395,7 @@ class NymeriaRealWristFullBodyDatasetFLU(Dataset):
                 continue
             X, y, joint_pos = result
             self._sessions.append((X, y, joint_pos))
+            self._session_files.append(path)
             session_lengths.append(len(X))
 
         if not self._sessions:

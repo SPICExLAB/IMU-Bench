@@ -1,0 +1,44 @@
+{
+  "task": "har_hhar",
+  "encoder": "mae_5src",
+  "protocol": "probe",
+  "seed": 42,
+  "metrics": {
+    "macro_f1": 0.613916923415499,
+    "bal_acc": 0.6223665658356055,
+    "acc": 0.6178128523111612,
+    "val_loss": 0.970379
+  },
+  "primary_metric": "macro_f1",
+  "eval_split": "val",
+  "run": "vit1d_har_probe_hhar_mae_realdata_ocdetect_eatingspeed_motionx_sonic",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 200,
+  "selection": {
+    "split": "val",
+    "monitor": "val_loss",
+    "mode": "min",
+    "note": "same convention as Experiments_table \u00a73 (metrics read at the min-val-loss checkpoint)"
+  },
+  "job_ids": {
+    "train": null,
+    "score": "9725905"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.har",
+    "date": "2026-08-17T18:44:35-05:00",
+    "git": "unknown",
+    "legacy_run": true,
+    "info": {
+      "n_val_samples": 2661,
+      "n_classes_seen": 6,
+      "n_classes_head": 6,
+      "n_val_batches": 11,
+      "logged_macro_f1_at_ckpt": 0.613311,
+      "train_end": "unknown/incomplete"
+    }
+  },
+  "status": "ok",
+  "notes": "harvested from a pre-harness run with a recipe-equivalent config.",
+  "schema_version": 1
+}

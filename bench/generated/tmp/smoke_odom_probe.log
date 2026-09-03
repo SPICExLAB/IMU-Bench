@@ -1,0 +1,18 @@
+INFO:imu_lm.models.ViT1D.run:[odom_finetune_nymeria_real_wrist_worldframe_flu] warm-starting encoder from /gpfs/home/vbc1591/IMU-SSL/runs/vit1d_ssl_focal_multidata/checkpoints/best.pt (encoder stays trainable)
+INFO:imu_lm.models.ViT1D.run:[odom_finetune_nymeria_real_wrist_worldframe_flu] freeze_encoder=true -> encoder frozen (probe mode)
+/gpfs/home/vbc1591/IMU-SSL/imu_lm/models/ViT1D/model.py:1787: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  self.transformer = nn.TransformerEncoder(decoder_layer, num_layers=num_layers)
+INFO:imu_lm.data.nymeria_real_wrist_odom_loader_FLU:[nymeria_real_wrist_odom_flu] loading: 20230607_s0_james_johnson_act1_7xwm28_cpfbody_rwrist_imu50hz_wristimu50hz_pose50hz.pkl
+INFO:imu_lm.data.nymeria_real_wrist_odom_loader_FLU:[nymeria_real_wrist_odom_flu] loading: 20230607_s0_james_johnson_act2_yhbvpa_cpfbody_rwrist_imu50hz_wristimu50hz_pose50hz.pkl
+[artifact] saved encoder_meta to /gpfs/home/vbc1591/IMU-SSL/bench/generated/tmp/runs/smoke_odom_probe/artifacts/encoder_meta.json
+Loading train sessions (nymeria real wrist FLU odom worldframe):   0%|          | 0/2 [00:00<?, ?session/s]INFO:imu_lm.data.nymeria_real_wrist_odom_loader_FLU:[nymeria_real_wrist_odom_flu] 20230607_s0_james_johnson_act1_7xwm28_cpfbody_rwrist_imu50hz_wristimu50hz_pose50hz.pkl: N=43022 fps=50
+Loading train sessions (nymeria real wrist FLU odom worldframe):  50%|█████     | 1/2 [00:00<00:00,  1.07session/s]INFO:imu_lm.data.nymeria_real_wrist_odom_loader_FLU:[nymeria_real_wrist_odom_flu] 20230607_s0_james_johnson_act2_yhbvpa_cpfbody_rwrist_imu50hz_wristimu50hz_pose50hz.pkl: N=42895 fps=50
+Loading train sessions (nymeria real wrist FLU odom worldframe): 100%|██████████| 2/2 [00:00<00:00,  2.13session/s]
+INFO:imu_lm.data.nymeria_real_wrist_odom_worldframe_loader_FLU:[nymeria_real_wrist_odom_worldframe_flu] split=train  sessions=2  windows=1338  T=128  hop=64
+INFO:imu_lm.data.nymeria_real_wrist_odom_loader_FLU:[nymeria_real_wrist_odom_flu] loading: 20230607_s0_james_johnson_act3_ifj2gc_cpfbody_rwrist_imu50hz_wristimu50hz_pose50hz.pkl
+Loading val sessions (nymeria real wrist FLU odom worldframe):   0%|          | 0/1 [00:00<?, ?session/s]INFO:imu_lm.data.nymeria_real_wrist_odom_loader_FLU:[nymeria_real_wrist_odom_flu] 20230607_s0_james_johnson_act3_ifj2gc_cpfbody_rwrist_imu50hz_wristimu50hz_pose50hz.pkl: N=41144 fps=50
+Loading val sessions (nymeria real wrist FLU odom worldframe): 100%|██████████| 1/1 [00:00<00:00,  4.62session/s]Loading val sessions (nymeria real wrist FLU odom worldframe): 100%|██████████| 1/1 [00:00<00:00,  4.60session/s]
+INFO:imu_lm.data.nymeria_real_wrist_odom_worldframe_loader_FLU:[nymeria_real_wrist_odom_worldframe_flu] split=val  sessions=1  windows=641  T=128  hop=64
+training:   0%|          | 0/1 [00:00<?, ?ep/s]epoch 1:   0%|          | 0/1 [00:00<?, ?ep/s] /gpfs/home/vbc1591/IMU-SSL/TransfHAR_env/lib/python3.10/site-packages/torch/utils/data/dataloader.py:759: UserWarning: 'pin_memory' argument is set as true but no accelerator is found, then device pinned memory won't be used.
+  super().__init__(loader)
+exit=137

@@ -1,0 +1,39 @@
+{
+  "model": "NormWear-Base (first-party, paper head)",
+  "condition": "aug",
+  "params": 136100000,
+  "best_epoch": 12,
+  "seed": 42,
+  "val": {
+    "n_windows": 612,
+    "n_clips": 102,
+    "window": {
+      "acc": 0.5473856209150327,
+      "bal_acc": 0.6226517363011616,
+      "macro_f1": 0.5289912930998112,
+      "macro_recall": 0.6226517363011616
+    },
+    "clip": {
+      "acc": 0.5882352941176471,
+      "bal_acc": 0.6759920634920634,
+      "macro_f1": 0.5792427414568632,
+      "macro_recall": 0.6759920634920634
+    }
+  },
+  "test": {
+    "n_windows": 522,
+    "n_clips": 87,
+    "window": {
+      "acc": 0.4904214559386973,
+      "bal_acc": 0.5305004409171076,
+      "macro_f1": 0.453610866416373,
+      "macro_recall": 0.5305004409171076
+    },
+    "clip": {
+      "acc": 0.5402298850574713,
+      "bal_acc": 0.5748015873015873,
+      "macro_f1": 0.494416597048176,
+      "macro_recall": 0.5748015873015873
+    }
+  }
+}

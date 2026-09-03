@@ -123,7 +123,10 @@ def load_session_flu(
     import core.articulate as art
     from core.paths import Paths
 
-    _log.info("[imuposer_flu] loading: %s", os.path.basename(pkl_path))
+    # DEBUG, not INFO: this runs once per file inside the tqdm-wrapped loading
+    # loop in IMUPoserWristFLUDataset.__init__ — at INFO level these lines
+    # interleave with (and visually bury) the progress bar's updates.
+    _log.debug("[imuposer_flu] loading: %s", os.path.basename(pkl_path))
 
     # ------------------------------------------------------------------
     # Load pickle
@@ -135,6 +138,38 @@ def load_session_flu(
         _log.warning("[imuposer_flu] cannot open %s: %s", pkl_path, exc)
         return None
 
+    # The officially-released IMUPoser pkl format is flat: {"pose" [N,72] axis-angle,
+    # "imu" [N,60], "trans" [N,3], "betas" [300]} — no "gt_data"/"real_imu_data" nesting.
+    # "imu" packs 5 sensors (0=left wrist, 1=right wrist, 2=left front pocket,
+    # 3=right front pocket, 4=head): first 15 cols = acc [5,3] world frame, last 45 =
+    # orientation [5,3,3] R_world_from_sensor (see "1. Dataset Walkthrough.ipynb" in the
+    # dataset root). Adapt it in-memory to the nested structure the rest of this loader
+    # expects; only ``joint_pos[:, 0]`` (pelvis/root translation) is used downstream, so
+    # the other 23 joints' world positions are left as zero placeholders.
+    if "gt_data" not in seq_data and "pose" in seq_data and "imu" in seq_data:
+        from core.articulate.math import axis_angle_to_rotation_matrix
+
+        def _as_f32(v):
+            return v.float() if torch.is_tensor(v) else torch.as_tensor(np.asarray(v, dtype=np.float32))
+
+        pose_aa = _as_f32(seq_data["pose"])   # [N, 72]
+        n_frames = pose_aa.shape[0]
+        pose_rotmat = axis_angle_to_rotation_matrix(
+            pose_aa.reshape(-1, 3)
+        ).reshape(n_frames, 24, 3, 3)
+
+        joint_pos = torch.zeros(n_frames, 24, 3, dtype=torch.float32)
+        joint_pos[:, 0] = _as_f32(seq_data["trans"])
+
+        imu = _as_f32(seq_data["imu"])         # [N, 60]
+        real_acc = imu[:, :15].reshape(n_frames, 5, 3)
+        real_ori = imu[:, 15:].reshape(n_frames, 5, 3, 3)
+
+        seq_data = {
+            "gt_data": {"pose": pose_rotmat, "joint_pos": joint_pos},
+            "real_imu_data": {"real_acc": real_acc, "real_ori": real_ori},
+            "sampling_rate_hz": seq_data.get("sampling_rate_hz", target_hz),
+        }
 
     gt          = seq_data.get("gt_data", {})
     pose_local  = gt.get("pose")        # [N, 24, 3, 3]  SMPL local rotations
@@ -253,7 +288,7 @@ def load_session_flu(
     chain_R = pose_local[:, _RIGHT_ARM_CHAIN]                        # [N, 5, 3, 3]
     y = matrix_to_rotation_6d(chain_R).numpy().astype(np.float32)   # [N, 5, 6]
 
-    _log.info("[imuposer_flu] %s: N=%d  fps=%.0f", os.path.basename(pkl_path), N, fps)
+    _log.debug("[imuposer_flu] %s: N=%d  fps=%.0f", os.path.basename(pkl_path), N, fps)
     return X, y
 
 
@@ -295,6 +330,7 @@ class IMUPoserWristFLUDataset(torch.utils.data.Dataset):
         )
 
         self._sessions: list[tuple[np.ndarray, np.ndarray]] = []
+        self._session_files: list[str] = []  # pkl path per kept session, parallel to _sessions
         self._sess_idx: list[int] = []
         self._starts:   list[int] = []
 
@@ -308,6 +344,7 @@ class IMUPoserWristFLUDataset(torch.utils.data.Dataset):
 
             si = len(self._sessions)
             self._sessions.append((X, y))
+            self._session_files.append(pkl)
 
             n_windows = (X.shape[0] - self._T) // self._hop + 1
             for s in range(n_windows):

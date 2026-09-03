@@ -1,0 +1,44 @@
+{
+  "task": "har_recofit",
+  "encoder": "mae_mr50",
+  "protocol": "probe",
+  "seed": 42,
+  "metrics": {
+    "macro_f1": 0.5448332213897186,
+    "bal_acc": 0.5467310848939692,
+    "acc": 0.7043801721976093,
+    "val_loss": 0.946795
+  },
+  "primary_metric": "macro_f1",
+  "eval_split": "val",
+  "run": "bench_har_recofit__mae_mr50__probe__s42",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 27600,
+  "selection": {
+    "split": "val",
+    "monitor": "val_loss",
+    "mode": "min",
+    "note": "same convention as Experiments_table \u00a73 (metrics read at the min-val-loss checkpoint)"
+  },
+  "job_ids": {
+    "train": null,
+    "score": "9972286"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.har",
+    "date": "2026-08-20T15:28:57-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_val_samples": 23926,
+      "n_classes_seen": 13,
+      "n_classes_head": 13,
+      "n_val_batches": 95,
+      "logged_macro_f1_at_ckpt": 0.544873,
+      "train_end": "unknown/incomplete"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

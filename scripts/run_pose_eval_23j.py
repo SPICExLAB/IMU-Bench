@@ -327,7 +327,8 @@ def main():
     state    = torch.load(ckpt_path, map_location=device, weights_only=False)
     ckpt_cfg = state["cfg"]
 
-    encoder = ViT1DEncoder(ckpt_cfg).to(device)
+    from imu_lm.models.baselines.inertia1_encoder import build_encoder as _build_encoder
+    encoder = _build_encoder(ckpt_cfg).to(device)   # ViT1D / alt-attn / Inertia-1 adapter per ckpt cfg
     encoder.load_state_dict(state["model"])
     encoder.eval()
 

@@ -1,0 +1,91 @@
+# NEW-SETTING re-evaluation of the Section-6 ladder row 'probe_mae_unimtssim' (2026-07-29,
+# user request): identical recipe to the headline proj run
+# (vit1d_clip_humanml3d_flu_finetune_mae_unimtssim_texttrainable_lr5e-5.yaml:
+# unimts_sim data + aug_texts-only captions, trainable text tower WITH
+# text_projection, fixed 10.24s wrap window, raw-space SO(3) rotation,
+# lr 5e-5 cosine to 8k) with ONLY the encoder-side change this ladder row
+# isolates. NOTE vs the old ladder: probes here still train the text tower
+# (uniform with the headline rows -- only the IMU encoder is frozen), and
+# lr is the uniform 5e-5 (old external-baseline probes used 1e-3 head-only).
+vit1d:
+  patch_size: 16
+  shared_kernel: acc_gyro
+  pos_embed_type: 2d
+  max_patches_per_channel: 256
+  max_channels: 32
+  pooling: mean
+  encoder:
+    hidden_size: 384
+    num_hidden_layers: 12
+    num_attention_heads: 6
+    intermediate_size: 1536
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-06
+    alt_attention: true
+objective:
+  type: imu_text_clip_flu
+  imu_text_clip_flu:
+    pretrained_run: vit1d_ssl_mae_varlen_altattn_multidata
+    pretrained_ckpt: best
+    freeze_imu_encoder: true
+    freeze_text_encoder: false
+    humanml3d_root: /projects/b53017/vbc1591/HumanML3D
+    clip_model: openai/clip-vit-base-patch32
+    clip_embed_dim: 512
+    local_files_only: true
+    text_projection: true
+paths:
+  dataset_path: /projects/b53017/vbc1591/IMULM_master_dataset_v2.parquet
+  runs_root: /gpfs/home/vbc1591/IMU-SSL/runs
+random_rotation:
+  enabled: true
+  rotation_set: so3
+humanml3d:
+  data_source: unimts_sim
+  captions_subpath: aug_texts
+  crop_mode: first
+windowing:
+  min_window_seconds: 10.24
+  max_window_seconds: 10.24
+  pad_mode: wrap
+data:
+  sensor_columns:
+  - acc_x
+  - acc_y
+  - acc_z
+  - gyro_x
+  - gyro_y
+  - gyro_z
+  batch_size: 64
+  num_workers: 4
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 8000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 500
+  val_max_batches: 100
+  optim:
+    name: adamw
+    lr: 5.0e-05
+    weight_decay: 0.01
+    betas:
+    - 0.9
+    - 0.95
+    eps: 1.0e-08
+  sched:
+    name: cosine
+    warmup_steps: 200
+  early_stopping:
+    enabled: true
+    monitor: val_loss
+    patience: 20
+logging:
+  log_every_steps: 5
+  ckpt_every_steps: 500
+  save_step_checkpoints: false
+wandb:
+  entity: yli32258-northwestern-university
+  project: TransfHAR_project

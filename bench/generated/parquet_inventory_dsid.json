@@ -1,0 +1,90 @@
+{
+ "capture24": {
+  "subjects": 151,
+  "sessions": 1,
+  "classes": 78,
+  "samples": 699011946,
+  "hours": 3883.4,
+  "gyro_nonzero": 0.0
+ },
+ "opportunity++": {
+  "subjects": 4,
+  "sessions": 6,
+  "classes": 21,
+  "samples": 985421,
+  "hours": 5.5,
+  "gyro_nonzero": 0.0
+ },
+ "pamap2": {
+  "subjects": 9,
+  "sessions": 2,
+  "classes": 18,
+  "samples": 1271041,
+  "hours": 7.1,
+  "gyro_nonzero": 1.0
+ },
+ "prism": {
+  "subjects": 31,
+  "sessions": 20,
+  "classes": 96,
+  "samples": 2928148,
+  "hours": 16.3,
+  "gyro_nonzero": 1.0
+ },
+ "recofit": {
+  "subjects": 94,
+  "sessions": 72,
+  "classes": 123,
+  "samples": 7745018,
+  "hours": 43.0,
+  "gyro_nonzero": 1.0
+ },
+ "samosa": {
+  "subjects": 20,
+  "sessions": 125,
+  "classes": 27,
+  "samples": 1204655,
+  "hours": 6.7,
+  "gyro_nonzero": 1.0
+ },
+ "shoaib": {
+  "subjects": 1,
+  "sessions": 13,
+  "classes": 13,
+  "samples": 1170000,
+  "hours": 6.5,
+  "gyro_nonzero": 1.0
+ },
+ "ut_watch": {
+  "subjects": 20,
+  "sessions": 4,
+  "classes": 24,
+  "samples": 8146709,
+  "hours": 45.3,
+  "gyro_nonzero": 0.991
+ },
+ "utd_mhad": {
+  "subjects": 8,
+  "sessions": 84,
+  "classes": 21,
+  "samples": 119897,
+  "hours": 0.7,
+  "gyro_nonzero": 1.0
+ },
+ "wear": {
+  "subjects": 24,
+  "sessions": 1,
+  "classes": 19,
+  "samples": 3462973,
+  "hours": 19.2,
+  "gyro_nonzero": 0.0
+ },
+ "wisdm": {
+  "subjects": 51,
+  "sessions": 907,
+  "classes": 18,
+  "samples": 8045562,
+  "hours": 44.7,
+  "gyro_nonzero": 1.0
+ }
+}

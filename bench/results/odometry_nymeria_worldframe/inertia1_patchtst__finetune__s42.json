@@ -1,0 +1,41 @@
+{
+  "task": "odometry_nymeria_worldframe",
+  "encoder": "inertia1_patchtst",
+  "protocol": "finetune",
+  "seed": 42,
+  "metrics": {
+    "vel_mse": 0.021164996549487114,
+    "ate_m": 0.1518396507358049,
+    "drift_pct": 42.01257641972267
+  },
+  "primary_metric": "ate_m",
+  "eval_split": "val",
+  "run": "bench_odometry_nymeria_worldframe__inertia1_patchtst__finetune__s42",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 39000,
+  "selection": {
+    "split": "val",
+    "monitor": "val_loss",
+    "mode": "min"
+  },
+  "job_ids": {
+    "train": 9567403,
+    "score": "9567403"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.odometry",
+    "date": "2026-08-17T07:54:12-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_val_windows": 73515,
+      "n_val_windows_total": 73515,
+      "n_val_sessions": 101,
+      "T": 128,
+      "train_end": "early stopping at step=59000 epoch=24"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

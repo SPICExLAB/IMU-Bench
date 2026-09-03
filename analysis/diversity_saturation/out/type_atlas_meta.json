@@ -1,0 +1,280 @@
+{
+  "per_family": 3,
+  "shape": [
+    30,
+    6,
+    512
+  ],
+  "exemplars": [
+    {
+      "family": "G1",
+      "family_raw_id": 3,
+      "type": 39,
+      "rank": 0,
+      "global_idx": 3329445,
+      "source": "capture24",
+      "type_size": 5196
+    },
+    {
+      "family": "G1",
+      "family_raw_id": 3,
+      "type": 39,
+      "rank": 1,
+      "global_idx": 3308038,
+      "source": "capture24",
+      "type_size": 5196
+    },
+    {
+      "family": "G1",
+      "family_raw_id": 3,
+      "type": 39,
+      "rank": 2,
+      "global_idx": 3506471,
+      "source": "capture24",
+      "type_size": 5196
+    },
+    {
+      "family": "G2",
+      "family_raw_id": 4,
+      "type": 129,
+      "rank": 0,
+      "global_idx": 1799419,
+      "source": "eatingspeed",
+      "type_size": 2657
+    },
+    {
+      "family": "G2",
+      "family_raw_id": 4,
+      "type": 129,
+      "rank": 1,
+      "global_idx": 1483485,
+      "source": "nymeria",
+      "type_size": 2657
+    },
+    {
+      "family": "G2",
+      "family_raw_id": 4,
+      "type": 129,
+      "rank": 2,
+      "global_idx": 1716902,
+      "source": "eatingspeed",
+      "type_size": 2657
+    },
+    {
+      "family": "G3",
+      "family_raw_id": 8,
+      "type": 12,
+      "rank": 0,
+      "global_idx": 1793088,
+      "source": "eatingspeed",
+      "type_size": 2486
+    },
+    {
+      "family": "G3",
+      "family_raw_id": 8,
+      "type": 12,
+      "rank": 1,
+      "global_idx": 1764738,
+      "source": "eatingspeed",
+      "type_size": 2486
+    },
+    {
+      "family": "G3",
+      "family_raw_id": 8,
+      "type": 12,
+      "rank": 2,
+      "global_idx": 1567012,
+      "source": "eatingspeed",
+      "type_size": 2486
+    },
+    {
+      "family": "G4",
+      "family_raw_id": 9,
+      "type": 706,
+      "rank": 0,
+      "global_idx": 563909,
+      "source": "ocdetect",
+      "type_size": 5464
+    },
+    {
+      "family": "G4",
+      "family_raw_id": 9,
+      "type": 706,
+      "rank": 1,
+      "global_idx": 311028,
+      "source": "ocdetect",
+      "type_size": 5464
+    },
+    {
+      "family": "G4",
+      "family_raw_id": 9,
+      "type": 706,
+      "rank": 2,
+      "global_idx": 1307404,
+      "source": "ocdetect",
+      "type_size": 5464
+    },
+    {
+      "family": "G5",
+      "family_raw_id": 7,
+      "type": 28,
+      "rank": 0,
+      "global_idx": 1135424,
+      "source": "ocdetect",
+      "type_size": 2865
+    },
+    {
+      "family": "G5",
+      "family_raw_id": 7,
+      "type": 28,
+      "rank": 1,
+      "global_idx": 1300851,
+      "source": "ocdetect",
+      "type_size": 2865
+    },
+    {
+      "family": "G5",
+      "family_raw_id": 7,
+      "type": 28,
+      "rank": 2,
+      "global_idx": 1343486,
+      "source": "ocdetect",
+      "type_size": 2865
+    },
+    {
+      "family": "G6",
+      "family_raw_id": 6,
+      "type": 743,
+      "rank": 0,
+      "global_idx": 1970086,
+      "source": "eatingspeed",
+      "type_size": 2700
+    },
+    {
+      "family": "G6",
+      "family_raw_id": 6,
+      "type": 743,
+      "rank": 1,
+      "global_idx": 1805761,
+      "source": "eatingspeed",
+      "type_size": 2700
+    },
+    {
+      "family": "G6",
+      "family_raw_id": 6,
+      "type": 743,
+      "rank": 2,
+      "global_idx": 1956576,
+      "source": "eatingspeed",
+      "type_size": 2700
+    },
+    {
+      "family": "G7",
+      "family_raw_id": 5,
+      "type": 628,
+      "rank": 0,
+      "global_idx": 599352,
+      "source": "ocdetect",
+      "type_size": 2242
+    },
+    {
+      "family": "G7",
+      "family_raw_id": 5,
+      "type": 628,
+      "rank": 1,
+      "global_idx": 1225373,
+      "source": "ocdetect",
+      "type_size": 2242
+    },
+    {
+      "family": "G7",
+      "family_raw_id": 5,
+      "type": 628,
+      "rank": 2,
+      "global_idx": 1118887,
+      "source": "ocdetect",
+      "type_size": 2242
+    },
+    {
+      "family": "A1",
+      "family_raw_id": 0,
+      "type": 963,
+      "rank": 0,
+      "global_idx": 3493035,
+      "source": "capture24",
+      "type_size": 2659
+    },
+    {
+      "family": "A1",
+      "family_raw_id": 0,
+      "type": 963,
+      "rank": 1,
+      "global_idx": 3537543,
+      "source": "capture24",
+      "type_size": 2659
+    },
+    {
+      "family": "A1",
+      "family_raw_id": 0,
+      "type": 963,
+      "rank": 2,
+      "global_idx": 3464445,
+      "source": "capture24",
+      "type_size": 2659
+    },
+    {
+      "family": "A2",
+      "family_raw_id": 1,
+      "type": 836,
+      "rank": 0,
+      "global_idx": 3312122,
+      "source": "capture24",
+      "type_size": 5049
+    },
+    {
+      "family": "A2",
+      "family_raw_id": 1,
+      "type": 836,
+      "rank": 1,
+      "global_idx": 2889274,
+      "source": "capture24",
+      "type_size": 5049
+    },
+    {
+      "family": "A2",
+      "family_raw_id": 1,
+      "type": 836,
+      "rank": 2,
+      "global_idx": 3168541,
+      "source": "capture24",
+      "type_size": 5049
+    },
+    {
+      "family": "A3",
+      "family_raw_id": 2,
+      "type": 487,
+      "rank": 0,
+      "global_idx": 3510015,
+      "source": "capture24",
+      "type_size": 7542
+    },
+    {
+      "family": "A3",
+      "family_raw_id": 2,
+      "type": 487,
+      "rank": 1,
+      "global_idx": 3496142,
+      "source": "capture24",
+      "type_size": 7542
+    },
+    {
+      "family": "A3",
+      "family_raw_id": 2,
+      "type": 487,
+      "rank": 2,
+      "global_idx": 3510848,
+      "source": "capture24",
+      "type_size": 7542
+    }
+  ]
+}

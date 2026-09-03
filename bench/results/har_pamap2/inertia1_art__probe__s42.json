@@ -1,0 +1,44 @@
+{
+  "task": "har_pamap2",
+  "encoder": "inertia1_art",
+  "protocol": "probe",
+  "seed": 42,
+  "metrics": {
+    "macro_f1": 0.4439166232385557,
+    "bal_acc": 0.4995325465955868,
+    "acc": 0.5784931187310474,
+    "val_loss": 1.445782
+  },
+  "primary_metric": "macro_f1",
+  "eval_split": "val",
+  "run": "bench_har_pamap2__inertia1_art__probe__s42",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 2400,
+  "selection": {
+    "split": "val",
+    "monitor": "val_loss",
+    "mode": "min",
+    "note": "same convention as Experiments_table \u00a73 (metrics read at the min-val-loss checkpoint)"
+  },
+  "job_ids": {
+    "train": 9744498,
+    "score": "9744498"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.har",
+    "date": "2026-08-18T01:47:50-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_val_samples": 4287,
+      "n_classes_seen": 16,
+      "n_classes_head": 18,
+      "n_val_batches": 17,
+      "logged_macro_f1_at_ckpt": 0.443634,
+      "train_end": "early stopping at step=10400 epoch=171"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

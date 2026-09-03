@@ -1,0 +1,43 @@
+{
+  "task": "har_samosa",
+  "encoder": "mae_recipe_r0",
+  "protocol": "probe",
+  "seed": 42,
+  "metrics": {
+    "macro_f1": 0.37649405250240797,
+    "bal_acc": 0.37043712970061554,
+    "acc": 0.3989856297548605,
+    "val_loss": 2.055926
+  },
+  "primary_metric": "macro_f1",
+  "eval_split": "val",
+  "run": "bench_har_samosa__mae_recipe_r0__probe__s42",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 19000,
+  "selection": {
+    "split": "val",
+    "monitor": "val_loss",
+    "mode": "min"
+  },
+  "job_ids": {
+    "train": null,
+    "score": "9963809"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.har",
+    "date": "2026-08-20T09:07:24-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_val_samples": 3549,
+      "n_classes_seen": 27,
+      "n_classes_head": 27,
+      "n_val_batches": 14,
+      "logged_macro_f1_at_ckpt": 0.377162,
+      "train_end": "unknown/incomplete"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

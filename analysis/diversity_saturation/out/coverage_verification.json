@@ -1,0 +1,206 @@
+{
+  "n_pool": 3555159,
+  "n_draws": 5,
+  "configs": {
+    "K1000_seed42": {
+      "n_clusters_nonempty": 1000,
+      "cluster_size_min": 363,
+      "cluster_size_median": 3060.0,
+      "cluster_size_max": 17489,
+      "coverage": {
+        "0.0001": {
+          "empirical_mean": 0.2884,
+          "empirical_sd": 0.0024166091947189165,
+          "closed_form": 0.28569622245394577,
+          "k_windows": 356
+        },
+        "0.001": {
+          "empirical_mean": 0.9269999999999999,
+          "empirical_sd": 0.007293833011524155,
+          "closed_form": 0.9290972458192399,
+          "k_windows": 3555
+        },
+        "0.005": {
+          "empirical_mean": 0.9994,
+          "empirical_sd": 0.0004898979485566361,
+          "closed_form": 0.9993991407589908,
+          "k_windows": 17776
+        },
+        "0.013": {
+          "empirical_mean": 1.0,
+          "empirical_sd": 0.0,
+          "closed_form": 0.9999840767259435,
+          "k_windows": 46217
+        },
+        "0.05": {
+          "empirical_mean": 1.0,
+          "empirical_sd": 0.0,
+          "closed_form": 0.9999999999861251,
+          "k_windows": 177758
+        },
+        "0.106": {
+          "empirical_mean": 1.0,
+          "empirical_sd": 0.0,
+          "closed_form": 1.0,
+          "k_windows": 376847
+        },
+        "0.25": {
+          "empirical_mean": 1.0,
+          "empirical_sd": 0.0,
+          "closed_form": 1.0,
+          "k_windows": 888790
+        }
+      }
+    },
+    "K1000_seed7": {
+      "n_clusters_nonempty": 1000,
+      "cluster_size_min": 360,
+      "cluster_size_median": 3005.5,
+      "cluster_size_max": 15855,
+      "coverage": {
+        "0.0001": {
+          "empirical_mean": 0.2888,
+          "empirical_sd": 0.007782030583337482,
+          "closed_form": 0.28503773394023124,
+          "k_windows": 356
+        },
+        "0.001": {
+          "empirical_mean": 0.9252,
+          "empirical_sd": 0.008772684879784491,
+          "closed_form": 0.926227221157422,
+          "k_windows": 3555
+        },
+        "0.005": {
+          "empirical_mean": 0.9994,
+          "empirical_sd": 0.0008000000000000007,
+          "closed_form": 0.9992811526938149,
+          "k_windows": 17776
+        },
+        "0.013": {
+          "empirical_mean": 1.0,
+          "empirical_sd": 0.0,
+          "closed_form": 0.9999794975309197,
+          "k_windows": 46217
+        },
+        "0.05": {
+          "empirical_mean": 1.0,
+          "empirical_sd": 0.0,
+          "closed_form": 0.999999999973478,
+          "k_windows": 177758
+        },
+        "0.106": {
+          "empirical_mean": 1.0,
+          "empirical_sd": 0.0,
+          "closed_form": 1.0,
+          "k_windows": 376847
+        },
+        "0.25": {
+          "empirical_mean": 1.0,
+          "empirical_sd": 0.0,
+          "closed_form": 1.0,
+          "k_windows": 888790
+        }
+      }
+    },
+    "K100_seed42": {
+      "n_clusters_nonempty": 100,
+      "cluster_size_min": 12104,
+      "cluster_size_median": 31051.5,
+      "cluster_size_max": 116174,
+      "coverage": {
+        "0.0001": {
+          "empirical_mean": 0.938,
+          "empirical_sd": 0.029933259094191512,
+          "closed_form": 0.937087684429138,
+          "k_windows": 356
+        },
+        "0.001": {
+          "empirical_mean": 1.0,
+          "empirical_sd": 0.0,
+          "closed_form": 0.9999999229761534,
+          "k_windows": 3555
+        },
+        "0.005": {
+          "empirical_mean": 1.0,
+          "empirical_sd": 0.0,
+          "closed_form": 1.0,
+          "k_windows": 17776
+        },
+        "0.013": {
+          "empirical_mean": 1.0,
+          "empirical_sd": 0.0,
+          "closed_form": 1.0,
+          "k_windows": 46217
+        },
+        "0.05": {
+          "empirical_mean": 1.0,
+          "empirical_sd": 0.0,
+          "closed_form": 1.0,
+          "k_windows": 177758
+        },
+        "0.106": {
+          "empirical_mean": 1.0,
+          "empirical_sd": 0.0,
+          "closed_form": 1.0,
+          "k_windows": 376847
+        },
+        "0.25": {
+          "empirical_mean": 1.0,
+          "empirical_sd": 0.0,
+          "closed_form": 1.0,
+          "k_windows": 888790
+        }
+      }
+    },
+    "K4000_seed42": {
+      "n_clusters_nonempty": 4000,
+      "cluster_size_min": 65,
+      "cluster_size_median": 806.0,
+      "cluster_size_max": 3058,
+      "coverage": {
+        "0.0001": {
+          "empirical_mean": 0.08425000000000002,
+          "empirical_sd": 0.0006708203932499375,
+          "closed_form": 0.08447074301945756,
+          "k_windows": 356
+        },
+        "0.001": {
+          "empirical_mean": 0.563,
+          "empirical_sd": 0.0030862598724021766,
+          "closed_form": 0.5612557950205288,
+          "k_windows": 3555
+        },
+        "0.005": {
+          "empirical_mean": 0.9648,
+          "empirical_sd": 0.0016155494421403616,
+          "closed_form": 0.96525653216066,
+          "k_windows": 17776
+        },
+        "0.013": {
+          "empirical_mean": 0.99855,
+          "empirical_sd": 0.00018708286933871208,
+          "closed_form": 0.9986329532141031,
+          "k_windows": 46217
+        },
+        "0.05": {
+          "empirical_mean": 1.0,
+          "empirical_sd": 0.0,
+          "closed_form": 0.9999876304873997,
+          "k_windows": 177758
+        },
+        "0.106": {
+          "empirical_mean": 1.0,
+          "empirical_sd": 0.0,
+          "closed_form": 0.9999997337142014,
+          "k_windows": 376847
+        },
+        "0.25": {
+          "empirical_mean": 1.0,
+          "empirical_sd": 0.0,
+          "closed_form": 0.9999999999780739,
+          "k_windows": 888790
+        }
+      }
+    }
+  }
+}

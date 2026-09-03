@@ -204,7 +204,15 @@ class DropPath(nn.Module):
             return x
         keep_prob = 1.0 - self.drop_prob
         shape = (x.shape[0],) + (1,) * (x.ndim - 1)
-        mask = torch.rand(shape, dtype=x.dtype, device=x.device).floor_() + keep_prob
+        # BUG FIX (2026-08-15): this used to be
+        #   torch.rand(shape).floor_() + keep_prob
+        # i.e. floor(U[0,1)) == 0 always, so mask == keep_prob for every
+        # sample and x * keep_prob / keep_prob == x -- DropPath was a silent
+        # no-op for every drop_path_rate > 0 ever configured in this repo
+        # (18 configs, all standard-ViT1D BEiT/DINO/HAR-finetune runs; the
+        # alt-attn encoder never wired drop_path_rate at all until today).
+        # Correct timm/MAE form: floor(U[0,1) + keep_prob) is 1 w.p. keep_prob.
+        mask = (torch.rand(shape, dtype=x.dtype, device=x.device) + keep_prob).floor_()
         return x * mask / keep_prob
 
 
@@ -886,9 +894,13 @@ class ViT1DDecoder3D(nn.Module):
 # ── Alternating frame/global attention encoder (VGGT-style) ───────────────────
 
 class _PreNormBlock(nn.Module):
-    """Standard pre-norm transformer block: x + Attn(LN x), x + FFN(LN x)."""
+    """Standard pre-norm transformer block: x + Attn(LN x), x + FFN(LN x).
 
-    def __init__(self, d_model, nhead, dim_ff, dropout=0.0):
+    drop_path (2026-08-15): optional stochastic depth on both residual
+    branches (no parameters -> state_dicts are unchanged; default 0.0 keeps
+    every existing checkpoint's behaviour bit-identical)."""
+
+    def __init__(self, d_model, nhead, dim_ff, dropout=0.0, drop_path=0.0):
         super().__init__()
         self.norm1 = nn.LayerNorm(d_model)
         self.attn  = nn.MultiheadAttention(d_model, nhead, dropout=dropout, batch_first=True)
@@ -896,11 +908,12 @@ class _PreNormBlock(nn.Module):
         self.ff    = nn.Sequential(
             nn.Linear(d_model, dim_ff), nn.GELU(), nn.Dropout(dropout),
             nn.Linear(dim_ff, d_model), nn.Dropout(dropout))
+        self.drop_path = DropPath(drop_path) if drop_path > 0.0 else nn.Identity()
 
     def forward(self, x):                 # [*, N, D]
         n = self.norm1(x)
-        x = x + self.attn(n, n, n)[0]
-        x = x + self.ff(self.norm2(x))
+        x = x + self.drop_path(self.attn(n, n, n)[0])
+        x = x + self.drop_path(self.ff(self.norm2(x)))
         return x
 
 
@@ -961,11 +974,16 @@ class ViT1DEncoderAltAttn(nn.Module):
             nn.init.trunc_normal_(self.register_token, std=0.02)
 
         # Alternating blocks: frame, global, frame, global, ...
+        # drop_path_rate (2026-08-15): stochastic depth, linearly increasing
+        # from 0 at the first pair to drop_path_rate at the last pair (MAE
+        # convention); default 0.0 = off (previously silently ignored here).
         n_pairs = num_layers // 2
+        drop_path_rate = float(enc_cfg.get("drop_path_rate", 0.0))
+        dpr = [drop_path_rate * i / max(1, n_pairs - 1) for i in range(n_pairs)]
         self.frame_blocks  = nn.ModuleList(
-            [_PreNormBlock(self.embed_dim, num_heads, dim_ff, dropout) for _ in range(n_pairs)])
+            [_PreNormBlock(self.embed_dim, num_heads, dim_ff, dropout, drop_path=dpr[i]) for i in range(n_pairs)])
         self.global_blocks = nn.ModuleList(
-            [_PreNormBlock(self.embed_dim, num_heads, dim_ff, dropout) for _ in range(n_pairs)])
+            [_PreNormBlock(self.embed_dim, num_heads, dim_ff, dropout, drop_path=dpr[i]) for i in range(n_pairs)])
         self.n_pairs = n_pairs
 
         self.norm     = nn.LayerNorm(self.embed_dim)
@@ -1938,3 +1956,193 @@ class JEPA1DPredictor(nn.Module):
 
         # Project back to encoder embedding dimension
         return self.pred_to_enc(full)   # [B, N, D_enc]
+
+class StatsConcatEncoder(nn.Module):
+    """Information-preserving wrapper (diagnostic, 2026-08-18): the loader hands over the
+    filtered-but-NOT-z-scored window; this module (i) records the per-window, per-channel
+    mean and std of the physical signal (acc scaled by 1/g, gyro in rad/s), (ii) applies the
+    usual per-window z-score itself so `base` sees exactly its standard input, and (iii)
+    returns [base(x_zscored) ; mean ; std]  ->  embed_dim = base.embed_dim + 2*C.
+    Restores the gravity-direction / motion-amplitude cues the z-score deletes without
+    touching the pretrained encoder. Config: stats_concat: {enabled: true, eps: 1e-6,
+    acc_scale: 9.81, n_acc: 3}; requires preprocess.normalize.enabled: false.
+    """
+
+    def __init__(self, base: nn.Module, n_channels: int, eps: float = 1e-6, acc_scale: float = 9.81, n_acc: int = 3,
+                 features=None, acc_units: str = "auto"):
+        super().__init__()
+        self.base = base
+        self.n_channels = int(n_channels)
+        self.eps = float(eps)
+        self.acc_scale = float(acc_scale)
+        self.n_acc = int(n_acc)
+        self.features = list(features or ["meanstd"])
+        self.acc_units = str(acc_units).lower()          # "auto" | "g" | "m/s2"
+        n_feat = sum((2 * self.n_channels) if f == "meanstd" else self.FEATURE_DIMS[f] for f in self.features)
+        self.n_feat = int(n_feat)
+        self.embed_dim = int(base.embed_dim) + self.n_feat
+        self.in_channels = getattr(base, "in_channels", self.n_channels)
+
+    # ---- physical feature sets -------------------------------------------------
+    # "meanstd"  : per-channel mean and std                                   (2C)
+    # "accphys"  : gravity direction (unit LPF-mean acc), |mean acc| in g,
+    #              acc dynamic energy log(1+E_a)                              (5)
+    # "gyrodyn"  : gyro energy log(1+E_w), mean |w|, per-axis std of w,
+    #              dominant frequency and spectral entropy of |w|             (7)
+    FEATURE_DIMS = {"meanstd": None, "accphys": 5, "gyrodyn": 7}
+
+    def _unit_gain(self, x: torch.Tensor) -> float:
+        """1.0 if acc is already m/s^2, 9.80665 if it is stored in g (|mean acc| ~ 1 vs ~9.8).
+
+        Datasets in this project are mixed: Capture24/NHANES are g, the rest m/s^2. Per-window
+        z-scoring hides it, fixed physical scaling does not -- see the 2026-08-20 unit audit.
+        """
+        if self.acc_units == "m/s2":
+            return 1.0
+        if self.acc_units == "g":
+            return 9.80665
+        with torch.no_grad():                                          # auto
+            m = x[:, : self.n_acc].mean(-1).norm(dim=1).mean().item()
+            sd = x[:, : self.n_acc].std().item()
+        return 9.80665 if (m < 3.0 and sd < 1.5) else 1.0
+
+    def _acc_phys(self, x: torch.Tensor) -> torch.Tensor:
+        a = x[:, : self.n_acc] * self._unit_gain(x) / self.acc_scale   # [B,3,T] in g
+        mu = a.mean(dim=-1)                                            # low-frequency component ~ gravity
+        norm = mu.norm(dim=1, keepdim=True).clamp_min(self.eps)
+        e = ((a - mu.unsqueeze(-1)) ** 2).mean(dim=(1, 2))              # dynamic energy
+        return torch.cat([mu / norm, norm, torch.log1p(e).unsqueeze(1)], dim=1)   # [B,5]
+
+    def _gyro_dyn(self, x: torch.Tensor) -> torch.Tensor:
+        if x.shape[1] <= self.n_acc:
+            return x.new_zeros(x.shape[0], 8)
+        w = x[:, self.n_acc:]                                          # [B,3,T] rad/s
+        mag = w.norm(dim=1)                                            # [B,T]
+        e = (w ** 2).mean(dim=(1, 2))
+        sd = w.std(dim=-1, unbiased=False)                             # [B,3]
+        spec = torch.fft.rfft(mag - mag.mean(dim=-1, keepdim=True), dim=-1).abs() ** 2   # [B,F]
+        spec = spec[:, 1:] + self.eps
+        p = spec / spec.sum(dim=-1, keepdim=True)
+        dom = p.argmax(dim=-1).float() / max(1, p.shape[-1])           # dominant frequency (normalised)
+        ent = -(p * p.log()).sum(dim=-1) / math.log(p.shape[-1])       # spectral entropy in [0,1]
+        return torch.cat([torch.log1p(e).unsqueeze(1), mag.mean(dim=-1, keepdim=True), sd,
+                          dom.unsqueeze(1), ent.unsqueeze(1)], dim=1)  # [B,8]
+
+    def stats(self, x: torch.Tensor) -> torch.Tensor:
+        feats = []
+        for f in self.features:
+            if f == "meanstd":
+                mu = x.mean(dim=-1)                       # [B, C]
+                sd = x.std(dim=-1, unbiased=False)        # population std, as in preprocess_window
+                gain = self._unit_gain(x)
+                scale = torch.ones(x.shape[1], device=x.device, dtype=x.dtype)
+                scale[: min(self.n_acc, x.shape[1])] = self.acc_scale / gain
+                feats.append(torch.cat([mu / scale, sd / scale], dim=1))
+            elif f == "accphys":
+                feats.append(self._acc_phys(x))
+            elif f == "gyrodyn":
+                feats.append(self._gyro_dyn(x))
+            else:
+                raise ValueError(f"unknown stats_concat feature {f!r}")
+        return torch.cat(feats, dim=1)
+
+    def zscore(self, x: torch.Tensor) -> torch.Tensor:
+        mu = x.mean(dim=-1, keepdim=True)
+        sd = x.std(dim=-1, keepdim=True, unbiased=False)
+        return (x - mu) / (sd + self.eps)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        r = self.stats(x.float())
+        z = self.base(self.zscore(x))
+        return torch.cat([z, r.to(z.dtype)], dim=1)
+
+    def forward_tokens(self, x: torch.Tensor):
+        return self.base.forward_tokens(self.zscore(x))
+
+    def load_pretrained_state(self, enc_state):
+        from imu_lm.models.ViT1D.run import _load_encoder_state_dict   # lazy: run.py imports this module
+        _load_encoder_state_dict(self.base, enc_state)
+
+
+def maybe_stats_wrap(encoder: nn.Module, cfg) -> nn.Module:
+    """Apply StatsConcatEncoder when cfg.stats_concat.enabled (see class docstring)."""
+    from imu_lm.utils.helpers import cfg_get
+    sc = cfg_get(cfg, ["stats_concat"], None) or {}
+    if not sc.get("enabled", False) or isinstance(encoder, StatsConcatEncoder):
+        return encoder
+    if bool(cfg_get(cfg, ["preprocess", "normalize", "enabled"], True)):
+        raise ValueError("stats_concat requires preprocess.normalize.enabled: false (the wrapper z-scores itself)")
+    cols = cfg_get(cfg, ["data", "sensor_columns"], None) or ["acc_x", "acc_y", "acc_z", "gyro_x", "gyro_y", "gyro_z"]
+    n_ch = 3 if bool(cfg_get(cfg, ["data", "acc_only"], False)) else len(cols)
+    return StatsConcatEncoder(encoder, n_channels=n_ch, eps=float(sc.get("eps", 1e-6)),
+                              acc_scale=float(sc.get("acc_scale", 9.81)), n_acc=int(sc.get("n_acc", 3)),
+                              features=sc.get("features", ["meanstd"]),
+                              acc_units=sc.get("acc_units", "auto"))
+
+class DualStreamGatedEncoder(nn.Module):
+    """Two pretrained stems + learned gated fusion (2026-08-18 ablation).
+
+        z_a = f_acc(a)            acc-only MAE stem, sees the 3 accelerometer channels
+        z_f = f_full(x)           6-channel MAE stem, sees acc+gyro
+        alpha = sigmoid(W [z_a ; z_f])            (per-dimension gate, one scalar per unit)
+        z = alpha * z_a' + (1 - alpha) * z_f      (z_a' = linear projection when dims differ)
+
+    Tests "separate stems + adaptive fusion" WITHOUT re-pretraining: MHEALTH/HHAR can lean on the
+    accelerometer/gravity stem while PAMAP2/UTD lean on the full acc+gyro stem. Both stems are loaded
+    from existing runs and frozen for `probe`; the gate (and optional stats) stay trainable.
+    Config:
+      dual_stream: {enabled: true, acc_run: vit1d_ssl_mae_varlen_acconly_multidata,
+                    full_run: vit1d_ssl_mae_varlen_altattn_multidata, freeze: true, concat: false}
+    """
+
+    def __init__(self, acc_stem: nn.Module, full_stem: nn.Module, n_acc: int = 3, concat: bool = False):
+        super().__init__()
+        self.acc_stem, self.full_stem, self.n_acc, self.concat = acc_stem, full_stem, int(n_acc), bool(concat)
+        da, df = int(acc_stem.embed_dim), int(full_stem.embed_dim)
+        self.proj = nn.Identity() if da == df else nn.Linear(da, df)
+        self.embed_dim = (da + df) if concat else df
+        self.gate = nn.Sequential(nn.Linear(da + df, df), nn.Sigmoid())
+        self.in_channels = getattr(full_stem, "in_channels", 6)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        za = self.acc_stem(x[:, : self.n_acc])
+        zf = self.full_stem(x)
+        if self.concat:
+            return torch.cat([za, zf], dim=1)
+        a = self.gate(torch.cat([za, zf], dim=1))
+        return a * self.proj(za) + (1.0 - a) * zf
+
+    def load_pretrained_state(self, enc_state) -> None:
+        """No-op: both stems are loaded from their own runs in build_dual_stream()."""
+        return
+
+    def gate_stats(self, x: torch.Tensor) -> torch.Tensor:
+        """Mean gate value per window: >0.5 = leaning on the accelerometer stem."""
+        with torch.no_grad():
+            za, zf = self.acc_stem(x[:, : self.n_acc]), self.full_stem(x)
+            return self.gate(torch.cat([za, zf], dim=1)).mean(dim=1)
+
+
+def build_dual_stream(cfg) -> nn.Module:
+    """Build DualStreamGatedEncoder from cfg.dual_stream (loads both pretrained stems)."""
+    import os
+    import torch as _t
+    from imu_lm.utils.helpers import cfg_get
+    from copy import deepcopy
+    ds = cfg_get(cfg, ["dual_stream"], None) or {}
+    runs_root = cfg_get(cfg, ["paths", "runs_root"], "runs")
+
+    def _stem(run, acc_only):
+        ck = _t.load(os.path.join(runs_root, run, "checkpoints", "best.pt"), map_location="cpu", weights_only=False)
+        c = deepcopy(ck["cfg"])
+        enc = (ViT1DEncoderAltAttn if bool(cfg_get(c, ["vit1d", "encoder", "alt_attention"], False)) else ViT1DEncoder)(c)
+        from imu_lm.models.ViT1D.run import _load_encoder_state_dict
+        _load_encoder_state_dict(enc, ck)
+        if ds.get("freeze", True):
+            enc.requires_grad_(False)
+            enc.eval()
+        return enc
+
+    acc = _stem(ds["acc_run"], True)
+    full = _stem(ds["full_run"], False)
+    return DualStreamGatedEncoder(acc, full, n_acc=int(ds.get("n_acc", 3)), concat=bool(ds.get("concat", False)))

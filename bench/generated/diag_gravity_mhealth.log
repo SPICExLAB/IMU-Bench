@@ -1,0 +1,5 @@
+/gpfs/home/vbc1591/IMU-SSL/TransfHAR_env/lib/python3.10/site-packages/torch/utils/data/dataloader.py:1102: UserWarning: 'pin_memory' argument is set as true but no accelerator is found, then device pinned memory won't be used.
+  super().__init__(loader)
+mhealth acc mean+std (6 feats) {'macro_f1': 0.6902672716238091, 'bal_acc': 0.7098980783208612, 'acc': 0.7192342752962625}
+mhealth acc+gyro mean+std (12 feats) {'macro_f1': 0.6910792450678261, 'bal_acc': 0.7107846031435562, 'acc': 0.7201458523245214}
+mhealth acc mean only (3 feats = gravity dir) {'macro_f1': 0.46460077557367896, 'bal_acc': 0.4918172883508767, 'acc': 0.5004557885141294}

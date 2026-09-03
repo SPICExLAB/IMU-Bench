@@ -1,0 +1,67 @@
+{
+  "task": "language_humanml3d",
+  "encoder": "mae_4src_phys",
+  "protocol": "finetune",
+  "seed": 42,
+  "metrics": {
+    "r1_i2t_g100": 30.705,
+    "r1_t2i_g100": 29.457403395637062,
+    "r5_i2t_g100": 63.705,
+    "r5_t2i_g100": 63.07622550254421,
+    "r10_i2t_g100": 76.52,
+    "r10_t2i_g100": 75.27835155423446,
+    "mrr_i2t_g100": 45.760887577340725,
+    "mrr_t2i_g100": 44.646908476826994,
+    "r1_i2t_full": 3.485544447446636,
+    "r1_t2i_full": 3.4432234432234434,
+    "mrr_i2t_full": 9.246134533907771,
+    "mrr_t2i_full": 8.561452896368753,
+    "medr_i2t_full": 58.0,
+    "medr_t2i_full": 69.0,
+    "r1_g100": 30.08120169781853,
+    "val_r1_i2t_g100": 30.385,
+    "val_r1_t2i_g100": 29.869798315037016,
+    "val_r5_i2t_g100": 64.725,
+    "val_r5_t2i_g100": 63.79882563186112,
+    "val_r10_i2t_g100": 77.795,
+    "val_r10_t2i_g100": 76.15011488383968,
+    "val_mrr_i2t_g100": 46.026170052236466,
+    "val_mrr_t2i_g100": 45.35799252175996,
+    "val_r1_i2t_full": 7.351712614870509,
+    "val_r1_t2i_full": 5.888888888888888,
+    "val_mrr_i2t_full": 16.820199428886674,
+    "val_mrr_t2i_full": 14.938632095478926,
+    "val_medr_i2t_full": 20.0,
+    "val_medr_t2i_full": 22.0,
+    "val_r1_g100": 30.12739915751851
+  },
+  "primary_metric": "r1_g100",
+  "eval_split": "test",
+  "run": "bench_language_humanml3d__mae_4src_phys__finetune__s42",
+  "checkpoint": "latest.pt",
+  "checkpoint_step": 8000,
+  "selection": {
+    "split": "none",
+    "monitor": "fixed_budget",
+    "mode": "latest",
+    "note": "fixed 8k-step budget, final checkpoint (latest.pt); \u00a713e: val-loss best.pt under-selects for retrieval, latest \u2265 best on every arm"
+  },
+  "job_ids": {
+    "train": null,
+    "score": "4867057"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.language",
+    "date": "2026-08-27T12:57:36-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_items_test": 3701,
+      "n_items_val": 1197,
+      "train_end": "unknown/incomplete"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

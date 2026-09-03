@@ -1,0 +1,11 @@
+[skip-train] bench_har_mhealth__relcon__finetune__s42
+[fill-missing] submitted 0 jobs
+[sbatch] 9725929  bscore_har_wisdm__deepconvlstm__external__s0.sh
+[sbatch] 9725948  bscore_har_utd_mhad__deepconvlstm__external__s0.sh
+[sbatch] 9725950  bscore_har_pamap2__deepconvlstm__external__s0.sh
+[sbatch] 9725951  bscore_har_recofit__deepconvlstm__external__s0.sh
+[sbatch] 9725953  bscore_har_hhar__deepconvlstm__external__s0.sh
+[sbatch] 9725954  bscore_har_mhealth__deepconvlstm__external__s0.sh
+[sbatch] 9726071  bench_har_mhealth__relcon__finetune__s42.sh
+[fill-missing] submitted 30 jobs
+SUBMIT_DONE

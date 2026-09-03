@@ -1,0 +1,44 @@
+{
+  "task": "har_wisdm_rot7",
+  "encoder": "scratch",
+  "protocol": "scratch",
+  "seed": 42,
+  "metrics": {
+    "macro_f1": 0.6282910586385521,
+    "bal_acc": 0.6282174260591528,
+    "acc": 0.6282174260591527,
+    "val_loss": 1.169234
+  },
+  "primary_metric": "macro_f1",
+  "eval_split": "val",
+  "run": "bench_har_wisdm_rot7__scratch__scratch__s42",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 9000,
+  "selection": {
+    "split": "val",
+    "monitor": "val_loss",
+    "mode": "min",
+    "note": "same convention as Experiments_table \u00a73 (metrics read at the min-val-loss checkpoint)"
+  },
+  "job_ids": {
+    "train": null,
+    "score": "3605401"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.har",
+    "date": "2026-08-20T18:39:54-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_val_samples": 25020,
+      "n_classes_seen": 18,
+      "n_classes_head": 18,
+      "n_val_batches": 98,
+      "logged_macro_f1_at_ckpt": 0.628355,
+      "train_end": "unknown/incomplete"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

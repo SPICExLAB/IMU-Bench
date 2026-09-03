@@ -1,0 +1,36 @@
+{
+  "seed": 1234,
+  "config": "configs/vit1d_ssl_mae_varlen_altattn_multidata_flu_recipe100pct.yaml",
+  "results": {
+    "1pct": {
+      "clean_val_mse": 0.7604344704104895,
+      "n_batches": 3814,
+      "ckpt_step": 283000,
+      "logged_best_val_loss": 0.7602588743464085
+    },
+    "5pct": {
+      "clean_val_mse": 0.7605695733395182,
+      "n_batches": 3814,
+      "ckpt_step": 297000,
+      "logged_best_val_loss": 0.760297035008247
+    },
+    "10pct": {
+      "clean_val_mse": 0.7579349950385706,
+      "n_batches": 3814,
+      "ckpt_step": 298000,
+      "logged_best_val_loss": 0.7577502438009207
+    },
+    "25pct": {
+      "clean_val_mse": 0.7584002128698217,
+      "n_batches": 3814,
+      "ckpt_step": 297000,
+      "logged_best_val_loss": 0.7578936522942784
+    },
+    "100pct": {
+      "clean_val_mse": 0.7567036285582299,
+      "n_batches": 3814,
+      "ckpt_step": 292000,
+      "logged_best_val_loss": 0.7566254064557936
+    }
+  }
+}

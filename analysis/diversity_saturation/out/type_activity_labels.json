@@ -1,0 +1,4169 @@
+{
+  "method": "labelled realdata windows re-embedded with the frozen encoder, projected with the recovered PCA-64 map, assigned to the nearest of the 1000 centroids. NOT an identity join with the cached pool, which is not reproducible from the current code (4.16% content match).",
+  "roundtrip_agreement": 0.965,
+  "n_windows": 97699,
+  "vocabulary": [
+    "adl_desk_device",
+    "adl_food",
+    "adl_household_general",
+    "adl_misc_gesture",
+    "adl_personal_care",
+    "cycle",
+    "device_tap",
+    "exercise_core",
+    "exercise_lower",
+    "exercise_plyometric",
+    "exercise_upper",
+    "other",
+    "posture_stationary",
+    "rest_inactive",
+    "run_jog",
+    "sports_play",
+    "stairs",
+    "stretching",
+    "walk"
+  ],
+  "types_touched_by_realdata": 700,
+  "types_with_ge30_windows": 408,
+  "purity_pcts": {
+    "10": 34.1,
+    "25": 41.0,
+    "50": 53.2,
+    "75": 66.2,
+    "90": 76.6
+  },
+  "chance_purity_pct": 31.2,
+  "median_entropy_nats": 1.356,
+  "per_activity": {
+    "adl_desk_device": {
+      "n_windows": 1768,
+      "share_pct": 1.81,
+      "types_touched": 299,
+      "types_for_50pct": 25,
+      "types_for_90pct": 164,
+      "top_types": [
+        {
+          "type": 374,
+          "share_of_activity_pct": 10.9,
+          "purity_pct": 58.5
+        },
+        {
+          "type": 951,
+          "share_of_activity_pct": 5.1,
+          "purity_pct": 21.7
+        },
+        {
+          "type": 683,
+          "share_of_activity_pct": 4.4,
+          "purity_pct": 47.9
+        }
+      ]
+    },
+    "adl_food": {
+      "n_windows": 700,
+      "share_pct": 0.72,
+      "types_touched": 125,
+      "types_for_50pct": 15,
+      "types_for_90pct": 68,
+      "top_types": [
+        {
+          "type": 461,
+          "share_of_activity_pct": 6.3,
+          "purity_pct": 19.6
+        },
+        {
+          "type": 872,
+          "share_of_activity_pct": 5.9,
+          "purity_pct": 7.9
+        },
+        {
+          "type": 907,
+          "share_of_activity_pct": 5.4,
+          "purity_pct": 7.6
+        }
+      ]
+    },
+    "adl_household_general": {
+      "n_windows": 226,
+      "share_pct": 0.23,
+      "types_touched": 74,
+      "types_for_50pct": 12,
+      "types_for_90pct": 52,
+      "top_types": [
+        {
+          "type": 879,
+          "share_of_activity_pct": 15.9,
+          "purity_pct": 6.6
+        },
+        {
+          "type": 897,
+          "share_of_activity_pct": 4.9,
+          "purity_pct": 8.9
+        },
+        {
+          "type": 550,
+          "share_of_activity_pct": 4.9,
+          "purity_pct": 2.3
+        }
+      ]
+    },
+    "adl_misc_gesture": {
+      "n_windows": 20972,
+      "share_pct": 21.47,
+      "types_touched": 608,
+      "types_for_50pct": 32,
+      "types_for_90pct": 224,
+      "top_types": [
+        {
+          "type": 810,
+          "share_of_activity_pct": 7.6,
+          "purity_pct": 55.4
+        },
+        {
+          "type": 850,
+          "share_of_activity_pct": 3.9,
+          "purity_pct": 54.5
+        },
+        {
+          "type": 891,
+          "share_of_activity_pct": 3.5,
+          "purity_pct": 46.0
+        }
+      ]
+    },
+    "adl_personal_care": {
+      "n_windows": 115,
+      "share_pct": 0.12,
+      "types_touched": 30,
+      "types_for_50pct": 6,
+      "types_for_90pct": 20,
+      "top_types": [
+        {
+          "type": 992,
+          "share_of_activity_pct": 13.0,
+          "purity_pct": 2.5
+        },
+        {
+          "type": 803,
+          "share_of_activity_pct": 11.3,
+          "purity_pct": 28.9
+        },
+        {
+          "type": 307,
+          "share_of_activity_pct": 11.3,
+          "purity_pct": 16.5
+        }
+      ]
+    },
+    "cycle": {
+      "n_windows": 350,
+      "share_pct": 0.36,
+      "types_touched": 24,
+      "types_for_50pct": 4,
+      "types_for_90pct": 10,
+      "top_types": [
+        {
+          "type": 504,
+          "share_of_activity_pct": 25.4,
+          "purity_pct": 27.6
+        },
+        {
+          "type": 201,
+          "share_of_activity_pct": 10.9,
+          "purity_pct": 82.6
+        },
+        {
+          "type": 104,
+          "share_of_activity_pct": 10.0,
+          "purity_pct": 79.5
+        }
+      ]
+    },
+    "device_tap": {
+      "n_windows": 11402,
+      "share_pct": 11.67,
+      "types_touched": 501,
+      "types_for_50pct": 17,
+      "types_for_90pct": 188,
+      "top_types": [
+        {
+          "type": 434,
+          "share_of_activity_pct": 7.6,
+          "purity_pct": 49.0
+        },
+        {
+          "type": 404,
+          "share_of_activity_pct": 6.9,
+          "purity_pct": 47.2
+        },
+        {
+          "type": 649,
+          "share_of_activity_pct": 6.3,
+          "purity_pct": 43.3
+        }
+      ]
+    },
+    "exercise_core": {
+      "n_windows": 557,
+      "share_pct": 0.57,
+      "types_touched": 122,
+      "types_for_50pct": 7,
+      "types_for_90pct": 67,
+      "top_types": [
+        {
+          "type": 181,
+          "share_of_activity_pct": 11.8,
+          "purity_pct": 3.3
+        },
+        {
+          "type": 649,
+          "share_of_activity_pct": 10.4,
+          "purity_pct": 3.5
+        },
+        {
+          "type": 404,
+          "share_of_activity_pct": 9.9,
+          "purity_pct": 3.3
+        }
+      ]
+    },
+    "exercise_lower": {
+      "n_windows": 4103,
+      "share_pct": 4.2,
+      "types_touched": 207,
+      "types_for_50pct": 5,
+      "types_for_90pct": 49,
+      "top_types": [
+        {
+          "type": 181,
+          "share_of_activity_pct": 16.5,
+          "purity_pct": 33.9
+        },
+        {
+          "type": 152,
+          "share_of_activity_pct": 12.7,
+          "purity_pct": 37.2
+        },
+        {
+          "type": 891,
+          "share_of_activity_pct": 10.4,
+          "purity_pct": 26.6
+        }
+      ]
+    },
+    "exercise_plyometric": {
+      "n_windows": 231,
+      "share_pct": 0.24,
+      "types_touched": 54,
+      "types_for_50pct": 4,
+      "types_for_90pct": 31,
+      "top_types": [
+        {
+          "type": 181,
+          "share_of_activity_pct": 23.4,
+          "purity_pct": 2.7
+        },
+        {
+          "type": 729,
+          "share_of_activity_pct": 17.7,
+          "purity_pct": 3.8
+        },
+        {
+          "type": 978,
+          "share_of_activity_pct": 7.8,
+          "purity_pct": 2.6
+        }
+      ]
+    },
+    "exercise_upper": {
+      "n_windows": 5505,
+      "share_pct": 5.63,
+      "types_touched": 399,
+      "types_for_50pct": 10,
+      "types_for_90pct": 156,
+      "top_types": [
+        {
+          "type": 810,
+          "share_of_activity_pct": 20.7,
+          "purity_pct": 39.4
+        },
+        {
+          "type": 507,
+          "share_of_activity_pct": 7.1,
+          "purity_pct": 58.2
+        },
+        {
+          "type": 646,
+          "share_of_activity_pct": 4.1,
+          "purity_pct": 27.9
+        }
+      ]
+    },
+    "other": {
+      "n_windows": 350,
+      "share_pct": 0.36,
+      "types_touched": 96,
+      "types_for_50pct": 13,
+      "types_for_90pct": 61,
+      "top_types": [
+        {
+          "type": 978,
+          "share_of_activity_pct": 10.6,
+          "purity_pct": 5.3
+        },
+        {
+          "type": 327,
+          "share_of_activity_pct": 5.4,
+          "purity_pct": 6.0
+        },
+        {
+          "type": 461,
+          "share_of_activity_pct": 4.0,
+          "purity_pct": 6.2
+        }
+      ]
+    },
+    "posture_stationary": {
+      "n_windows": 700,
+      "share_pct": 0.72,
+      "types_touched": 173,
+      "types_for_50pct": 22,
+      "types_for_90pct": 103,
+      "top_types": [
+        {
+          "type": 138,
+          "share_of_activity_pct": 6.6,
+          "purity_pct": 5.1
+        },
+        {
+          "type": 739,
+          "share_of_activity_pct": 4.9,
+          "purity_pct": 15.0
+        },
+        {
+          "type": 4,
+          "share_of_activity_pct": 4.7,
+          "purity_pct": 10.9
+        }
+      ]
+    },
+    "rest_inactive": {
+      "n_windows": 30439,
+      "share_pct": 31.16,
+      "types_touched": 555,
+      "types_for_50pct": 76,
+      "types_for_90pct": 251,
+      "top_types": [
+        {
+          "type": 138,
+          "share_of_activity_pct": 2.7,
+          "purity_pct": 92.2
+        },
+        {
+          "type": 10,
+          "share_of_activity_pct": 2.2,
+          "purity_pct": 93.2
+        },
+        {
+          "type": 434,
+          "share_of_activity_pct": 1.9,
+          "purity_pct": 32.1
+        }
+      ]
+    },
+    "run_jog": {
+      "n_windows": 350,
+      "share_pct": 0.36,
+      "types_touched": 3,
+      "types_for_50pct": 1,
+      "types_for_90pct": 2,
+      "top_types": [
+        {
+          "type": 891,
+          "share_of_activity_pct": 71.7,
+          "purity_pct": 15.7
+        },
+        {
+          "type": 152,
+          "share_of_activity_pct": 28.0,
+          "purity_pct": 7.0
+        },
+        {
+          "type": 980,
+          "share_of_activity_pct": 0.3,
+          "purity_pct": 0.2
+        }
+      ]
+    },
+    "sports_play": {
+      "n_windows": 16568,
+      "share_pct": 16.96,
+      "types_touched": 553,
+      "types_for_50pct": 28,
+      "types_for_90pct": 201,
+      "top_types": [
+        {
+          "type": 902,
+          "share_of_activity_pct": 6.9,
+          "purity_pct": 76.4
+        },
+        {
+          "type": 795,
+          "share_of_activity_pct": 4.3,
+          "purity_pct": 73.4
+        },
+        {
+          "type": 622,
+          "share_of_activity_pct": 4.0,
+          "purity_pct": 88.9
+        }
+      ]
+    },
+    "stairs": {
+      "n_windows": 700,
+      "share_pct": 0.72,
+      "types_touched": 38,
+      "types_for_50pct": 3,
+      "types_for_90pct": 16,
+      "top_types": [
+        {
+          "type": 850,
+          "share_of_activity_pct": 30.3,
+          "purity_pct": 14.1
+        },
+        {
+          "type": 237,
+          "share_of_activity_pct": 16.0,
+          "purity_pct": 9.1
+        },
+        {
+          "type": 371,
+          "share_of_activity_pct": 8.4,
+          "purity_pct": 7.3
+        }
+      ]
+    },
+    "stretching": {
+      "n_windows": 482,
+      "share_pct": 0.49,
+      "types_touched": 114,
+      "types_for_50pct": 5,
+      "types_for_90pct": 66,
+      "top_types": [
+        {
+          "type": 462,
+          "share_of_activity_pct": 18.9,
+          "purity_pct": 7.5
+        },
+        {
+          "type": 434,
+          "share_of_activity_pct": 15.1,
+          "purity_pct": 4.1
+        },
+        {
+          "type": 404,
+          "share_of_activity_pct": 6.6,
+          "purity_pct": 1.9
+        }
+      ]
+    },
+    "walk": {
+      "n_windows": 2181,
+      "share_pct": 2.23,
+      "types_touched": 168,
+      "types_for_50pct": 6,
+      "types_for_90pct": 46,
+      "top_types": [
+        {
+          "type": 237,
+          "share_of_activity_pct": 13.4,
+          "purity_pct": 23.9
+        },
+        {
+          "type": 850,
+          "share_of_activity_pct": 12.7,
+          "purity_pct": 18.5
+        },
+        {
+          "type": 729,
+          "share_of_activity_pct": 9.3,
+          "purity_pct": 19.1
+        }
+      ]
+    }
+  },
+  "named_types": [
+    {
+      "type": 932,
+      "n_windows": 396,
+      "top_activity": "rest_inactive",
+      "purity_pct": 94.4,
+      "entropy_nats": 0.289,
+      "runner_up": "posture_stationary",
+      "runner_up_pct": 2.5
+    },
+    {
+      "type": 724,
+      "n_windows": 30,
+      "top_activity": "rest_inactive",
+      "purity_pct": 93.3,
+      "entropy_nats": 0.245,
+      "runner_up": "sports_play",
+      "runner_up_pct": 6.7
+    },
+    {
+      "type": 10,
+      "n_windows": 708,
+      "top_activity": "rest_inactive",
+      "purity_pct": 93.2,
+      "entropy_nats": 0.365,
+      "runner_up": "posture_stationary",
+      "runner_up_pct": 1.8
+    },
+    {
+      "type": 671,
+      "n_windows": 206,
+      "top_activity": "rest_inactive",
+      "purity_pct": 92.7,
+      "entropy_nats": 0.373,
+      "runner_up": "exercise_lower",
+      "runner_up_pct": 2.4
+    },
+    {
+      "type": 138,
+      "n_windows": 906,
+      "top_activity": "rest_inactive",
+      "purity_pct": 92.2,
+      "entropy_nats": 0.377,
+      "runner_up": "posture_stationary",
+      "runner_up_pct": 5.1
+    },
+    {
+      "type": 44,
+      "n_windows": 135,
+      "top_activity": "rest_inactive",
+      "purity_pct": 91.1,
+      "entropy_nats": 0.449,
+      "runner_up": "device_tap",
+      "runner_up_pct": 3.0
+    },
+    {
+      "type": 312,
+      "n_windows": 120,
+      "top_activity": "rest_inactive",
+      "purity_pct": 90.0,
+      "entropy_nats": 0.488,
+      "runner_up": "adl_food",
+      "runner_up_pct": 3.3
+    },
+    {
+      "type": 130,
+      "n_windows": 161,
+      "top_activity": "rest_inactive",
+      "purity_pct": 89.4,
+      "entropy_nats": 0.527,
+      "runner_up": "posture_stationary",
+      "runner_up_pct": 3.7
+    },
+    {
+      "type": 622,
+      "n_windows": 745,
+      "top_activity": "sports_play",
+      "purity_pct": 88.9,
+      "entropy_nats": 0.492,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 6.2
+    },
+    {
+      "type": 506,
+      "n_windows": 386,
+      "top_activity": "rest_inactive",
+      "purity_pct": 88.6,
+      "entropy_nats": 0.549,
+      "runner_up": "device_tap",
+      "runner_up_pct": 3.4
+    },
+    {
+      "type": 494,
+      "n_windows": 32,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 87.5,
+      "entropy_nats": 0.447,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 9.4
+    },
+    {
+      "type": 885,
+      "n_windows": 264,
+      "top_activity": "rest_inactive",
+      "purity_pct": 87.5,
+      "entropy_nats": 0.548,
+      "runner_up": "adl_desk_device",
+      "runner_up_pct": 4.5
+    },
+    {
+      "type": 279,
+      "n_windows": 111,
+      "top_activity": "rest_inactive",
+      "purity_pct": 86.5,
+      "entropy_nats": 0.618,
+      "runner_up": "sports_play",
+      "runner_up_pct": 4.5
+    },
+    {
+      "type": 313,
+      "n_windows": 128,
+      "top_activity": "sports_play",
+      "purity_pct": 85.2,
+      "entropy_nats": 0.61,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 6.2
+    },
+    {
+      "type": 831,
+      "n_windows": 147,
+      "top_activity": "rest_inactive",
+      "purity_pct": 85.0,
+      "entropy_nats": 0.667,
+      "runner_up": "device_tap",
+      "runner_up_pct": 5.4
+    },
+    {
+      "type": 745,
+      "n_windows": 187,
+      "top_activity": "rest_inactive",
+      "purity_pct": 84.0,
+      "entropy_nats": 0.687,
+      "runner_up": "sports_play",
+      "runner_up_pct": 4.8
+    },
+    {
+      "type": 290,
+      "n_windows": 124,
+      "top_activity": "rest_inactive",
+      "purity_pct": 83.9,
+      "entropy_nats": 0.717,
+      "runner_up": "sports_play",
+      "runner_up_pct": 5.6
+    },
+    {
+      "type": 593,
+      "n_windows": 36,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 83.3,
+      "entropy_nats": 0.619,
+      "runner_up": "posture_stationary",
+      "runner_up_pct": 8.3
+    },
+    {
+      "type": 294,
+      "n_windows": 52,
+      "top_activity": "device_tap",
+      "purity_pct": 82.7,
+      "entropy_nats": 0.634,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 11.5
+    },
+    {
+      "type": 201,
+      "n_windows": 46,
+      "top_activity": "cycle",
+      "purity_pct": 82.6,
+      "entropy_nats": 0.649,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 10.9
+    },
+    {
+      "type": 743,
+      "n_windows": 68,
+      "top_activity": "rest_inactive",
+      "purity_pct": 82.4,
+      "entropy_nats": 0.684,
+      "runner_up": "adl_food",
+      "runner_up_pct": 7.4
+    },
+    {
+      "type": 366,
+      "n_windows": 79,
+      "top_activity": "rest_inactive",
+      "purity_pct": 82.3,
+      "entropy_nats": 0.805,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 5.1
+    },
+    {
+      "type": 534,
+      "n_windows": 79,
+      "top_activity": "device_tap",
+      "purity_pct": 82.3,
+      "entropy_nats": 0.637,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 10.1
+    },
+    {
+      "type": 860,
+      "n_windows": 151,
+      "top_activity": "rest_inactive",
+      "purity_pct": 82.1,
+      "entropy_nats": 0.766,
+      "runner_up": "device_tap",
+      "runner_up_pct": 5.3
+    },
+    {
+      "type": 72,
+      "n_windows": 105,
+      "top_activity": "rest_inactive",
+      "purity_pct": 81.0,
+      "entropy_nats": 0.765,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 7.6
+    },
+    {
+      "type": 104,
+      "n_windows": 44,
+      "top_activity": "cycle",
+      "purity_pct": 79.5,
+      "entropy_nats": 0.615,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 15.9
+    },
+    {
+      "type": 769,
+      "n_windows": 207,
+      "top_activity": "rest_inactive",
+      "purity_pct": 79.2,
+      "entropy_nats": 0.827,
+      "runner_up": "posture_stationary",
+      "runner_up_pct": 7.2
+    },
+    {
+      "type": 642,
+      "n_windows": 253,
+      "top_activity": "rest_inactive",
+      "purity_pct": 79.1,
+      "entropy_nats": 0.899,
+      "runner_up": "exercise_lower",
+      "runner_up_pct": 4.7
+    },
+    {
+      "type": 880,
+      "n_windows": 57,
+      "top_activity": "rest_inactive",
+      "purity_pct": 78.9,
+      "entropy_nats": 0.848,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 8.8
+    },
+    {
+      "type": 141,
+      "n_windows": 137,
+      "top_activity": "rest_inactive",
+      "purity_pct": 78.8,
+      "entropy_nats": 0.765,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 12.4
+    },
+    {
+      "type": 64,
+      "n_windows": 47,
+      "top_activity": "rest_inactive",
+      "purity_pct": 78.7,
+      "entropy_nats": 0.777,
+      "runner_up": "adl_food",
+      "runner_up_pct": 10.6
+    },
+    {
+      "type": 109,
+      "n_windows": 75,
+      "top_activity": "rest_inactive",
+      "purity_pct": 78.7,
+      "entropy_nats": 0.74,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 13.3
+    },
+    {
+      "type": 460,
+      "n_windows": 46,
+      "top_activity": "rest_inactive",
+      "purity_pct": 78.3,
+      "entropy_nats": 0.747,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 10.9
+    },
+    {
+      "type": 827,
+      "n_windows": 106,
+      "top_activity": "rest_inactive",
+      "purity_pct": 78.3,
+      "entropy_nats": 0.843,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 7.5
+    },
+    {
+      "type": 742,
+      "n_windows": 179,
+      "top_activity": "rest_inactive",
+      "purity_pct": 78.2,
+      "entropy_nats": 0.847,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 8.4
+    },
+    {
+      "type": 639,
+      "n_windows": 255,
+      "top_activity": "rest_inactive",
+      "purity_pct": 78.0,
+      "entropy_nats": 0.844,
+      "runner_up": "sports_play",
+      "runner_up_pct": 7.5
+    },
+    {
+      "type": 739,
+      "n_windows": 226,
+      "top_activity": "rest_inactive",
+      "purity_pct": 77.9,
+      "entropy_nats": 0.774,
+      "runner_up": "posture_stationary",
+      "runner_up_pct": 15.0
+    },
+    {
+      "type": 332,
+      "n_windows": 162,
+      "top_activity": "rest_inactive",
+      "purity_pct": 77.8,
+      "entropy_nats": 0.917,
+      "runner_up": "sports_play",
+      "runner_up_pct": 6.8
+    },
+    {
+      "type": 665,
+      "n_windows": 58,
+      "top_activity": "rest_inactive",
+      "purity_pct": 77.6,
+      "entropy_nats": 0.85,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 10.3
+    },
+    {
+      "type": 911,
+      "n_windows": 220,
+      "top_activity": "rest_inactive",
+      "purity_pct": 77.3,
+      "entropy_nats": 0.924,
+      "runner_up": "posture_stationary",
+      "runner_up_pct": 7.7
+    },
+    {
+      "type": 660,
+      "n_windows": 30,
+      "top_activity": "rest_inactive",
+      "purity_pct": 76.7,
+      "entropy_nats": 0.841,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 10.0
+    },
+    {
+      "type": 80,
+      "n_windows": 81,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 76.5,
+      "entropy_nats": 0.924,
+      "runner_up": "sports_play",
+      "runner_up_pct": 8.6
+    },
+    {
+      "type": 902,
+      "n_windows": 1497,
+      "top_activity": "sports_play",
+      "purity_pct": 76.4,
+      "entropy_nats": 0.852,
+      "runner_up": "exercise_upper",
+      "runner_up_pct": 14.1
+    },
+    {
+      "type": 232,
+      "n_windows": 147,
+      "top_activity": "rest_inactive",
+      "purity_pct": 76.2,
+      "entropy_nats": 1.005,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 6.8
+    },
+    {
+      "type": 898,
+      "n_windows": 42,
+      "top_activity": "rest_inactive",
+      "purity_pct": 76.2,
+      "entropy_nats": 0.709,
+      "runner_up": "adl_desk_device",
+      "runner_up_pct": 14.3
+    },
+    {
+      "type": 351,
+      "n_windows": 356,
+      "top_activity": "rest_inactive",
+      "purity_pct": 76.1,
+      "entropy_nats": 0.883,
+      "runner_up": "sports_play",
+      "runner_up_pct": 9.6
+    },
+    {
+      "type": 69,
+      "n_windows": 234,
+      "top_activity": "rest_inactive",
+      "purity_pct": 75.6,
+      "entropy_nats": 0.994,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 6.0
+    },
+    {
+      "type": 822,
+      "n_windows": 45,
+      "top_activity": "cycle",
+      "purity_pct": 75.6,
+      "entropy_nats": 0.699,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 17.8
+    },
+    {
+      "type": 486,
+      "n_windows": 155,
+      "top_activity": "rest_inactive",
+      "purity_pct": 75.5,
+      "entropy_nats": 0.909,
+      "runner_up": "sports_play",
+      "runner_up_pct": 9.0
+    },
+    {
+      "type": 765,
+      "n_windows": 236,
+      "top_activity": "rest_inactive",
+      "purity_pct": 75.4,
+      "entropy_nats": 1.058,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 5.5
+    },
+    {
+      "type": 82,
+      "n_windows": 85,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 75.3,
+      "entropy_nats": 0.822,
+      "runner_up": "stairs",
+      "runner_up_pct": 16.5
+    },
+    {
+      "type": 225,
+      "n_windows": 121,
+      "top_activity": "rest_inactive",
+      "purity_pct": 75.2,
+      "entropy_nats": 0.963,
+      "runner_up": "adl_desk_device",
+      "runner_up_pct": 6.6
+    },
+    {
+      "type": 418,
+      "n_windows": 32,
+      "top_activity": "rest_inactive",
+      "purity_pct": 75.0,
+      "entropy_nats": 0.909,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 12.5
+    },
+    {
+      "type": 554,
+      "n_windows": 36,
+      "top_activity": "device_tap",
+      "purity_pct": 75.0,
+      "entropy_nats": 0.85,
+      "runner_up": "sports_play",
+      "runner_up_pct": 13.9
+    },
+    {
+      "type": 18,
+      "n_windows": 210,
+      "top_activity": "sports_play",
+      "purity_pct": 74.8,
+      "entropy_nats": 0.98,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 7.1
+    },
+    {
+      "type": 733,
+      "n_windows": 274,
+      "top_activity": "rest_inactive",
+      "purity_pct": 74.8,
+      "entropy_nats": 0.96,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 9.1
+    },
+    {
+      "type": 79,
+      "n_windows": 122,
+      "top_activity": "rest_inactive",
+      "purity_pct": 74.6,
+      "entropy_nats": 0.986,
+      "runner_up": "device_tap",
+      "runner_up_pct": 7.4
+    },
+    {
+      "type": 314,
+      "n_windows": 399,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 74.4,
+      "entropy_nats": 0.973,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 8.8
+    },
+    {
+      "type": 45,
+      "n_windows": 506,
+      "top_activity": "sports_play",
+      "purity_pct": 74.3,
+      "entropy_nats": 1.015,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 8.3
+    },
+    {
+      "type": 738,
+      "n_windows": 35,
+      "top_activity": "rest_inactive",
+      "purity_pct": 74.3,
+      "entropy_nats": 0.826,
+      "runner_up": "device_tap",
+      "runner_up_pct": 14.3
+    },
+    {
+      "type": 780,
+      "n_windows": 99,
+      "top_activity": "rest_inactive",
+      "purity_pct": 73.7,
+      "entropy_nats": 0.966,
+      "runner_up": "device_tap",
+      "runner_up_pct": 11.1
+    },
+    {
+      "type": 88,
+      "n_windows": 276,
+      "top_activity": "rest_inactive",
+      "purity_pct": 73.6,
+      "entropy_nats": 0.994,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 10.5
+    },
+    {
+      "type": 255,
+      "n_windows": 68,
+      "top_activity": "rest_inactive",
+      "purity_pct": 73.5,
+      "entropy_nats": 1.047,
+      "runner_up": "sports_play",
+      "runner_up_pct": 8.8
+    },
+    {
+      "type": 658,
+      "n_windows": 34,
+      "top_activity": "rest_inactive",
+      "purity_pct": 73.5,
+      "entropy_nats": 0.996,
+      "runner_up": "sports_play",
+      "runner_up_pct": 5.9
+    },
+    {
+      "type": 795,
+      "n_windows": 971,
+      "top_activity": "sports_play",
+      "purity_pct": 73.4,
+      "entropy_nats": 0.881,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 17.9
+    },
+    {
+      "type": 182,
+      "n_windows": 112,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 73.2,
+      "entropy_nats": 0.872,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 15.2
+    },
+    {
+      "type": 674,
+      "n_windows": 41,
+      "top_activity": "rest_inactive",
+      "purity_pct": 73.2,
+      "entropy_nats": 0.961,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 12.2
+    },
+    {
+      "type": 514,
+      "n_windows": 197,
+      "top_activity": "rest_inactive",
+      "purity_pct": 73.1,
+      "entropy_nats": 1.055,
+      "runner_up": "sports_play",
+      "runner_up_pct": 7.6
+    },
+    {
+      "type": 329,
+      "n_windows": 118,
+      "top_activity": "rest_inactive",
+      "purity_pct": 72.9,
+      "entropy_nats": 1.009,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 12.7
+    },
+    {
+      "type": 921,
+      "n_windows": 431,
+      "top_activity": "sports_play",
+      "purity_pct": 72.9,
+      "entropy_nats": 1.002,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 13.0
+    },
+    {
+      "type": 599,
+      "n_windows": 138,
+      "top_activity": "rest_inactive",
+      "purity_pct": 72.5,
+      "entropy_nats": 0.958,
+      "runner_up": "adl_desk_device",
+      "runner_up_pct": 15.2
+    },
+    {
+      "type": 268,
+      "n_windows": 87,
+      "top_activity": "rest_inactive",
+      "purity_pct": 72.4,
+      "entropy_nats": 1.029,
+      "runner_up": "device_tap",
+      "runner_up_pct": 9.2
+    },
+    {
+      "type": 216,
+      "n_windows": 36,
+      "top_activity": "device_tap",
+      "purity_pct": 72.2,
+      "entropy_nats": 0.985,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 11.1
+    },
+    {
+      "type": 816,
+      "n_windows": 223,
+      "top_activity": "rest_inactive",
+      "purity_pct": 72.2,
+      "entropy_nats": 1.068,
+      "runner_up": "device_tap",
+      "runner_up_pct": 9.4
+    },
+    {
+      "type": 636,
+      "n_windows": 319,
+      "top_activity": "sports_play",
+      "purity_pct": 72.1,
+      "entropy_nats": 1.032,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 13.8
+    },
+    {
+      "type": 533,
+      "n_windows": 99,
+      "top_activity": "rest_inactive",
+      "purity_pct": 71.7,
+      "entropy_nats": 1.064,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 10.1
+    },
+    {
+      "type": 111,
+      "n_windows": 88,
+      "top_activity": "rest_inactive",
+      "purity_pct": 71.6,
+      "entropy_nats": 0.969,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 12.5
+    },
+    {
+      "type": 521,
+      "n_windows": 102,
+      "top_activity": "rest_inactive",
+      "purity_pct": 71.6,
+      "entropy_nats": 1.01,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 10.8
+    },
+    {
+      "type": 357,
+      "n_windows": 63,
+      "top_activity": "rest_inactive",
+      "purity_pct": 71.4,
+      "entropy_nats": 1.094,
+      "runner_up": "sports_play",
+      "runner_up_pct": 7.9
+    },
+    {
+      "type": 551,
+      "n_windows": 190,
+      "top_activity": "rest_inactive",
+      "purity_pct": 71.1,
+      "entropy_nats": 1.062,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 9.5
+    },
+    {
+      "type": 835,
+      "n_windows": 31,
+      "top_activity": "rest_inactive",
+      "purity_pct": 71.0,
+      "entropy_nats": 0.801,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 22.6
+    },
+    {
+      "type": 772,
+      "n_windows": 41,
+      "top_activity": "rest_inactive",
+      "purity_pct": 70.7,
+      "entropy_nats": 1.0,
+      "runner_up": "adl_desk_device",
+      "runner_up_pct": 12.2
+    },
+    {
+      "type": 700,
+      "n_windows": 258,
+      "top_activity": "rest_inactive",
+      "purity_pct": 70.5,
+      "entropy_nats": 1.151,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 8.9
+    },
+    {
+      "type": 824,
+      "n_windows": 135,
+      "top_activity": "rest_inactive",
+      "purity_pct": 70.4,
+      "entropy_nats": 1.126,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 11.1
+    },
+    {
+      "type": 24,
+      "n_windows": 66,
+      "top_activity": "rest_inactive",
+      "purity_pct": 69.7,
+      "entropy_nats": 1.126,
+      "runner_up": "device_tap",
+      "runner_up_pct": 10.6
+    },
+    {
+      "type": 399,
+      "n_windows": 89,
+      "top_activity": "rest_inactive",
+      "purity_pct": 69.7,
+      "entropy_nats": 1.132,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 9.0
+    },
+    {
+      "type": 866,
+      "n_windows": 119,
+      "top_activity": "rest_inactive",
+      "purity_pct": 69.7,
+      "entropy_nats": 1.128,
+      "runner_up": "sports_play",
+      "runner_up_pct": 9.2
+    },
+    {
+      "type": 449,
+      "n_windows": 32,
+      "top_activity": "rest_inactive",
+      "purity_pct": 68.8,
+      "entropy_nats": 1.003,
+      "runner_up": "sports_play",
+      "runner_up_pct": 15.6
+    },
+    {
+      "type": 515,
+      "n_windows": 67,
+      "top_activity": "rest_inactive",
+      "purity_pct": 68.7,
+      "entropy_nats": 1.062,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 16.4
+    },
+    {
+      "type": 937,
+      "n_windows": 115,
+      "top_activity": "rest_inactive",
+      "purity_pct": 68.7,
+      "entropy_nats": 1.179,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 9.6
+    },
+    {
+      "type": 76,
+      "n_windows": 66,
+      "top_activity": "rest_inactive",
+      "purity_pct": 68.2,
+      "entropy_nats": 1.09,
+      "runner_up": "posture_stationary",
+      "runner_up_pct": 15.2
+    },
+    {
+      "type": 305,
+      "n_windows": 176,
+      "top_activity": "rest_inactive",
+      "purity_pct": 68.2,
+      "entropy_nats": 1.179,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 11.9
+    },
+    {
+      "type": 459,
+      "n_windows": 185,
+      "top_activity": "rest_inactive",
+      "purity_pct": 68.1,
+      "entropy_nats": 1.175,
+      "runner_up": "device_tap",
+      "runner_up_pct": 10.3
+    },
+    {
+      "type": 563,
+      "n_windows": 197,
+      "top_activity": "rest_inactive",
+      "purity_pct": 68.0,
+      "entropy_nats": 1.113,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 12.2
+    },
+    {
+      "type": 958,
+      "n_windows": 75,
+      "top_activity": "adl_desk_device",
+      "purity_pct": 68.0,
+      "entropy_nats": 1.13,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 10.7
+    },
+    {
+      "type": 757,
+      "n_windows": 31,
+      "top_activity": "device_tap",
+      "purity_pct": 67.7,
+      "entropy_nats": 0.887,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 22.6
+    },
+    {
+      "type": 439,
+      "n_windows": 71,
+      "top_activity": "rest_inactive",
+      "purity_pct": 67.6,
+      "entropy_nats": 1.064,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 15.5
+    },
+    {
+      "type": 826,
+      "n_windows": 74,
+      "top_activity": "rest_inactive",
+      "purity_pct": 67.6,
+      "entropy_nats": 1.131,
+      "runner_up": "sports_play",
+      "runner_up_pct": 8.1
+    },
+    {
+      "type": 964,
+      "n_windows": 245,
+      "top_activity": "rest_inactive",
+      "purity_pct": 67.3,
+      "entropy_nats": 1.173,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 13.1
+    },
+    {
+      "type": 520,
+      "n_windows": 57,
+      "top_activity": "rest_inactive",
+      "purity_pct": 66.7,
+      "entropy_nats": 1.088,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 14.0
+    },
+    {
+      "type": 355,
+      "n_windows": 215,
+      "top_activity": "rest_inactive",
+      "purity_pct": 66.5,
+      "entropy_nats": 1.121,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 13.5
+    },
+    {
+      "type": 929,
+      "n_windows": 371,
+      "top_activity": "rest_inactive",
+      "purity_pct": 66.3,
+      "entropy_nats": 1.232,
+      "runner_up": "device_tap",
+      "runner_up_pct": 14.8
+    },
+    {
+      "type": 868,
+      "n_windows": 77,
+      "top_activity": "rest_inactive",
+      "purity_pct": 66.2,
+      "entropy_nats": 1.218,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 13.0
+    },
+    {
+      "type": 699,
+      "n_windows": 251,
+      "top_activity": "rest_inactive",
+      "purity_pct": 66.1,
+      "entropy_nats": 1.193,
+      "runner_up": "device_tap",
+      "runner_up_pct": 9.2
+    },
+    {
+      "type": 90,
+      "n_windows": 117,
+      "top_activity": "rest_inactive",
+      "purity_pct": 65.8,
+      "entropy_nats": 1.214,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 13.7
+    },
+    {
+      "type": 848,
+      "n_windows": 73,
+      "top_activity": "rest_inactive",
+      "purity_pct": 65.8,
+      "entropy_nats": 1.144,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 11.0
+    },
+    {
+      "type": 35,
+      "n_windows": 35,
+      "top_activity": "rest_inactive",
+      "purity_pct": 65.7,
+      "entropy_nats": 0.99,
+      "runner_up": "posture_stationary",
+      "runner_up_pct": 17.1
+    },
+    {
+      "type": 242,
+      "n_windows": 102,
+      "top_activity": "rest_inactive",
+      "purity_pct": 65.7,
+      "entropy_nats": 1.199,
+      "runner_up": "device_tap",
+      "runner_up_pct": 10.8
+    },
+    {
+      "type": 753,
+      "n_windows": 236,
+      "top_activity": "rest_inactive",
+      "purity_pct": 65.7,
+      "entropy_nats": 1.211,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 14.0
+    },
+    {
+      "type": 405,
+      "n_windows": 96,
+      "top_activity": "rest_inactive",
+      "purity_pct": 65.6,
+      "entropy_nats": 1.039,
+      "runner_up": "posture_stationary",
+      "runner_up_pct": 17.7
+    },
+    {
+      "type": 221,
+      "n_windows": 224,
+      "top_activity": "rest_inactive",
+      "purity_pct": 65.2,
+      "entropy_nats": 1.119,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 14.7
+    },
+    {
+      "type": 146,
+      "n_windows": 153,
+      "top_activity": "rest_inactive",
+      "purity_pct": 64.7,
+      "entropy_nats": 1.203,
+      "runner_up": "device_tap",
+      "runner_up_pct": 12.4
+    },
+    {
+      "type": 857,
+      "n_windows": 96,
+      "top_activity": "rest_inactive",
+      "purity_pct": 64.6,
+      "entropy_nats": 1.283,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 9.4
+    },
+    {
+      "type": 120,
+      "n_windows": 208,
+      "top_activity": "rest_inactive",
+      "purity_pct": 64.4,
+      "entropy_nats": 1.229,
+      "runner_up": "sports_play",
+      "runner_up_pct": 12.0
+    },
+    {
+      "type": 189,
+      "n_windows": 163,
+      "top_activity": "rest_inactive",
+      "purity_pct": 64.4,
+      "entropy_nats": 1.114,
+      "runner_up": "adl_desk_device",
+      "runner_up_pct": 19.0
+    },
+    {
+      "type": 954,
+      "n_windows": 179,
+      "top_activity": "rest_inactive",
+      "purity_pct": 64.2,
+      "entropy_nats": 1.274,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 12.8
+    },
+    {
+      "type": 535,
+      "n_windows": 909,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 64.0,
+      "entropy_nats": 1.227,
+      "runner_up": "sports_play",
+      "runner_up_pct": 11.9
+    },
+    {
+      "type": 616,
+      "n_windows": 147,
+      "top_activity": "rest_inactive",
+      "purity_pct": 63.9,
+      "entropy_nats": 1.249,
+      "runner_up": "adl_food",
+      "runner_up_pct": 10.9
+    },
+    {
+      "type": 322,
+      "n_windows": 116,
+      "top_activity": "rest_inactive",
+      "purity_pct": 63.8,
+      "entropy_nats": 1.247,
+      "runner_up": "sports_play",
+      "runner_up_pct": 11.2
+    },
+    {
+      "type": 546,
+      "n_windows": 47,
+      "top_activity": "rest_inactive",
+      "purity_pct": 63.8,
+      "entropy_nats": 1.09,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 21.3
+    },
+    {
+      "type": 560,
+      "n_windows": 211,
+      "top_activity": "rest_inactive",
+      "purity_pct": 63.5,
+      "entropy_nats": 1.244,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 13.7
+    },
+    {
+      "type": 626,
+      "n_windows": 488,
+      "top_activity": "sports_play",
+      "purity_pct": 63.5,
+      "entropy_nats": 1.053,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 17.6
+    },
+    {
+      "type": 471,
+      "n_windows": 246,
+      "top_activity": "rest_inactive",
+      "purity_pct": 63.4,
+      "entropy_nats": 1.288,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 11.8
+    },
+    {
+      "type": 94,
+      "n_windows": 30,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 63.3,
+      "entropy_nats": 1.036,
+      "runner_up": "exercise_lower",
+      "runner_up_pct": 23.3
+    },
+    {
+      "type": 42,
+      "n_windows": 95,
+      "top_activity": "rest_inactive",
+      "purity_pct": 63.2,
+      "entropy_nats": 1.408,
+      "runner_up": "device_tap",
+      "runner_up_pct": 9.5
+    },
+    {
+      "type": 264,
+      "n_windows": 239,
+      "top_activity": "rest_inactive",
+      "purity_pct": 63.2,
+      "entropy_nats": 1.225,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 14.2
+    },
+    {
+      "type": 385,
+      "n_windows": 200,
+      "top_activity": "rest_inactive",
+      "purity_pct": 63.0,
+      "entropy_nats": 1.188,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 16.0
+    },
+    {
+      "type": 797,
+      "n_windows": 294,
+      "top_activity": "rest_inactive",
+      "purity_pct": 62.9,
+      "entropy_nats": 1.191,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 18.4
+    },
+    {
+      "type": 356,
+      "n_windows": 370,
+      "top_activity": "rest_inactive",
+      "purity_pct": 62.7,
+      "entropy_nats": 1.226,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 16.5
+    },
+    {
+      "type": 134,
+      "n_windows": 123,
+      "top_activity": "rest_inactive",
+      "purity_pct": 62.6,
+      "entropy_nats": 1.378,
+      "runner_up": "device_tap",
+      "runner_up_pct": 10.6
+    },
+    {
+      "type": 144,
+      "n_windows": 107,
+      "top_activity": "rest_inactive",
+      "purity_pct": 62.6,
+      "entropy_nats": 1.178,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 16.8
+    },
+    {
+      "type": 262,
+      "n_windows": 144,
+      "top_activity": "rest_inactive",
+      "purity_pct": 62.5,
+      "entropy_nats": 1.2,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 13.9
+    },
+    {
+      "type": 176,
+      "n_windows": 103,
+      "top_activity": "rest_inactive",
+      "purity_pct": 62.1,
+      "entropy_nats": 1.144,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 14.6
+    },
+    {
+      "type": 890,
+      "n_windows": 253,
+      "top_activity": "rest_inactive",
+      "purity_pct": 62.1,
+      "entropy_nats": 1.243,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 14.6
+    },
+    {
+      "type": 617,
+      "n_windows": 105,
+      "top_activity": "rest_inactive",
+      "purity_pct": 61.9,
+      "entropy_nats": 1.329,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 14.3
+    },
+    {
+      "type": 923,
+      "n_windows": 134,
+      "top_activity": "rest_inactive",
+      "purity_pct": 61.9,
+      "entropy_nats": 1.24,
+      "runner_up": "device_tap",
+      "runner_up_pct": 14.2
+    },
+    {
+      "type": 652,
+      "n_windows": 60,
+      "top_activity": "rest_inactive",
+      "purity_pct": 61.7,
+      "entropy_nats": 1.219,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 15.0
+    },
+    {
+      "type": 787,
+      "n_windows": 52,
+      "top_activity": "cycle",
+      "purity_pct": 61.5,
+      "entropy_nats": 1.168,
+      "runner_up": "device_tap",
+      "runner_up_pct": 19.2
+    },
+    {
+      "type": 396,
+      "n_windows": 145,
+      "top_activity": "rest_inactive",
+      "purity_pct": 61.4,
+      "entropy_nats": 1.266,
+      "runner_up": "device_tap",
+      "runner_up_pct": 13.1
+    },
+    {
+      "type": 777,
+      "n_windows": 83,
+      "top_activity": "rest_inactive",
+      "purity_pct": 61.4,
+      "entropy_nats": 1.366,
+      "runner_up": "sports_play",
+      "runner_up_pct": 14.5
+    },
+    {
+      "type": 720,
+      "n_windows": 31,
+      "top_activity": "rest_inactive",
+      "purity_pct": 61.3,
+      "entropy_nats": 1.325,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 16.1
+    },
+    {
+      "type": 469,
+      "n_windows": 54,
+      "top_activity": "rest_inactive",
+      "purity_pct": 61.1,
+      "entropy_nats": 1.226,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 16.7
+    },
+    {
+      "type": 604,
+      "n_windows": 46,
+      "top_activity": "rest_inactive",
+      "purity_pct": 60.9,
+      "entropy_nats": 1.179,
+      "runner_up": "sports_play",
+      "runner_up_pct": 15.2
+    },
+    {
+      "type": 632,
+      "n_windows": 145,
+      "top_activity": "device_tap",
+      "purity_pct": 60.7,
+      "entropy_nats": 1.242,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 21.4
+    },
+    {
+      "type": 996,
+      "n_windows": 89,
+      "top_activity": "rest_inactive",
+      "purity_pct": 60.7,
+      "entropy_nats": 1.258,
+      "runner_up": "device_tap",
+      "runner_up_pct": 15.7
+    },
+    {
+      "type": 343,
+      "n_windows": 33,
+      "top_activity": "rest_inactive",
+      "purity_pct": 60.6,
+      "entropy_nats": 1.151,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 15.2
+    },
+    {
+      "type": 263,
+      "n_windows": 75,
+      "top_activity": "rest_inactive",
+      "purity_pct": 60.0,
+      "entropy_nats": 1.029,
+      "runner_up": "sports_play",
+      "runner_up_pct": 20.0
+    },
+    {
+      "type": 578,
+      "n_windows": 30,
+      "top_activity": "rest_inactive",
+      "purity_pct": 60.0,
+      "entropy_nats": 1.124,
+      "runner_up": "posture_stationary",
+      "runner_up_pct": 20.0
+    },
+    {
+      "type": 214,
+      "n_windows": 133,
+      "top_activity": "rest_inactive",
+      "purity_pct": 59.4,
+      "entropy_nats": 1.376,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 11.3
+    },
+    {
+      "type": 283,
+      "n_windows": 32,
+      "top_activity": "rest_inactive",
+      "purity_pct": 59.4,
+      "entropy_nats": 1.192,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 18.8
+    },
+    {
+      "type": 567,
+      "n_windows": 128,
+      "top_activity": "rest_inactive",
+      "purity_pct": 59.4,
+      "entropy_nats": 1.34,
+      "runner_up": "sports_play",
+      "runner_up_pct": 14.8
+    },
+    {
+      "type": 610,
+      "n_windows": 71,
+      "top_activity": "rest_inactive",
+      "purity_pct": 59.2,
+      "entropy_nats": 1.197,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 22.5
+    },
+    {
+      "type": 462,
+      "n_windows": 1208,
+      "top_activity": "device_tap",
+      "purity_pct": 58.8,
+      "entropy_nats": 1.24,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 22.6
+    },
+    {
+      "type": 126,
+      "n_windows": 63,
+      "top_activity": "rest_inactive",
+      "purity_pct": 58.7,
+      "entropy_nats": 1.337,
+      "runner_up": "sports_play",
+      "runner_up_pct": 15.9
+    },
+    {
+      "type": 912,
+      "n_windows": 87,
+      "top_activity": "rest_inactive",
+      "purity_pct": 58.6,
+      "entropy_nats": 1.097,
+      "runner_up": "adl_desk_device",
+      "runner_up_pct": 27.6
+    },
+    {
+      "type": 74,
+      "n_windows": 275,
+      "top_activity": "rest_inactive",
+      "purity_pct": 58.5,
+      "entropy_nats": 1.386,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 13.5
+    },
+    {
+      "type": 374,
+      "n_windows": 328,
+      "top_activity": "adl_desk_device",
+      "purity_pct": 58.5,
+      "entropy_nats": 1.027,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 30.5
+    },
+    {
+      "type": 662,
+      "n_windows": 108,
+      "top_activity": "rest_inactive",
+      "purity_pct": 58.3,
+      "entropy_nats": 1.223,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 16.7
+    },
+    {
+      "type": 507,
+      "n_windows": 675,
+      "top_activity": "exercise_upper",
+      "purity_pct": 58.2,
+      "entropy_nats": 1.436,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 13.3
+    },
+    {
+      "type": 203,
+      "n_windows": 86,
+      "top_activity": "rest_inactive",
+      "purity_pct": 58.1,
+      "entropy_nats": 1.331,
+      "runner_up": "device_tap",
+      "runner_up_pct": 15.1
+    },
+    {
+      "type": 589,
+      "n_windows": 81,
+      "top_activity": "rest_inactive",
+      "purity_pct": 58.0,
+      "entropy_nats": 1.369,
+      "runner_up": "device_tap",
+      "runner_up_pct": 18.5
+    },
+    {
+      "type": 842,
+      "n_windows": 157,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 58.0,
+      "entropy_nats": 1.319,
+      "runner_up": "sports_play",
+      "runner_up_pct": 15.3
+    },
+    {
+      "type": 414,
+      "n_windows": 256,
+      "top_activity": "rest_inactive",
+      "purity_pct": 57.8,
+      "entropy_nats": 1.364,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 13.7
+    },
+    {
+      "type": 536,
+      "n_windows": 123,
+      "top_activity": "rest_inactive",
+      "purity_pct": 57.7,
+      "entropy_nats": 1.27,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 17.1
+    },
+    {
+      "type": 783,
+      "n_windows": 137,
+      "top_activity": "rest_inactive",
+      "purity_pct": 57.7,
+      "entropy_nats": 1.283,
+      "runner_up": "device_tap",
+      "runner_up_pct": 19.0
+    },
+    {
+      "type": 175,
+      "n_windows": 82,
+      "top_activity": "rest_inactive",
+      "purity_pct": 57.3,
+      "entropy_nats": 1.389,
+      "runner_up": "device_tap",
+      "runner_up_pct": 14.6
+    },
+    {
+      "type": 978,
+      "n_windows": 704,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 57.2,
+      "entropy_nats": 1.443,
+      "runner_up": "sports_play",
+      "runner_up_pct": 13.8
+    },
+    {
+      "type": 969,
+      "n_windows": 275,
+      "top_activity": "sports_play",
+      "purity_pct": 57.1,
+      "entropy_nats": 1.089,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 29.8
+    },
+    {
+      "type": 717,
+      "n_windows": 207,
+      "top_activity": "rest_inactive",
+      "purity_pct": 57.0,
+      "entropy_nats": 1.32,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 19.3
+    },
+    {
+      "type": 220,
+      "n_windows": 58,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 56.9,
+      "entropy_nats": 1.343,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 12.1
+    },
+    {
+      "type": 132,
+      "n_windows": 81,
+      "top_activity": "rest_inactive",
+      "purity_pct": 56.8,
+      "entropy_nats": 1.395,
+      "runner_up": "sports_play",
+      "runner_up_pct": 17.3
+    },
+    {
+      "type": 988,
+      "n_windows": 176,
+      "top_activity": "rest_inactive",
+      "purity_pct": 56.8,
+      "entropy_nats": 1.382,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 13.6
+    },
+    {
+      "type": 287,
+      "n_windows": 263,
+      "top_activity": "sports_play",
+      "purity_pct": 56.7,
+      "entropy_nats": 1.43,
+      "runner_up": "exercise_lower",
+      "runner_up_pct": 14.1
+    },
+    {
+      "type": 916,
+      "n_windows": 60,
+      "top_activity": "rest_inactive",
+      "purity_pct": 56.7,
+      "entropy_nats": 1.362,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 15.0
+    },
+    {
+      "type": 465,
+      "n_windows": 53,
+      "top_activity": "device_tap",
+      "purity_pct": 56.6,
+      "entropy_nats": 1.469,
+      "runner_up": "exercise_lower",
+      "runner_up_pct": 13.2
+    },
+    {
+      "type": 217,
+      "n_windows": 404,
+      "top_activity": "rest_inactive",
+      "purity_pct": 56.4,
+      "entropy_nats": 1.391,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 17.3
+    },
+    {
+      "type": 675,
+      "n_windows": 179,
+      "top_activity": "sports_play",
+      "purity_pct": 56.4,
+      "entropy_nats": 1.241,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 27.9
+    },
+    {
+      "type": 4,
+      "n_windows": 304,
+      "top_activity": "rest_inactive",
+      "purity_pct": 56.2,
+      "entropy_nats": 1.534,
+      "runner_up": "posture_stationary",
+      "runner_up_pct": 10.9
+    },
+    {
+      "type": 438,
+      "n_windows": 528,
+      "top_activity": "rest_inactive",
+      "purity_pct": 56.2,
+      "entropy_nats": 1.423,
+      "runner_up": "device_tap",
+      "runner_up_pct": 12.5
+    },
+    {
+      "type": 27,
+      "n_windows": 34,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 55.9,
+      "entropy_nats": 1.024,
+      "runner_up": "posture_stationary",
+      "runner_up_pct": 32.4
+    },
+    {
+      "type": 951,
+      "n_windows": 415,
+      "top_activity": "rest_inactive",
+      "purity_pct": 55.9,
+      "entropy_nats": 1.342,
+      "runner_up": "adl_desk_device",
+      "runner_up_pct": 21.7
+    },
+    {
+      "type": 102,
+      "n_windows": 343,
+      "top_activity": "rest_inactive",
+      "purity_pct": 55.7,
+      "entropy_nats": 1.436,
+      "runner_up": "adl_desk_device",
+      "runner_up_pct": 12.0
+    },
+    {
+      "type": 584,
+      "n_windows": 131,
+      "top_activity": "device_tap",
+      "purity_pct": 55.7,
+      "entropy_nats": 1.111,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 31.3
+    },
+    {
+      "type": 502,
+      "n_windows": 441,
+      "top_activity": "rest_inactive",
+      "purity_pct": 55.6,
+      "entropy_nats": 1.443,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 22.0
+    },
+    {
+      "type": 906,
+      "n_windows": 256,
+      "top_activity": "rest_inactive",
+      "purity_pct": 55.5,
+      "entropy_nats": 1.409,
+      "runner_up": "device_tap",
+      "runner_up_pct": 17.2
+    },
+    {
+      "type": 782,
+      "n_windows": 213,
+      "top_activity": "rest_inactive",
+      "purity_pct": 55.4,
+      "entropy_nats": 1.373,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 15.5
+    },
+    {
+      "type": 810,
+      "n_windows": 2886,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 55.4,
+      "entropy_nats": 0.906,
+      "runner_up": "exercise_upper",
+      "runner_up_pct": 39.4
+    },
+    {
+      "type": 315,
+      "n_windows": 454,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 55.3,
+      "entropy_nats": 1.305,
+      "runner_up": "exercise_upper",
+      "runner_up_pct": 20.5
+    },
+    {
+      "type": 807,
+      "n_windows": 47,
+      "top_activity": "rest_inactive",
+      "purity_pct": 55.3,
+      "entropy_nats": 1.084,
+      "runner_up": "device_tap",
+      "runner_up_pct": 31.9
+    },
+    {
+      "type": 586,
+      "n_windows": 444,
+      "top_activity": "rest_inactive",
+      "purity_pct": 55.2,
+      "entropy_nats": 0.995,
+      "runner_up": "sports_play",
+      "runner_up_pct": 36.0
+    },
+    {
+      "type": 114,
+      "n_windows": 118,
+      "top_activity": "sports_play",
+      "purity_pct": 55.1,
+      "entropy_nats": 1.363,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 21.2
+    },
+    {
+      "type": 341,
+      "n_windows": 166,
+      "top_activity": "rest_inactive",
+      "purity_pct": 54.8,
+      "entropy_nats": 1.435,
+      "runner_up": "device_tap",
+      "runner_up_pct": 15.7
+    },
+    {
+      "type": 974,
+      "n_windows": 227,
+      "top_activity": "rest_inactive",
+      "purity_pct": 54.6,
+      "entropy_nats": 1.472,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 13.7
+    },
+    {
+      "type": 850,
+      "n_windows": 1499,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 54.5,
+      "entropy_nats": 1.33,
+      "runner_up": "walk",
+      "runner_up_pct": 18.5
+    },
+    {
+      "type": 960,
+      "n_windows": 114,
+      "top_activity": "rest_inactive",
+      "purity_pct": 54.4,
+      "entropy_nats": 1.385,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 17.5
+    },
+    {
+      "type": 767,
+      "n_windows": 219,
+      "top_activity": "rest_inactive",
+      "purity_pct": 54.3,
+      "entropy_nats": 1.385,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 19.6
+    },
+    {
+      "type": 245,
+      "n_windows": 48,
+      "top_activity": "rest_inactive",
+      "purity_pct": 54.2,
+      "entropy_nats": 1.25,
+      "runner_up": "posture_stationary",
+      "runner_up_pct": 18.8
+    },
+    {
+      "type": 422,
+      "n_windows": 85,
+      "top_activity": "device_tap",
+      "purity_pct": 54.1,
+      "entropy_nats": 1.13,
+      "runner_up": "posture_stationary",
+      "runner_up_pct": 27.1
+    },
+    {
+      "type": 573,
+      "n_windows": 74,
+      "top_activity": "rest_inactive",
+      "purity_pct": 54.1,
+      "entropy_nats": 1.612,
+      "runner_up": "device_tap",
+      "runner_up_pct": 10.8
+    },
+    {
+      "type": 709,
+      "n_windows": 150,
+      "top_activity": "rest_inactive",
+      "purity_pct": 54.0,
+      "entropy_nats": 1.299,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 23.3
+    },
+    {
+      "type": 426,
+      "n_windows": 597,
+      "top_activity": "sports_play",
+      "purity_pct": 53.9,
+      "entropy_nats": 1.416,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 20.6
+    },
+    {
+      "type": 342,
+      "n_windows": 39,
+      "top_activity": "rest_inactive",
+      "purity_pct": 53.8,
+      "entropy_nats": 0.984,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 30.8
+    },
+    {
+      "type": 183,
+      "n_windows": 71,
+      "top_activity": "device_tap",
+      "purity_pct": 53.5,
+      "entropy_nats": 1.48,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 18.3
+    },
+    {
+      "type": 335,
+      "n_windows": 212,
+      "top_activity": "rest_inactive",
+      "purity_pct": 53.3,
+      "entropy_nats": 1.419,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 18.9
+    },
+    {
+      "type": 326,
+      "n_windows": 243,
+      "top_activity": "sports_play",
+      "purity_pct": 53.1,
+      "entropy_nats": 1.499,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 14.8
+    },
+    {
+      "type": 580,
+      "n_windows": 34,
+      "top_activity": "rest_inactive",
+      "purity_pct": 52.9,
+      "entropy_nats": 1.435,
+      "runner_up": "device_tap",
+      "runner_up_pct": 17.6
+    },
+    {
+      "type": 196,
+      "n_windows": 57,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 52.6,
+      "entropy_nats": 1.328,
+      "runner_up": "sports_play",
+      "runner_up_pct": 19.3
+    },
+    {
+      "type": 328,
+      "n_windows": 213,
+      "top_activity": "rest_inactive",
+      "purity_pct": 52.6,
+      "entropy_nats": 1.578,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 13.1
+    },
+    {
+      "type": 91,
+      "n_windows": 356,
+      "top_activity": "sports_play",
+      "purity_pct": 51.7,
+      "entropy_nats": 1.053,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 33.7
+    },
+    {
+      "type": 952,
+      "n_windows": 60,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 51.7,
+      "entropy_nats": 1.087,
+      "runner_up": "sports_play",
+      "runner_up_pct": 33.3
+    },
+    {
+      "type": 979,
+      "n_windows": 334,
+      "top_activity": "rest_inactive",
+      "purity_pct": 51.5,
+      "entropy_nats": 1.383,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 26.3
+    },
+    {
+      "type": 442,
+      "n_windows": 140,
+      "top_activity": "sports_play",
+      "purity_pct": 51.4,
+      "entropy_nats": 1.195,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 32.1
+    },
+    {
+      "type": 261,
+      "n_windows": 92,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 51.1,
+      "entropy_nats": 1.502,
+      "runner_up": "stairs",
+      "runner_up_pct": 20.7
+    },
+    {
+      "type": 211,
+      "n_windows": 100,
+      "top_activity": "rest_inactive",
+      "purity_pct": 51.0,
+      "entropy_nats": 1.384,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 23.0
+    },
+    {
+      "type": 67,
+      "n_windows": 212,
+      "top_activity": "rest_inactive",
+      "purity_pct": 50.9,
+      "entropy_nats": 1.42,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 18.4
+    },
+    {
+      "type": 647,
+      "n_windows": 65,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 50.8,
+      "entropy_nats": 1.475,
+      "runner_up": "sports_play",
+      "runner_up_pct": 18.5
+    },
+    {
+      "type": 788,
+      "n_windows": 61,
+      "top_activity": "rest_inactive",
+      "purity_pct": 50.8,
+      "entropy_nats": 1.493,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 18.0
+    },
+    {
+      "type": 944,
+      "n_windows": 447,
+      "top_activity": "rest_inactive",
+      "purity_pct": 50.8,
+      "entropy_nats": 1.352,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 28.4
+    },
+    {
+      "type": 257,
+      "n_windows": 557,
+      "top_activity": "exercise_lower",
+      "purity_pct": 50.4,
+      "entropy_nats": 1.596,
+      "runner_up": "device_tap",
+      "runner_up_pct": 15.3
+    },
+    {
+      "type": 686,
+      "n_windows": 342,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 50.3,
+      "entropy_nats": 1.423,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 18.1
+    },
+    {
+      "type": 157,
+      "n_windows": 225,
+      "top_activity": "rest_inactive",
+      "purity_pct": 50.2,
+      "entropy_nats": 1.49,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 19.1
+    },
+    {
+      "type": 37,
+      "n_windows": 84,
+      "top_activity": "rest_inactive",
+      "purity_pct": 50.0,
+      "entropy_nats": 1.381,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 23.8
+    },
+    {
+      "type": 143,
+      "n_windows": 140,
+      "top_activity": "rest_inactive",
+      "purity_pct": 50.0,
+      "entropy_nats": 1.439,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 22.1
+    },
+    {
+      "type": 352,
+      "n_windows": 130,
+      "top_activity": "rest_inactive",
+      "purity_pct": 50.0,
+      "entropy_nats": 1.518,
+      "runner_up": "sports_play",
+      "runner_up_pct": 15.4
+    },
+    {
+      "type": 450,
+      "n_windows": 168,
+      "top_activity": "rest_inactive",
+      "purity_pct": 50.0,
+      "entropy_nats": 1.27,
+      "runner_up": "adl_desk_device",
+      "runner_up_pct": 28.0
+    },
+    {
+      "type": 495,
+      "n_windows": 46,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 50.0,
+      "entropy_nats": 1.419,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 17.4
+    },
+    {
+      "type": 801,
+      "n_windows": 68,
+      "top_activity": "rest_inactive",
+      "purity_pct": 50.0,
+      "entropy_nats": 1.562,
+      "runner_up": "adl_food",
+      "runner_up_pct": 17.6
+    },
+    {
+      "type": 689,
+      "n_windows": 283,
+      "top_activity": "rest_inactive",
+      "purity_pct": 49.5,
+      "entropy_nats": 1.481,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 20.8
+    },
+    {
+      "type": 956,
+      "n_windows": 670,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 49.4,
+      "entropy_nats": 1.424,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 20.9
+    },
+    {
+      "type": 943,
+      "n_windows": 61,
+      "top_activity": "rest_inactive",
+      "purity_pct": 49.2,
+      "entropy_nats": 1.571,
+      "runner_up": "sports_play",
+      "runner_up_pct": 18.0
+    },
+    {
+      "type": 277,
+      "n_windows": 114,
+      "top_activity": "rest_inactive",
+      "purity_pct": 49.1,
+      "entropy_nats": 1.49,
+      "runner_up": "sports_play",
+      "runner_up_pct": 21.1
+    },
+    {
+      "type": 434,
+      "n_windows": 1761,
+      "top_activity": "device_tap",
+      "purity_pct": 49.0,
+      "entropy_nats": 1.329,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 32.1
+    },
+    {
+      "type": 664,
+      "n_windows": 202,
+      "top_activity": "rest_inactive",
+      "purity_pct": 49.0,
+      "entropy_nats": 1.437,
+      "runner_up": "sports_play",
+      "runner_up_pct": 20.3
+    },
+    {
+      "type": 933,
+      "n_windows": 347,
+      "top_activity": "device_tap",
+      "purity_pct": 49.0,
+      "entropy_nats": 1.7,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 16.1
+    },
+    {
+      "type": 57,
+      "n_windows": 66,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 48.5,
+      "entropy_nats": 1.274,
+      "runner_up": "posture_stationary",
+      "runner_up_pct": 25.8
+    },
+    {
+      "type": 500,
+      "n_windows": 60,
+      "top_activity": "rest_inactive",
+      "purity_pct": 48.3,
+      "entropy_nats": 1.08,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 40.0
+    },
+    {
+      "type": 646,
+      "n_windows": 814,
+      "top_activity": "sports_play",
+      "purity_pct": 48.3,
+      "entropy_nats": 1.32,
+      "runner_up": "exercise_upper",
+      "runner_up_pct": 27.9
+    },
+    {
+      "type": 677,
+      "n_windows": 141,
+      "top_activity": "rest_inactive",
+      "purity_pct": 48.2,
+      "entropy_nats": 1.471,
+      "runner_up": "device_tap",
+      "runner_up_pct": 17.7
+    },
+    {
+      "type": 110,
+      "n_windows": 235,
+      "top_activity": "rest_inactive",
+      "purity_pct": 48.1,
+      "entropy_nats": 1.395,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 21.3
+    },
+    {
+      "type": 683,
+      "n_windows": 163,
+      "top_activity": "adl_desk_device",
+      "purity_pct": 47.9,
+      "entropy_nats": 1.115,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 38.0
+    },
+    {
+      "type": 600,
+      "n_windows": 449,
+      "top_activity": "sports_play",
+      "purity_pct": 47.7,
+      "entropy_nats": 1.425,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 22.7
+    },
+    {
+      "type": 828,
+      "n_windows": 84,
+      "top_activity": "rest_inactive",
+      "purity_pct": 47.6,
+      "entropy_nats": 1.33,
+      "runner_up": "device_tap",
+      "runner_up_pct": 29.8
+    },
+    {
+      "type": 564,
+      "n_windows": 495,
+      "top_activity": "rest_inactive",
+      "purity_pct": 47.5,
+      "entropy_nats": 1.342,
+      "runner_up": "device_tap",
+      "runner_up_pct": 31.1
+    },
+    {
+      "type": 358,
+      "n_windows": 161,
+      "top_activity": "rest_inactive",
+      "purity_pct": 47.2,
+      "entropy_nats": 1.627,
+      "runner_up": "device_tap",
+      "runner_up_pct": 14.3
+    },
+    {
+      "type": 404,
+      "n_windows": 1667,
+      "top_activity": "device_tap",
+      "purity_pct": 47.2,
+      "entropy_nats": 1.729,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 13.6
+    },
+    {
+      "type": 21,
+      "n_windows": 270,
+      "top_activity": "rest_inactive",
+      "purity_pct": 47.0,
+      "entropy_nats": 1.482,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 20.7
+    },
+    {
+      "type": 336,
+      "n_windows": 32,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 46.9,
+      "entropy_nats": 1.26,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 31.2
+    },
+    {
+      "type": 590,
+      "n_windows": 207,
+      "top_activity": "rest_inactive",
+      "purity_pct": 46.9,
+      "entropy_nats": 1.453,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 19.8
+    },
+    {
+      "type": 291,
+      "n_windows": 92,
+      "top_activity": "rest_inactive",
+      "purity_pct": 46.7,
+      "entropy_nats": 1.446,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 20.7
+    },
+    {
+      "type": 608,
+      "n_windows": 206,
+      "top_activity": "rest_inactive",
+      "purity_pct": 46.6,
+      "entropy_nats": 1.405,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 27.2
+    },
+    {
+      "type": 387,
+      "n_windows": 95,
+      "top_activity": "rest_inactive",
+      "purity_pct": 46.3,
+      "entropy_nats": 1.618,
+      "runner_up": "sports_play",
+      "runner_up_pct": 14.7
+    },
+    {
+      "type": 526,
+      "n_windows": 160,
+      "top_activity": "walk",
+      "purity_pct": 46.2,
+      "entropy_nats": 1.193,
+      "runner_up": "sports_play",
+      "runner_up_pct": 33.1
+    },
+    {
+      "type": 708,
+      "n_windows": 106,
+      "top_activity": "sports_play",
+      "purity_pct": 46.2,
+      "entropy_nats": 1.571,
+      "runner_up": "exercise_lower",
+      "runner_up_pct": 20.8
+    },
+    {
+      "type": 980,
+      "n_windows": 532,
+      "top_activity": "sports_play",
+      "purity_pct": 46.2,
+      "entropy_nats": 1.17,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 41.0
+    },
+    {
+      "type": 891,
+      "n_windows": 1599,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 46.0,
+      "entropy_nats": 1.341,
+      "runner_up": "exercise_lower",
+      "runner_up_pct": 26.6
+    },
+    {
+      "type": 118,
+      "n_windows": 455,
+      "top_activity": "rest_inactive",
+      "purity_pct": 45.9,
+      "entropy_nats": 1.426,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 28.4
+    },
+    {
+      "type": 603,
+      "n_windows": 181,
+      "top_activity": "rest_inactive",
+      "purity_pct": 45.9,
+      "entropy_nats": 1.397,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 28.7
+    },
+    {
+      "type": 678,
+      "n_windows": 103,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 45.6,
+      "entropy_nats": 1.181,
+      "runner_up": "device_tap",
+      "runner_up_pct": 37.9
+    },
+    {
+      "type": 497,
+      "n_windows": 301,
+      "top_activity": "rest_inactive",
+      "purity_pct": 45.5,
+      "entropy_nats": 1.498,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 25.2
+    },
+    {
+      "type": 605,
+      "n_windows": 272,
+      "top_activity": "rest_inactive",
+      "purity_pct": 45.2,
+      "entropy_nats": 1.452,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 27.9
+    },
+    {
+      "type": 54,
+      "n_windows": 91,
+      "top_activity": "rest_inactive",
+      "purity_pct": 45.1,
+      "entropy_nats": 1.775,
+      "runner_up": "device_tap",
+      "runner_up_pct": 13.2
+    },
+    {
+      "type": 285,
+      "n_windows": 288,
+      "top_activity": "rest_inactive",
+      "purity_pct": 45.1,
+      "entropy_nats": 1.843,
+      "runner_up": "sports_play",
+      "runner_up_pct": 14.9
+    },
+    {
+      "type": 375,
+      "n_windows": 164,
+      "top_activity": "rest_inactive",
+      "purity_pct": 45.1,
+      "entropy_nats": 1.487,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 22.0
+    },
+    {
+      "type": 499,
+      "n_windows": 709,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 45.1,
+      "entropy_nats": 0.947,
+      "runner_up": "sports_play",
+      "runner_up_pct": 45.0
+    },
+    {
+      "type": 93,
+      "n_windows": 383,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 44.9,
+      "entropy_nats": 1.575,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 23.2
+    },
+    {
+      "type": 377,
+      "n_windows": 163,
+      "top_activity": "sports_play",
+      "purity_pct": 44.8,
+      "entropy_nats": 1.572,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 19.6
+    },
+    {
+      "type": 113,
+      "n_windows": 38,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 44.7,
+      "entropy_nats": 1.435,
+      "runner_up": "sports_play",
+      "runner_up_pct": 15.8
+    },
+    {
+      "type": 992,
+      "n_windows": 604,
+      "top_activity": "sports_play",
+      "purity_pct": 44.7,
+      "entropy_nats": 1.215,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 37.3
+    },
+    {
+      "type": 915,
+      "n_windows": 81,
+      "top_activity": "sports_play",
+      "purity_pct": 44.4,
+      "entropy_nats": 1.266,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 32.1
+    },
+    {
+      "type": 258,
+      "n_windows": 86,
+      "top_activity": "sports_play",
+      "purity_pct": 44.2,
+      "entropy_nats": 1.532,
+      "runner_up": "exercise_upper",
+      "runner_up_pct": 19.8
+    },
+    {
+      "type": 371,
+      "n_windows": 805,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 44.2,
+      "entropy_nats": 1.191,
+      "runner_up": "sports_play",
+      "runner_up_pct": 41.9
+    },
+    {
+      "type": 518,
+      "n_windows": 143,
+      "top_activity": "rest_inactive",
+      "purity_pct": 44.1,
+      "entropy_nats": 1.621,
+      "runner_up": "sports_play",
+      "runner_up_pct": 17.5
+    },
+    {
+      "type": 129,
+      "n_windows": 293,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 44.0,
+      "entropy_nats": 1.421,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 32.4
+    },
+    {
+      "type": 12,
+      "n_windows": 185,
+      "top_activity": "rest_inactive",
+      "purity_pct": 43.8,
+      "entropy_nats": 1.572,
+      "runner_up": "sports_play",
+      "runner_up_pct": 18.4
+    },
+    {
+      "type": 691,
+      "n_windows": 32,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 43.8,
+      "entropy_nats": 1.507,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 18.8
+    },
+    {
+      "type": 407,
+      "n_windows": 39,
+      "top_activity": "rest_inactive",
+      "purity_pct": 43.6,
+      "entropy_nats": 1.36,
+      "runner_up": "posture_stationary",
+      "runner_up_pct": 33.3
+    },
+    {
+      "type": 456,
+      "n_windows": 227,
+      "top_activity": "rest_inactive",
+      "purity_pct": 43.6,
+      "entropy_nats": 1.535,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 25.1
+    },
+    {
+      "type": 433,
+      "n_windows": 396,
+      "top_activity": "exercise_upper",
+      "purity_pct": 43.4,
+      "entropy_nats": 1.628,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 13.9
+    },
+    {
+      "type": 550,
+      "n_windows": 473,
+      "top_activity": "sports_play",
+      "purity_pct": 43.3,
+      "entropy_nats": 1.727,
+      "runner_up": "device_tap",
+      "runner_up_pct": 14.8
+    },
+    {
+      "type": 649,
+      "n_windows": 1663,
+      "top_activity": "device_tap",
+      "purity_pct": 43.3,
+      "entropy_nats": 1.824,
+      "runner_up": "exercise_lower",
+      "runner_up_pct": 15.3
+    },
+    {
+      "type": 707,
+      "n_windows": 300,
+      "top_activity": "rest_inactive",
+      "purity_pct": 43.3,
+      "entropy_nats": 1.431,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 23.3
+    },
+    {
+      "type": 19,
+      "n_windows": 243,
+      "top_activity": "sports_play",
+      "purity_pct": 43.2,
+      "entropy_nats": 1.274,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 27.6
+    },
+    {
+      "type": 380,
+      "n_windows": 213,
+      "top_activity": "rest_inactive",
+      "purity_pct": 43.2,
+      "entropy_nats": 1.389,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 32.4
+    },
+    {
+      "type": 46,
+      "n_windows": 209,
+      "top_activity": "rest_inactive",
+      "purity_pct": 43.1,
+      "entropy_nats": 1.675,
+      "runner_up": "sports_play",
+      "runner_up_pct": 18.7
+    },
+    {
+      "type": 230,
+      "n_windows": 332,
+      "top_activity": "sports_play",
+      "purity_pct": 43.1,
+      "entropy_nats": 1.431,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 30.1
+    },
+    {
+      "type": 722,
+      "n_windows": 42,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 42.9,
+      "entropy_nats": 1.54,
+      "runner_up": "sports_play",
+      "runner_up_pct": 31.0
+    },
+    {
+      "type": 504,
+      "n_windows": 323,
+      "top_activity": "device_tap",
+      "purity_pct": 42.4,
+      "entropy_nats": 1.694,
+      "runner_up": "cycle",
+      "runner_up_pct": 27.6
+    },
+    {
+      "type": 92,
+      "n_windows": 299,
+      "top_activity": "rest_inactive",
+      "purity_pct": 42.1,
+      "entropy_nats": 1.519,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 23.4
+    },
+    {
+      "type": 167,
+      "n_windows": 428,
+      "top_activity": "exercise_upper",
+      "purity_pct": 42.1,
+      "entropy_nats": 1.375,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 29.4
+    },
+    {
+      "type": 452,
+      "n_windows": 38,
+      "top_activity": "rest_inactive",
+      "purity_pct": 42.1,
+      "entropy_nats": 1.155,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 34.2
+    },
+    {
+      "type": 25,
+      "n_windows": 262,
+      "top_activity": "device_tap",
+      "purity_pct": 42.0,
+      "entropy_nats": 1.627,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 25.6
+    },
+    {
+      "type": 623,
+      "n_windows": 150,
+      "top_activity": "sports_play",
+      "purity_pct": 42.0,
+      "entropy_nats": 1.554,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 20.7
+    },
+    {
+      "type": 61,
+      "n_windows": 117,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 41.9,
+      "entropy_nats": 1.571,
+      "runner_up": "sports_play",
+      "runner_up_pct": 19.7
+    },
+    {
+      "type": 809,
+      "n_windows": 342,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 41.8,
+      "entropy_nats": 1.434,
+      "runner_up": "sports_play",
+      "runner_up_pct": 28.7
+    },
+    {
+      "type": 137,
+      "n_windows": 206,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 41.7,
+      "entropy_nats": 1.555,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 25.7
+    },
+    {
+      "type": 267,
+      "n_windows": 36,
+      "top_activity": "sports_play",
+      "purity_pct": 41.7,
+      "entropy_nats": 1.369,
+      "runner_up": "adl_desk_device",
+      "runner_up_pct": 30.6
+    },
+    {
+      "type": 587,
+      "n_windows": 482,
+      "top_activity": "rest_inactive",
+      "purity_pct": 41.7,
+      "entropy_nats": 1.365,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 34.4
+    },
+    {
+      "type": 103,
+      "n_windows": 442,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 41.6,
+      "entropy_nats": 1.653,
+      "runner_up": "sports_play",
+      "runner_up_pct": 19.2
+    },
+    {
+      "type": 207,
+      "n_windows": 41,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 41.5,
+      "entropy_nats": 1.195,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 41.5
+    },
+    {
+      "type": 406,
+      "n_windows": 256,
+      "top_activity": "rest_inactive",
+      "purity_pct": 41.4,
+      "entropy_nats": 1.504,
+      "runner_up": "sports_play",
+      "runner_up_pct": 22.7
+    },
+    {
+      "type": 910,
+      "n_windows": 230,
+      "top_activity": "rest_inactive",
+      "purity_pct": 41.3,
+      "entropy_nats": 1.512,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 25.2
+    },
+    {
+      "type": 568,
+      "n_windows": 34,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 41.2,
+      "entropy_nats": 1.43,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 23.5
+    },
+    {
+      "type": 736,
+      "n_windows": 51,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 41.2,
+      "entropy_nats": 1.202,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 41.2
+    },
+    {
+      "type": 136,
+      "n_windows": 704,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 41.1,
+      "entropy_nats": 1.301,
+      "runner_up": "sports_play",
+      "runner_up_pct": 37.1
+    },
+    {
+      "type": 241,
+      "n_windows": 56,
+      "top_activity": "sports_play",
+      "purity_pct": 41.1,
+      "entropy_nats": 1.489,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 25.0
+    },
+    {
+      "type": 408,
+      "n_windows": 217,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 41.0,
+      "entropy_nats": 1.457,
+      "runner_up": "sports_play",
+      "runner_up_pct": 24.9
+    },
+    {
+      "type": 540,
+      "n_windows": 105,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 41.0,
+      "entropy_nats": 1.608,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 21.0
+    },
+    {
+      "type": 454,
+      "n_windows": 44,
+      "top_activity": "rest_inactive",
+      "purity_pct": 40.9,
+      "entropy_nats": 1.607,
+      "runner_up": "sports_play",
+      "runner_up_pct": 25.0
+    },
+    {
+      "type": 457,
+      "n_windows": 110,
+      "top_activity": "device_tap",
+      "purity_pct": 40.9,
+      "entropy_nats": 1.219,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 39.1
+    },
+    {
+      "type": 685,
+      "n_windows": 304,
+      "top_activity": "rest_inactive",
+      "purity_pct": 40.8,
+      "entropy_nats": 1.474,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 34.5
+    },
+    {
+      "type": 0,
+      "n_windows": 69,
+      "top_activity": "sports_play",
+      "purity_pct": 40.6,
+      "entropy_nats": 1.362,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 36.2
+    },
+    {
+      "type": 503,
+      "n_windows": 101,
+      "top_activity": "rest_inactive",
+      "purity_pct": 40.6,
+      "entropy_nats": 1.635,
+      "runner_up": "device_tap",
+      "runner_up_pct": 23.8
+    },
+    {
+      "type": 204,
+      "n_windows": 153,
+      "top_activity": "rest_inactive",
+      "purity_pct": 40.5,
+      "entropy_nats": 1.586,
+      "runner_up": "sports_play",
+      "runner_up_pct": 19.0
+    },
+    {
+      "type": 307,
+      "n_windows": 79,
+      "top_activity": "rest_inactive",
+      "purity_pct": 40.5,
+      "entropy_nats": 1.549,
+      "runner_up": "sports_play",
+      "runner_up_pct": 17.7
+    },
+    {
+      "type": 798,
+      "n_windows": 102,
+      "top_activity": "rest_inactive",
+      "purity_pct": 40.2,
+      "entropy_nats": 1.727,
+      "runner_up": "sports_play",
+      "runner_up_pct": 21.6
+    },
+    {
+      "type": 152,
+      "n_windows": 1405,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 40.1,
+      "entropy_nats": 1.443,
+      "runner_up": "exercise_lower",
+      "runner_up_pct": 37.2
+    },
+    {
+      "type": 588,
+      "n_windows": 438,
+      "top_activity": "sports_play",
+      "purity_pct": 40.0,
+      "entropy_nats": 1.843,
+      "runner_up": "device_tap",
+      "runner_up_pct": 14.6
+    },
+    {
+      "type": 779,
+      "n_windows": 153,
+      "top_activity": "device_tap",
+      "purity_pct": 39.9,
+      "entropy_nats": 1.313,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 28.8
+    },
+    {
+      "type": 451,
+      "n_windows": 201,
+      "top_activity": "rest_inactive",
+      "purity_pct": 39.8,
+      "entropy_nats": 1.37,
+      "runner_up": "device_tap",
+      "runner_up_pct": 32.3
+    },
+    {
+      "type": 692,
+      "n_windows": 88,
+      "top_activity": "rest_inactive",
+      "purity_pct": 39.8,
+      "entropy_nats": 1.48,
+      "runner_up": "sports_play",
+      "runner_up_pct": 23.9
+    },
+    {
+      "type": 872,
+      "n_windows": 520,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 39.8,
+      "entropy_nats": 1.619,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 28.1
+    },
+    {
+      "type": 802,
+      "n_windows": 106,
+      "top_activity": "sports_play",
+      "purity_pct": 39.6,
+      "entropy_nats": 1.538,
+      "runner_up": "exercise_lower",
+      "runner_up_pct": 27.4
+    },
+    {
+      "type": 41,
+      "n_windows": 137,
+      "top_activity": "rest_inactive",
+      "purity_pct": 39.4,
+      "entropy_nats": 1.523,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 27.0
+    },
+    {
+      "type": 272,
+      "n_windows": 155,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 39.4,
+      "entropy_nats": 1.452,
+      "runner_up": "sports_play",
+      "runner_up_pct": 34.8
+    },
+    {
+      "type": 321,
+      "n_windows": 132,
+      "top_activity": "device_tap",
+      "purity_pct": 39.4,
+      "entropy_nats": 1.746,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 17.4
+    },
+    {
+      "type": 513,
+      "n_windows": 251,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 39.4,
+      "entropy_nats": 1.547,
+      "runner_up": "sports_play",
+      "runner_up_pct": 29.5
+    },
+    {
+      "type": 975,
+      "n_windows": 218,
+      "top_activity": "device_tap",
+      "purity_pct": 39.4,
+      "entropy_nats": 1.729,
+      "runner_up": "walk",
+      "runner_up_pct": 16.5
+    },
+    {
+      "type": 512,
+      "n_windows": 59,
+      "top_activity": "rest_inactive",
+      "purity_pct": 39.0,
+      "entropy_nats": 1.278,
+      "runner_up": "sports_play",
+      "runner_up_pct": 27.1
+    },
+    {
+      "type": 585,
+      "n_windows": 59,
+      "top_activity": "rest_inactive",
+      "purity_pct": 39.0,
+      "entropy_nats": 1.503,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 22.0
+    },
+    {
+      "type": 542,
+      "n_windows": 67,
+      "top_activity": "rest_inactive",
+      "purity_pct": 38.8,
+      "entropy_nats": 1.483,
+      "runner_up": "sports_play",
+      "runner_up_pct": 25.4
+    },
+    {
+      "type": 338,
+      "n_windows": 31,
+      "top_activity": "rest_inactive",
+      "purity_pct": 38.7,
+      "entropy_nats": 1.298,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 29.0
+    },
+    {
+      "type": 934,
+      "n_windows": 217,
+      "top_activity": "rest_inactive",
+      "purity_pct": 38.7,
+      "entropy_nats": 1.538,
+      "runner_up": "exercise_upper",
+      "runner_up_pct": 28.1
+    },
+    {
+      "type": 327,
+      "n_windows": 316,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 38.6,
+      "entropy_nats": 1.578,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 25.3
+    },
+    {
+      "type": 879,
+      "n_windows": 544,
+      "top_activity": "rest_inactive",
+      "purity_pct": 38.4,
+      "entropy_nats": 1.706,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 22.4
+    },
+    {
+      "type": 907,
+      "n_windows": 502,
+      "top_activity": "rest_inactive",
+      "purity_pct": 38.4,
+      "entropy_nats": 1.737,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 22.1
+    },
+    {
+      "type": 473,
+      "n_windows": 778,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 38.3,
+      "entropy_nats": 1.596,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 33.0
+    },
+    {
+      "type": 656,
+      "n_windows": 147,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 38.1,
+      "entropy_nats": 1.563,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 34.0
+    },
+    {
+      "type": 883,
+      "n_windows": 139,
+      "top_activity": "sports_play",
+      "purity_pct": 38.1,
+      "entropy_nats": 1.575,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 26.6
+    },
+    {
+      "type": 413,
+      "n_windows": 303,
+      "top_activity": "rest_inactive",
+      "purity_pct": 38.0,
+      "entropy_nats": 1.58,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 26.4
+    },
+    {
+      "type": 959,
+      "n_windows": 257,
+      "top_activity": "device_tap",
+      "purity_pct": 37.7,
+      "entropy_nats": 1.856,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 19.5
+    },
+    {
+      "type": 973,
+      "n_windows": 72,
+      "top_activity": "rest_inactive",
+      "purity_pct": 37.5,
+      "entropy_nats": 1.809,
+      "runner_up": "sports_play",
+      "runner_up_pct": 16.7
+    },
+    {
+      "type": 337,
+      "n_windows": 105,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 37.1,
+      "entropy_nats": 1.623,
+      "runner_up": "sports_play",
+      "runner_up_pct": 23.8
+    },
+    {
+      "type": 752,
+      "n_windows": 140,
+      "top_activity": "rest_inactive",
+      "purity_pct": 37.1,
+      "entropy_nats": 1.462,
+      "runner_up": "sports_play",
+      "runner_up_pct": 30.0
+    },
+    {
+      "type": 14,
+      "n_windows": 46,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 37.0,
+      "entropy_nats": 1.413,
+      "runner_up": "sports_play",
+      "runner_up_pct": 26.1
+    },
+    {
+      "type": 562,
+      "n_windows": 30,
+      "top_activity": "rest_inactive",
+      "purity_pct": 36.7,
+      "entropy_nats": 1.57,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 33.3
+    },
+    {
+      "type": 582,
+      "n_windows": 131,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 36.6,
+      "entropy_nats": 1.483,
+      "runner_up": "sports_play",
+      "runner_up_pct": 27.5
+    },
+    {
+      "type": 832,
+      "n_windows": 63,
+      "top_activity": "rest_inactive",
+      "purity_pct": 36.5,
+      "entropy_nats": 1.612,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 23.8
+    },
+    {
+      "type": 140,
+      "n_windows": 33,
+      "top_activity": "device_tap",
+      "purity_pct": 36.4,
+      "entropy_nats": 1.679,
+      "runner_up": "sports_play",
+      "runner_up_pct": 24.2
+    },
+    {
+      "type": 846,
+      "n_windows": 33,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 36.4,
+      "entropy_nats": 1.448,
+      "runner_up": "device_tap",
+      "runner_up_pct": 27.3
+    },
+    {
+      "type": 430,
+      "n_windows": 61,
+      "top_activity": "device_tap",
+      "purity_pct": 36.1,
+      "entropy_nats": 1.707,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 24.6
+    },
+    {
+      "type": 628,
+      "n_windows": 145,
+      "top_activity": "device_tap",
+      "purity_pct": 35.9,
+      "entropy_nats": 1.876,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 21.4
+    },
+    {
+      "type": 712,
+      "n_windows": 386,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 35.8,
+      "entropy_nats": 1.622,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 24.6
+    },
+    {
+      "type": 730,
+      "n_windows": 137,
+      "top_activity": "rest_inactive",
+      "purity_pct": 35.8,
+      "entropy_nats": 1.785,
+      "runner_up": "adl_food",
+      "runner_up_pct": 16.1
+    },
+    {
+      "type": 565,
+      "n_windows": 42,
+      "top_activity": "stairs",
+      "purity_pct": 35.7,
+      "entropy_nats": 1.691,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 28.6
+    },
+    {
+      "type": 237,
+      "n_windows": 1227,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 35.6,
+      "entropy_nats": 1.578,
+      "runner_up": "walk",
+      "runner_up_pct": 23.9
+    },
+    {
+      "type": 402,
+      "n_windows": 34,
+      "top_activity": "device_tap",
+      "purity_pct": 35.3,
+      "entropy_nats": 1.916,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 14.7
+    },
+    {
+      "type": 552,
+      "n_windows": 51,
+      "top_activity": "rest_inactive",
+      "purity_pct": 35.3,
+      "entropy_nats": 1.544,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 25.5
+    },
+    {
+      "type": 461,
+      "n_windows": 224,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 34.8,
+      "entropy_nats": 1.661,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 23.2
+    },
+    {
+      "type": 517,
+      "n_windows": 216,
+      "top_activity": "rest_inactive",
+      "purity_pct": 34.7,
+      "entropy_nats": 1.804,
+      "runner_up": "sports_play",
+      "runner_up_pct": 16.7
+    },
+    {
+      "type": 922,
+      "n_windows": 98,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 34.7,
+      "entropy_nats": 1.409,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 33.7
+    },
+    {
+      "type": 705,
+      "n_windows": 145,
+      "top_activity": "rest_inactive",
+      "purity_pct": 34.5,
+      "entropy_nats": 1.553,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 31.7
+    },
+    {
+      "type": 971,
+      "n_windows": 220,
+      "top_activity": "rest_inactive",
+      "purity_pct": 34.5,
+      "entropy_nats": 1.603,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 33.6
+    },
+    {
+      "type": 778,
+      "n_windows": 70,
+      "top_activity": "rest_inactive",
+      "purity_pct": 34.3,
+      "entropy_nats": 1.728,
+      "runner_up": "sports_play",
+      "runner_up_pct": 18.6
+    },
+    {
+      "type": 30,
+      "n_windows": 298,
+      "top_activity": "rest_inactive",
+      "purity_pct": 34.2,
+      "entropy_nats": 1.699,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 25.2
+    },
+    {
+      "type": 696,
+      "n_windows": 302,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 34.1,
+      "entropy_nats": 1.562,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 27.5
+    },
+    {
+      "type": 710,
+      "n_windows": 88,
+      "top_activity": "exercise_lower",
+      "purity_pct": 34.1,
+      "entropy_nats": 1.617,
+      "runner_up": "device_tap",
+      "runner_up_pct": 25.0
+    },
+    {
+      "type": 871,
+      "n_windows": 44,
+      "top_activity": "rest_inactive",
+      "purity_pct": 34.1,
+      "entropy_nats": 1.568,
+      "runner_up": "sports_play",
+      "runner_up_pct": 25.0
+    },
+    {
+      "type": 714,
+      "n_windows": 50,
+      "top_activity": "sports_play",
+      "purity_pct": 34.0,
+      "entropy_nats": 1.448,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 30.0
+    },
+    {
+      "type": 181,
+      "n_windows": 1993,
+      "top_activity": "exercise_lower",
+      "purity_pct": 33.9,
+      "entropy_nats": 1.857,
+      "runner_up": "device_tap",
+      "runner_up_pct": 23.2
+    },
+    {
+      "type": 532,
+      "n_windows": 558,
+      "top_activity": "rest_inactive",
+      "purity_pct": 33.9,
+      "entropy_nats": 1.741,
+      "runner_up": "device_tap",
+      "runner_up_pct": 27.4
+    },
+    {
+      "type": 901,
+      "n_windows": 62,
+      "top_activity": "rest_inactive",
+      "purity_pct": 33.9,
+      "entropy_nats": 1.736,
+      "runner_up": "device_tap",
+      "runner_up_pct": 22.6
+    },
+    {
+      "type": 194,
+      "n_windows": 145,
+      "top_activity": "rest_inactive",
+      "purity_pct": 33.8,
+      "entropy_nats": 1.479,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 31.0
+    },
+    {
+      "type": 107,
+      "n_windows": 482,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 33.6,
+      "entropy_nats": 1.664,
+      "runner_up": "exercise_upper",
+      "runner_up_pct": 27.4
+    },
+    {
+      "type": 306,
+      "n_windows": 951,
+      "top_activity": "device_tap",
+      "purity_pct": 33.5,
+      "entropy_nats": 1.722,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 33.3
+    },
+    {
+      "type": 653,
+      "n_windows": 246,
+      "top_activity": "rest_inactive",
+      "purity_pct": 33.3,
+      "entropy_nats": 1.45,
+      "runner_up": "sports_play",
+      "runner_up_pct": 28.5
+    },
+    {
+      "type": 803,
+      "n_windows": 45,
+      "top_activity": "sports_play",
+      "purity_pct": 33.3,
+      "entropy_nats": 1.714,
+      "runner_up": "adl_personal_care",
+      "runner_up_pct": 28.9
+    },
+    {
+      "type": 445,
+      "n_windows": 106,
+      "top_activity": "sports_play",
+      "purity_pct": 33.0,
+      "entropy_nats": 1.588,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 29.2
+    },
+    {
+      "type": 299,
+      "n_windows": 193,
+      "top_activity": "sports_play",
+      "purity_pct": 32.6,
+      "entropy_nats": 1.474,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 31.6
+    },
+    {
+      "type": 897,
+      "n_windows": 123,
+      "top_activity": "rest_inactive",
+      "purity_pct": 32.5,
+      "entropy_nats": 1.886,
+      "runner_up": "exercise_lower",
+      "runner_up_pct": 17.9
+    },
+    {
+      "type": 223,
+      "n_windows": 229,
+      "top_activity": "device_tap",
+      "purity_pct": 32.3,
+      "entropy_nats": 1.789,
+      "runner_up": "device_tap",
+      "runner_up_pct": 32.3
+    },
+    {
+      "type": 233,
+      "n_windows": 133,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 32.3,
+      "entropy_nats": 1.719,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 26.3
+    },
+    {
+      "type": 927,
+      "n_windows": 31,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 32.3,
+      "entropy_nats": 1.805,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 22.6
+    },
+    {
+      "type": 693,
+      "n_windows": 115,
+      "top_activity": "rest_inactive",
+      "purity_pct": 32.2,
+      "entropy_nats": 1.516,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 32.2
+    },
+    {
+      "type": 746,
+      "n_windows": 59,
+      "top_activity": "device_tap",
+      "purity_pct": 32.2,
+      "entropy_nats": 1.839,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 20.3
+    },
+    {
+      "type": 729,
+      "n_windows": 1065,
+      "top_activity": "device_tap",
+      "purity_pct": 31.9,
+      "entropy_nats": 1.671,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 24.3
+    },
+    {
+      "type": 382,
+      "n_windows": 528,
+      "top_activity": "device_tap",
+      "purity_pct": 31.6,
+      "entropy_nats": 1.751,
+      "runner_up": "sports_play",
+      "runner_up_pct": 30.5
+    },
+    {
+      "type": 940,
+      "n_windows": 51,
+      "top_activity": "rest_inactive",
+      "purity_pct": 31.4,
+      "entropy_nats": 1.794,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 25.5
+    },
+    {
+      "type": 95,
+      "n_windows": 32,
+      "top_activity": "device_tap",
+      "purity_pct": 31.2,
+      "entropy_nats": 1.838,
+      "runner_up": "sports_play",
+      "runner_up_pct": 21.9
+    },
+    {
+      "type": 381,
+      "n_windows": 355,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 30.7,
+      "entropy_nats": 1.727,
+      "runner_up": "device_tap",
+      "runner_up_pct": 30.7
+    },
+    {
+      "type": 873,
+      "n_windows": 917,
+      "top_activity": "device_tap",
+      "purity_pct": 30.2,
+      "entropy_nats": 1.941,
+      "runner_up": "exercise_lower",
+      "runner_up_pct": 23.2
+    },
+    {
+      "type": 40,
+      "n_windows": 30,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 30.0,
+      "entropy_nats": 1.817,
+      "runner_up": "device_tap",
+      "runner_up_pct": 23.3
+    },
+    {
+      "type": 861,
+      "n_windows": 267,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 30.0,
+      "entropy_nats": 1.64,
+      "runner_up": "exercise_upper",
+      "runner_up_pct": 29.6
+    },
+    {
+      "type": 7,
+      "n_windows": 55,
+      "top_activity": "sports_play",
+      "purity_pct": 29.1,
+      "entropy_nats": 1.548,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 23.6
+    },
+    {
+      "type": 159,
+      "n_windows": 80,
+      "top_activity": "rest_inactive",
+      "purity_pct": 28.7,
+      "entropy_nats": 1.538,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 27.5
+    },
+    {
+      "type": 238,
+      "n_windows": 143,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 28.7,
+      "entropy_nats": 1.72,
+      "runner_up": "sports_play",
+      "runner_up_pct": 23.8
+    },
+    {
+      "type": 292,
+      "n_windows": 56,
+      "top_activity": "device_tap",
+      "purity_pct": 28.6,
+      "entropy_nats": 1.591,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 25.0
+    },
+    {
+      "type": 488,
+      "n_windows": 67,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 28.4,
+      "entropy_nats": 1.825,
+      "runner_up": "exercise_upper",
+      "runner_up_pct": 20.9
+    },
+    {
+      "type": 28,
+      "n_windows": 115,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 27.8,
+      "entropy_nats": 1.877,
+      "runner_up": "sports_play",
+      "runner_up_pct": 23.5
+    },
+    {
+      "type": 719,
+      "n_windows": 33,
+      "top_activity": "device_tap",
+      "purity_pct": 27.3,
+      "entropy_nats": 1.641,
+      "runner_up": "device_tap",
+      "runner_up_pct": 27.3
+    },
+    {
+      "type": 755,
+      "n_windows": 86,
+      "top_activity": "exercise_lower",
+      "purity_pct": 26.7,
+      "entropy_nats": 1.798,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 22.1
+    },
+    {
+      "type": 151,
+      "n_windows": 80,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 26.2,
+      "entropy_nats": 1.713,
+      "runner_up": "sports_play",
+      "runner_up_pct": 20.0
+    },
+    {
+      "type": 917,
+      "n_windows": 69,
+      "top_activity": "sports_play",
+      "purity_pct": 26.1,
+      "entropy_nats": 1.759,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 24.6
+    },
+    {
+      "type": 528,
+      "n_windows": 184,
+      "top_activity": "rest_inactive",
+      "purity_pct": 25.5,
+      "entropy_nats": 1.746,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 25.5
+    },
+    {
+      "type": 227,
+      "n_windows": 183,
+      "top_activity": "rest_inactive",
+      "purity_pct": 25.1,
+      "entropy_nats": 1.883,
+      "runner_up": "adl_misc_gesture",
+      "runner_up_pct": 19.1
+    },
+    {
+      "type": 829,
+      "n_windows": 256,
+      "top_activity": "device_tap",
+      "purity_pct": 24.6,
+      "entropy_nats": 1.756,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 23.4
+    },
+    {
+      "type": 948,
+      "n_windows": 33,
+      "top_activity": "rest_inactive",
+      "purity_pct": 24.2,
+      "entropy_nats": 1.859,
+      "runner_up": "rest_inactive",
+      "runner_up_pct": 24.2
+    },
+    {
+      "type": 333,
+      "n_windows": 52,
+      "top_activity": "rest_inactive",
+      "purity_pct": 23.1,
+      "entropy_nats": 1.794,
+      "runner_up": "sports_play",
+      "runner_up_pct": 21.2
+    },
+    {
+      "type": 153,
+      "n_windows": 220,
+      "top_activity": "adl_misc_gesture",
+      "purity_pct": 21.4,
+      "entropy_nats": 1.999,
+      "runner_up": "device_tap",
+      "runner_up_pct": 20.5
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+# pamap2 HAR FINETUNE, warm-started from the unimts_sim + trainable-text
+# CLIP-align checkpoint (job 8129177, best_step5500: val_loss 2.4645,
+# trained on /projects/b53017/vbc1591/HumanML3D/UniMTS_data/data with a
+# genuinely-trainable CLIP text tower -- see EXPERIMENTS.md 2026-07-28).
+# Recipe otherwise IDENTICAL to the section-10 precedent
+# (vit1d_har_finetune_pamap2*_anyrot_multidata_flu.yaml family: generic
+# utd_mhad_finetune objective, warm-started encoder + fresh LinearHead,
+# cross-entropy, 2.56s windows, normalize disabled) so numbers stay
+# comparable with every prior "Ours finetune" row.
+# pretrained_ckpt is the EXPLICIT step-5500 snapshot path (not "best") so
+# this stays pinned to the same weights the zero-shot eval used even if a
+# later val improvement overwrites best.pt.
+
+vit1d:
+  patch_size: 16
+  shared_kernel: acc_gyro
+  use_cls_token: false
+  encoder:
+    hidden_size: 384
+    num_hidden_layers: 12
+    num_attention_heads: 6
+    intermediate_size: 1536
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-6
+    drop_path_rate: 0.0
+    alt_attention: true
+  max_patches_per_channel: 256
+  pooling: "mean"
+
+objective:
+  type: utd_mhad_finetune       # generic finetune objective: warm-started encoder + LinearHead
+  utd_mhad_finetune:
+    pretrained_run:  vit1d_clip_humanml3d_finetune_mae_unimtssim_texttrainable_lr5e-5_noproj
+    pretrained_ckpt: /gpfs/home/vbc1591/IMU-SSL/runs/vit1d_clip_humanml3d_finetune_mae_unimtssim_texttrainable_lr5e-5_noproj/checkpoints/best_pinned.pt
+
+paths:
+  dataset_path: /projects/b53017/vbc1591/IMULM_master_dataset_v2.parquet
+  runs_root: /gpfs/home/vbc1591/IMU-SSL/runs
+
+preprocess:
+  normalize:
+    enabled: false
+
+windowing:
+  window_seconds: 2.56
+  # PAMAP2 needs 700 (repo default 100 rejects EVERY PAMAP2 val session due
+  # to real sensor dropout -- same reason run_zeroshot_har passes
+  # --max-gaps-per-session 700, see EXPERIMENTS.md §10). Found 2026-07-28:
+  # without this the finetune ran its full 20k steps with an EMPTY val split
+  # (zero val rows, no best.pt, early stopping never armed).
+  max_gaps_per_session: 700
+
+splits:
+  # seed 42 = the SAME held-out subject split prepare_har_data.py used to
+  # build UniMTS_data/X_test.npy (and every zero-shot eval this session) --
+  # so the "Ours finetune" val subjects match the UniMTS finetune test
+  # subjects exactly. base.yaml's splits.seed=0 (the previous implicit
+  # default here) holds out a DIFFERENT subject set (2026-07-28).
+  seed: 42
+  group_key: subject_id
+  shuffle: true
+  val_ratio: 0.2
+
+data:
+  train_on_datasets: ["pamap2"]
+  sensor_columns: [acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z]
+  batch_size:       256
+  eval_batch_size:  256
+  num_workers:      8
+  pin_memory:       true
+
+logging:
+  ckpt_every_steps: 500
+  save_step_checkpoints: false
+
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 20000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 200
+
+  early_stopping:
+    enabled: true
+    patience: 20
+
+  optim:
+    name: adamw
+    lr: 1.0e-4
+    weight_decay: 0.1
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+
+  sched:
+    name: cosine
+    warmup_steps: 100
+
+wandb:
+  entity: yli32258-northwestern-university
+  project: TransfHAR_project

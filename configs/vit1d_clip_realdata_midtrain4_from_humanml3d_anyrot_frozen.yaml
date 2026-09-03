@@ -1,0 +1,130 @@
+# "Midtraining" v4: identical to midtrain v3
+# (vit1d_clip_realdata_midtrain3_from_humanml3d_anyrot.yaml -- rotation-aug
+# checkpoint warm-start, rotation augmentation kept ON during midtraining,
+# same recofit/samosa/shoaib/ut_watch mix, same lr) except ONE change:
+# freeze_imu_encoder: true (was false).
+#
+# Why: midtrain v3 gave WISDM/PAMAP2 zero-shot their best-ever results
+# (30.59%/25.31% and 17.04%/12.52%, both beating UniMTS for the first time)
+# but UTD-MHAD zero-shot COLLAPSED to 2.26%/0.27% -- the model predicts
+# "The person is arm curl" for literally every single UTD-MHAD window
+# (100% recall on that one class, 0% on all 20 others -- below the 1/21
+# random-guess floor). This isn't new: midtrain v1 (arm curl/pickup-and-throw,
+# ~2-class collapse) and v2 (wave/baseball-swing, different ~2-class
+# collapse) show the SAME pattern in weaker form -- v3 is just the most
+# extreme version. The midtrain-v3 training curve confirms the mechanism:
+# val_loss hit its best value at step 1000 and then never improved again
+# (crept slightly WORSE, 5.58->5.63, over the next 10 epochs before early
+# stopping) -- the trainable encoder isn't learning anything useful after
+# the first ~1000 steps, it's drifting into a degenerate solution that
+# destroys whatever fine-grained gesture discrimination the rotation-aug
+# Stage-2 checkpoint had for UTD-MHAD's unusual, low-frequency captions,
+# in exchange for fitting the real-dataset midtrain mix's locomotion/ADL-
+# heavy vocabulary.
+#
+# Fix under test: freeze the IMU encoder during midtraining (only the
+# lightweight IMU-side projection head [ContrastiveCLIPHead, "always
+# trained" per run.py] and the text-side adapter [text_projection_mlp]
+# stay trainable). This should let midtraining still calibrate to real-
+# caption phrasing/statistics via the projection heads, while preventing
+# the core representation -- and whatever UTD-MHAD-relevant discrimination
+# it encodes -- from being overwritten.
+
+vit1d:
+  patch_size: 16
+  shared_kernel: acc_gyro
+  pos_embed_type: 2d
+  max_patches_per_channel: 256
+  max_channels: 32
+  pooling: "mean"
+
+  encoder:
+    hidden_size: 384
+    num_hidden_layers: 12
+    num_attention_heads: 6
+    intermediate_size: 1536
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-6
+    alt_attention: true
+
+objective:
+  type: imu_text_clip_realdata
+  imu_text_clip_realdata:
+    clip_model:        openai/clip-vit-base-patch32
+    clip_embed_dim:    512
+    local_files_only:  true
+
+    pretrained_run:  vit1d_clip_humanml3d_finetune_mae_multidata_anyrot
+    pretrained_ckpt: best
+
+    sentence_template: "The person is {}"
+
+    freeze_imu_encoder:  true    # NEW vs. midtrain v3 -- see header note
+    freeze_text_encoder: true
+    text_projection_mlp: true
+    text_mlp_hidden_dim: null
+
+paths:
+  dataset_path: /projects/b53017/vbc1591/IMULM_master_dataset_v2.parquet
+  runs_root: /gpfs/home/vbc1591/IMU-SSL/runs
+
+preprocess:
+  normalize:
+    enabled: false            # HumanML3D-CLIP checkpoint expects raw scale (see §10 configs)
+
+windowing:
+  window_seconds: 2.56
+
+splits:
+  seed: 42
+  group_key: subject_id
+  shuffle: true
+  val_ratio: 0.1
+  test_ratio: 0.0
+
+data:
+  sensor_columns: [acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z]
+  train_on_datasets: ["recofit", "samosa", "shoaib", "ut_watch"]
+  batch_size: 256
+  eval_batch_size: 256
+  num_workers: 8
+  pin_memory: true
+
+random_rotation:
+  enabled: true
+  rotation_set: so3
+
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 10000000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 500
+  val_max_batches: 100
+
+  optim:
+    name: adamw
+    lr: 3.0e-5
+    weight_decay: 0.01
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+
+  sched:
+    name: cosine
+    warmup_steps: 500
+
+  early_stopping:
+    enabled: true
+    monitor: val_loss
+    patience: 20
+
+logging:
+  log_every_steps: 5
+  ckpt_every_steps: 500
+  save_step_checkpoints: false
+
+wandb:
+  entity: yli32258-northwestern-university
+  project: TransfHAR_project

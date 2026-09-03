@@ -1,0 +1,67 @@
+{
+  "task": "language_humanml3d",
+  "encoder": "mae_4src_physnp",
+  "protocol": "finetune",
+  "seed": 42,
+  "metrics": {
+    "r1_i2t_g100": 29.525000000000002,
+    "r1_t2i_g100": 28.91329538011991,
+    "r5_i2t_g100": 62.535,
+    "r5_t2i_g100": 61.97793339714847,
+    "r10_i2t_g100": 75.53999999999999,
+    "r10_t2i_g100": 74.47730364250089,
+    "mrr_i2t_g100": 44.777619188112965,
+    "mrr_t2i_g100": 44.07379332895612,
+    "r1_i2t_full": 2.9991894082680357,
+    "r1_t2i_full": 3.223443223443224,
+    "mrr_i2t_full": 8.622150970093026,
+    "mrr_t2i_full": 8.24064811817102,
+    "medr_i2t_full": 59.0,
+    "medr_t2i_full": 69.0,
+    "r1_g100": 29.219147690059955,
+    "val_r1_i2t_g100": 30.209999999999997,
+    "val_r1_t2i_g100": 29.088588205259125,
+    "val_r5_i2t_g100": 64.385,
+    "val_r5_t2i_g100": 63.533316313505225,
+    "val_r10_i2t_g100": 77.83,
+    "val_r10_t2i_g100": 76.00714832780189,
+    "val_mrr_i2t_g100": 45.84246564593861,
+    "val_mrr_t2i_g100": 44.670860821999895,
+    "val_r1_i2t_full": 7.101086048454469,
+    "val_r1_t2i_full": 6.222222222222222,
+    "val_mrr_i2t_full": 16.498279301575558,
+    "val_mrr_t2i_full": 15.127816907873251,
+    "val_medr_i2t_full": 20.0,
+    "val_medr_t2i_full": 24.0,
+    "val_r1_g100": 29.64929410262956
+  },
+  "primary_metric": "r1_g100",
+  "eval_split": "test",
+  "run": "bench_language_humanml3d__mae_4src_physnp__finetune__s42",
+  "checkpoint": "latest.pt",
+  "checkpoint_step": 8000,
+  "selection": {
+    "split": "none",
+    "monitor": "fixed_budget",
+    "mode": "latest",
+    "note": "fixed 8k-step budget, final checkpoint (latest.pt); \u00a713e: val-loss best.pt under-selects for retrieval, latest \u2265 best on every arm"
+  },
+  "job_ids": {
+    "train": null,
+    "score": "4867065"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.language",
+    "date": "2026-08-27T13:44:02-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_items_test": 3701,
+      "n_items_val": 1197,
+      "train_end": "unknown/incomplete"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

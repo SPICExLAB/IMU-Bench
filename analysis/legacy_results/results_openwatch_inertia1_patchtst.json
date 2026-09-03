@@ -1,0 +1,154 @@
+[
+  {
+    "name": "Inertia-1 (PatchTST) probe win/noaug",
+    "run": "vit1d_gesture_probe_openwatch_6class_inertia1_patchtst_windowed_stratified",
+    "split": "val",
+    "n_clips": 102,
+    "n_windows": 612,
+    "window": {
+      "acc": 0.5147058823529411,
+      "bal_acc": 0.5838126406373533,
+      "macro_f1": 0.48593101643481096,
+      "macro_recall": 0.5838126406373533
+    },
+    "clip": {
+      "acc": 0.5686274509803921,
+      "bal_acc": 0.6331349206349206,
+      "macro_f1": 0.54237875987102,
+      "macro_recall": 0.6331349206349206
+    }
+  },
+  {
+    "name": "Inertia-1 (PatchTST) probe win/noaug",
+    "run": "vit1d_gesture_probe_openwatch_6class_inertia1_patchtst_windowed_stratified",
+    "split": "test",
+    "n_clips": 87,
+    "n_windows": 522,
+    "window": {
+      "acc": 0.49616858237547895,
+      "bal_acc": 0.57038139329806,
+      "macro_f1": 0.48467253128000753,
+      "macro_recall": 0.57038139329806
+    },
+    "clip": {
+      "acc": 0.5287356321839081,
+      "bal_acc": 0.6218253968253967,
+      "macro_f1": 0.5167790406760995,
+      "macro_recall": 0.6218253968253967
+    }
+  },
+  {
+    "name": "Inertia-1 (PatchTST) probe win/aug",
+    "run": "vit1d_gesture_probe_openwatch_6class_inertia1_patchtst_windowed_stratified_aug",
+    "split": "val",
+    "n_clips": 102,
+    "n_windows": 612,
+    "window": {
+      "acc": 0.47549019607843135,
+      "bal_acc": 0.5725449279328589,
+      "macro_f1": 0.465118502307946,
+      "macro_recall": 0.5725449279328589
+    },
+    "clip": {
+      "acc": 0.5392156862745098,
+      "bal_acc": 0.6562671045429666,
+      "macro_f1": 0.5406165311653117,
+      "macro_recall": 0.6562671045429666
+    }
+  },
+  {
+    "name": "Inertia-1 (PatchTST) probe win/aug",
+    "run": "vit1d_gesture_probe_openwatch_6class_inertia1_patchtst_windowed_stratified_aug",
+    "split": "test",
+    "n_clips": 87,
+    "n_windows": 522,
+    "window": {
+      "acc": 0.4789272030651341,
+      "bal_acc": 0.5431437389770724,
+      "macro_f1": 0.46958384422874117,
+      "macro_recall": 0.5431437389770724
+    },
+    "clip": {
+      "acc": 0.5287356321839081,
+      "bal_acc": 0.6088624338624339,
+      "macro_f1": 0.5319122926881548,
+      "macro_recall": 0.6088624338624339
+    }
+  },
+  {
+    "name": "Inertia-1 (PatchTST) finetune win/noaug",
+    "run": "vit1d_gesture_finetune_openwatch_6class_inertia1_patchtst_windowed_stratified",
+    "split": "val",
+    "n_clips": 102,
+    "n_windows": 612,
+    "window": {
+      "acc": 0.6535947712418301,
+      "bal_acc": 0.5421091041780697,
+      "macro_f1": 0.5310791445946831,
+      "macro_recall": 0.5421091041780697
+    },
+    "clip": {
+      "acc": 0.7352941176470589,
+      "bal_acc": 0.6334633278598796,
+      "macro_f1": 0.6441298222219759,
+      "macro_recall": 0.6334633278598796
+    }
+  },
+  {
+    "name": "Inertia-1 (PatchTST) finetune win/noaug",
+    "run": "vit1d_gesture_finetune_openwatch_6class_inertia1_patchtst_windowed_stratified",
+    "split": "test",
+    "n_clips": 87,
+    "n_windows": 522,
+    "window": {
+      "acc": 0.5440613026819924,
+      "bal_acc": 0.44551366843033513,
+      "macro_f1": 0.4484848236909049,
+      "macro_recall": 0.44551366843033513
+    },
+    "clip": {
+      "acc": 0.5747126436781609,
+      "bal_acc": 0.469973544973545,
+      "macro_f1": 0.47571421041534895,
+      "macro_recall": 0.469973544973545
+    }
+  },
+  {
+    "name": "Inertia-1 (PatchTST) finetune win/aug",
+    "run": "vit1d_gesture_finetune_openwatch_6class_inertia1_patchtst_windowed_stratified_aug",
+    "split": "val",
+    "n_clips": 102,
+    "n_windows": 612,
+    "window": {
+      "acc": 0.630718954248366,
+      "bal_acc": 0.566319254393967,
+      "macro_f1": 0.5348639790591344,
+      "macro_recall": 0.566319254393967
+    },
+    "clip": {
+      "acc": 0.7352941176470589,
+      "bal_acc": 0.7132754059478197,
+      "macro_f1": 0.6617008801419334,
+      "macro_recall": 0.7132754059478197
+    }
+  },
+  {
+    "name": "Inertia-1 (PatchTST) finetune win/aug",
+    "run": "vit1d_gesture_finetune_openwatch_6class_inertia1_patchtst_windowed_stratified_aug",
+    "split": "test",
+    "n_clips": 87,
+    "n_windows": 522,
+    "window": {
+      "acc": 0.5670498084291188,
+      "bal_acc": 0.515079365079365,
+      "macro_f1": 0.5006385548676838,
+      "macro_recall": 0.515079365079365
+    },
+    "clip": {
+      "acc": 0.632183908045977,
+      "bal_acc": 0.5966269841269841,
+      "macro_f1": 0.5853273805993461,
+      "macro_recall": 0.5966269841269841
+    }
+  }
+]

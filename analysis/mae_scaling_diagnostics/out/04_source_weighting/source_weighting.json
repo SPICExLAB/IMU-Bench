@@ -1,0 +1,192 @@
+{
+  "per_fraction": [
+    {
+      "fraction": "0.1pct",
+      "overall_fraction": 0.001,
+      "total": 487,
+      "realdata": 100,
+      "ocdetect": 6,
+      "nymeria": 158,
+      "totalcapture": 0,
+      "imuposer": 0,
+      "eatingspeed": 50,
+      "motionx": 10,
+      "humanml3d": 4,
+      "sonic": 32,
+      "capture24": 125,
+      "openwatch": 2
+    },
+    {
+      "fraction": "1pct",
+      "overall_fraction": 0.01,
+      "total": 4873,
+      "realdata": 962,
+      "ocdetect": 105,
+      "nymeria": 1611,
+      "totalcapture": 7,
+      "imuposer": 1,
+      "eatingspeed": 537,
+      "motionx": 37,
+      "humanml3d": 20,
+      "sonic": 313,
+      "capture24": 1263,
+      "openwatch": 17
+    },
+    {
+      "fraction": "5pct",
+      "overall_fraction": 0.05,
+      "total": 24365,
+      "realdata": 4706,
+      "ocdetect": 555,
+      "nymeria": 7950,
+      "totalcapture": 19,
+      "imuposer": 8,
+      "eatingspeed": 2848,
+      "motionx": 229,
+      "humanml3d": 164,
+      "sonic": 1634,
+      "capture24": 6158,
+      "openwatch": 94
+    },
+    {
+      "fraction": "25pct",
+      "overall_fraction": 0.25,
+      "total": 121824,
+      "realdata": 23180,
+      "ocdetect": 2838,
+      "nymeria": 39301,
+      "totalcapture": 81,
+      "imuposer": 30,
+      "eatingspeed": 14522,
+      "motionx": 1160,
+      "humanml3d": 731,
+      "sonic": 8111,
+      "capture24": 31396,
+      "openwatch": 474
+    },
+    {
+      "fraction": "50pct",
+      "overall_fraction": 0.5,
+      "total": 243648,
+      "realdata": 46452,
+      "ocdetect": 5574,
+      "nymeria": 78862,
+      "totalcapture": 208,
+      "imuposer": 65,
+      "eatingspeed": 28751,
+      "motionx": 2359,
+      "humanml3d": 1400,
+      "sonic": 16284,
+      "capture24": 62735,
+      "openwatch": 958
+    },
+    {
+      "fraction": "100pct",
+      "overall_fraction": 1.0,
+      "total": 487295,
+      "realdata": 93510,
+      "ocdetect": 10873,
+      "nymeria": 157885,
+      "totalcapture": 461,
+      "imuposer": 137,
+      "eatingspeed": 57536,
+      "motionx": 4683,
+      "humanml3d": 2825,
+      "sonic": 32662,
+      "capture24": 124881,
+      "openwatch": 1842
+    }
+  ],
+  "deltas": [
+    {
+      "from": "0.1pct",
+      "to": "1pct",
+      "delta_total": 4386,
+      "delta_per_source": {
+        "realdata": 862,
+        "ocdetect": 99,
+        "nymeria": 1453,
+        "totalcapture": 7,
+        "imuposer": 1,
+        "eatingspeed": 487,
+        "motionx": 27,
+        "humanml3d": 16,
+        "sonic": 281,
+        "capture24": 1138,
+        "openwatch": 15
+      }
+    },
+    {
+      "from": "1pct",
+      "to": "5pct",
+      "delta_total": 19492,
+      "delta_per_source": {
+        "realdata": 3744,
+        "ocdetect": 450,
+        "nymeria": 6339,
+        "totalcapture": 12,
+        "imuposer": 7,
+        "eatingspeed": 2311,
+        "motionx": 192,
+        "humanml3d": 144,
+        "sonic": 1321,
+        "capture24": 4895,
+        "openwatch": 77
+      }
+    },
+    {
+      "from": "5pct",
+      "to": "25pct",
+      "delta_total": 97459,
+      "delta_per_source": {
+        "realdata": 18474,
+        "ocdetect": 2283,
+        "nymeria": 31351,
+        "totalcapture": 62,
+        "imuposer": 22,
+        "eatingspeed": 11674,
+        "motionx": 931,
+        "humanml3d": 567,
+        "sonic": 6477,
+        "capture24": 25238,
+        "openwatch": 380
+      }
+    },
+    {
+      "from": "25pct",
+      "to": "50pct",
+      "delta_total": 121824,
+      "delta_per_source": {
+        "realdata": 23272,
+        "ocdetect": 2736,
+        "nymeria": 39561,
+        "totalcapture": 127,
+        "imuposer": 35,
+        "eatingspeed": 14229,
+        "motionx": 1199,
+        "humanml3d": 669,
+        "sonic": 8173,
+        "capture24": 31339,
+        "openwatch": 484
+      }
+    },
+    {
+      "from": "50pct",
+      "to": "100pct",
+      "delta_total": 243647,
+      "delta_per_source": {
+        "realdata": 47058,
+        "ocdetect": 5299,
+        "nymeria": 79023,
+        "totalcapture": 253,
+        "imuposer": 72,
+        "eatingspeed": 28785,
+        "motionx": 2324,
+        "humanml3d": 1425,
+        "sonic": 16378,
+        "capture24": 62146,
+        "openwatch": 884
+      }
+    }
+  ]
+}

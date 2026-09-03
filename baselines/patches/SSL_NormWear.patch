@@ -1,0 +1,36 @@
+diff --git a/main_model.py b/main_model.py
+index 927104f..026e60c 100644
+--- a/main_model.py
++++ b/main_model.py
+@@ -1,8 +1,15 @@
+ from scipy import signal
+-import torchaudio.transforms as T
+ 
+ from .modules.normwear import *
+ 
++# NOTE (vendored, IMU-SSL integration): the upstream implementation resamples
++# via torchaudio.transforms.Resample, an extra dependency this repo's shared
++# venv doesn't otherwise need (and risky to add given the pinned custom torch
++# build). Replaced with scipy.signal.resample, matching how the rest of this
++# repo already resamples windows (imu_lm/data/*_loader*.py); numerically
++# equivalent (both are FFT-based polyphase/Fourier resampling for this
++# use case).
++
+ def wt(ts, lf=0.1, hf=65):
+     # in: L
+     # out: FxL
+@@ -65,12 +72,9 @@ class NormWearModel(nn.Module):
+         # resample
+         if sampling_rate != self.sampling_rate:
+             if sampling_rate > 256:
+-                resampler = T.Resample(sampling_rate, self.sampling_rate)
+-
+                 bn, nvar, L = sample_data.shape
+-                sample_data = resampler(sample_data.reshape(bn*nvar, L)) # [nvar*nvar, new_L]
+-                _, new_L = sample_data.shape
+-                sample_data = sample_data.reshape(bn, nvar, new_L) # [bn, nvar, new_L]
++                new_L = int(round(L * self.sampling_rate / sampling_rate))
++                sample_data = signal.resample(sample_data, new_L, axis=-1)
+ 
+         if torch.is_tensor(sample_data):
+             sample_data = sample_data.numpy()

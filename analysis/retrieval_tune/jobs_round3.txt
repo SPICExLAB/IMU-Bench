@@ -1,0 +1,9 @@
+lr1e-4_tau0.1fixed_soupsrc 9435426
+lr1e-4_tau0.1fixed_s43 9435427
+lr1e-4_tau0.1fixed_s44 9435428
+lr2e-4_tau0.1fixed 9435429
+lr1e-4_tau0.15fixed 9435430
+lr1e-4_tau0.07fixed 9435431
+lr1e-4_tau0.1fixed_steps16k_soupsrc 9435954
+lr1e-4_tau0.1fixed_steps16k_soupsrc_s43 9442693
+lr1e-4_tau0.1fixed_steps16k_soupsrc_s44 9442694

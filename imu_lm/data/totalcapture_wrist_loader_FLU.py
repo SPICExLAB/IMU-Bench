@@ -203,7 +203,9 @@ def load_session_flu(
     """
     from scipy.spatial.transform import Rotation as ScipyRot
 
-    logger.info("[totalcapture_flu] loading: %s", os.path.basename(pkl_path))
+    # DEBUG, not INFO: these run once per file inside the tqdm-wrapped loading
+    # loop — at INFO level they interleave with (and visually bury) the bar.
+    logger.debug("[totalcapture_flu] loading: %s", os.path.basename(pkl_path))
 
     # ------------------------------------------------------------------
     # Load pickle
@@ -249,7 +251,7 @@ def load_session_flu(
         ori_raw = _resample_rotmat_nlerp(ori_raw, new_len)
         gt_raw  = _resample_linear(gt_raw,        new_len)
         N       = new_len
-        logger.info(
+        logger.debug(
             "[totalcapture_flu] resampled → %d frames (%.0f→%.0f Hz)", N, fps_raw, target_hz
         )
 
@@ -276,7 +278,7 @@ def load_session_flu(
             .astype(np.float64)
         )
         R_world_from_s = _smpl_global_rotations(R_local_gt)[:, _SMPL_RIGHT_WRIST]   # [N,3,3]
-        logger.info("[totalcapture_flu] using GT SMPL FK orientation for FLU frame")
+        logger.debug("[totalcapture_flu] using GT SMPL FK orientation for FLU frame")
     else:
         R_world_from_s = ori_all[:, _RIGHT_WRIST_IDX]   # [N, 3, 3]  R_world_from_sensor
 
@@ -351,10 +353,25 @@ def load_session_flu(
         torch.from_numpy(label_R)
     ).numpy()                                                                    # [N, J, 6]
 
-    logger.info(
+    logger.debug(
         "[totalcapture_flu] loaded %s: N=%d fps=%.0f real-wrist-flu",
         os.path.basename(pkl_path), N, fps,
     )
+
+    if num_joints == 24:
+        # Full-body mode only: also compute FK joint positions (root at
+        # world origin, zero shape -- already root-relative) so downstream
+        # mpjpe/fk_pos_loss (imu_lm/objectives/pose_1d.py) can run. Skipped
+        # for the 5-joint arm-chain mode, where `y` above is already sliced
+        # down to RIGHT_WRIST_CHAIN_JOINTS and wouldn't match the [.., 24, ..]
+        # layout _compute_val_mpjpe/_compute_fk_pos_loss assume for y_full_rot.
+        import core.articulate as art
+        from core.paths import Paths
+        body_model = art.model.ParametricModel(Paths.SMPL_FILE, device=torch.device("cpu"))
+        _, joint_pos = body_model.forward_kinematics(torch.from_numpy(pose_R))   # [N, 24, 3]
+        joint_pos = joint_pos.cpu().numpy().astype(np.float32)
+        return X, y, joint_pos
+
     return X, y
 
 
@@ -419,6 +436,7 @@ class TotalCaptureRealWristDatasetFLU(Dataset):
         self._num_patches = self._T // self._patch_size
 
         self._sessions: List[Tuple[np.ndarray, np.ndarray]] = []
+        self._session_files: List[str] = []  # pkl path per kept session, parallel to _sessions
         session_lengths: List[int] = []
 
         for path in tqdm(
@@ -437,14 +455,16 @@ class TotalCaptureRealWristDatasetFLU(Dataset):
             if result is None:
                 logger.warning("[totalcapture_flu] skipping: %s", path)
                 continue
-            X, y = result
+            X, y, *rest = result   # rest = [joint_pos] iff num_joints == 24
+            joint_pos = rest[0] if rest else None
             if X.shape[0] < self._T:
                 logger.warning(
                     "[totalcapture_flu] %s too short (%d < %d), skipping",
                     os.path.basename(path), X.shape[0], self._T,
                 )
                 continue
-            self._sessions.append((X, y))
+            self._sessions.append((X, y, joint_pos))
+            self._session_files.append(path)
             session_lengths.append(len(X))
 
         if not self._sessions:
@@ -460,19 +480,26 @@ class TotalCaptureRealWristDatasetFLU(Dataset):
     def __len__(self) -> int:
         return len(self._starts)
 
-    def __getitem__(self, idx: int) -> Optional[Tuple[torch.Tensor, torch.Tensor]]:
+    def __getitem__(self, idx: int) -> Optional[Tuple[torch.Tensor, ...]]:
         si    = int(self._sess_idx[idx])
         start = int(self._starts[idx])
         T     = self._T
 
-        X_raw, y_arr = self._sessions[si]
+        X_raw, y_arr, joint_pos_arr = self._sessions[si]
         Xw = X_raw[start : start + T]   # [T, 6]
 
         Xproc = preprocess_window(Xw, self.cfg, self.stats)
         if Xproc is None:
             return None
 
-        Xproc    = apply_augment(Xproc.T, self.cfg).T   # [C, T] → augment → [C, T]
+        # Train-only (bug fixed 2026-07-28): this was unconditional, so val
+        # windows were augmented too -- inconsistent with nymeria/openwatch/
+        # realdata, which already gate on split_name, and enough to make the
+        # combined-MAE val loss noisy/non-comparable across runs that took
+        # different data paths (raw builders vs. cache). self.split_name is
+        # already "train"/"val"/"test" here; it just wasn't being used.
+        if self.split_name == "train":
+            Xproc = apply_augment(Xproc.T, self.cfg).T   # [C, T] → augment → [C, T]
         x_tensor = torch.from_numpy(Xproc).float()      # [6, T]
 
         P = self._patch_size
@@ -480,11 +507,18 @@ class TotalCaptureRealWristDatasetFLU(Dataset):
         patch_labels = np.empty(
             (self._num_patches, n_joints * ROT6D_DIM), dtype=np.float32
         )
+        if joint_pos_arr is not None:
+            patch_gt_pos = np.empty((self._num_patches, 24 * 3), dtype=np.float32)
         for p in range(self._num_patches):
             frame = start + p * P + P // 2
             patch_labels[p] = y_arr[frame].reshape(-1)   # [J, 6] → [J*6]
+            if joint_pos_arr is not None:
+                patch_gt_pos[p] = joint_pos_arr[frame].reshape(-1)   # [24, 3] → [72]
 
-        y_tensor = torch.from_numpy(patch_labels).float()   # [P, 30]
+        y_tensor = torch.from_numpy(patch_labels).float()   # [P, 30] or [P, 144]
+        if joint_pos_arr is not None:
+            gt_pos_tensor = torch.from_numpy(patch_gt_pos).float()   # [P, 72]
+            return x_tensor, y_tensor, gt_pos_tensor
         return x_tensor, y_tensor
 
 
@@ -493,13 +527,13 @@ class TotalCaptureRealWristDatasetFLU(Dataset):
 # ---------------------------------------------------------------------------
 
 def collate_skip_none(
-    batch: List[Optional[Tuple[torch.Tensor, torch.Tensor]]],
-) -> Optional[Tuple[torch.Tensor, torch.Tensor]]:
+    batch: List[Optional[Tuple[torch.Tensor, ...]]],
+) -> Optional[Tuple[torch.Tensor, ...]]:
     batch = [b for b in batch if b is not None]
     if not batch:
         return None
-    xs, ys = zip(*batch)
-    return torch.stack(xs, 0), torch.stack(ys, 0)
+    cols = list(zip(*batch))   # [(x0,x1,...), (y0,y1,...), (gt0,gt1,...)?]
+    return tuple(torch.stack(c, 0) for c in cols)
 
 
 # ---------------------------------------------------------------------------

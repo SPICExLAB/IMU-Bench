@@ -1,0 +1,67 @@
+{
+  "task": "language_humanml3d",
+  "encoder": "simmtm_4src",
+  "protocol": "probe",
+  "seed": 42,
+  "metrics": {
+    "r1_i2t_g100": 16.76,
+    "r1_t2i_g100": 16.519723915562498,
+    "r5_i2t_g100": 43.16,
+    "r5_t2i_g100": 42.223789611567334,
+    "r10_i2t_g100": 56.769999999999996,
+    "r10_t2i_g100": 55.61489243790619,
+    "mrr_i2t_g100": 29.757821613938322,
+    "mrr_t2i_g100": 29.219423958900975,
+    "r1_i2t_full": 1.621183463928668,
+    "r1_t2i_full": 1.3553113553113554,
+    "mrr_i2t_full": 4.743994287802593,
+    "mrr_t2i_full": 4.227864271200115,
+    "medr_i2t_full": 191.0,
+    "medr_t2i_full": 239.0,
+    "r1_g100": 16.63986195778125,
+    "val_r1_i2t_g100": 18.8,
+    "val_r1_t2i_g100": 18.3354608118458,
+    "val_r5_i2t_g100": 44.785000000000004,
+    "val_r5_t2i_g100": 43.860097013020166,
+    "val_r10_i2t_g100": 57.445,
+    "val_r10_t2i_g100": 57.49297932090885,
+    "val_mrr_i2t_g100": 31.712266835535658,
+    "val_mrr_t2i_g100": 31.045400968072588,
+    "val_r1_i2t_full": 4.177109440267335,
+    "val_r1_t2i_full": 3.7777777777777777,
+    "val_mrr_i2t_full": 10.177961295136413,
+    "val_mrr_t2i_full": 9.625533738874518,
+    "val_medr_i2t_full": 60.0,
+    "val_medr_t2i_full": 68.5,
+    "val_r1_g100": 18.5677304059229
+  },
+  "primary_metric": "r1_g100",
+  "eval_split": "test",
+  "run": "bench_language_humanml3d__simmtm_4src__probe__s42",
+  "checkpoint": "latest.pt",
+  "checkpoint_step": 8000,
+  "selection": {
+    "split": "none",
+    "monitor": "fixed_budget",
+    "mode": "latest",
+    "note": "fixed 8k-step budget, final checkpoint (latest.pt); \u00a713e: val-loss best.pt under-selects for retrieval, latest \u2265 best on every arm"
+  },
+  "job_ids": {
+    "train": null,
+    "score": "4895762"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.language",
+    "date": "2026-08-27T20:42:45-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_items_test": 3701,
+      "n_items_val": 1197,
+      "train_end": "unknown/incomplete"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

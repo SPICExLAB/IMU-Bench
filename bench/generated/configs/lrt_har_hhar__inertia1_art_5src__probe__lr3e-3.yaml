@@ -1,0 +1,89 @@
+vit1d:
+  patch_size: 16
+  max_patches_per_channel: 256
+  pooling: mean
+objective:
+  type: utd_mhad_probe
+  utd_mhad_probe:
+    pretrained_run: inertia1_art_small_5src
+    pretrained_ckpt: best
+    class_weighted_ce: true
+paths:
+  dataset_path: /projects/b53017/vbc1591/hhar_dataset.parquet
+  runs_root: /gpfs/home/vbc1591/IMU-SSL/runs
+preprocess:
+  normalize:
+    enabled: false
+    method: zscore
+    eps: 1.0e-06
+  impute:
+    enabled: true
+    method: linear
+    max_missing_frac: 0.2
+  filter:
+    enabled: false
+windowing:
+  window_seconds: 2.56
+splits:
+  val_ratio: 0.2
+data:
+  train_on_datasets:
+  - hhar
+  sensor_columns:
+  - acc_x
+  - acc_y
+  - acc_z
+  batch_size: 256
+  eval_batch_size: 256
+  num_workers: 8
+  pin_memory: true
+  acc_only: true
+logging:
+  ckpt_every_steps: 500
+  save_step_checkpoints: false
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 20000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 200
+  early_stopping:
+    enabled: true
+    monitor: bal_acc
+    patience: 20
+  optim:
+    name: adamw
+    lr: 0.003
+    weight_decay: 0.1
+    betas:
+    - 0.9
+    - 0.95
+    eps: 1.0e-08
+  sched:
+    name: cosine
+    warmup_steps: 100
+wandb:
+  entity: yli32258-northwestern-university
+  project: TransfHAR_project
+inertia1:
+  variant: ar_transformer
+  preset: small
+  input_hz: 50
+  acc_scale_to_g: 0.10197162129779283
+  acc_channels:
+  - 0
+  - 1
+  - 2
+  patch_len: 10
+  stride: 10
+  mask_ratio: 0.4
+  pretrain_window_sec: 30
+  model_hz: 20
+bench:
+  task: har_hhar
+  encoder: inertia1_art_5src
+  protocol: probe
+  seed: 42
+  template: configs/vit1d_har_probe_hhar_mae_multidata_flu.yaml
+  registry_version: 1

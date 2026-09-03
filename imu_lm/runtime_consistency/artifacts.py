@@ -56,6 +56,9 @@ def _build_encoder_from_cfg(backbone: str, cfg: Any):
     if backbone == "vit1d":
         from imu_lm.models.ViT1D.model import ViT1DEncoder
         return ViT1DEncoder(cfg)
+    elif backbone == "inertia1":
+        from imu_lm.models.baselines.inertia1_encoder import Inertia1Encoder
+        return Inertia1Encoder(cfg)
     elif backbone in ("vit", "vit2d"):
         from imu_lm.models.ViT2D.model import ViTEncoder
         return ViTEncoder(cfg)

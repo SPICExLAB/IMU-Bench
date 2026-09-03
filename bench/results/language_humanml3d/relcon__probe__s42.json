@@ -1,0 +1,67 @@
+{
+  "task": "language_humanml3d",
+  "encoder": "relcon",
+  "protocol": "probe",
+  "seed": 42,
+  "metrics": {
+    "r1_i2t_g100": 15.35,
+    "r1_t2i_g100": 13.58758627638672,
+    "r5_i2t_g100": 40.79,
+    "r5_t2i_g100": 38.319310796513676,
+    "r10_i2t_g100": 54.87,
+    "r10_t2i_g100": 52.849010025693985,
+    "mrr_i2t_g100": 28.23388225341815,
+    "mrr_t2i_g100": 26.09609397039327,
+    "r1_i2t_full": 1.1078087003512564,
+    "r1_t2i_full": 1.0622710622710623,
+    "mrr_i2t_full": 3.7802971570808515,
+    "mrr_t2i_full": 3.4247730398936387,
+    "medr_i2t_full": 209.0,
+    "medr_t2i_full": 259.5,
+    "r1_g100": 14.468793138193359,
+    "val_r1_i2t_g100": 14.374999999999998,
+    "val_r1_t2i_g100": 13.132499361756448,
+    "val_r5_i2t_g100": 40.99,
+    "val_r5_t2i_g100": 37.07429154965535,
+    "val_r10_i2t_g100": 55.55,
+    "val_r10_t2i_g100": 52.795506765381674,
+    "val_mrr_i2t_g100": 27.50059641562815,
+    "val_mrr_t2i_g100": 25.519486792336988,
+    "val_r1_i2t_full": 3.842940685045948,
+    "val_r1_t2i_full": 3.0,
+    "val_mrr_i2t_full": 8.50687257936102,
+    "val_mrr_t2i_full": 7.500203125933426,
+    "val_medr_i2t_full": 68.0,
+    "val_medr_t2i_full": 85.0,
+    "val_r1_g100": 13.753749680878222
+  },
+  "primary_metric": "r1_g100",
+  "eval_split": "test",
+  "run": "bench_language_humanml3d__relcon__probe__s42",
+  "checkpoint": "latest.pt",
+  "checkpoint_step": 8000,
+  "selection": {
+    "split": "none",
+    "monitor": "fixed_budget",
+    "mode": "latest",
+    "note": "fixed 8k-step budget, final checkpoint (latest.pt); \u00a713e: val-loss best.pt under-selects for retrieval, latest \u2265 best on every arm"
+  },
+  "job_ids": {
+    "train": 9690537,
+    "score": "9690537"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.language",
+    "date": "2026-08-17T11:56:04-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_items_test": 3701,
+      "n_items_val": 1197,
+      "train_end": "max_steps reached at step=8000 epoch=1"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

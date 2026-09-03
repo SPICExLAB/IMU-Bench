@@ -1,0 +1,3 @@
+paths:
+  runs_root: "/gpfs/home/vbc1591/IMU-SSL/runs"
+  dataset_path: "/gpfs/home/vbc1591/IMU-SSL/data_derived/wharf_gyrozero.parquet"

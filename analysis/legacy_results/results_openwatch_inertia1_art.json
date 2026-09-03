@@ -1,0 +1,154 @@
+[
+  {
+    "name": "Inertia-1 (ART) probe win/noaug",
+    "run": "vit1d_gesture_probe_openwatch_6class_inertia1_art_windowed_stratified",
+    "split": "val",
+    "n_clips": 102,
+    "n_windows": 612,
+    "window": {
+      "acc": 0.5424836601307189,
+      "bal_acc": 0.6017389618682722,
+      "macro_f1": 0.5138875874692569,
+      "macro_recall": 0.6017389618682722
+    },
+    "clip": {
+      "acc": 0.5980392156862745,
+      "bal_acc": 0.6962962962962963,
+      "macro_f1": 0.5939203429420822,
+      "macro_recall": 0.6962962962962963
+    }
+  },
+  {
+    "name": "Inertia-1 (ART) probe win/noaug",
+    "run": "vit1d_gesture_probe_openwatch_6class_inertia1_art_windowed_stratified",
+    "split": "test",
+    "n_clips": 87,
+    "n_windows": 522,
+    "window": {
+      "acc": 0.5076628352490421,
+      "bal_acc": 0.5427138447971781,
+      "macro_f1": 0.47561229076283534,
+      "macro_recall": 0.5427138447971781
+    },
+    "clip": {
+      "acc": 0.5287356321839081,
+      "bal_acc": 0.5704365079365079,
+      "macro_f1": 0.5054395495571965,
+      "macro_recall": 0.5704365079365079
+    }
+  },
+  {
+    "name": "Inertia-1 (ART) probe win/aug",
+    "run": "vit1d_gesture_probe_openwatch_6class_inertia1_art_windowed_stratified_aug",
+    "split": "val",
+    "n_clips": 102,
+    "n_windows": 612,
+    "window": {
+      "acc": 0.5196078431372549,
+      "bal_acc": 0.6050781487563097,
+      "macro_f1": 0.5001217790730773,
+      "macro_recall": 0.6050781487563097
+    },
+    "clip": {
+      "acc": 0.5686274509803921,
+      "bal_acc": 0.6961777047983944,
+      "macro_f1": 0.5705463152831574,
+      "macro_recall": 0.6961777047983944
+    }
+  },
+  {
+    "name": "Inertia-1 (ART) probe win/aug",
+    "run": "vit1d_gesture_probe_openwatch_6class_inertia1_art_windowed_stratified_aug",
+    "split": "test",
+    "n_clips": 87,
+    "n_windows": 522,
+    "window": {
+      "acc": 0.4885057471264368,
+      "bal_acc": 0.5305445326278659,
+      "macro_f1": 0.4570458363216013,
+      "macro_recall": 0.5305445326278659
+    },
+    "clip": {
+      "acc": 0.5517241379310345,
+      "bal_acc": 0.6079365079365079,
+      "macro_f1": 0.5320048309178743,
+      "macro_recall": 0.6079365079365079
+    }
+  },
+  {
+    "name": "Inertia-1 (ART) finetune win/noaug",
+    "run": "vit1d_gesture_finetune_openwatch_6class_inertia1_art_windowed_stratified",
+    "split": "val",
+    "n_clips": 102,
+    "n_windows": 612,
+    "window": {
+      "acc": 0.6470588235294118,
+      "bal_acc": 0.5438651705893085,
+      "macro_f1": 0.5439659136294321,
+      "macro_recall": 0.5438651705893085
+    },
+    "clip": {
+      "acc": 0.7352941176470589,
+      "bal_acc": 0.6617770479839445,
+      "macro_f1": 0.6609833971902936,
+      "macro_recall": 0.6617770479839445
+    }
+  },
+  {
+    "name": "Inertia-1 (ART) finetune win/noaug",
+    "run": "vit1d_gesture_finetune_openwatch_6class_inertia1_art_windowed_stratified",
+    "split": "test",
+    "n_clips": 87,
+    "n_windows": 522,
+    "window": {
+      "acc": 0.5459770114942529,
+      "bal_acc": 0.4650462962962963,
+      "macro_f1": 0.45903701140336106,
+      "macro_recall": 0.4650462962962963
+    },
+    "clip": {
+      "acc": 0.632183908045977,
+      "bal_acc": 0.5464285714285714,
+      "macro_f1": 0.5494627090602323,
+      "macro_recall": 0.5464285714285714
+    }
+  },
+  {
+    "name": "Inertia-1 (ART) finetune win/aug",
+    "run": "vit1d_gesture_finetune_openwatch_6class_inertia1_art_windowed_stratified_aug",
+    "split": "val",
+    "n_clips": 102,
+    "n_windows": 612,
+    "window": {
+      "acc": 0.6568627450980392,
+      "bal_acc": 0.5528465760505991,
+      "macro_f1": 0.5484827829038037,
+      "macro_recall": 0.5528465760505991
+    },
+    "clip": {
+      "acc": 0.7352941176470589,
+      "bal_acc": 0.6132548804962598,
+      "macro_f1": 0.6171688637790332,
+      "macro_recall": 0.6132548804962598
+    }
+  },
+  {
+    "name": "Inertia-1 (ART) finetune win/aug",
+    "run": "vit1d_gesture_finetune_openwatch_6class_inertia1_art_windowed_stratified_aug",
+    "split": "test",
+    "n_clips": 87,
+    "n_windows": 522,
+    "window": {
+      "acc": 0.5957854406130269,
+      "bal_acc": 0.46844135802469133,
+      "macro_f1": 0.4851211601602546,
+      "macro_recall": 0.46844135802469133
+    },
+    "clip": {
+      "acc": 0.6666666666666666,
+      "bal_acc": 0.5473544973544974,
+      "macro_f1": 0.5746963562753037,
+      "macro_recall": 0.5473544973544974
+    }
+  }
+]

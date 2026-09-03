@@ -1,0 +1,91 @@
+# 5-source SSL MAE pretrain variant of vit1d_clip_nymeria_flu_finetune_mae_multidata_lr3e-5.yaml.
+# ONLY pretrained_run changed: vit1d_ssl_mae_varlen_altattn_multidata -> vit1d_ssl_mae_varlen_altattn_realdata_ocdetect_eatingspeed_motionx_sonic.
+# IMU<->text CLIP alignment FINETUNE on Nymeria motion-narration captions —
+# LR sweep sibling of vit1d_clip_nymeria_flu_finetune_mae_multidata.yaml
+# (lr:1e-4 baseline scored 5.81%/5.69%, oddly *below* the frozen probe's
+# 6.73%/6.86% -- unusual for this benchmark, where finetuning almost always
+# beats probing). Tries a lower LR on the theory that the untuned baseline
+# LR may be overfitting this task's small/narrow val set (only 20 sequences)
+# faster than it can generalize -- identical to the baseline in every other
+# respect.
+
+vit1d:
+  patch_size: 16
+  shared_kernel: acc_gyro
+  pos_embed_type: 2d
+  max_patches_per_channel: 256
+  max_channels: 32
+  pooling: "mean"
+
+  encoder:
+    hidden_size: 384
+    num_hidden_layers: 12
+    num_attention_heads: 6
+    intermediate_size: 1536
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-6
+    alt_attention: true
+
+objective:
+  type: imu_text_clip_nymeria_flu
+  imu_text_clip_nymeria_flu:
+    pretrained_run:  vit1d_ssl_mae_varlen_altattn_realdata_ocdetect_eatingspeed_motionx_sonic
+    pretrained_ckpt: best
+    freeze_imu_encoder:  false
+    freeze_text_encoder: true
+
+    captions_root:  /projects/b53017/vbc1591/nymeria_captions
+    train_pkl_root: /projects/b53017/vbc1591/processed_data_body_Ty_rwrist
+    val_pkl_root:   /projects/b53017/vbc1591/processed_data_test_body_Ty_rwrist
+    clip_model:     openai/clip-vit-base-patch32
+    clip_embed_dim: 512
+    local_files_only: true
+    text_cache_path: /projects/b53017/vbc1591/nymeria_captions/clip_text_emb_cache.pt
+
+paths:
+  dataset_path: /projects/b53017/vbc1591/IMULM_master_dataset_v2.parquet
+  runs_root: /gpfs/home/vbc1591/IMU-SSL/runs
+
+windowing:
+  min_window_seconds: 1.28
+  max_window_seconds: 10.24
+
+data:
+  sensor_columns: [acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z]
+  batch_size: 64
+  num_workers: 4
+
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 10000000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 500
+  val_max_batches: 100
+
+  optim:
+    name: adamw
+    lr: 3.0e-5
+    weight_decay: 0.01
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+
+  sched:
+    name: cosine
+    warmup_steps: 200
+
+  early_stopping:
+    enabled: true
+    monitor: val_loss
+    patience: 20
+
+logging:
+  log_every_steps: 5
+  ckpt_every_steps: 500
+  save_step_checkpoints: false
+
+wandb:
+  entity: yli32258-northwestern-university
+  project: TransfHAR_project

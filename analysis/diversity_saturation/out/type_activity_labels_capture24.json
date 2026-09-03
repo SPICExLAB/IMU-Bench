@@ -1,0 +1,3610 @@
+{
+  "block": [
+    2120596,
+    3553317
+  ],
+  "taxonomies": {
+    "Walmsley2020": {
+      "vocabulary": [
+        "light",
+        "moderate-vigorous",
+        "sedentary",
+        "sleep"
+      ],
+      "n_labelled": 1432721,
+      "n_unlabelled": 0,
+      "types_with_ge30_windows": 269,
+      "purity_pcts": {
+        "10": 52.8,
+        "25": 62.8,
+        "50": 73.0,
+        "75": 82.4,
+        "90": 91.0
+      },
+      "chance_purity_pct": 39.6,
+      "per_activity": {
+        "light": {
+          "n_windows": 258324,
+          "share_of_labelled_pct": 18.03,
+          "types_touched": 270,
+          "types_for_90pct": 131,
+          "top_types": [
+            {
+              "type": 397,
+              "share_of_activity_pct": 2.1,
+              "purity_pct": 63.5
+            },
+            {
+              "type": 688,
+              "share_of_activity_pct": 2.0,
+              "purity_pct": 66.4
+            },
+            {
+              "type": 644,
+              "share_of_activity_pct": 1.9,
+              "purity_pct": 64.5
+            }
+          ]
+        },
+        "moderate-vigorous": {
+          "n_windows": 71584,
+          "share_of_labelled_pct": 5.0,
+          "types_touched": 242,
+          "types_for_90pct": 90,
+          "top_types": [
+            {
+              "type": 909,
+              "share_of_activity_pct": 5.0,
+              "purity_pct": 89.3
+            },
+            {
+              "type": 218,
+              "share_of_activity_pct": 4.3,
+              "purity_pct": 62.9
+            },
+            {
+              "type": 771,
+              "share_of_activity_pct": 3.4,
+              "purity_pct": 58.8
+            }
+          ]
+        },
+        "sedentary": {
+          "n_windows": 566744,
+          "share_of_labelled_pct": 39.56,
+          "types_touched": 274,
+          "types_for_90pct": 184,
+          "top_types": [
+            {
+              "type": 112,
+              "share_of_activity_pct": 1.5,
+              "purity_pct": 84.4
+            },
+            {
+              "type": 892,
+              "share_of_activity_pct": 1.3,
+              "purity_pct": 83.1
+            },
+            {
+              "type": 318,
+              "share_of_activity_pct": 1.2,
+              "purity_pct": 90.5
+            }
+          ]
+        },
+        "sleep": {
+          "n_windows": 536069,
+          "share_of_labelled_pct": 37.42,
+          "types_touched": 262,
+          "types_for_90pct": 53,
+          "top_types": [
+            {
+              "type": 370,
+              "share_of_activity_pct": 3.0,
+              "purity_pct": 93.5
+            },
+            {
+              "type": 993,
+              "share_of_activity_pct": 2.8,
+              "purity_pct": 92.0
+            },
+            {
+              "type": 281,
+              "share_of_activity_pct": 2.7,
+              "purity_pct": 95.0
+            }
+          ]
+        }
+      },
+      "named_types": [
+        {
+          "type": 556,
+          "capture24_windows": 5146,
+          "top_activity": "sleep",
+          "purity_pct": 97.8
+        },
+        {
+          "type": 345,
+          "capture24_windows": 7771,
+          "top_activity": "sleep",
+          "purity_pct": 97.5
+        },
+        {
+          "type": 123,
+          "capture24_windows": 7108,
+          "top_activity": "sleep",
+          "purity_pct": 96.7
+        },
+        {
+          "type": 56,
+          "capture24_windows": 7886,
+          "top_activity": "sleep",
+          "purity_pct": 96.5
+        },
+        {
+          "type": 754,
+          "capture24_windows": 11628,
+          "top_activity": "sleep",
+          "purity_pct": 96.5
+        },
+        {
+          "type": 158,
+          "capture24_windows": 13450,
+          "top_activity": "sleep",
+          "purity_pct": 96.3
+        },
+        {
+          "type": 165,
+          "capture24_windows": 10037,
+          "top_activity": "sleep",
+          "purity_pct": 96.3
+        },
+        {
+          "type": 544,
+          "capture24_windows": 10419,
+          "top_activity": "sleep",
+          "purity_pct": 96.3
+        },
+        {
+          "type": 360,
+          "capture24_windows": 7393,
+          "top_activity": "sleep",
+          "purity_pct": 96.2
+        },
+        {
+          "type": 440,
+          "capture24_windows": 12120,
+          "top_activity": "sleep",
+          "purity_pct": 96.2
+        },
+        {
+          "type": 548,
+          "capture24_windows": 12077,
+          "top_activity": "sleep",
+          "purity_pct": 96.1
+        },
+        {
+          "type": 650,
+          "capture24_windows": 7129,
+          "top_activity": "sleep",
+          "purity_pct": 96.0
+        },
+        {
+          "type": 812,
+          "capture24_windows": 13348,
+          "top_activity": "sleep",
+          "purity_pct": 96.0
+        },
+        {
+          "type": 304,
+          "capture24_windows": 11068,
+          "top_activity": "sleep",
+          "purity_pct": 95.6
+        },
+        {
+          "type": 436,
+          "capture24_windows": 14720,
+          "top_activity": "sleep",
+          "purity_pct": 95.3
+        },
+        {
+          "type": 281,
+          "capture24_windows": 15365,
+          "top_activity": "sleep",
+          "purity_pct": 95.0
+        },
+        {
+          "type": 115,
+          "capture24_windows": 11560,
+          "top_activity": "sleep",
+          "purity_pct": 94.7
+        },
+        {
+          "type": 682,
+          "capture24_windows": 11812,
+          "top_activity": "sleep",
+          "purity_pct": 94.3
+        },
+        {
+          "type": 198,
+          "capture24_windows": 14637,
+          "top_activity": "sleep",
+          "purity_pct": 94.2
+        },
+        {
+          "type": 77,
+          "capture24_windows": 14754,
+          "top_activity": "sleep",
+          "purity_pct": 93.9
+        },
+        {
+          "type": 789,
+          "capture24_windows": 9871,
+          "top_activity": "sleep",
+          "purity_pct": 93.7
+        },
+        {
+          "type": 370,
+          "capture24_windows": 17489,
+          "top_activity": "sleep",
+          "purity_pct": 93.5
+        },
+        {
+          "type": 999,
+          "capture24_windows": 11196,
+          "top_activity": "sleep",
+          "purity_pct": 93.0
+        },
+        {
+          "type": 31,
+          "capture24_windows": 8176,
+          "top_activity": "sleep",
+          "purity_pct": 92.2
+        },
+        {
+          "type": 246,
+          "capture24_windows": 14423,
+          "top_activity": "sleep",
+          "purity_pct": 92.1
+        },
+        {
+          "type": 378,
+          "capture24_windows": 13390,
+          "top_activity": "sleep",
+          "purity_pct": 92.1
+        },
+        {
+          "type": 993,
+          "capture24_windows": 16189,
+          "top_activity": "sleep",
+          "purity_pct": 92.0
+        },
+        {
+          "type": 796,
+          "capture24_windows": 10806,
+          "top_activity": "sleep",
+          "purity_pct": 90.8
+        },
+        {
+          "type": 270,
+          "capture24_windows": 9317,
+          "top_activity": "sleep",
+          "purity_pct": 90.5
+        },
+        {
+          "type": 318,
+          "capture24_windows": 7311,
+          "top_activity": "sedentary",
+          "purity_pct": 90.5
+        },
+        {
+          "type": 410,
+          "capture24_windows": 7617,
+          "top_activity": "sleep",
+          "purity_pct": 90.5
+        },
+        {
+          "type": 673,
+          "capture24_windows": 12455,
+          "top_activity": "sleep",
+          "purity_pct": 90.1
+        },
+        {
+          "type": 909,
+          "capture24_windows": 4018,
+          "top_activity": "moderate-vigorous",
+          "purity_pct": 89.3
+        },
+        {
+          "type": 177,
+          "capture24_windows": 3587,
+          "top_activity": "sedentary",
+          "purity_pct": 88.7
+        },
+        {
+          "type": 3,
+          "capture24_windows": 9331,
+          "top_activity": "sleep",
+          "purity_pct": 88.1
+        },
+        {
+          "type": 2,
+          "capture24_windows": 12786,
+          "top_activity": "sleep",
+          "purity_pct": 88.0
+        },
+        {
+          "type": 470,
+          "capture24_windows": 11317,
+          "top_activity": "sleep",
+          "purity_pct": 87.6
+        },
+        {
+          "type": 606,
+          "capture24_windows": 11938,
+          "top_activity": "sleep",
+          "purity_pct": 87.6
+        },
+        {
+          "type": 561,
+          "capture24_windows": 3394,
+          "top_activity": "sedentary",
+          "purity_pct": 87.4
+        },
+        {
+          "type": 638,
+          "capture24_windows": 12811,
+          "top_activity": "sleep",
+          "purity_pct": 87.4
+        },
+        {
+          "type": 17,
+          "capture24_windows": 5530,
+          "top_activity": "sedentary",
+          "purity_pct": 87.3
+        },
+        {
+          "type": 894,
+          "capture24_windows": 10079,
+          "top_activity": "sleep",
+          "purity_pct": 87.3
+        },
+        {
+          "type": 101,
+          "capture24_windows": 10863,
+          "top_activity": "sleep",
+          "purity_pct": 86.9
+        },
+        {
+          "type": 295,
+          "capture24_windows": 3544,
+          "top_activity": "sedentary",
+          "purity_pct": 86.6
+        },
+        {
+          "type": 60,
+          "capture24_windows": 11344,
+          "top_activity": "sleep",
+          "purity_pct": 86.5
+        },
+        {
+          "type": 325,
+          "capture24_windows": 1180,
+          "top_activity": "moderate-vigorous",
+          "purity_pct": 85.6
+        },
+        {
+          "type": 147,
+          "capture24_windows": 12154,
+          "top_activity": "sleep",
+          "purity_pct": 85.3
+        },
+        {
+          "type": 785,
+          "capture24_windows": 4222,
+          "top_activity": "sleep",
+          "purity_pct": 85.3
+        },
+        {
+          "type": 155,
+          "capture24_windows": 7450,
+          "top_activity": "sedentary",
+          "purity_pct": 85.1
+        },
+        {
+          "type": 591,
+          "capture24_windows": 6218,
+          "top_activity": "sedentary",
+          "purity_pct": 85.0
+        },
+        {
+          "type": 965,
+          "capture24_windows": 11408,
+          "top_activity": "sleep",
+          "purity_pct": 85.0
+        },
+        {
+          "type": 511,
+          "capture24_windows": 5186,
+          "top_activity": "sedentary",
+          "purity_pct": 84.6
+        },
+        {
+          "type": 149,
+          "capture24_windows": 7001,
+          "top_activity": "sedentary",
+          "purity_pct": 84.5
+        },
+        {
+          "type": 968,
+          "capture24_windows": 3703,
+          "top_activity": "sedentary",
+          "purity_pct": 84.5
+        },
+        {
+          "type": 11,
+          "capture24_windows": 3991,
+          "top_activity": "sedentary",
+          "purity_pct": 84.4
+        },
+        {
+          "type": 112,
+          "capture24_windows": 9941,
+          "top_activity": "sedentary",
+          "purity_pct": 84.4
+        },
+        {
+          "type": 199,
+          "capture24_windows": 3190,
+          "top_activity": "sedentary",
+          "purity_pct": 84.1
+        },
+        {
+          "type": 269,
+          "capture24_windows": 6770,
+          "top_activity": "sedentary",
+          "purity_pct": 84.1
+        },
+        {
+          "type": 421,
+          "capture24_windows": 4055,
+          "top_activity": "sedentary",
+          "purity_pct": 83.3
+        },
+        {
+          "type": 892,
+          "capture24_windows": 9048,
+          "top_activity": "sedentary",
+          "purity_pct": 83.1
+        },
+        {
+          "type": 480,
+          "capture24_windows": 2204,
+          "top_activity": "sedentary",
+          "purity_pct": 83.0
+        },
+        {
+          "type": 741,
+          "capture24_windows": 1839,
+          "top_activity": "sedentary",
+          "purity_pct": 82.9
+        },
+        {
+          "type": 852,
+          "capture24_windows": 3444,
+          "top_activity": "sedentary",
+          "purity_pct": 82.9
+        },
+        {
+          "type": 543,
+          "capture24_windows": 2529,
+          "top_activity": "sedentary",
+          "purity_pct": 82.8
+        },
+        {
+          "type": 970,
+          "capture24_windows": 1522,
+          "top_activity": "sleep",
+          "purity_pct": 82.7
+        },
+        {
+          "type": 171,
+          "capture24_windows": 2771,
+          "top_activity": "sedentary",
+          "purity_pct": 82.5
+        },
+        {
+          "type": 773,
+          "capture24_windows": 2420,
+          "top_activity": "sedentary",
+          "purity_pct": 82.5
+        },
+        {
+          "type": 398,
+          "capture24_windows": 1504,
+          "top_activity": "sedentary",
+          "purity_pct": 82.4
+        },
+        {
+          "type": 864,
+          "capture24_windows": 3230,
+          "top_activity": "sedentary",
+          "purity_pct": 82.4
+        },
+        {
+          "type": 250,
+          "capture24_windows": 7553,
+          "top_activity": "sedentary",
+          "purity_pct": 82.3
+        },
+        {
+          "type": 117,
+          "capture24_windows": 2858,
+          "top_activity": "sedentary",
+          "purity_pct": 82.1
+        },
+        {
+          "type": 443,
+          "capture24_windows": 3546,
+          "top_activity": "sedentary",
+          "purity_pct": 82.0
+        },
+        {
+          "type": 16,
+          "capture24_windows": 9431,
+          "top_activity": "sleep",
+          "purity_pct": 81.8
+        },
+        {
+          "type": 963,
+          "capture24_windows": 2659,
+          "top_activity": "sedentary",
+          "purity_pct": 81.8
+        },
+        {
+          "type": 142,
+          "capture24_windows": 4430,
+          "top_activity": "sedentary",
+          "purity_pct": 81.7
+        },
+        {
+          "type": 229,
+          "capture24_windows": 9478,
+          "top_activity": "sleep",
+          "purity_pct": 81.4
+        },
+        {
+          "type": 539,
+          "capture24_windows": 2796,
+          "top_activity": "sedentary",
+          "purity_pct": 81.4
+        },
+        {
+          "type": 669,
+          "capture24_windows": 2223,
+          "top_activity": "sedentary",
+          "purity_pct": 81.4
+        },
+        {
+          "type": 640,
+          "capture24_windows": 2990,
+          "top_activity": "sedentary",
+          "purity_pct": 81.3
+        },
+        {
+          "type": 711,
+          "capture24_windows": 2214,
+          "top_activity": "sedentary",
+          "purity_pct": 80.9
+        },
+        {
+          "type": 834,
+          "capture24_windows": 4209,
+          "top_activity": "sedentary",
+          "purity_pct": 80.9
+        },
+        {
+          "type": 498,
+          "capture24_windows": 2717,
+          "top_activity": "sedentary",
+          "purity_pct": 80.8
+        },
+        {
+          "type": 991,
+          "capture24_windows": 1838,
+          "top_activity": "sedentary",
+          "purity_pct": 80.7
+        },
+        {
+          "type": 78,
+          "capture24_windows": 2701,
+          "top_activity": "sedentary",
+          "purity_pct": 80.3
+        },
+        {
+          "type": 280,
+          "capture24_windows": 4097,
+          "top_activity": "sedentary",
+          "purity_pct": 80.3
+        },
+        {
+          "type": 463,
+          "capture24_windows": 2580,
+          "top_activity": "sleep",
+          "purity_pct": 79.5
+        },
+        {
+          "type": 188,
+          "capture24_windows": 4120,
+          "top_activity": "sedentary",
+          "purity_pct": 79.3
+        },
+        {
+          "type": 516,
+          "capture24_windows": 6799,
+          "top_activity": "sedentary",
+          "purity_pct": 79.3
+        },
+        {
+          "type": 844,
+          "capture24_windows": 2029,
+          "top_activity": "sedentary",
+          "purity_pct": 79.1
+        },
+        {
+          "type": 545,
+          "capture24_windows": 2871,
+          "top_activity": "sedentary",
+          "purity_pct": 78.9
+        },
+        {
+          "type": 70,
+          "capture24_windows": 3183,
+          "top_activity": "sedentary",
+          "purity_pct": 78.8
+        },
+        {
+          "type": 58,
+          "capture24_windows": 2947,
+          "top_activity": "sedentary",
+          "purity_pct": 78.7
+        },
+        {
+          "type": 837,
+          "capture24_windows": 3833,
+          "top_activity": "sedentary",
+          "purity_pct": 78.7
+        },
+        {
+          "type": 737,
+          "capture24_windows": 6130,
+          "top_activity": "sleep",
+          "purity_pct": 78.6
+        },
+        {
+          "type": 895,
+          "capture24_windows": 8148,
+          "top_activity": "sedentary",
+          "purity_pct": 78.6
+        },
+        {
+          "type": 197,
+          "capture24_windows": 5300,
+          "top_activity": "sedentary",
+          "purity_pct": 78.2
+        },
+        {
+          "type": 289,
+          "capture24_windows": 2067,
+          "top_activity": "sedentary",
+          "purity_pct": 78.2
+        },
+        {
+          "type": 695,
+          "capture24_windows": 7435,
+          "top_activity": "sedentary",
+          "purity_pct": 78.0
+        },
+        {
+          "type": 666,
+          "capture24_windows": 3557,
+          "top_activity": "sedentary",
+          "purity_pct": 77.9
+        },
+        {
+          "type": 984,
+          "capture24_windows": 4703,
+          "top_activity": "sedentary",
+          "purity_pct": 77.7
+        },
+        {
+          "type": 395,
+          "capture24_windows": 2371,
+          "top_activity": "light",
+          "purity_pct": 77.6
+        },
+        {
+          "type": 510,
+          "capture24_windows": 7171,
+          "top_activity": "sedentary",
+          "purity_pct": 77.6
+        },
+        {
+          "type": 106,
+          "capture24_windows": 5859,
+          "top_activity": "sedentary",
+          "purity_pct": 77.3
+        },
+        {
+          "type": 904,
+          "capture24_windows": 2164,
+          "top_activity": "sedentary",
+          "purity_pct": 77.3
+        },
+        {
+          "type": 966,
+          "capture24_windows": 4944,
+          "top_activity": "sedentary",
+          "purity_pct": 77.1
+        },
+        {
+          "type": 249,
+          "capture24_windows": 4117,
+          "top_activity": "sedentary",
+          "purity_pct": 77.0
+        },
+        {
+          "type": 116,
+          "capture24_windows": 3952,
+          "top_activity": "sedentary",
+          "purity_pct": 76.9
+        },
+        {
+          "type": 913,
+          "capture24_windows": 3346,
+          "top_activity": "sedentary",
+          "purity_pct": 76.6
+        },
+        {
+          "type": 496,
+          "capture24_windows": 2793,
+          "top_activity": "sedentary",
+          "purity_pct": 76.3
+        },
+        {
+          "type": 553,
+          "capture24_windows": 7770,
+          "top_activity": "sleep",
+          "purity_pct": 76.3
+        },
+        {
+          "type": 602,
+          "capture24_windows": 2763,
+          "top_activity": "sedentary",
+          "purity_pct": 76.1
+        },
+        {
+          "type": 231,
+          "capture24_windows": 3441,
+          "top_activity": "sedentary",
+          "purity_pct": 76.0
+        },
+        {
+          "type": 464,
+          "capture24_windows": 2442,
+          "top_activity": "sedentary",
+          "purity_pct": 76.0
+        },
+        {
+          "type": 162,
+          "capture24_windows": 3378,
+          "top_activity": "sedentary",
+          "purity_pct": 75.7
+        },
+        {
+          "type": 210,
+          "capture24_windows": 4186,
+          "top_activity": "sedentary",
+          "purity_pct": 75.7
+        },
+        {
+          "type": 455,
+          "capture24_windows": 3264,
+          "top_activity": "sedentary",
+          "purity_pct": 75.6
+        },
+        {
+          "type": 519,
+          "capture24_windows": 2979,
+          "top_activity": "sedentary",
+          "purity_pct": 75.3
+        },
+        {
+          "type": 308,
+          "capture24_windows": 4210,
+          "top_activity": "sedentary",
+          "purity_pct": 75.2
+        },
+        {
+          "type": 350,
+          "capture24_windows": 2376,
+          "top_activity": "sedentary",
+          "purity_pct": 75.1
+        },
+        {
+          "type": 945,
+          "capture24_windows": 3673,
+          "top_activity": "sedentary",
+          "purity_pct": 75.1
+        },
+        {
+          "type": 659,
+          "capture24_windows": 4468,
+          "top_activity": "sedentary",
+          "purity_pct": 75.0
+        },
+        {
+          "type": 63,
+          "capture24_windows": 3173,
+          "top_activity": "sedentary",
+          "purity_pct": 74.6
+        },
+        {
+          "type": 597,
+          "capture24_windows": 3964,
+          "top_activity": "sedentary",
+          "purity_pct": 74.6
+        },
+        {
+          "type": 701,
+          "capture24_windows": 3763,
+          "top_activity": "sedentary",
+          "purity_pct": 74.5
+        },
+        {
+          "type": 840,
+          "capture24_windows": 4418,
+          "top_activity": "sedentary",
+          "purity_pct": 74.3
+        },
+        {
+          "type": 936,
+          "capture24_windows": 2179,
+          "top_activity": "sedentary",
+          "purity_pct": 74.3
+        },
+        {
+          "type": 577,
+          "capture24_windows": 2227,
+          "top_activity": "sedentary",
+          "purity_pct": 74.0
+        },
+        {
+          "type": 949,
+          "capture24_windows": 8111,
+          "top_activity": "sedentary",
+          "purity_pct": 74.0
+        },
+        {
+          "type": 191,
+          "capture24_windows": 2601,
+          "top_activity": "sedentary",
+          "purity_pct": 73.8
+        },
+        {
+          "type": 390,
+          "capture24_windows": 1720,
+          "top_activity": "sedentary",
+          "purity_pct": 73.8
+        },
+        {
+          "type": 186,
+          "capture24_windows": 4498,
+          "top_activity": "sedentary",
+          "purity_pct": 73.5
+        },
+        {
+          "type": 530,
+          "capture24_windows": 4065,
+          "top_activity": "sedentary",
+          "purity_pct": 73.5
+        },
+        {
+          "type": 856,
+          "capture24_windows": 1668,
+          "top_activity": "sedentary",
+          "purity_pct": 73.1
+        },
+        {
+          "type": 154,
+          "capture24_windows": 3706,
+          "top_activity": "sedentary",
+          "purity_pct": 73.0
+        },
+        {
+          "type": 403,
+          "capture24_windows": 3107,
+          "top_activity": "sedentary",
+          "purity_pct": 73.0
+        },
+        {
+          "type": 817,
+          "capture24_windows": 5668,
+          "top_activity": "sedentary",
+          "purity_pct": 73.0
+        },
+        {
+          "type": 330,
+          "capture24_windows": 3284,
+          "top_activity": "sedentary",
+          "purity_pct": 72.8
+        },
+        {
+          "type": 731,
+          "capture24_windows": 5693,
+          "top_activity": "sedentary",
+          "purity_pct": 72.4
+        },
+        {
+          "type": 734,
+          "capture24_windows": 3011,
+          "top_activity": "sedentary",
+          "purity_pct": 72.3
+        },
+        {
+          "type": 383,
+          "capture24_windows": 3017,
+          "top_activity": "sedentary",
+          "purity_pct": 72.1
+        },
+        {
+          "type": 282,
+          "capture24_windows": 6621,
+          "top_activity": "light",
+          "purity_pct": 72.0
+        },
+        {
+          "type": 928,
+          "capture24_windows": 3379,
+          "top_activity": "sedentary",
+          "purity_pct": 71.8
+        },
+        {
+          "type": 73,
+          "capture24_windows": 2362,
+          "top_activity": "sedentary",
+          "purity_pct": 71.5
+        },
+        {
+          "type": 347,
+          "capture24_windows": 5518,
+          "top_activity": "sedentary",
+          "purity_pct": 71.5
+        },
+        {
+          "type": 468,
+          "capture24_windows": 5990,
+          "top_activity": "sedentary",
+          "purity_pct": 71.3
+        },
+        {
+          "type": 570,
+          "capture24_windows": 3345,
+          "top_activity": "sedentary",
+          "purity_pct": 71.3
+        },
+        {
+          "type": 192,
+          "capture24_windows": 2658,
+          "top_activity": "sedentary",
+          "purity_pct": 71.1
+        },
+        {
+          "type": 598,
+          "capture24_windows": 2337,
+          "top_activity": "sedentary",
+          "purity_pct": 71.1
+        },
+        {
+          "type": 168,
+          "capture24_windows": 2830,
+          "top_activity": "sedentary",
+          "purity_pct": 71.0
+        },
+        {
+          "type": 474,
+          "capture24_windows": 4679,
+          "top_activity": "sedentary",
+          "purity_pct": 71.0
+        },
+        {
+          "type": 529,
+          "capture24_windows": 3313,
+          "top_activity": "sedentary",
+          "purity_pct": 70.9
+        },
+        {
+          "type": 668,
+          "capture24_windows": 3901,
+          "top_activity": "sedentary",
+          "purity_pct": 70.9
+        },
+        {
+          "type": 139,
+          "capture24_windows": 2500,
+          "top_activity": "sedentary",
+          "purity_pct": 70.7
+        },
+        {
+          "type": 172,
+          "capture24_windows": 4020,
+          "top_activity": "sedentary",
+          "purity_pct": 70.7
+        },
+        {
+          "type": 391,
+          "capture24_windows": 4643,
+          "top_activity": "sedentary",
+          "purity_pct": 70.7
+        },
+        {
+          "type": 633,
+          "capture24_windows": 1547,
+          "top_activity": "sedentary",
+          "purity_pct": 70.7
+        },
+        {
+          "type": 762,
+          "capture24_windows": 4169,
+          "top_activity": "sedentary",
+          "purity_pct": 70.6
+        },
+        {
+          "type": 508,
+          "capture24_windows": 2336,
+          "top_activity": "sedentary",
+          "purity_pct": 70.3
+        },
+        {
+          "type": 164,
+          "capture24_windows": 3405,
+          "top_activity": "sedentary",
+          "purity_pct": 69.8
+        },
+        {
+          "type": 501,
+          "capture24_windows": 1519,
+          "top_activity": "light",
+          "purity_pct": 69.8
+        },
+        {
+          "type": 39,
+          "capture24_windows": 5196,
+          "top_activity": "sedentary",
+          "purity_pct": 69.2
+        },
+        {
+          "type": 215,
+          "capture24_windows": 4302,
+          "top_activity": "sedentary",
+          "purity_pct": 69.2
+        },
+        {
+          "type": 36,
+          "capture24_windows": 2002,
+          "top_activity": "sedentary",
+          "purity_pct": 69.1
+        },
+        {
+          "type": 145,
+          "capture24_windows": 2089,
+          "top_activity": "sedentary",
+          "purity_pct": 69.1
+        },
+        {
+          "type": 694,
+          "capture24_windows": 6193,
+          "top_activity": "light",
+          "purity_pct": 69.0
+        },
+        {
+          "type": 409,
+          "capture24_windows": 4926,
+          "top_activity": "sedentary",
+          "purity_pct": 68.9
+        },
+        {
+          "type": 98,
+          "capture24_windows": 4520,
+          "top_activity": "sedentary",
+          "purity_pct": 68.8
+        },
+        {
+          "type": 32,
+          "capture24_windows": 6623,
+          "top_activity": "light",
+          "purity_pct": 68.7
+        },
+        {
+          "type": 569,
+          "capture24_windows": 4370,
+          "top_activity": "sedentary",
+          "purity_pct": 68.5
+        },
+        {
+          "type": 942,
+          "capture24_windows": 7342,
+          "top_activity": "sedentary",
+          "purity_pct": 68.4
+        },
+        {
+          "type": 900,
+          "capture24_windows": 3595,
+          "top_activity": "light",
+          "purity_pct": 68.3
+        },
+        {
+          "type": 735,
+          "capture24_windows": 4173,
+          "top_activity": "light",
+          "purity_pct": 68.2
+        },
+        {
+          "type": 947,
+          "capture24_windows": 2995,
+          "top_activity": "light",
+          "purity_pct": 67.7
+        },
+        {
+          "type": 881,
+          "capture24_windows": 4822,
+          "top_activity": "light",
+          "purity_pct": 67.6
+        },
+        {
+          "type": 331,
+          "capture24_windows": 7037,
+          "top_activity": "light",
+          "purity_pct": 67.3
+        },
+        {
+          "type": 572,
+          "capture24_windows": 6753,
+          "top_activity": "light",
+          "purity_pct": 67.2
+        },
+        {
+          "type": 684,
+          "capture24_windows": 4401,
+          "top_activity": "sedentary",
+          "purity_pct": 67.1
+        },
+        {
+          "type": 372,
+          "capture24_windows": 5945,
+          "top_activity": "light",
+          "purity_pct": 67.0
+        },
+        {
+          "type": 634,
+          "capture24_windows": 3302,
+          "top_activity": "light",
+          "purity_pct": 66.7
+        },
+        {
+          "type": 135,
+          "capture24_windows": 6740,
+          "top_activity": "light",
+          "purity_pct": 66.6
+        },
+        {
+          "type": 226,
+          "capture24_windows": 3571,
+          "top_activity": "light",
+          "purity_pct": 66.5
+        },
+        {
+          "type": 688,
+          "capture24_windows": 7694,
+          "top_activity": "light",
+          "purity_pct": 66.4
+        },
+        {
+          "type": 394,
+          "capture24_windows": 5695,
+          "top_activity": "sedentary",
+          "purity_pct": 66.0
+        },
+        {
+          "type": 808,
+          "capture24_windows": 844,
+          "top_activity": "light",
+          "purity_pct": 65.9
+        },
+        {
+          "type": 1,
+          "capture24_windows": 5028,
+          "top_activity": "sedentary",
+          "purity_pct": 65.8
+        },
+        {
+          "type": 770,
+          "capture24_windows": 4206,
+          "top_activity": "sedentary",
+          "purity_pct": 65.7
+        },
+        {
+          "type": 643,
+          "capture24_windows": 9145,
+          "top_activity": "sleep",
+          "purity_pct": 65.3
+        },
+        {
+          "type": 859,
+          "capture24_windows": 3963,
+          "top_activity": "sedentary",
+          "purity_pct": 65.1
+        },
+        {
+          "type": 987,
+          "capture24_windows": 3678,
+          "top_activity": "moderate-vigorous",
+          "purity_pct": 64.8
+        },
+        {
+          "type": 369,
+          "capture24_windows": 2535,
+          "top_activity": "moderate-vigorous",
+          "purity_pct": 64.5
+        },
+        {
+          "type": 644,
+          "capture24_windows": 7650,
+          "top_activity": "light",
+          "purity_pct": 64.5
+        },
+        {
+          "type": 195,
+          "capture24_windows": 3570,
+          "top_activity": "sedentary",
+          "purity_pct": 64.3
+        },
+        {
+          "type": 166,
+          "capture24_windows": 5950,
+          "top_activity": "light",
+          "purity_pct": 64.2
+        },
+        {
+          "type": 431,
+          "capture24_windows": 5061,
+          "top_activity": "sedentary",
+          "purity_pct": 64.1
+        },
+        {
+          "type": 509,
+          "capture24_windows": 5978,
+          "top_activity": "light",
+          "purity_pct": 63.9
+        },
+        {
+          "type": 725,
+          "capture24_windows": 4250,
+          "top_activity": "light",
+          "purity_pct": 63.9
+        },
+        {
+          "type": 417,
+          "capture24_windows": 2988,
+          "top_activity": "sedentary",
+          "purity_pct": 63.8
+        },
+        {
+          "type": 627,
+          "capture24_windows": 3391,
+          "top_activity": "sedentary",
+          "purity_pct": 63.8
+        },
+        {
+          "type": 836,
+          "capture24_windows": 5049,
+          "top_activity": "sedentary",
+          "purity_pct": 63.8
+        },
+        {
+          "type": 397,
+          "capture24_windows": 8426,
+          "top_activity": "light",
+          "purity_pct": 63.5
+        },
+        {
+          "type": 218,
+          "capture24_windows": 4900,
+          "top_activity": "moderate-vigorous",
+          "purity_pct": 62.9
+        },
+        {
+          "type": 75,
+          "capture24_windows": 3546,
+          "top_activity": "moderate-vigorous",
+          "purity_pct": 62.8
+        },
+        {
+          "type": 618,
+          "capture24_windows": 2905,
+          "top_activity": "light",
+          "purity_pct": 62.3
+        },
+        {
+          "type": 870,
+          "capture24_windows": 3363,
+          "top_activity": "sedentary",
+          "purity_pct": 61.9
+        },
+        {
+          "type": 657,
+          "capture24_windows": 3780,
+          "top_activity": "moderate-vigorous",
+          "purity_pct": 61.8
+        },
+        {
+          "type": 768,
+          "capture24_windows": 5159,
+          "top_activity": "sedentary",
+          "purity_pct": 61.2
+        },
+        {
+          "type": 882,
+          "capture24_windows": 3545,
+          "top_activity": "sedentary",
+          "purity_pct": 60.8
+        },
+        {
+          "type": 635,
+          "capture24_windows": 4156,
+          "top_activity": "sedentary",
+          "purity_pct": 60.7
+        },
+        {
+          "type": 34,
+          "capture24_windows": 5021,
+          "top_activity": "light",
+          "purity_pct": 60.5
+        },
+        {
+          "type": 641,
+          "capture24_windows": 1487,
+          "top_activity": "light",
+          "purity_pct": 60.5
+        },
+        {
+          "type": 723,
+          "capture24_windows": 7852,
+          "top_activity": "light",
+          "purity_pct": 60.0
+        },
+        {
+          "type": 781,
+          "capture24_windows": 5153,
+          "top_activity": "sedentary",
+          "purity_pct": 59.8
+        },
+        {
+          "type": 71,
+          "capture24_windows": 4225,
+          "top_activity": "sedentary",
+          "purity_pct": 59.7
+        },
+        {
+          "type": 648,
+          "capture24_windows": 3309,
+          "top_activity": "light",
+          "purity_pct": 59.4
+        },
+        {
+          "type": 884,
+          "capture24_windows": 3716,
+          "top_activity": "moderate-vigorous",
+          "purity_pct": 59.4
+        },
+        {
+          "type": 180,
+          "capture24_windows": 2322,
+          "top_activity": "sedentary",
+          "purity_pct": 59.1
+        },
+        {
+          "type": 319,
+          "capture24_windows": 3958,
+          "top_activity": "sedentary",
+          "purity_pct": 59.1
+        },
+        {
+          "type": 26,
+          "capture24_windows": 3563,
+          "top_activity": "sedentary",
+          "purity_pct": 58.9
+        },
+        {
+          "type": 99,
+          "capture24_windows": 4845,
+          "top_activity": "light",
+          "purity_pct": 58.8
+        },
+        {
+          "type": 771,
+          "capture24_windows": 4118,
+          "top_activity": "moderate-vigorous",
+          "purity_pct": 58.8
+        },
+        {
+          "type": 681,
+          "capture24_windows": 5647,
+          "top_activity": "light",
+          "purity_pct": 58.7
+        },
+        {
+          "type": 105,
+          "capture24_windows": 6506,
+          "top_activity": "light",
+          "purity_pct": 58.6
+        },
+        {
+          "type": 702,
+          "capture24_windows": 4071,
+          "top_activity": "sedentary",
+          "purity_pct": 58.6
+        },
+        {
+          "type": 655,
+          "capture24_windows": 3602,
+          "top_activity": "moderate-vigorous",
+          "purity_pct": 58.4
+        },
+        {
+          "type": 265,
+          "capture24_windows": 4934,
+          "top_activity": "sedentary",
+          "purity_pct": 58.3
+        },
+        {
+          "type": 811,
+          "capture24_windows": 3301,
+          "top_activity": "light",
+          "purity_pct": 58.1
+        },
+        {
+          "type": 855,
+          "capture24_windows": 4023,
+          "top_activity": "sedentary",
+          "purity_pct": 58.0
+        },
+        {
+          "type": 48,
+          "capture24_windows": 6662,
+          "top_activity": "light",
+          "purity_pct": 56.9
+        },
+        {
+          "type": 814,
+          "capture24_windows": 3429,
+          "top_activity": "sleep",
+          "purity_pct": 56.9
+        },
+        {
+          "type": 630,
+          "capture24_windows": 3206,
+          "top_activity": "moderate-vigorous",
+          "purity_pct": 56.7
+        },
+        {
+          "type": 309,
+          "capture24_windows": 3919,
+          "top_activity": "moderate-vigorous",
+          "purity_pct": 56.2
+        },
+        {
+          "type": 865,
+          "capture24_windows": 4677,
+          "top_activity": "sedentary",
+          "purity_pct": 56.2
+        },
+        {
+          "type": 8,
+          "capture24_windows": 3198,
+          "top_activity": "sedentary",
+          "purity_pct": 55.8
+        },
+        {
+          "type": 435,
+          "capture24_windows": 3718,
+          "top_activity": "sedentary",
+          "purity_pct": 55.7
+        },
+        {
+          "type": 601,
+          "capture24_windows": 4391,
+          "top_activity": "light",
+          "purity_pct": 54.9
+        },
+        {
+          "type": 334,
+          "capture24_windows": 9207,
+          "top_activity": "sleep",
+          "purity_pct": 54.3
+        },
+        {
+          "type": 607,
+          "capture24_windows": 5210,
+          "top_activity": "light",
+          "purity_pct": 53.7
+        },
+        {
+          "type": 997,
+          "capture24_windows": 1002,
+          "top_activity": "sedentary",
+          "purity_pct": 53.7
+        },
+        {
+          "type": 365,
+          "capture24_windows": 4512,
+          "top_activity": "light",
+          "purity_pct": 53.5
+        },
+        {
+          "type": 487,
+          "capture24_windows": 7542,
+          "top_activity": "sleep",
+          "purity_pct": 53.3
+        },
+        {
+          "type": 538,
+          "capture24_windows": 3777,
+          "top_activity": "light",
+          "purity_pct": 53.2
+        },
+        {
+          "type": 766,
+          "capture24_windows": 3653,
+          "top_activity": "sedentary",
+          "purity_pct": 52.8
+        },
+        {
+          "type": 38,
+          "capture24_windows": 4980,
+          "top_activity": "sedentary",
+          "purity_pct": 52.7
+        },
+        {
+          "type": 311,
+          "capture24_windows": 6006,
+          "top_activity": "light",
+          "purity_pct": 52.5
+        },
+        {
+          "type": 624,
+          "capture24_windows": 4092,
+          "top_activity": "sedentary",
+          "purity_pct": 52.5
+        },
+        {
+          "type": 346,
+          "capture24_windows": 4542,
+          "top_activity": "sedentary",
+          "purity_pct": 52.4
+        },
+        {
+          "type": 672,
+          "capture24_windows": 6932,
+          "top_activity": "light",
+          "purity_pct": 52.4
+        },
+        {
+          "type": 819,
+          "capture24_windows": 3173,
+          "top_activity": "moderate-vigorous",
+          "purity_pct": 51.6
+        },
+        {
+          "type": 784,
+          "capture24_windows": 3251,
+          "top_activity": "light",
+          "purity_pct": 51.2
+        },
+        {
+          "type": 833,
+          "capture24_windows": 2356,
+          "top_activity": "light",
+          "purity_pct": 51.1
+        },
+        {
+          "type": 22,
+          "capture24_windows": 6124,
+          "top_activity": "light",
+          "purity_pct": 50.7
+        },
+        {
+          "type": 492,
+          "capture24_windows": 4197,
+          "top_activity": "sedentary",
+          "purity_pct": 49.7
+        },
+        {
+          "type": 939,
+          "capture24_windows": 5759,
+          "top_activity": "light",
+          "purity_pct": 49.7
+        },
+        {
+          "type": 791,
+          "capture24_windows": 5124,
+          "top_activity": "sedentary",
+          "purity_pct": 49.6
+        },
+        {
+          "type": 59,
+          "capture24_windows": 3189,
+          "top_activity": "moderate-vigorous",
+          "purity_pct": 49.5
+        },
+        {
+          "type": 340,
+          "capture24_windows": 5593,
+          "top_activity": "sedentary",
+          "purity_pct": 49.4
+        },
+        {
+          "type": 251,
+          "capture24_windows": 3735,
+          "top_activity": "sedentary",
+          "purity_pct": 49.3
+        },
+        {
+          "type": 96,
+          "capture24_windows": 3524,
+          "top_activity": "moderate-vigorous",
+          "purity_pct": 49.2
+        },
+        {
+          "type": 878,
+          "capture24_windows": 3650,
+          "top_activity": "sedentary",
+          "purity_pct": 49.2
+        },
+        {
+          "type": 820,
+          "capture24_windows": 6154,
+          "top_activity": "light",
+          "purity_pct": 49.1
+        },
+        {
+          "type": 393,
+          "capture24_windows": 3339,
+          "top_activity": "sedentary",
+          "purity_pct": 48.8
+        },
+        {
+          "type": 847,
+          "capture24_windows": 5486,
+          "top_activity": "sleep",
+          "purity_pct": 48.7
+        },
+        {
+          "type": 124,
+          "capture24_windows": 4320,
+          "top_activity": "light",
+          "purity_pct": 48.3
+        },
+        {
+          "type": 505,
+          "capture24_windows": 2902,
+          "top_activity": "light",
+          "purity_pct": 47.1
+        },
+        {
+          "type": 531,
+          "capture24_windows": 2757,
+          "top_activity": "light",
+          "purity_pct": 46.9
+        },
+        {
+          "type": 559,
+          "capture24_windows": 2554,
+          "top_activity": "light",
+          "purity_pct": 46.5
+        },
+        {
+          "type": 47,
+          "capture24_windows": 7323,
+          "top_activity": "light",
+          "purity_pct": 45.7
+        },
+        {
+          "type": 163,
+          "capture24_windows": 2515,
+          "top_activity": "sedentary",
+          "purity_pct": 45.7
+        },
+        {
+          "type": 858,
+          "capture24_windows": 2750,
+          "top_activity": "sedentary",
+          "purity_pct": 44.9
+        }
+      ]
+    },
+    "WillettsSpecific2018": {
+      "vocabulary": [
+        "bicycling",
+        "household-chores",
+        "manual-work",
+        "mixed-activity",
+        "sitting",
+        "sleep",
+        "sports",
+        "standing",
+        "vehicle",
+        "walking"
+      ],
+      "n_labelled": 1432721,
+      "n_unlabelled": 0,
+      "types_with_ge30_windows": 269,
+      "purity_pcts": {
+        "10": 34.6,
+        "25": 51.4,
+        "50": 68.4,
+        "75": 78.7,
+        "90": 91.0
+      },
+      "chance_purity_pct": 37.4,
+      "per_activity": {
+        "bicycling": {
+          "n_windows": 14766,
+          "share_of_labelled_pct": 1.03,
+          "types_touched": 224,
+          "types_for_90pct": 48,
+          "top_types": [
+            {
+              "type": 909,
+              "share_of_activity_pct": 23.6,
+              "purity_pct": 86.8
+            },
+            {
+              "type": 75,
+              "share_of_activity_pct": 14.5,
+              "purity_pct": 60.3
+            },
+            {
+              "type": 630,
+              "share_of_activity_pct": 11.1,
+              "purity_pct": 51.2
+            }
+          ]
+        },
+        "household-chores": {
+          "n_windows": 94940,
+          "share_of_labelled_pct": 6.63,
+          "types_touched": 258,
+          "types_for_90pct": 99,
+          "top_types": [
+            {
+              "type": 644,
+              "share_of_activity_pct": 3.4,
+              "purity_pct": 42.6
+            },
+            {
+              "type": 397,
+              "share_of_activity_pct": 3.2,
+              "purity_pct": 36.3
+            },
+            {
+              "type": 135,
+              "share_of_activity_pct": 2.6,
+              "purity_pct": 36.1
+            }
+          ]
+        },
+        "manual-work": {
+          "n_windows": 16934,
+          "share_of_labelled_pct": 1.18,
+          "types_touched": 224,
+          "types_for_90pct": 116,
+          "top_types": [
+            {
+              "type": 135,
+              "share_of_activity_pct": 4.0,
+              "purity_pct": 10.1
+            },
+            {
+              "type": 688,
+              "share_of_activity_pct": 2.9,
+              "purity_pct": 6.4
+            },
+            {
+              "type": 282,
+              "share_of_activity_pct": 2.9,
+              "purity_pct": 7.5
+            }
+          ]
+        },
+        "mixed-activity": {
+          "n_windows": 59980,
+          "share_of_labelled_pct": 4.19,
+          "types_touched": 255,
+          "types_for_90pct": 119,
+          "top_types": [
+            {
+              "type": 218,
+              "share_of_activity_pct": 4.8,
+              "purity_pct": 58.3
+            },
+            {
+              "type": 657,
+              "share_of_activity_pct": 3.2,
+              "purity_pct": 50.4
+            },
+            {
+              "type": 655,
+              "share_of_activity_pct": 3.1,
+              "purity_pct": 51.4
+            }
+          ]
+        },
+        "sitting": {
+          "n_windows": 513137,
+          "share_of_labelled_pct": 35.82,
+          "types_touched": 270,
+          "types_for_90pct": 180,
+          "top_types": [
+            {
+              "type": 112,
+              "share_of_activity_pct": 1.6,
+              "purity_pct": 83.1
+            },
+            {
+              "type": 892,
+              "share_of_activity_pct": 1.4,
+              "purity_pct": 80.1
+            },
+            {
+              "type": 318,
+              "share_of_activity_pct": 1.3,
+              "purity_pct": 89.1
+            }
+          ]
+        },
+        "sleep": {
+          "n_windows": 536069,
+          "share_of_labelled_pct": 37.42,
+          "types_touched": 262,
+          "types_for_90pct": 53,
+          "top_types": [
+            {
+              "type": 370,
+              "share_of_activity_pct": 3.0,
+              "purity_pct": 93.5
+            },
+            {
+              "type": 993,
+              "share_of_activity_pct": 2.8,
+              "purity_pct": 92.0
+            },
+            {
+              "type": 281,
+              "share_of_activity_pct": 2.7,
+              "purity_pct": 95.0
+            }
+          ]
+        },
+        "sports": {
+          "n_windows": 7145,
+          "share_of_labelled_pct": 0.5,
+          "types_touched": 221,
+          "types_for_90pct": 95,
+          "top_types": [
+            {
+              "type": 340,
+              "share_of_activity_pct": 15.1,
+              "purity_pct": 19.3
+            },
+            {
+              "type": 325,
+              "share_of_activity_pct": 10.8,
+              "purity_pct": 65.4
+            },
+            {
+              "type": 725,
+              "share_of_activity_pct": 4.2,
+              "purity_pct": 7.1
+            }
+          ]
+        },
+        "standing": {
+          "n_windows": 46770,
+          "share_of_labelled_pct": 3.26,
+          "types_touched": 264,
+          "types_for_90pct": 154,
+          "top_types": [
+            {
+              "type": 895,
+              "share_of_activity_pct": 1.3,
+              "purity_pct": 7.6
+            },
+            {
+              "type": 702,
+              "share_of_activity_pct": 1.3,
+              "purity_pct": 14.7
+            },
+            {
+              "type": 372,
+              "share_of_activity_pct": 1.2,
+              "purity_pct": 9.7
+            }
+          ]
+        },
+        "vehicle": {
+          "n_windows": 53151,
+          "share_of_labelled_pct": 3.71,
+          "types_touched": 264,
+          "types_for_90pct": 144,
+          "top_types": [
+            {
+              "type": 530,
+              "share_of_activity_pct": 5.4,
+              "purity_pct": 71.0
+            },
+            {
+              "type": 455,
+              "share_of_activity_pct": 4.5,
+              "purity_pct": 73.6
+            },
+            {
+              "type": 172,
+              "share_of_activity_pct": 3.8,
+              "purity_pct": 49.8
+            }
+          ]
+        },
+        "walking": {
+          "n_windows": 89829,
+          "share_of_labelled_pct": 6.27,
+          "types_touched": 255,
+          "types_for_90pct": 102,
+          "top_types": [
+            {
+              "type": 309,
+              "share_of_activity_pct": 2.6,
+              "purity_pct": 60.2
+            },
+            {
+              "type": 771,
+              "share_of_activity_pct": 2.4,
+              "purity_pct": 52.1
+            },
+            {
+              "type": 34,
+              "share_of_activity_pct": 2.4,
+              "purity_pct": 42.4
+            }
+          ]
+        }
+      },
+      "named_types": [
+        {
+          "type": 556,
+          "capture24_windows": 5146,
+          "top_activity": "sleep",
+          "purity_pct": 97.8
+        },
+        {
+          "type": 345,
+          "capture24_windows": 7771,
+          "top_activity": "sleep",
+          "purity_pct": 97.5
+        },
+        {
+          "type": 123,
+          "capture24_windows": 7108,
+          "top_activity": "sleep",
+          "purity_pct": 96.7
+        },
+        {
+          "type": 56,
+          "capture24_windows": 7886,
+          "top_activity": "sleep",
+          "purity_pct": 96.5
+        },
+        {
+          "type": 754,
+          "capture24_windows": 11628,
+          "top_activity": "sleep",
+          "purity_pct": 96.5
+        },
+        {
+          "type": 158,
+          "capture24_windows": 13450,
+          "top_activity": "sleep",
+          "purity_pct": 96.3
+        },
+        {
+          "type": 165,
+          "capture24_windows": 10037,
+          "top_activity": "sleep",
+          "purity_pct": 96.3
+        },
+        {
+          "type": 544,
+          "capture24_windows": 10419,
+          "top_activity": "sleep",
+          "purity_pct": 96.3
+        },
+        {
+          "type": 360,
+          "capture24_windows": 7393,
+          "top_activity": "sleep",
+          "purity_pct": 96.2
+        },
+        {
+          "type": 440,
+          "capture24_windows": 12120,
+          "top_activity": "sleep",
+          "purity_pct": 96.2
+        },
+        {
+          "type": 548,
+          "capture24_windows": 12077,
+          "top_activity": "sleep",
+          "purity_pct": 96.1
+        },
+        {
+          "type": 650,
+          "capture24_windows": 7129,
+          "top_activity": "sleep",
+          "purity_pct": 96.0
+        },
+        {
+          "type": 812,
+          "capture24_windows": 13348,
+          "top_activity": "sleep",
+          "purity_pct": 96.0
+        },
+        {
+          "type": 304,
+          "capture24_windows": 11068,
+          "top_activity": "sleep",
+          "purity_pct": 95.6
+        },
+        {
+          "type": 436,
+          "capture24_windows": 14720,
+          "top_activity": "sleep",
+          "purity_pct": 95.3
+        },
+        {
+          "type": 281,
+          "capture24_windows": 15365,
+          "top_activity": "sleep",
+          "purity_pct": 95.0
+        },
+        {
+          "type": 115,
+          "capture24_windows": 11560,
+          "top_activity": "sleep",
+          "purity_pct": 94.7
+        },
+        {
+          "type": 682,
+          "capture24_windows": 11812,
+          "top_activity": "sleep",
+          "purity_pct": 94.3
+        },
+        {
+          "type": 198,
+          "capture24_windows": 14637,
+          "top_activity": "sleep",
+          "purity_pct": 94.2
+        },
+        {
+          "type": 77,
+          "capture24_windows": 14754,
+          "top_activity": "sleep",
+          "purity_pct": 93.9
+        },
+        {
+          "type": 789,
+          "capture24_windows": 9871,
+          "top_activity": "sleep",
+          "purity_pct": 93.7
+        },
+        {
+          "type": 370,
+          "capture24_windows": 17489,
+          "top_activity": "sleep",
+          "purity_pct": 93.5
+        },
+        {
+          "type": 999,
+          "capture24_windows": 11196,
+          "top_activity": "sleep",
+          "purity_pct": 93.0
+        },
+        {
+          "type": 31,
+          "capture24_windows": 8176,
+          "top_activity": "sleep",
+          "purity_pct": 92.2
+        },
+        {
+          "type": 246,
+          "capture24_windows": 14423,
+          "top_activity": "sleep",
+          "purity_pct": 92.1
+        },
+        {
+          "type": 378,
+          "capture24_windows": 13390,
+          "top_activity": "sleep",
+          "purity_pct": 92.1
+        },
+        {
+          "type": 993,
+          "capture24_windows": 16189,
+          "top_activity": "sleep",
+          "purity_pct": 92.0
+        },
+        {
+          "type": 796,
+          "capture24_windows": 10806,
+          "top_activity": "sleep",
+          "purity_pct": 90.8
+        },
+        {
+          "type": 270,
+          "capture24_windows": 9317,
+          "top_activity": "sleep",
+          "purity_pct": 90.5
+        },
+        {
+          "type": 410,
+          "capture24_windows": 7617,
+          "top_activity": "sleep",
+          "purity_pct": 90.5
+        },
+        {
+          "type": 673,
+          "capture24_windows": 12455,
+          "top_activity": "sleep",
+          "purity_pct": 90.1
+        },
+        {
+          "type": 318,
+          "capture24_windows": 7311,
+          "top_activity": "sitting",
+          "purity_pct": 89.1
+        },
+        {
+          "type": 3,
+          "capture24_windows": 9331,
+          "top_activity": "sleep",
+          "purity_pct": 88.1
+        },
+        {
+          "type": 2,
+          "capture24_windows": 12786,
+          "top_activity": "sleep",
+          "purity_pct": 88.0
+        },
+        {
+          "type": 470,
+          "capture24_windows": 11317,
+          "top_activity": "sleep",
+          "purity_pct": 87.6
+        },
+        {
+          "type": 606,
+          "capture24_windows": 11938,
+          "top_activity": "sleep",
+          "purity_pct": 87.6
+        },
+        {
+          "type": 638,
+          "capture24_windows": 12811,
+          "top_activity": "sleep",
+          "purity_pct": 87.4
+        },
+        {
+          "type": 894,
+          "capture24_windows": 10079,
+          "top_activity": "sleep",
+          "purity_pct": 87.3
+        },
+        {
+          "type": 101,
+          "capture24_windows": 10863,
+          "top_activity": "sleep",
+          "purity_pct": 86.9
+        },
+        {
+          "type": 909,
+          "capture24_windows": 4018,
+          "top_activity": "bicycling",
+          "purity_pct": 86.8
+        },
+        {
+          "type": 60,
+          "capture24_windows": 11344,
+          "top_activity": "sleep",
+          "purity_pct": 86.5
+        },
+        {
+          "type": 177,
+          "capture24_windows": 3587,
+          "top_activity": "sitting",
+          "purity_pct": 86.4
+        },
+        {
+          "type": 561,
+          "capture24_windows": 3394,
+          "top_activity": "sitting",
+          "purity_pct": 86.3
+        },
+        {
+          "type": 147,
+          "capture24_windows": 12154,
+          "top_activity": "sleep",
+          "purity_pct": 85.3
+        },
+        {
+          "type": 785,
+          "capture24_windows": 4222,
+          "top_activity": "sleep",
+          "purity_pct": 85.3
+        },
+        {
+          "type": 17,
+          "capture24_windows": 5530,
+          "top_activity": "sitting",
+          "purity_pct": 85.0
+        },
+        {
+          "type": 965,
+          "capture24_windows": 11408,
+          "top_activity": "sleep",
+          "purity_pct": 85.0
+        },
+        {
+          "type": 199,
+          "capture24_windows": 3190,
+          "top_activity": "sitting",
+          "purity_pct": 83.4
+        },
+        {
+          "type": 112,
+          "capture24_windows": 9941,
+          "top_activity": "sitting",
+          "purity_pct": 83.1
+        },
+        {
+          "type": 970,
+          "capture24_windows": 1522,
+          "top_activity": "sleep",
+          "purity_pct": 82.7
+        },
+        {
+          "type": 16,
+          "capture24_windows": 9431,
+          "top_activity": "sleep",
+          "purity_pct": 81.8
+        },
+        {
+          "type": 511,
+          "capture24_windows": 5186,
+          "top_activity": "sitting",
+          "purity_pct": 81.5
+        },
+        {
+          "type": 852,
+          "capture24_windows": 3444,
+          "top_activity": "sitting",
+          "purity_pct": 81.5
+        },
+        {
+          "type": 229,
+          "capture24_windows": 9478,
+          "top_activity": "sleep",
+          "purity_pct": 81.4
+        },
+        {
+          "type": 398,
+          "capture24_windows": 1504,
+          "top_activity": "sitting",
+          "purity_pct": 81.1
+        },
+        {
+          "type": 773,
+          "capture24_windows": 2420,
+          "top_activity": "sitting",
+          "purity_pct": 80.9
+        },
+        {
+          "type": 591,
+          "capture24_windows": 6218,
+          "top_activity": "sitting",
+          "purity_pct": 80.8
+        },
+        {
+          "type": 295,
+          "capture24_windows": 3544,
+          "top_activity": "sitting",
+          "purity_pct": 80.6
+        },
+        {
+          "type": 149,
+          "capture24_windows": 7001,
+          "top_activity": "sitting",
+          "purity_pct": 80.3
+        },
+        {
+          "type": 269,
+          "capture24_windows": 6770,
+          "top_activity": "sitting",
+          "purity_pct": 80.2
+        },
+        {
+          "type": 892,
+          "capture24_windows": 9048,
+          "top_activity": "sitting",
+          "purity_pct": 80.1
+        },
+        {
+          "type": 11,
+          "capture24_windows": 3991,
+          "top_activity": "sitting",
+          "purity_pct": 80.0
+        },
+        {
+          "type": 443,
+          "capture24_windows": 3546,
+          "top_activity": "sitting",
+          "purity_pct": 79.7
+        },
+        {
+          "type": 463,
+          "capture24_windows": 2580,
+          "top_activity": "sleep",
+          "purity_pct": 79.5
+        },
+        {
+          "type": 968,
+          "capture24_windows": 3703,
+          "top_activity": "sitting",
+          "purity_pct": 79.2
+        },
+        {
+          "type": 834,
+          "capture24_windows": 4209,
+          "top_activity": "sitting",
+          "purity_pct": 79.1
+        },
+        {
+          "type": 155,
+          "capture24_windows": 7450,
+          "top_activity": "sitting",
+          "purity_pct": 78.7
+        },
+        {
+          "type": 741,
+          "capture24_windows": 1839,
+          "top_activity": "sitting",
+          "purity_pct": 78.7
+        },
+        {
+          "type": 737,
+          "capture24_windows": 6130,
+          "top_activity": "sleep",
+          "purity_pct": 78.6
+        },
+        {
+          "type": 421,
+          "capture24_windows": 4055,
+          "top_activity": "sitting",
+          "purity_pct": 78.5
+        },
+        {
+          "type": 498,
+          "capture24_windows": 2717,
+          "top_activity": "sitting",
+          "purity_pct": 78.4
+        },
+        {
+          "type": 539,
+          "capture24_windows": 2796,
+          "top_activity": "sitting",
+          "purity_pct": 77.7
+        },
+        {
+          "type": 844,
+          "capture24_windows": 2029,
+          "top_activity": "sitting",
+          "purity_pct": 77.5
+        },
+        {
+          "type": 695,
+          "capture24_windows": 7435,
+          "top_activity": "sitting",
+          "purity_pct": 77.1
+        },
+        {
+          "type": 250,
+          "capture24_windows": 7553,
+          "top_activity": "sitting",
+          "purity_pct": 77.0
+        },
+        {
+          "type": 543,
+          "capture24_windows": 2529,
+          "top_activity": "sitting",
+          "purity_pct": 77.0
+        },
+        {
+          "type": 991,
+          "capture24_windows": 1838,
+          "top_activity": "sitting",
+          "purity_pct": 76.6
+        },
+        {
+          "type": 516,
+          "capture24_windows": 6799,
+          "top_activity": "sitting",
+          "purity_pct": 76.3
+        },
+        {
+          "type": 553,
+          "capture24_windows": 7770,
+          "top_activity": "sleep",
+          "purity_pct": 76.3
+        },
+        {
+          "type": 171,
+          "capture24_windows": 2771,
+          "top_activity": "sitting",
+          "purity_pct": 76.2
+        },
+        {
+          "type": 837,
+          "capture24_windows": 3833,
+          "top_activity": "sitting",
+          "purity_pct": 75.9
+        },
+        {
+          "type": 117,
+          "capture24_windows": 2858,
+          "top_activity": "sitting",
+          "purity_pct": 75.6
+        },
+        {
+          "type": 984,
+          "capture24_windows": 4703,
+          "top_activity": "sitting",
+          "purity_pct": 75.6
+        },
+        {
+          "type": 188,
+          "capture24_windows": 4120,
+          "top_activity": "sitting",
+          "purity_pct": 75.5
+        },
+        {
+          "type": 711,
+          "capture24_windows": 2214,
+          "top_activity": "sitting",
+          "purity_pct": 75.4
+        },
+        {
+          "type": 963,
+          "capture24_windows": 2659,
+          "top_activity": "sitting",
+          "purity_pct": 74.8
+        },
+        {
+          "type": 669,
+          "capture24_windows": 2223,
+          "top_activity": "sitting",
+          "purity_pct": 74.7
+        },
+        {
+          "type": 70,
+          "capture24_windows": 3183,
+          "top_activity": "sitting",
+          "purity_pct": 74.6
+        },
+        {
+          "type": 78,
+          "capture24_windows": 2701,
+          "top_activity": "sitting",
+          "purity_pct": 74.3
+        },
+        {
+          "type": 116,
+          "capture24_windows": 3952,
+          "top_activity": "sitting",
+          "purity_pct": 73.9
+        },
+        {
+          "type": 142,
+          "capture24_windows": 4430,
+          "top_activity": "sitting",
+          "purity_pct": 73.8
+        },
+        {
+          "type": 480,
+          "capture24_windows": 2204,
+          "top_activity": "sitting",
+          "purity_pct": 73.7
+        },
+        {
+          "type": 545,
+          "capture24_windows": 2871,
+          "top_activity": "sitting",
+          "purity_pct": 73.7
+        },
+        {
+          "type": 602,
+          "capture24_windows": 2763,
+          "top_activity": "sitting",
+          "purity_pct": 73.7
+        },
+        {
+          "type": 289,
+          "capture24_windows": 2067,
+          "top_activity": "sitting",
+          "purity_pct": 73.6
+        },
+        {
+          "type": 455,
+          "capture24_windows": 3264,
+          "top_activity": "vehicle",
+          "purity_pct": 73.6
+        },
+        {
+          "type": 280,
+          "capture24_windows": 4097,
+          "top_activity": "sitting",
+          "purity_pct": 73.4
+        },
+        {
+          "type": 519,
+          "capture24_windows": 2979,
+          "top_activity": "sitting",
+          "purity_pct": 73.2
+        },
+        {
+          "type": 249,
+          "capture24_windows": 4117,
+          "top_activity": "sitting",
+          "purity_pct": 73.1
+        },
+        {
+          "type": 496,
+          "capture24_windows": 2793,
+          "top_activity": "sitting",
+          "purity_pct": 73.0
+        },
+        {
+          "type": 945,
+          "capture24_windows": 3673,
+          "top_activity": "sitting",
+          "purity_pct": 73.0
+        },
+        {
+          "type": 308,
+          "capture24_windows": 4210,
+          "top_activity": "sitting",
+          "purity_pct": 72.9
+        },
+        {
+          "type": 464,
+          "capture24_windows": 2442,
+          "top_activity": "sitting",
+          "purity_pct": 72.5
+        },
+        {
+          "type": 191,
+          "capture24_windows": 2601,
+          "top_activity": "sitting",
+          "purity_pct": 72.3
+        },
+        {
+          "type": 350,
+          "capture24_windows": 2376,
+          "top_activity": "sitting",
+          "purity_pct": 72.3
+        },
+        {
+          "type": 577,
+          "capture24_windows": 2227,
+          "top_activity": "sitting",
+          "purity_pct": 72.1
+        },
+        {
+          "type": 63,
+          "capture24_windows": 3173,
+          "top_activity": "sitting",
+          "purity_pct": 72.0
+        },
+        {
+          "type": 162,
+          "capture24_windows": 3378,
+          "top_activity": "sitting",
+          "purity_pct": 72.0
+        },
+        {
+          "type": 197,
+          "capture24_windows": 5300,
+          "top_activity": "sitting",
+          "purity_pct": 72.0
+        },
+        {
+          "type": 864,
+          "capture24_windows": 3230,
+          "top_activity": "sitting",
+          "purity_pct": 72.0
+        },
+        {
+          "type": 390,
+          "capture24_windows": 1720,
+          "top_activity": "sitting",
+          "purity_pct": 71.9
+        },
+        {
+          "type": 640,
+          "capture24_windows": 2990,
+          "top_activity": "sitting",
+          "purity_pct": 71.8
+        },
+        {
+          "type": 701,
+          "capture24_windows": 3763,
+          "top_activity": "sitting",
+          "purity_pct": 71.7
+        },
+        {
+          "type": 231,
+          "capture24_windows": 3441,
+          "top_activity": "sitting",
+          "purity_pct": 71.5
+        },
+        {
+          "type": 58,
+          "capture24_windows": 2947,
+          "top_activity": "sitting",
+          "purity_pct": 71.4
+        },
+        {
+          "type": 659,
+          "capture24_windows": 4468,
+          "top_activity": "sitting",
+          "purity_pct": 71.4
+        },
+        {
+          "type": 106,
+          "capture24_windows": 5859,
+          "top_activity": "sitting",
+          "purity_pct": 71.3
+        },
+        {
+          "type": 530,
+          "capture24_windows": 4065,
+          "top_activity": "vehicle",
+          "purity_pct": 71.0
+        },
+        {
+          "type": 949,
+          "capture24_windows": 8111,
+          "top_activity": "sitting",
+          "purity_pct": 71.0
+        },
+        {
+          "type": 856,
+          "capture24_windows": 1668,
+          "top_activity": "sitting",
+          "purity_pct": 70.7
+        },
+        {
+          "type": 895,
+          "capture24_windows": 8148,
+          "top_activity": "sitting",
+          "purity_pct": 70.7
+        },
+        {
+          "type": 154,
+          "capture24_windows": 3706,
+          "top_activity": "sitting",
+          "purity_pct": 70.5
+        },
+        {
+          "type": 734,
+          "capture24_windows": 3011,
+          "top_activity": "sitting",
+          "purity_pct": 70.5
+        },
+        {
+          "type": 817,
+          "capture24_windows": 5668,
+          "top_activity": "sitting",
+          "purity_pct": 70.5
+        },
+        {
+          "type": 403,
+          "capture24_windows": 3107,
+          "top_activity": "sitting",
+          "purity_pct": 70.4
+        },
+        {
+          "type": 904,
+          "capture24_windows": 2164,
+          "top_activity": "sitting",
+          "purity_pct": 70.2
+        },
+        {
+          "type": 840,
+          "capture24_windows": 4418,
+          "top_activity": "sitting",
+          "purity_pct": 70.1
+        },
+        {
+          "type": 936,
+          "capture24_windows": 2179,
+          "top_activity": "sitting",
+          "purity_pct": 69.8
+        },
+        {
+          "type": 383,
+          "capture24_windows": 3017,
+          "top_activity": "sitting",
+          "purity_pct": 69.1
+        },
+        {
+          "type": 510,
+          "capture24_windows": 7171,
+          "top_activity": "sitting",
+          "purity_pct": 68.8
+        },
+        {
+          "type": 347,
+          "capture24_windows": 5518,
+          "top_activity": "sitting",
+          "purity_pct": 68.6
+        },
+        {
+          "type": 598,
+          "capture24_windows": 2337,
+          "top_activity": "sitting",
+          "purity_pct": 68.6
+        },
+        {
+          "type": 762,
+          "capture24_windows": 4169,
+          "top_activity": "sitting",
+          "purity_pct": 68.5
+        },
+        {
+          "type": 164,
+          "capture24_windows": 3405,
+          "top_activity": "sitting",
+          "purity_pct": 68.4
+        },
+        {
+          "type": 597,
+          "capture24_windows": 3964,
+          "top_activity": "sitting",
+          "purity_pct": 68.4
+        },
+        {
+          "type": 210,
+          "capture24_windows": 4186,
+          "top_activity": "sitting",
+          "purity_pct": 68.3
+        },
+        {
+          "type": 330,
+          "capture24_windows": 3284,
+          "top_activity": "sitting",
+          "purity_pct": 68.3
+        },
+        {
+          "type": 633,
+          "capture24_windows": 1547,
+          "top_activity": "sitting",
+          "purity_pct": 68.0
+        },
+        {
+          "type": 913,
+          "capture24_windows": 3346,
+          "top_activity": "sitting",
+          "purity_pct": 67.9
+        },
+        {
+          "type": 139,
+          "capture24_windows": 2500,
+          "top_activity": "sitting",
+          "purity_pct": 67.8
+        },
+        {
+          "type": 569,
+          "capture24_windows": 4370,
+          "top_activity": "sitting",
+          "purity_pct": 67.8
+        },
+        {
+          "type": 508,
+          "capture24_windows": 2336,
+          "top_activity": "sitting",
+          "purity_pct": 67.7
+        },
+        {
+          "type": 36,
+          "capture24_windows": 2002,
+          "top_activity": "sitting",
+          "purity_pct": 67.3
+        },
+        {
+          "type": 145,
+          "capture24_windows": 2089,
+          "top_activity": "sitting",
+          "purity_pct": 67.1
+        },
+        {
+          "type": 474,
+          "capture24_windows": 4679,
+          "top_activity": "sitting",
+          "purity_pct": 67.0
+        },
+        {
+          "type": 39,
+          "capture24_windows": 5196,
+          "top_activity": "sitting",
+          "purity_pct": 66.7
+        },
+        {
+          "type": 192,
+          "capture24_windows": 2658,
+          "top_activity": "sitting",
+          "purity_pct": 66.7
+        },
+        {
+          "type": 668,
+          "capture24_windows": 3901,
+          "top_activity": "sitting",
+          "purity_pct": 66.6
+        },
+        {
+          "type": 215,
+          "capture24_windows": 4302,
+          "top_activity": "sitting",
+          "purity_pct": 66.4
+        },
+        {
+          "type": 731,
+          "capture24_windows": 5693,
+          "top_activity": "sitting",
+          "purity_pct": 66.4
+        },
+        {
+          "type": 966,
+          "capture24_windows": 4944,
+          "top_activity": "sitting",
+          "purity_pct": 66.2
+        },
+        {
+          "type": 666,
+          "capture24_windows": 3557,
+          "top_activity": "sitting",
+          "purity_pct": 65.9
+        },
+        {
+          "type": 928,
+          "capture24_windows": 3379,
+          "top_activity": "sitting",
+          "purity_pct": 65.7
+        },
+        {
+          "type": 529,
+          "capture24_windows": 3313,
+          "top_activity": "sitting",
+          "purity_pct": 65.5
+        },
+        {
+          "type": 325,
+          "capture24_windows": 1180,
+          "top_activity": "sports",
+          "purity_pct": 65.4
+        },
+        {
+          "type": 643,
+          "capture24_windows": 9145,
+          "top_activity": "sleep",
+          "purity_pct": 65.3
+        },
+        {
+          "type": 942,
+          "capture24_windows": 7342,
+          "top_activity": "sitting",
+          "purity_pct": 65.1
+        },
+        {
+          "type": 391,
+          "capture24_windows": 4643,
+          "top_activity": "sitting",
+          "purity_pct": 65.0
+        },
+        {
+          "type": 73,
+          "capture24_windows": 2362,
+          "top_activity": "sitting",
+          "purity_pct": 64.7
+        },
+        {
+          "type": 570,
+          "capture24_windows": 3345,
+          "top_activity": "sitting",
+          "purity_pct": 64.4
+        },
+        {
+          "type": 168,
+          "capture24_windows": 2830,
+          "top_activity": "sitting",
+          "purity_pct": 64.3
+        },
+        {
+          "type": 417,
+          "capture24_windows": 2988,
+          "top_activity": "vehicle",
+          "purity_pct": 63.0
+        },
+        {
+          "type": 684,
+          "capture24_windows": 4401,
+          "top_activity": "sitting",
+          "purity_pct": 63.0
+        },
+        {
+          "type": 770,
+          "capture24_windows": 4206,
+          "top_activity": "sitting",
+          "purity_pct": 61.9
+        },
+        {
+          "type": 859,
+          "capture24_windows": 3963,
+          "top_activity": "sitting",
+          "purity_pct": 61.9
+        },
+        {
+          "type": 409,
+          "capture24_windows": 4926,
+          "top_activity": "sitting",
+          "purity_pct": 61.8
+        },
+        {
+          "type": 75,
+          "capture24_windows": 3546,
+          "top_activity": "bicycling",
+          "purity_pct": 60.3
+        },
+        {
+          "type": 309,
+          "capture24_windows": 3919,
+          "top_activity": "walking",
+          "purity_pct": 60.2
+        },
+        {
+          "type": 98,
+          "capture24_windows": 4520,
+          "top_activity": "sitting",
+          "purity_pct": 60.0
+        },
+        {
+          "type": 1,
+          "capture24_windows": 5028,
+          "top_activity": "sitting",
+          "purity_pct": 59.4
+        },
+        {
+          "type": 195,
+          "capture24_windows": 3570,
+          "top_activity": "sitting",
+          "purity_pct": 59.4
+        },
+        {
+          "type": 395,
+          "capture24_windows": 2371,
+          "top_activity": "walking",
+          "purity_pct": 58.8
+        },
+        {
+          "type": 218,
+          "capture24_windows": 4900,
+          "top_activity": "mixed-activity",
+          "purity_pct": 58.3
+        },
+        {
+          "type": 627,
+          "capture24_windows": 3391,
+          "top_activity": "sitting",
+          "purity_pct": 58.2
+        },
+        {
+          "type": 369,
+          "capture24_windows": 2535,
+          "top_activity": "mixed-activity",
+          "purity_pct": 57.8
+        },
+        {
+          "type": 431,
+          "capture24_windows": 5061,
+          "top_activity": "sitting",
+          "purity_pct": 57.3
+        },
+        {
+          "type": 501,
+          "capture24_windows": 1519,
+          "top_activity": "household-chores",
+          "purity_pct": 57.1
+        },
+        {
+          "type": 635,
+          "capture24_windows": 4156,
+          "top_activity": "sitting",
+          "purity_pct": 57.1
+        },
+        {
+          "type": 71,
+          "capture24_windows": 4225,
+          "top_activity": "sitting",
+          "purity_pct": 57.0
+        },
+        {
+          "type": 814,
+          "capture24_windows": 3429,
+          "top_activity": "sleep",
+          "purity_pct": 56.9
+        },
+        {
+          "type": 870,
+          "capture24_windows": 3363,
+          "top_activity": "sitting",
+          "purity_pct": 56.9
+        },
+        {
+          "type": 186,
+          "capture24_windows": 4498,
+          "top_activity": "sitting",
+          "purity_pct": 56.7
+        },
+        {
+          "type": 882,
+          "capture24_windows": 3545,
+          "top_activity": "sitting",
+          "purity_pct": 56.1
+        },
+        {
+          "type": 836,
+          "capture24_windows": 5049,
+          "top_activity": "sitting",
+          "purity_pct": 56.0
+        },
+        {
+          "type": 394,
+          "capture24_windows": 5695,
+          "top_activity": "sitting",
+          "purity_pct": 55.9
+        },
+        {
+          "type": 265,
+          "capture24_windows": 4934,
+          "top_activity": "sitting",
+          "purity_pct": 55.6
+        },
+        {
+          "type": 768,
+          "capture24_windows": 5159,
+          "top_activity": "sitting",
+          "purity_pct": 55.5
+        },
+        {
+          "type": 435,
+          "capture24_windows": 3718,
+          "top_activity": "sitting",
+          "purity_pct": 55.0
+        },
+        {
+          "type": 334,
+          "capture24_windows": 9207,
+          "top_activity": "sleep",
+          "purity_pct": 54.3
+        },
+        {
+          "type": 26,
+          "capture24_windows": 3563,
+          "top_activity": "sitting",
+          "purity_pct": 54.1
+        },
+        {
+          "type": 319,
+          "capture24_windows": 3958,
+          "top_activity": "sitting",
+          "purity_pct": 54.0
+        },
+        {
+          "type": 833,
+          "capture24_windows": 2356,
+          "top_activity": "walking",
+          "purity_pct": 53.8
+        },
+        {
+          "type": 987,
+          "capture24_windows": 3678,
+          "top_activity": "walking",
+          "purity_pct": 53.6
+        },
+        {
+          "type": 180,
+          "capture24_windows": 2322,
+          "top_activity": "sitting",
+          "purity_pct": 53.4
+        },
+        {
+          "type": 487,
+          "capture24_windows": 7542,
+          "top_activity": "sleep",
+          "purity_pct": 53.3
+        },
+        {
+          "type": 808,
+          "capture24_windows": 844,
+          "top_activity": "household-chores",
+          "purity_pct": 53.3
+        },
+        {
+          "type": 468,
+          "capture24_windows": 5990,
+          "top_activity": "sitting",
+          "purity_pct": 52.1
+        },
+        {
+          "type": 771,
+          "capture24_windows": 4118,
+          "top_activity": "walking",
+          "purity_pct": 52.1
+        },
+        {
+          "type": 38,
+          "capture24_windows": 4980,
+          "top_activity": "sitting",
+          "purity_pct": 51.7
+        },
+        {
+          "type": 8,
+          "capture24_windows": 3198,
+          "top_activity": "sitting",
+          "purity_pct": 51.5
+        },
+        {
+          "type": 59,
+          "capture24_windows": 3189,
+          "top_activity": "walking",
+          "purity_pct": 51.5
+        },
+        {
+          "type": 655,
+          "capture24_windows": 3602,
+          "top_activity": "mixed-activity",
+          "purity_pct": 51.4
+        },
+        {
+          "type": 96,
+          "capture24_windows": 3524,
+          "top_activity": "walking",
+          "purity_pct": 51.3
+        },
+        {
+          "type": 630,
+          "capture24_windows": 3206,
+          "top_activity": "bicycling",
+          "purity_pct": 51.2
+        },
+        {
+          "type": 657,
+          "capture24_windows": 3780,
+          "top_activity": "mixed-activity",
+          "purity_pct": 50.4
+        },
+        {
+          "type": 702,
+          "capture24_windows": 4071,
+          "top_activity": "sitting",
+          "purity_pct": 50.3
+        },
+        {
+          "type": 172,
+          "capture24_windows": 4020,
+          "top_activity": "vehicle",
+          "purity_pct": 49.8
+        },
+        {
+          "type": 346,
+          "capture24_windows": 4542,
+          "top_activity": "sitting",
+          "purity_pct": 49.6
+        },
+        {
+          "type": 766,
+          "capture24_windows": 3653,
+          "top_activity": "sitting",
+          "purity_pct": 49.4
+        },
+        {
+          "type": 884,
+          "capture24_windows": 3716,
+          "top_activity": "mixed-activity",
+          "purity_pct": 49.4
+        },
+        {
+          "type": 855,
+          "capture24_windows": 4023,
+          "top_activity": "sitting",
+          "purity_pct": 48.9
+        },
+        {
+          "type": 847,
+          "capture24_windows": 5486,
+          "top_activity": "sleep",
+          "purity_pct": 48.7
+        },
+        {
+          "type": 492,
+          "capture24_windows": 4197,
+          "top_activity": "sitting",
+          "purity_pct": 47.0
+        },
+        {
+          "type": 878,
+          "capture24_windows": 3650,
+          "top_activity": "sitting",
+          "purity_pct": 46.3
+        },
+        {
+          "type": 624,
+          "capture24_windows": 4092,
+          "top_activity": "sitting",
+          "purity_pct": 46.2
+        },
+        {
+          "type": 781,
+          "capture24_windows": 5153,
+          "top_activity": "sitting",
+          "purity_pct": 44.9
+        },
+        {
+          "type": 393,
+          "capture24_windows": 3339,
+          "top_activity": "sitting",
+          "purity_pct": 44.7
+        },
+        {
+          "type": 819,
+          "capture24_windows": 3173,
+          "top_activity": "mixed-activity",
+          "purity_pct": 44.4
+        },
+        {
+          "type": 124,
+          "capture24_windows": 4320,
+          "top_activity": "sitting",
+          "purity_pct": 43.6
+        },
+        {
+          "type": 251,
+          "capture24_windows": 3735,
+          "top_activity": "sitting",
+          "purity_pct": 43.1
+        },
+        {
+          "type": 791,
+          "capture24_windows": 5124,
+          "top_activity": "sitting",
+          "purity_pct": 42.9
+        },
+        {
+          "type": 644,
+          "capture24_windows": 7650,
+          "top_activity": "household-chores",
+          "purity_pct": 42.6
+        },
+        {
+          "type": 618,
+          "capture24_windows": 2905,
+          "top_activity": "household-chores",
+          "purity_pct": 42.5
+        },
+        {
+          "type": 34,
+          "capture24_windows": 5021,
+          "top_activity": "walking",
+          "purity_pct": 42.4
+        },
+        {
+          "type": 725,
+          "capture24_windows": 4250,
+          "top_activity": "walking",
+          "purity_pct": 40.7
+        },
+        {
+          "type": 505,
+          "capture24_windows": 2902,
+          "top_activity": "sitting",
+          "purity_pct": 40.3
+        },
+        {
+          "type": 531,
+          "capture24_windows": 2757,
+          "top_activity": "sitting",
+          "purity_pct": 40.2
+        },
+        {
+          "type": 865,
+          "capture24_windows": 4677,
+          "top_activity": "sitting",
+          "purity_pct": 39.9
+        },
+        {
+          "type": 340,
+          "capture24_windows": 5593,
+          "top_activity": "sitting",
+          "purity_pct": 39.5
+        },
+        {
+          "type": 997,
+          "capture24_windows": 1002,
+          "top_activity": "sitting",
+          "purity_pct": 39.4
+        },
+        {
+          "type": 559,
+          "capture24_windows": 2554,
+          "top_activity": "sitting",
+          "purity_pct": 39.3
+        },
+        {
+          "type": 226,
+          "capture24_windows": 3571,
+          "top_activity": "walking",
+          "purity_pct": 38.2
+        },
+        {
+          "type": 22,
+          "capture24_windows": 6124,
+          "top_activity": "sitting",
+          "purity_pct": 37.9
+        },
+        {
+          "type": 672,
+          "capture24_windows": 6932,
+          "top_activity": "sitting",
+          "purity_pct": 37.9
+        },
+        {
+          "type": 858,
+          "capture24_windows": 2750,
+          "top_activity": "sitting",
+          "purity_pct": 37.5
+        },
+        {
+          "type": 311,
+          "capture24_windows": 6006,
+          "top_activity": "sitting",
+          "purity_pct": 37.3
+        },
+        {
+          "type": 166,
+          "capture24_windows": 5950,
+          "top_activity": "household-chores",
+          "purity_pct": 37.0
+        },
+        {
+          "type": 282,
+          "capture24_windows": 6621,
+          "top_activity": "household-chores",
+          "purity_pct": 36.6
+        },
+        {
+          "type": 397,
+          "capture24_windows": 8426,
+          "top_activity": "household-chores",
+          "purity_pct": 36.3
+        },
+        {
+          "type": 135,
+          "capture24_windows": 6740,
+          "top_activity": "household-chores",
+          "purity_pct": 36.1
+        },
+        {
+          "type": 163,
+          "capture24_windows": 2515,
+          "top_activity": "sitting",
+          "purity_pct": 36.1
+        },
+        {
+          "type": 538,
+          "capture24_windows": 3777,
+          "top_activity": "sitting",
+          "purity_pct": 34.6
+        },
+        {
+          "type": 572,
+          "capture24_windows": 6753,
+          "top_activity": "household-chores",
+          "purity_pct": 34.6
+        },
+        {
+          "type": 365,
+          "capture24_windows": 4512,
+          "top_activity": "sitting",
+          "purity_pct": 34.5
+        },
+        {
+          "type": 784,
+          "capture24_windows": 3251,
+          "top_activity": "sitting",
+          "purity_pct": 34.5
+        },
+        {
+          "type": 601,
+          "capture24_windows": 4391,
+          "top_activity": "sitting",
+          "purity_pct": 34.4
+        },
+        {
+          "type": 32,
+          "capture24_windows": 6623,
+          "top_activity": "household-chores",
+          "purity_pct": 34.3
+        },
+        {
+          "type": 939,
+          "capture24_windows": 5759,
+          "top_activity": "sitting",
+          "purity_pct": 34.3
+        },
+        {
+          "type": 47,
+          "capture24_windows": 7323,
+          "top_activity": "sitting",
+          "purity_pct": 34.1
+        },
+        {
+          "type": 681,
+          "capture24_windows": 5647,
+          "top_activity": "household-chores",
+          "purity_pct": 33.5
+        },
+        {
+          "type": 820,
+          "capture24_windows": 6154,
+          "top_activity": "sitting",
+          "purity_pct": 33.5
+        },
+        {
+          "type": 634,
+          "capture24_windows": 3302,
+          "top_activity": "walking",
+          "purity_pct": 33.3
+        },
+        {
+          "type": 331,
+          "capture24_windows": 7037,
+          "top_activity": "household-chores",
+          "purity_pct": 32.4
+        },
+        {
+          "type": 900,
+          "capture24_windows": 3595,
+          "top_activity": "walking",
+          "purity_pct": 31.8
+        },
+        {
+          "type": 881,
+          "capture24_windows": 4822,
+          "top_activity": "walking",
+          "purity_pct": 31.7
+        },
+        {
+          "type": 648,
+          "capture24_windows": 3309,
+          "top_activity": "household-chores",
+          "purity_pct": 31.5
+        },
+        {
+          "type": 947,
+          "capture24_windows": 2995,
+          "top_activity": "walking",
+          "purity_pct": 31.5
+        },
+        {
+          "type": 48,
+          "capture24_windows": 6662,
+          "top_activity": "sitting",
+          "purity_pct": 29.4
+        },
+        {
+          "type": 105,
+          "capture24_windows": 6506,
+          "top_activity": "sitting",
+          "purity_pct": 29.3
+        },
+        {
+          "type": 99,
+          "capture24_windows": 4845,
+          "top_activity": "sitting",
+          "purity_pct": 29.2
+        },
+        {
+          "type": 723,
+          "capture24_windows": 7852,
+          "top_activity": "household-chores",
+          "purity_pct": 28.8
+        },
+        {
+          "type": 688,
+          "capture24_windows": 7694,
+          "top_activity": "household-chores",
+          "purity_pct": 28.7
+        },
+        {
+          "type": 694,
+          "capture24_windows": 6193,
+          "top_activity": "household-chores",
+          "purity_pct": 28.5
+        },
+        {
+          "type": 509,
+          "capture24_windows": 5978,
+          "top_activity": "household-chores",
+          "purity_pct": 26.5
+        },
+        {
+          "type": 735,
+          "capture24_windows": 4173,
+          "top_activity": "walking",
+          "purity_pct": 26.3
+        },
+        {
+          "type": 641,
+          "capture24_windows": 1487,
+          "top_activity": "walking",
+          "purity_pct": 25.8
+        },
+        {
+          "type": 607,
+          "capture24_windows": 5210,
+          "top_activity": "household-chores",
+          "purity_pct": 25.6
+        },
+        {
+          "type": 811,
+          "capture24_windows": 3301,
+          "top_activity": "sitting",
+          "purity_pct": 25.2
+        },
+        {
+          "type": 372,
+          "capture24_windows": 5945,
+          "top_activity": "walking",
+          "purity_pct": 24.9
+        }
+      ]
+    }
+  }
+}

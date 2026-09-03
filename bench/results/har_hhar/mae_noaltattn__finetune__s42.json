@@ -1,0 +1,44 @@
+{
+  "task": "har_hhar",
+  "encoder": "mae_noaltattn",
+  "protocol": "finetune",
+  "seed": 42,
+  "metrics": {
+    "macro_f1": 0.598924370906208,
+    "bal_acc": 0.6055986821664728,
+    "acc": 0.5963923337091319,
+    "val_loss": 1.197256
+  },
+  "primary_metric": "macro_f1",
+  "eval_split": "val",
+  "run": "bench_har_hhar__mae_noaltattn__finetune__s42",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 200,
+  "selection": {
+    "split": "val",
+    "monitor": "val_loss",
+    "mode": "min",
+    "note": "same convention as Experiments_table \u00a73 (metrics read at the min-val-loss checkpoint)"
+  },
+  "job_ids": {
+    "train": 9731626,
+    "score": "9731626"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.har",
+    "date": "2026-08-17T22:45:15-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_val_samples": 2661,
+      "n_classes_seen": 6,
+      "n_classes_head": 6,
+      "n_val_batches": 11,
+      "logged_macro_f1_at_ckpt": 0.598437,
+      "train_end": "early stopping at step=4200 epoch=103"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

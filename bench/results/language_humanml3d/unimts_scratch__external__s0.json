@@ -1,0 +1,31 @@
+{
+  "task": "language_humanml3d",
+  "encoder": "unimts_scratch",
+  "protocol": "external",
+  "seed": 0,
+  "metrics": {
+    "r1_g100": 13.05,
+    "r1_i2t_g100": 24.4,
+    "r1_t2i_g100": 1.7,
+    "mrr_i2t_g100": 39.1,
+    "mrr_t2i_g100": 6.7
+  },
+  "primary_metric": "r1_g100",
+  "eval_split": "val",
+  "run": null,
+  "checkpoint": null,
+  "checkpoint_step": null,
+  "selection": {
+    "split": "n/a",
+    "monitor": "n/a"
+  },
+  "job_ids": {},
+  "provenance": {
+    "source": "harvest:analysis/retrieval_eval/humanml3d__unimts_scratch_jointmask_wrist.json (VAL split)",
+    "date": "2026-08-16T17:13:19-05:00",
+    "git": "1b95aa3-dirty"
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

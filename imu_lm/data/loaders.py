@@ -94,6 +94,7 @@ class WindowDataset(Dataset):
         self._spec_enabled = bool((cfg_get(cfg, ["spectrogram"], {}) or {}).get("enabled", False))
 
         # Build load columns list once
+        self._drop_label_values = list(cfg_get(cfg, ["data", "drop_label_values"], []) or [])
         self._load_cols = list(self._sensor_cols) + [self._label_col]
         if self._time_col:
             self._load_cols.append(self._time_col)
@@ -140,6 +141,12 @@ class WindowDataset(Dataset):
                 df = df.sort_values(self._time_col).reset_index(drop=True)
             if self._drop_na:
                 df = df.dropna(subset=self._sensor_cols)
+            # data.drop_label_values: label ids/strings to treat as "no activity" -> those rows are
+            # dropped before windowing, so a dominant null class (UT-Watch "none" = 86 % of rows,
+            # PrISM "rest_inactive") cannot make every encoder score the same degenerate macro-F1.
+            if self._drop_label_values:
+                keep = ~df[self._label_col].isin(self._drop_label_values)
+                df = df[keep].reset_index(drop=True)
             X = df[self._sensor_cols].to_numpy(dtype=np.float32)
             y = df[self._label_col].to_numpy()
             t = df[self._time_col].to_numpy() if self._time_col else None
@@ -168,6 +175,11 @@ class WindowDataset(Dataset):
         T = self._T
         Xw = X[start : start + T]
         yw = y[start : start + T]
+        # Window specs are built from the parquet's n_rows, but data.drop_label_values removes rows
+        # (e.g. UT-Watch's 86 % "none" class) AFTER that count is fixed, so the tail of a session can
+        # yield a short window. Drop those rather than let collate fail on ragged shapes.
+        if Xw.shape[0] < T:
+            return None
 
         label = resolve_window_label(yw, self.cfg)
         if label is None:
@@ -298,6 +310,23 @@ def make_loaders(cfg: Any, dataset_filter=None) -> Dict[str, DataLoader]:
     dataset_filter: optional list of dataset names to restrict session scan.
                     When provided, builds probe_* loaders. Otherwise builds train/val/test.
     """
+    # NOTE (2026-07-28): no config in configs/ sets `data.loader`, so this
+    # branch is currently unreachable (the many `loader:` keys in the configs
+    # live under `objective.<name>.loader`, a different setting consumed
+    # elsewhere). Kept because it is a documented entry point, but the
+    # objective_key is now derived from the config instead of defaulting:
+    # make_openwatch_loaders_from_cfg defaults to
+    # objective_key="openwatch_gesture_supervised", so a probe/finetune config
+    # reaching here would have had its per-source block (root/train_subjects/
+    # ...) read from the WRONG objective key and silently fall back to
+    # built-in defaults.
+    loader_name = str(cfg_get(cfg, ["data", "loader"], "") or "").lower()
+    if loader_name in {"openwatch", "openwatch_gesture", "openwatch_raw"}:
+        from imu_lm.data.openwatch_loader import make_openwatch_loaders_from_cfg
+        _obj_type = str(cfg_get(cfg, ["objective", "type"], "") or "")
+        if _obj_type and (cfg_get(cfg, ["objective", _obj_type], None) is not None):
+            return make_openwatch_loaders_from_cfg(cfg, objective_key=_obj_type)
+        return make_openwatch_loaders_from_cfg(cfg)
 
     parquet_path = cfg_get(cfg, ["paths", "dataset_path"])
     batch_size = int(cfg_get(cfg, ["data", "batch_size"], 256))

@@ -1,0 +1,39 @@
+{
+  "task": "arm_pose_nymeria_rot7",
+  "encoder": "mae_recipe_r0",
+  "protocol": "probe",
+  "seed": 42,
+  "metrics": {
+    "pos_err_cm": 8.437249809503555,
+    "ang_err_deg": 10.24174976348877,
+    "val_pose_mse": 0.017704
+  },
+  "primary_metric": "pos_err_cm",
+  "eval_split": "val",
+  "run": "bench_arm_pose_nymeria_rot7__mae_recipe_r0__probe__s42",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 9000,
+  "selection": {
+    "split": "val",
+    "monitor": "val_loss",
+    "mode": "min"
+  },
+  "job_ids": {
+    "train": null,
+    "score": "3605397"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.arm_pose",
+    "date": "2026-08-20T18:22:46-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_val_windows": 18269,
+      "n_val_sessions": 101,
+      "train_end": "unknown/incomplete"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

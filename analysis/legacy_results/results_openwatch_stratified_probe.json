@@ -1,0 +1,65 @@
+[
+  {
+    "acc": 0.4939759036144578,
+    "bal_acc": 0.515350067675649,
+    "macro_f1": 0.46221170460521366,
+    "macro_recall": 0.515350067675649,
+    "n_val": 83,
+    "name": "Ours (MAE)",
+    "run": "vit1d_gesture_probe_openwatch_6class_mae_multidata"
+  },
+  {
+    "acc": 0.4939759036144578,
+    "bal_acc": 0.5276778023871046,
+    "macro_f1": 0.4810158251334722,
+    "macro_recall": 0.5276778023871046,
+    "n_val": 83,
+    "name": "Ours (MAE, no alt-attn)",
+    "run": "vit1d_gesture_probe_openwatch_6class_mae_noaltattn_multidata"
+  },
+  {
+    "acc": 0.4578313253012048,
+    "bal_acc": 0.6354128214593331,
+    "macro_f1": 0.5152211295146077,
+    "macro_recall": 0.6354128214593331,
+    "n_val": 83,
+    "name": "Ours (MAE, acc-only)",
+    "run": "vit1d_gesture_probe_openwatch_6class_mae_acconly_multidata"
+  },
+  {
+    "acc": 0.39759036144578314,
+    "bal_acc": 0.4703611418727698,
+    "macro_f1": 0.38100590765643444,
+    "macro_recall": 0.4703611418727698,
+    "n_val": 83,
+    "name": "FOCAL",
+    "run": "vit1d_gesture_probe_openwatch_6class_focal_multidata"
+  },
+  {
+    "acc": 0.4939759036144578,
+    "bal_acc": 0.4468592346499323,
+    "macro_f1": 0.4196946217897064,
+    "macro_recall": 0.4468592346499323,
+    "n_val": 83,
+    "name": "SimMTM",
+    "run": "vit1d_gesture_probe_openwatch_6class_simmtm_multidata"
+  },
+  {
+    "acc": 0.4457831325301205,
+    "bal_acc": 0.5051371969976621,
+    "macro_f1": 0.4111046012927733,
+    "macro_recall": 0.5051371969976621,
+    "n_val": 83,
+    "name": "RelCon",
+    "run": "vit1d_gesture_probe_openwatch_6class_relcon_multidata"
+  },
+  {
+    "acc": 0.5180722891566265,
+    "bal_acc": 0.4569259874492433,
+    "macro_f1": 0.4359759010816802,
+    "macro_recall": 0.4569259874492433,
+    "n_val": 83,
+    "name": "NormWear-Base (first-party, stratified)",
+    "run": "scripts/eval_openwatch_normwear.py"
+  }
+]

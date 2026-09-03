@@ -1,0 +1,122 @@
+{
+  "WISDM / Ours (MAE)": {
+    "n_val_samples": 25020,
+    "n_classes_seen": 18,
+    "acc": 0.6551558752997602,
+    "bal_acc": 0.65515587529976,
+    "macro_f1": 0.6391723218424796,
+    "macro_precision": 0.649472063076161,
+    "macro_recall": 0.65515587529976,
+    "run": "vit1d_har_probe_wisdm_mae_multidata"
+  },
+  "WISDM / Ours (MAE) finetune": {
+    "n_val_samples": 25020,
+    "n_classes_seen": 18,
+    "acc": 0.7121502797761791,
+    "bal_acc": 0.7121502797761791,
+    "macro_f1": 0.7038442870303991,
+    "macro_precision": 0.7123242025843087,
+    "macro_recall": 0.7121502797761791,
+    "run": "vit1d_har_finetune_wisdm_mae_multidata"
+  },
+  "WISDM / Ours (MAE, no alt-attn)": {
+    "n_val_samples": 25020,
+    "n_classes_seen": 18,
+    "acc": 0.6484812150279776,
+    "bal_acc": 0.6484812150279776,
+    "macro_f1": 0.6291597081008571,
+    "macro_precision": 0.6288403719837921,
+    "macro_recall": 0.6484812150279776,
+    "run": "vit1d_har_probe_wisdm_mae_noaltattn_multidata"
+  },
+  "WISDM / FOCAL": {
+    "n_val_samples": 25020,
+    "n_classes_seen": 18,
+    "acc": 0.4197841726618705,
+    "bal_acc": 0.4197841726618705,
+    "macro_f1": 0.3901409217470435,
+    "macro_precision": 0.3903009000781761,
+    "macro_recall": 0.4197841726618705,
+    "run": "vit1d_har_probe_wisdm_focal_multidata"
+  },
+  "WISDM / SimMTM": {
+    "n_val_samples": 25020,
+    "n_classes_seen": 18,
+    "acc": 0.5357314148681055,
+    "bal_acc": 0.5357314148681055,
+    "macro_f1": 0.5086354832010234,
+    "macro_precision": 0.5117142195884081,
+    "macro_recall": 0.5357314148681055,
+    "run": "vit1d_har_probe_wisdm_simmtm_multidata"
+  },
+  "WISDM / Scratch": {
+    "n_val_samples": 25020,
+    "n_classes_seen": 18,
+    "acc": 0.6089128697042366,
+    "bal_acc": 0.6089128697042365,
+    "macro_f1": 0.6056691429172097,
+    "macro_precision": 0.6371528917121903,
+    "macro_recall": 0.6089128697042365,
+    "run": "vit1d_har_supervised_wisdm_altattn_scratch"
+  },
+  "UTD-MHAD / Ours (MAE)": {
+    "n_val_samples": 207,
+    "n_classes_seen": 21,
+    "acc": 0.6376811594202898,
+    "bal_acc": 0.6382544703973275,
+    "macro_f1": 0.633048323927101,
+    "macro_precision": 0.6923610737663533,
+    "macro_recall": 0.6382544703973275,
+    "run": "vit1d_har_probe_utd_mhad_mae_multidata"
+  },
+  "UTD-MHAD / Ours (MAE) finetune": {
+    "n_val_samples": 207,
+    "n_classes_seen": 21,
+    "acc": 0.7391304347826086,
+    "bal_acc": 0.7497721854864713,
+    "macro_f1": 0.7274311140295862,
+    "macro_precision": 0.7652139410542771,
+    "macro_recall": 0.7497721854864713,
+    "run": "vit1d_har_finetune_utd_mhad_mae_multidata"
+  },
+  "UTD-MHAD / Ours (MAE, no alt-attn)": {
+    "n_val_samples": 207,
+    "n_classes_seen": 21,
+    "acc": 0.7004830917874396,
+    "bal_acc": 0.7012194815766244,
+    "macro_f1": 0.7039653375285455,
+    "macro_precision": 0.7586835254692398,
+    "macro_recall": 0.7012194815766244,
+    "run": "vit1d_har_probe_utd_mhad_mae_noaltattn_multidata"
+  },
+  "UTD-MHAD / FOCAL": {
+    "n_val_samples": 207,
+    "n_classes_seen": 21,
+    "acc": 0.5362318840579711,
+    "bal_acc": 0.5210046567189424,
+    "macro_f1": 0.5042655221060711,
+    "macro_precision": 0.571037342675998,
+    "macro_recall": 0.5210046567189424,
+    "run": "vit1d_har_probe_utd_mhad_focal_multidata"
+  },
+  "UTD-MHAD / SimMTM": {
+    "n_val_samples": 207,
+    "n_classes_seen": 21,
+    "acc": 0.6473429951690821,
+    "bal_acc": 0.6477487459630317,
+    "macro_f1": 0.6255458681454887,
+    "macro_precision": 0.6753445822773554,
+    "macro_recall": 0.6477487459630317,
+    "run": "vit1d_har_probe_utd_mhad_simmtm_multidata"
+  },
+  "UTD-MHAD / Scratch": {
+    "n_val_samples": 207,
+    "n_classes_seen": 21,
+    "acc": 0.7101449275362319,
+    "bal_acc": 0.7137095708524279,
+    "macro_f1": 0.7014427042502346,
+    "macro_precision": 0.7332506118220404,
+    "macro_recall": 0.7137095708524279,
+    "run": "vit1d_har_supervised_utd_mhad_altattn_scratch"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "pd_row_ref": 35.9921,
+  "pd_row": {
+    "scratch": {
+      "mae": 38.935199999999995,
+      "wisdm": 37.668800000000005,
+      "pose": 37.6198,
+      "gesture": 40.2283,
+      "odom": 36.107499999999995
+    },
+    "finetune": {
+      "mae": 39.1872,
+      "wisdm": 42.011900000000004,
+      "pose": 39.8224,
+      "gesture": 39.163,
+      "odom": 39.705200000000005
+    }
+  },
+  "pd_column": {
+    "scratch": {
+      "WISDM": 65.9636,
+      "Nymeria full-body pose": 100.421928,
+      "OpenWatch gesture": 65.3061,
+      "Nymeria world-frame odometry": 0.07734761723594152
+    },
+    "finetune": {
+      "WISDM": 72.2509,
+      "Nymeria full-body pose": 92.022431,
+      "OpenWatch gesture": 65.3061,
+      "Nymeria world-frame odometry": 0.1306304612651442
+    }
+  }
+}

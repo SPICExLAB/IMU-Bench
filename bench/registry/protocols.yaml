@@ -1,0 +1,42 @@
+# IMU-Bench adaptation protocols.
+#
+# A protocol says WHAT is trainable and how the encoder is initialised.
+# The optimisation recipe (LR, steps, patience, selection monitor) is fixed
+# PER TASK in tasks.yaml (`recipe:` block) and is identical for every encoder
+# within a task -- that is what makes a column controlled. The protocol only
+# picks which recipe sub-block applies (recipe.probe / recipe.finetune /
+# recipe.scratch) and how the objective type is resolved.
+#
+#   probe     encoder frozen (loaded from encoders.yaml run/ckpt), task head trained
+#   finetune  encoder warm-started from the same checkpoint, everything trainable
+#   scratch   random init, everything trainable (only meaningful with encoder=scratch)
+#   external  not a harness protocol; specialist baselines harvested from their own scripts
+#
+# Seeds: primary seed 42 (matches every legacy run). Replicate seeds 43, 44
+# are used for the "seed" column of the leaderboard when present.
+
+protocols:
+  probe:
+    name: "Frozen probe"
+    trainable: head
+    init: pretrained
+    requires_encoder_run: true
+  finetune:
+    name: "Full finetune"
+    trainable: all
+    init: pretrained
+    requires_encoder_run: true
+  scratch:
+    name: "From scratch"
+    trainable: all
+    init: random
+    requires_encoder_run: false
+  external:
+    name: "External baseline"
+    trainable: n/a
+    init: n/a
+    requires_encoder_run: false
+
+seeds:
+  primary: 42
+  replicates: [43, 44]

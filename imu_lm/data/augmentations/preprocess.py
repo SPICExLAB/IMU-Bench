@@ -9,6 +9,7 @@ from typing import Any, Optional
 import numpy as np
 
 from imu_lm.utils.helpers import cfg_get
+from imu_lm.data.augmentations.transform import apply_frame_perturb
 
 logger = logging.getLogger(__name__)
 
@@ -70,6 +71,24 @@ def impute_window(Xw: np.ndarray, cfg: Any, stats: Optional[PreprocessStats] = N
 
 
 def filter_window(Xw: np.ndarray, cfg: Any, stats: Optional[PreprocessStats] = None) -> np.ndarray:
+    """Low/high/band-pass filter a ``[T, C]`` window.
+
+    Returns a NEW array — never mutates ``Xw``. This is load-bearing, not
+    defensive style (bug fixed 2026-07-28): the old version wrote back into
+    the caller's array via ``Xw[:, c] = filtfilt(...)`` and returned that same
+    object. Every caller reached here through ``preprocess_window``, which
+    copies first (``Xw.astype(np.float32)``), so the aliasing was invisible —
+    until ``humanml3d_dataset_FLU.py`` began calling ``filter_window``
+    directly on (a) a worker-cached clip array and (b) a *view* into one.
+    Because those clips are cached per worker and re-drawn many times over a
+    run, each draw re-filtered the already-filtered cache cumulatively:
+    measured ~0.985 correlation vs. a single pass after 50 draws, with the
+    passband decaying without bound as training length grows, and
+    non-deterministically (it depends on how often a given worker happened to
+    draw a given clip). In the random-crop path it was worse in kind — only
+    the cropped sub-range got re-filtered, leaving step discontinuities at
+    crop boundaries inside a single clip.
+    """
     filt_cfg = cfg_get(cfg, ["preprocess", "filter"], {}) or {}
     if not filt_cfg.get("enabled", False):
         return Xw
@@ -96,12 +115,14 @@ def filter_window(Xw: np.ndarray, cfg: Any, stats: Optional[PreprocessStats] = N
         Wn = [low / nyq, high / nyq]
         b, a = signal.butter(order, Wn, btype="band")
 
-    for c in range(Xw.shape[1]):
-        Xw[:, c] = signal.filtfilt(b, a, Xw[:, c], method="gust")
+    # Write into a fresh array, never back into Xw -- see docstring.
+    out = np.array(Xw, copy=True)
+    for c in range(out.shape[1]):
+        out[:, c] = signal.filtfilt(b, a, Xw[:, c], method="gust")
 
     if stats:
         stats.windows_filtered += 1
-    return Xw
+    return out
 
 
 def normalize_window(Xw: np.ndarray, cfg: Any, stats: Optional[PreprocessStats] = None) -> np.ndarray:
@@ -122,6 +143,28 @@ def normalize_window(Xw: np.ndarray, cfg: Any, stats: Optional[PreprocessStats] 
         elif method == "minmax":
             xmin, xmax = x.min(), x.max()
             Xn[:, c] = (x - xmin) / ((xmax - xmin) + eps)
+        elif method == "physical":
+            # DC-PRESERVING fixed scaling (2026-08-18): divide by a constant per modality
+            # instead of per-window statistics, so gravity direction (window mean) and motion
+            # amplitude (window std) survive into the model. acc: m/s^2 -> g; gyro: rad/s / w_ref.
+            # Optional symmetric clipping keeps outliers from dominating the numeric range.
+            n_acc = int(norm_cfg.get("n_acc", 3))
+            # acc_units: "auto" (default) | "g" | "m/s2". Mixed units across datasets (Capture24 and
+            # NHANES are g, the rest m/s^2) would otherwise be scaled 9.81x apart -- z-scoring hid
+            # this, fixed physical scaling does not.
+            if c < n_acc:
+                u = str(norm_cfg.get("acc_units", "auto")).lower()
+                if u == "auto":
+                    mag = float(np.linalg.norm(Xw[:, :n_acc].mean(axis=0)))
+                    spread = float(Xw[:, :n_acc].std())
+                    # both conditions: gravity-free m/s^2 data (PADS) has a small mean but large spread
+                    u = "g" if (mag < 3.0 and spread < 1.5) else "m/s2"
+                sc = float(norm_cfg.get("acc_scale", 9.81)) / (9.80665 if u == "g" else 1.0)
+            else:
+                sc = float(norm_cfg.get("gyro_scale", 5.0))
+            v = x / sc
+            clip = norm_cfg.get("clip_acc", 8.0) if c < n_acc else norm_cfg.get("clip_gyro", 8.0)
+            Xn[:, c] = np.clip(v, -float(clip), float(clip)) if clip else v
         else:  # zscore
             Xn[:, c] = (x - x.mean()) / (x.std() + eps)
 
@@ -141,6 +184,13 @@ def preprocess_window(Xw: np.ndarray, cfg: Any, stats: Optional[PreprocessStats]
     Xw = impute_window(Xw, cfg, stats)
     if Xw is None:
         return None
+
+    # Coordinate-frame perturbation: models a sensor MOUNTED in a different
+    # frame, so it applies to every split and runs on the raw signal -- before
+    # normalize_window, which is per-channel and does not commute with a
+    # rotation. Placed after impute so a rotation can't smear NaNs across axes.
+    # No-op unless the config carries `frame_perturb.enabled: true`.
+    Xw = apply_frame_perturb(Xw, cfg)
 
     Xw = filter_window(Xw, cfg, stats)
     Xw = normalize_window(Xw, cfg, stats)

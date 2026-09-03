@@ -1,0 +1,44 @@
+{
+  "task": "har_mhealth",
+  "encoder": "inertia1_patchtst_randinit",
+  "protocol": "probe",
+  "seed": 42,
+  "metrics": {
+    "macro_f1": 0.6695075729558172,
+    "bal_acc": 0.672966818363729,
+    "acc": 0.6777883698760725,
+    "val_loss": 0.798387
+  },
+  "primary_metric": "macro_f1",
+  "eval_split": "val",
+  "run": "bench_har_mhealth__inertia1_patchtst_randinit__probe__s42",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 5200,
+  "selection": {
+    "split": "val",
+    "monitor": "val_loss",
+    "mode": "min",
+    "note": "same convention as Experiments_table \u00a73 (metrics read at the min-val-loss checkpoint)"
+  },
+  "job_ids": {
+    "train": 9784601,
+    "score": "9784601"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.har",
+    "date": "2026-08-18T12:42:48-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_val_samples": 1049,
+      "n_classes_seen": 12,
+      "n_classes_head": 12,
+      "n_val_batches": 5,
+      "logged_macro_f1_at_ckpt": 0.669366,
+      "train_end": "early stopping at step=9200 epoch=542"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

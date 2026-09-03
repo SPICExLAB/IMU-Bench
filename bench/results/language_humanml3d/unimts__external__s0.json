@@ -1,0 +1,31 @@
+{
+  "task": "language_humanml3d",
+  "encoder": "unimts",
+  "protocol": "external",
+  "seed": 0,
+  "metrics": {
+    "r1_g100": 17.6,
+    "r1_i2t_g100": 33.6,
+    "r1_t2i_g100": 1.6,
+    "mrr_i2t_g100": 49.3,
+    "mrr_t2i_g100": 6.4
+  },
+  "primary_metric": "r1_g100",
+  "eval_split": "val",
+  "run": null,
+  "checkpoint": null,
+  "checkpoint_step": null,
+  "selection": {
+    "split": "n/a",
+    "monitor": "n/a"
+  },
+  "job_ids": {},
+  "provenance": {
+    "source": "harvest:analysis/retrieval_eval/humanml3d__unimts_official_wrist.json (VAL split; contaminated: pretrained on HumanML3D)",
+    "date": "2026-08-16T17:13:19-05:00",
+    "git": "1b95aa3-dirty"
+  },
+  "status": "invalid",
+  "notes": "",
+  "schema_version": 1
+}

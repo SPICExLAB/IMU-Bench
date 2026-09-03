@@ -1,0 +1,90 @@
+vit1d:
+  patch_size: 16
+  shared_kernel: true
+  use_cls_token: false
+  encoder:
+    hidden_size: 384
+    num_hidden_layers: 12
+    num_attention_heads: 6
+    intermediate_size: 1536
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-06
+    drop_path_rate: 0.0
+    alt_attention: true
+  max_patches_per_channel: 256
+  pooling: mean
+objective:
+  type: utd_mhad_finetune
+  utd_mhad_finetune:
+    pretrained_run: acconly_4src
+    pretrained_ckpt: best
+    class_weighted_ce: true
+paths:
+  dataset_path: /projects/b53017/vbc1591/IMULM_master_dataset_v2.parquet
+  runs_root: /gpfs/home/vbc1591/IMU-SSL/runs
+preprocess:
+  normalize:
+    enabled: true
+    method: physical
+    acc_scale: 9.81
+    gyro_scale: 5.0
+    clip_acc: 8.0
+    clip_gyro: 8.0
+    n_acc: 3
+    acc_units: auto
+windowing:
+  window_seconds: 2.56
+splits:
+  val_ratio: 0.2
+  probe_dataset: null
+data:
+  train_on_datasets:
+  - prism
+  sensor_columns:
+  - acc_x
+  - acc_y
+  - acc_z
+  batch_size: 256
+  eval_batch_size: 256
+  num_workers: 8
+  pin_memory: true
+  acc_only: true
+  drop_label_values:
+  - 0
+  label_column: global_activity_id
+logging:
+  ckpt_every_steps: 500
+  save_step_checkpoints: false
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 20000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 200
+  early_stopping:
+    enabled: true
+    monitor: bal_acc
+    patience: 20
+  optim:
+    name: adamw
+    lr: 0.0001
+    weight_decay: 0.1
+    betas:
+    - 0.9
+    - 0.95
+    eps: 1.0e-08
+  sched:
+    name: cosine
+    warmup_steps: 100
+wandb:
+  entity: yli32258-northwestern-university
+  project: TransfHAR_project
+bench:
+  task: har_prism
+  encoder: acconly_4src
+  protocol: finetune
+  seed: 42
+  template: configs/har_extra/vit1d_har_finetune_prism_mae_multidata_flu.yaml
+  registry_version: 1

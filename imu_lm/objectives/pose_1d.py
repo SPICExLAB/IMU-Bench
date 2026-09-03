@@ -38,6 +38,25 @@ def _rot6d_to_matrix(d6: torch.Tensor) -> torch.Tensor:
     return torch.stack((b1, b2, b3), dim=-2)
 
 
+def _assemble_full_R(pred_rot, y_full_rot, B, Pt, K, J, J_loader):
+    """Build the full J_loader-joint rotation tensor FK needs.
+
+    Two conventions coexist in this codebase:
+      - root EXCLUDED from predictions (Nymeria: num_joints=23, J_loader=24)
+        -> splice the GT root (joint 0) onto the front of the predicted joints.
+      - root INCLUDED in predictions (TotalCapture: num_joints=24, J_loader=24)
+        -> pred_rot already covers every joint including root; nothing to splice.
+    Distinguished by J == J_loader (nothing missing) vs. J == J_loader - 1
+    (root missing, the only other case this objective is used with).
+    """
+    pred_R = _rot6d_to_matrix(pred_rot.reshape(B, Pt, K, J, 6))
+    if J == J_loader:
+        return pred_R
+    root_6d = y_full_rot.reshape(B, Pt, K, J_loader, 6)[:, :, :, 0:1, :]
+    root_R  = _rot6d_to_matrix(root_6d)
+    return torch.cat([root_R, pred_R], dim=3)
+
+
 def _compute_val_mpjpe(
     pred_rot: torch.Tensor,
     y_full_rot: torch.Tensor,
@@ -46,9 +65,22 @@ def _compute_val_mpjpe(
     num_joints: int,
     body_model,
 ) -> float:
-    """MPJPE in mm for joints 1..num_joints using FK with GT root spliced in.
+    """MPJPE in mm over the NON-ROOT joints (1..J_loader-1) using FK (GT root
+    spliced in when predictions exclude it -- see _assemble_full_R).
 
-    pred_rot   : [B, Pt, K * num_joints * 6]  predicted 6D rotations (no root)
+    Bug fixed 2026-07-28: this used to slice ``j_start:j_start+J`` with
+    ``j_start = 0 if J == J_loader else 1``, so ``num_joints: 24`` configs
+    (e.g. the TotalCapture 24-joint probe/finetune family) averaged over
+    joints 0..23 -- *including joint 0*. Both tensors here are root-relative
+    (``pos_pred_rel`` subtracts ``pos_pred[:, 0:1]`` two lines below; the GT
+    is root-relative on arrival, see core/articulate/model.py:89 "Root joint
+    is aligned at zero"), so joint 0's term is identically zero and simply
+    diluted the mean: reported MPJPE for 24-joint configs came out exactly
+    23/24 (~4.2%) LOWER than the same error measured the 23-joint way, i.e.
+    not comparable to the Nymeria 23-joint numbers it sat next to in tables.
+    The metric now always excludes the root, for every J.
+
+    pred_rot   : [B, Pt, K * num_joints * 6]  predicted 6D rotations
     y_full_rot : [B, Pt, K * 24 * 6]          GT full-body 6D rotations (joint 0 = root)
     gt_pos     : [B, Pt, K * 24 * 3]          GT FK joint positions, root-relative
     """
@@ -57,15 +89,7 @@ def _compute_val_mpjpe(
     J = num_joints
     J_loader = y_full_rot.shape[-1] // (K * 6)  # typically 24
 
-    # GT root rotation matrix  [B, Pt, K, 1, 3, 3]
-    root_6d = y_full_rot.reshape(B, Pt, K, J_loader, 6)[:, :, :, 0:1, :]
-    root_R  = _rot6d_to_matrix(root_6d)
-
-    # Predicted rotation matrices  [B, Pt, K, J, 3, 3]
-    pred_R = _rot6d_to_matrix(pred_rot.reshape(B, Pt, K, J, 6))
-
-    # Full 24-joint rotation: [B, Pt, K, 24, 3, 3]
-    full_R = torch.cat([root_R, pred_R], dim=3)
+    full_R = _assemble_full_R(pred_rot, y_full_rot, B, Pt, K, J, J_loader)
 
     # FK on body model's device
     bm_device = body_model._J_regressor.device
@@ -80,7 +104,13 @@ def _compute_val_mpjpe(
     # GT positions are already root-relative: [B, Pt, K, 24, 3]
     gt_pos_4d = gt_pos.reshape(B, Pt, K, J_loader, 3)
 
-    diff = pos_pred_rel[:, :, :, 1:J + 1] - gt_pos_4d[:, :, :, 1:J + 1]
+    # Always skip joint 0 (the root): it is exactly zero in both tensors under
+    # the root-relative convention, so including it would only dilute the mean
+    # and make 24-joint configs incomparable to 23-joint ones. Both tensors are
+    # in the same J_loader-joint FK space here, so this slice is aligned for
+    # J == J_loader (model predicts the root too) and J == J_loader - 1
+    # (GT root spliced in by _assemble_full_R) alike.
+    diff = pos_pred_rel[:, :, :, 1:J_loader] - gt_pos_4d[:, :, :, 1:J_loader]
     return diff.norm(dim=-1).mean().item() * 1000.0   # mm
 
 
@@ -95,17 +125,24 @@ def _compute_fk_pos_loss(
     """MSE joint position loss via differentiable FK (gradients flow through pred_rot).
 
     Same layout as _compute_val_mpjpe but no torch.no_grad() and returns a tensor.
+
+    NOTE (2026-07-28): unlike ``_compute_val_mpjpe``, this deliberately KEEPS
+    the ``j_start`` slicing, i.e. ``num_joints: 24`` configs still include the
+    always-zero root term. That term contributes exactly 0 to the mean and has
+    zero gradient, so its only effect is scaling this loss by 23/24 -- which is
+    indistinguishable from setting ``joint_pos_weight`` 4.3% lower, and those
+    weights were tuned with this scaling in place. Changing it here would
+    silently retune every 24-joint config's effective loss balance, so it is
+    left as-is on purpose; the reported *metric* is what needed to be
+    comparable, and that is fixed above.
     """
     B, Pt, _ = pred_rot.shape
     K = sub_patches
     J = num_joints
     J_loader = y_full_rot.shape[-1] // (K * 6)
+    j_start  = 0 if J == J_loader else 1
 
-    root_6d = y_full_rot.reshape(B, Pt, K, J_loader, 6)[:, :, :, 0:1, :]
-    root_R  = _rot6d_to_matrix(root_6d)
-
-    pred_R = _rot6d_to_matrix(pred_rot.reshape(B, Pt, K, J, 6))
-    full_R = torch.cat([root_R, pred_R], dim=3)
+    full_R = _assemble_full_R(pred_rot, y_full_rot, B, Pt, K, J, J_loader)
 
     bm_device = body_model._J_regressor.device
     full_R_flat = full_R.reshape(B * Pt * K, -1).to(bm_device)
@@ -118,7 +155,7 @@ def _compute_fk_pos_loss(
 
     gt_pos_4d = gt_pos.reshape(B, Pt, K, J_loader, 3).to(pred_rot.device)
 
-    diff = pos_pred_rel[:, :, :, 1:J + 1] - gt_pos_4d[:, :, :, 1:J + 1]
+    diff = pos_pred_rel[:, :, :, j_start:j_start + J] - gt_pos_4d[:, :, :, j_start:j_start + J]
     return (diff ** 2).mean()
 
 

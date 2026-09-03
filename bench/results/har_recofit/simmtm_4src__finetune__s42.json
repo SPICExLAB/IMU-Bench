@@ -1,0 +1,44 @@
+{
+  "task": "har_recofit",
+  "encoder": "simmtm_4src",
+  "protocol": "finetune",
+  "seed": 42,
+  "metrics": {
+    "macro_f1": 0.7563681431161806,
+    "bal_acc": 0.8021594886847594,
+    "acc": 0.8701412689124801,
+    "val_loss": 0.614345
+  },
+  "primary_metric": "macro_f1",
+  "eval_split": "val",
+  "run": "bench_har_recofit__simmtm_4src__finetune__s42",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 11200,
+  "selection": {
+    "split": "val",
+    "monitor": "val_loss",
+    "mode": "min",
+    "note": "same convention as Experiments_table \u00a73 (metrics read at the min-val-loss checkpoint)"
+  },
+  "job_ids": {
+    "train": null,
+    "score": "4895706"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.har",
+    "date": "2026-08-27T17:22:09-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_val_samples": 23926,
+      "n_classes_seen": 13,
+      "n_classes_head": 13,
+      "n_val_batches": 95,
+      "logged_macro_f1_at_ckpt": 0.757013,
+      "train_end": "unknown/incomplete"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

@@ -1,0 +1,154 @@
+[
+  {
+    "name": "Ours (MAE) probe win/noaug",
+    "run": "vit1d_gesture_probe_openwatch_6class_mae_windowed_strat",
+    "split": "val",
+    "n_clips": 102,
+    "n_windows": 612,
+    "window": {
+      "acc": 0.576797385620915,
+      "bal_acc": 0.6989288755093352,
+      "macro_f1": 0.5609929120228165,
+      "macro_recall": 0.6989288755093352
+    },
+    "clip": {
+      "acc": 0.6764705882352942,
+      "bal_acc": 0.8264846743295019,
+      "macro_f1": 0.6740894704163071,
+      "macro_recall": 0.8264846743295019
+    }
+  },
+  {
+    "name": "Ours (MAE) probe win/noaug",
+    "run": "vit1d_gesture_probe_openwatch_6class_mae_windowed_strat",
+    "split": "test",
+    "n_clips": 87,
+    "n_windows": 522,
+    "window": {
+      "acc": 0.5076628352490421,
+      "bal_acc": 0.5644179894179894,
+      "macro_f1": 0.4904458273515586,
+      "macro_recall": 0.5644179894179894
+    },
+    "clip": {
+      "acc": 0.5977011494252874,
+      "bal_acc": 0.7132275132275132,
+      "macro_f1": 0.6063870975198207,
+      "macro_recall": 0.7132275132275132
+    }
+  },
+  {
+    "name": "Ours (MAE) probe win/aug",
+    "run": "vit1d_gesture_probe_openwatch_6class_mae_windowed_strat_aug",
+    "split": "val",
+    "n_clips": 102,
+    "n_windows": 612,
+    "window": {
+      "acc": 0.5800653594771242,
+      "bal_acc": 0.6749251201119018,
+      "macro_f1": 0.5531175262205305,
+      "macro_recall": 0.6749251201119018
+    },
+    "clip": {
+      "acc": 0.6274509803921569,
+      "bal_acc": 0.7845306513409963,
+      "macro_f1": 0.6378149572940063,
+      "macro_recall": 0.7845306513409963
+    }
+  },
+  {
+    "name": "Ours (MAE) probe win/aug",
+    "run": "vit1d_gesture_probe_openwatch_6class_mae_windowed_strat_aug",
+    "split": "test",
+    "n_clips": 87,
+    "n_windows": 522,
+    "window": {
+      "acc": 0.4942528735632184,
+      "bal_acc": 0.5557098765432099,
+      "macro_f1": 0.48216562449006845,
+      "macro_recall": 0.5557098765432099
+    },
+    "clip": {
+      "acc": 0.5977011494252874,
+      "bal_acc": 0.725,
+      "macro_f1": 0.6145620529144556,
+      "macro_recall": 0.725
+    }
+  },
+  {
+    "name": "Ours (MAE) finetune win/noaug",
+    "run": "vit1d_gesture_finetune_openwatch_6class_mae_windowed_strat",
+    "split": "val",
+    "n_clips": 102,
+    "n_windows": 612,
+    "window": {
+      "acc": 0.7467320261437909,
+      "bal_acc": 0.667873107097245,
+      "macro_f1": 0.6639148752843258,
+      "macro_recall": 0.667873107097245
+    },
+    "clip": {
+      "acc": 0.8235294117647058,
+      "bal_acc": 0.8144157088122604,
+      "macro_f1": 0.7835618546935682,
+      "macro_recall": 0.8144157088122604
+    }
+  },
+  {
+    "name": "Ours (MAE) finetune win/noaug",
+    "run": "vit1d_gesture_finetune_openwatch_6class_mae_windowed_strat",
+    "split": "test",
+    "n_clips": 87,
+    "n_windows": 522,
+    "window": {
+      "acc": 0.6724137931034483,
+      "bal_acc": 0.552336860670194,
+      "macro_f1": 0.5799275605586808,
+      "macro_recall": 0.552336860670194
+    },
+    "clip": {
+      "acc": 0.7701149425287356,
+      "bal_acc": 0.6777777777777777,
+      "macro_f1": 0.7036526148921106,
+      "macro_recall": 0.6777777777777777
+    }
+  },
+  {
+    "name": "Ours (MAE) finetune win/aug",
+    "run": "vit1d_gesture_finetune_openwatch_6class_mae_windowed_strat_aug",
+    "split": "val",
+    "n_clips": 102,
+    "n_windows": 612,
+    "window": {
+      "acc": 0.7777777777777778,
+      "bal_acc": 0.7165408532506233,
+      "macro_f1": 0.7042939557463788,
+      "macro_recall": 0.7165408532506233
+    },
+    "clip": {
+      "acc": 0.8333333333333334,
+      "bal_acc": 0.7938697318007663,
+      "macro_f1": 0.7825435729847495,
+      "macro_recall": 0.7938697318007663
+    }
+  },
+  {
+    "name": "Ours (MAE) finetune win/aug",
+    "run": "vit1d_gesture_finetune_openwatch_6class_mae_windowed_strat_aug",
+    "split": "test",
+    "n_clips": 87,
+    "n_windows": 522,
+    "window": {
+      "acc": 0.6340996168582376,
+      "bal_acc": 0.5269069664902998,
+      "macro_f1": 0.5437066401485877,
+      "macro_recall": 0.5269069664902998
+    },
+    "clip": {
+      "acc": 0.6666666666666666,
+      "bal_acc": 0.566468253968254,
+      "macro_f1": 0.5804232804232804,
+      "macro_recall": 0.566468253968254
+    }
+  }
+]
