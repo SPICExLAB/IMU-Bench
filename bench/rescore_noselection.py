@@ -36,7 +36,14 @@ os.environ.setdefault("BENCH_RESULTS_ROOT", os.path.join(REPO, "bench", "results
 OUT_ROOT = os.environ["BENCH_RESULTS_ROOT"]
 
 from bench.registry_io import load_encoders, load_tasks                      # noqa: E402
-from bench.rescore_units import PAPER_CELLS, PAPER_TASKS, SLURM_DIR          # noqa: E402
+from bench.rescore_units import PAPER_CELLS, SLURM_DIR                       # noqa: E402
+from bench.rescore_units import PAPER_TASKS as _ALL_TASKS                    # noqa: E402
+
+# The microgesture tasks select on val and report on a held-out test split, so there is nothing to
+# control for; their scorer also refuses any checkpoint but best.pt (clip voting is defined on the
+# selected one). IMU--text already uses the final checkpoint, so its two columns should come out
+# identical -- a useful self-check that the control reproduces the reported numbers.
+PAPER_TASKS = [t for t in _ALL_TASKS if not t.startswith("microgesture_")]
 from bench.score import score_cell                                           # noqa: E402
 from bench.score.common import run_dir_of                                    # noqa: E402
 
@@ -126,13 +133,14 @@ mkdir -p "$BENCH_TMP"
 export HF_HOME=/gpfs/projects/p32139/.cache HF_HUB_OFFLINE=1 HF_HUB_DISABLE_IMPLICIT_TOKEN=1
 export WANDB_MODE=disabled
 export BENCH_RESULTS_ROOT={repo}/bench/results_nosel
-echo "[nosel] job=$SLURM_JOB_ID node=$(hostname) start=$(date -Is)"
+{units}echo "[nosel] job=$SLURM_JOB_ID node=$(hostname) start=$(date -Is)"
 python -m bench.rescore_noselection --task {task}
 echo "[nosel] done $(date -Is)"
 """
 
 
-def write_slurm(task_list: List[str], account: str, partition: str, cpu: bool = False) -> List[str]:
+def write_slurm(task_list: List[str], account: str, partition: str, cpu: bool = False,
+                no_units: bool = False) -> List[str]:
     os.makedirs(SLURM_DIR, exist_ok=True)
     out = []
     for t in task_list:
@@ -141,7 +149,8 @@ def write_slurm(task_list: List[str], account: str, partition: str, cpu: bool = 
             f.write(SBATCH.format(task=t, repo=REPO, account=account,
                                   partition=("normal" if cpu else partition),
                                   gres="" if cpu else "#SBATCH --gres=gpu:1\n#SBATCH --exclude=qgpu3006,qgpu3013,qgpu2014,qgpu2006\n",
-                                  time="12:00:00" if cpu else "04:00:00", cpus=16 if cpu else 8))
+                                  time="12:00:00" if cpu else "04:00:00", cpus=16 if cpu else 8,
+                                  units="export BENCH_UNITS=0   # sidecars are for the reported tree only\n" if no_units else ""))
         os.chmod(p, 0o755)
         out.append(p)
     return out
@@ -159,10 +168,11 @@ def main(argv=None):
     ap.add_argument("--account", default="p32139")
     ap.add_argument("--partition", default="gengpu")
     ap.add_argument("--cpu", action="store_true", help="CPU partition (inference only); no GPU queueing")
+    ap.add_argument("--no-units", action="store_true", help="skip per-unit sidecars (kinematic scorers re-run the val set for them)")
     args = ap.parse_args(argv)
 
     if args.write_slurm:
-        for p in write_slurm(args.task or PAPER_TASKS, args.account, args.partition, cpu=args.cpu):
+        for p in write_slurm(args.task or PAPER_TASKS, args.account, args.partition, cpu=args.cpu, no_units=args.no_units):
             print(p if not args.submit else
                   subprocess.run(["sbatch", p], capture_output=True, text=True, cwd=REPO).stdout.strip())
         return 0
