@@ -38,7 +38,10 @@ from typing import Any, Dict, Optional
 
 SCHEMA_VERSION = 1
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-RESULTS_ROOT = os.path.join(REPO, "bench", "results")
+# BENCH_RESULTS_ROOT redirects every read and write to another results tree; used by the
+# selection-free control (bench/rescore_noselection.py), which scores the same runs from
+# latest.pt into bench/results_nosel without touching the reported cells.
+RESULTS_ROOT = os.environ.get("BENCH_RESULTS_ROOT") or os.path.join(REPO, "bench", "results")
 
 
 def git_sha(short: bool = True) -> str:
