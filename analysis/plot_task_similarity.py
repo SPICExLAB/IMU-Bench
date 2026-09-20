@@ -26,6 +26,7 @@ from matplotlib.colors import LinearSegmentedColormap, TwoSlopeNorm   # noqa: E4
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PAIRS_CSV = os.path.join(REPO, "paper_results", "tab3_task_similarity", "task_similarity.csv")
 CKNNA_CSV = os.path.join(REPO, "analysis", "task_similarity", "cknna_results.csv")
+SCRATCH_CSV = os.path.join(REPO, "analysis", "task_similarity_scratch", "cknna_results.csv")   # optional
 
 # Palette (dataviz reference instance): sequential blue ramp, diverging blue<->red with grey midpoint.
 BLUE = ["#cde2fb", "#9ec5f4", "#6da7ec", "#3987e5", "#256abf", "#184f95", "#0d366b"]
@@ -55,9 +56,9 @@ def read_pairs():
     return gain
 
 
-def read_cknna():
+def read_cknna(path=CKNNA_CSV):
     ck = {}
-    with open(CKNNA_CSV) as f:
+    with open(path) as f:
         for r in csv.DictReader(f):
             ck[frozenset((r["task_a"], r["task_b"]))] = float(r["cknna"])
     return ck
@@ -136,15 +137,38 @@ def main():
             if i != j and frozenset((ci, cj)) in ck:
                 C[i, j] = ck[frozenset((ci, cj))]
     seq = LinearSegmentedColormap.from_list("seq", BLUE)
-    cmax = float(np.nanmax(C)) if np.isfinite(C).any() else 0.5
-    snorm = plt.Normalize(vmin=0, vmax=cmax)
 
-    # Single panel: the representational view. The directional transfer matrix stays in the appendix
-    # table and in paper_results; Figure 2 of the transfer section shows transfer against scratch.
-    fig, axR = plt.subplots(1, 1, figsize=(6.4, 5.6))
+    # Right panel (when its run exists): encoders trained FROM SCRATCH on each task -- no shared
+    # pretraining, so any structure here is what the tasks alone impose on the same architecture.
+    SC_ORDER = ["Full-body pose", "Odometry", "Microgesture", "Parkinson's", "PRISM", "IMU-text", "Arm pose",
+                "HHAR", "MHEALTH", "User study"]
+    SC_SHORT = {"Full-body pose": "Full-body\npose", "Microgesture": "Micro-\ngesture", "PRISM": "PRISM\nactivity",
+                "IMU-text": "IMU–text", "User study": "User\nstudy"}
+    S = None
+    if os.path.exists(SCRATCH_CSV):
+        cks = read_cknna(SCRATCH_CSV)
+        present = [t for t in SC_ORDER if any(t in k for k in cks)]
+        S = np.full((len(present), len(present)), np.nan)
+        for i, ti in enumerate(present):
+            for j, tj in enumerate(present):
+                if i != j and frozenset((ti, tj)) in cks:
+                    S[i, j] = cks[frozenset((ti, tj))]
+    vmax = float(np.nanmax([np.nanmax(C)] + ([np.nanmax(S)] if S is not None else [])))
+    snorm = plt.Normalize(vmin=0, vmax=vmax)
+
+    if S is None:
+        fig, axR = plt.subplots(1, 1, figsize=(6.4, 5.6))
+        axes = [axR]
+    else:
+        fig, (axR, axS) = plt.subplots(1, 2, figsize=(12.6, 5.6),
+                                       gridspec_kw=dict(width_ratios=[m, len(present)], wspace=0.5))
+        axes = [axR, axS]
     fig.patch.set_facecolor("white")
     draw_matrix(axR, C, [lab for _, lab, _ in ck_labels], seq, snorm, lambda v: f"{v:.2f}",
-                "CKNNA between task-adapted encoders", cbar_label="CKNNA (shared held-out Nymeria windows)")
+                "(a) Encoders fine-tuned from the MAE", cbar_label="CKNNA (shared held-out Nymeria windows)")
+    if S is not None:
+        draw_matrix(axS, S, [SC_SHORT.get(t, t) for t in present], seq, snorm, lambda v: f"{v:.2f}",
+                    "(b) Encoders trained from scratch per task", cbar_label="CKNNA (same windows)")
 
     os.makedirs(a.outdir, exist_ok=True)
     for ext in ("png", "pdf"):
@@ -160,6 +184,9 @@ def main():
             for i, s in enumerate(TASKS) for j, t in enumerate(TASKS) if i != j]
     rows += [["cknna", ck_labels[i][0], ck_labels[j][0], None if np.isnan(C[i, j]) else C[i, j]]
              for i in range(m) for j in range(m) if i < j]
+    if S is not None:
+        rows += [["cknna_scratch", present[i], present[j], None if np.isnan(S[i, j]) else S[i, j]]
+                 for i in range(len(present)) for j in range(len(present)) if i < j]
     write_csv("tab3_task_similarity", "figure_matrices.csv", ["panel", "row", "col", "value"], rows)
     print(f"wrote {a.outdir}/task_similarity.png  transfer cells={int(np.isfinite(T).sum())}/{n*(n-1)}  "
           f"cknna pairs={int(np.isfinite(C).sum())//2}/{m*(m-1)//2}")
