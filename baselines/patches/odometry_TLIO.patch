@@ -1,0 +1,249 @@
+diff --git a/train_nymeria_tlio.py b/train_nymeria_tlio.py
+new file mode 100644
+index 0000000..1b28ef2
+--- /dev/null
++++ b/train_nymeria_tlio.py
+@@ -0,0 +1,166 @@
++#!/usr/bin/env python3
++"""Train + evaluate TLIO's ResNet1D displacement regressor on Nymeria
++wrist IMU -> world-frame pelvis odometry, scored in the exact metric
++definition of "4b. Odometry -- canonical world-frame variant".
++
++Adaptation notes (documented, not hidden)
++------------------------------------------
++* Reuses TLIO's actual network (``src/network/model_resnet.py::ResNet1D``,
++  the real learned component from the paper) loaded directly from its source
++  file (bypassing ``network/__init__.py`` to avoid TLIO's EKF-only
++  ``liegroups`` dependency, which this benchmark doesn't use).
++* TLIO's own training pipeline (``main_net.py``) expects a specific
++  memory-mapped HDF5 dataset format and includes IMU bias-shift / gravity
++  perturbation augmentation, a bias-corrected covariance-weighted NLL loss,
++  and downstream EKF fusion across overlapping windows. None of that is
++  reproduced here -- this script trains the SAME architecture with plain
++  MSE regression against the window's net displacement (no covariance loss,
++  no EKF), matching how every other baseline/model in this benchmark
++  (Ours, Scratch, MobilePoser) is trained and scored: single-window
++  regression, cumulative-sum reconstruction, no filtering.
++* TLIO's network outputs ONE 3D displacement per whole window (that's the
++  actual design -- displacements are normally fused via EKF at high rate
++  from overlapping windows). Evaluated here as a constant-velocity
++  trajectory across the window (2 points: start, end), then interpolated
++  onto the same 33-point grid "Ours" is scored on -- see
++  ../common_worldframe_eval.py for why and how.
++"""
++from __future__ import annotations
++
++import argparse
++import csv
++import importlib.util
++import os
++import sys
++
++import numpy as np
++import torch
++import torch.nn as nn
++
++_THIS_DIR = os.path.dirname(os.path.abspath(__file__))
++_ODOM_DIR = os.path.dirname(_THIS_DIR)
++sys.path.insert(0, _ODOM_DIR)
++from common_worldframe_eval import score_window, aggregate, WINDOW_SECONDS_DEFAULT  # noqa: E402
++
++
++def load_resnet1d_classes():
++    spec = importlib.util.spec_from_file_location(
++        "tlio_model_resnet", os.path.join(_THIS_DIR, "src", "network", "model_resnet.py")
++    )
++    mod = importlib.util.module_from_spec(spec)
++    spec.loader.exec_module(mod)
++    return mod.ResNet1D, mod.BasicBlock1D
++
++
++def infer_inter_dim(resnet_cls, block_cls, T, in_dim=6, group_sizes=(2, 2, 2, 2)):
++    """Downsampling is fixed (conv stride2 + maxpool stride2 + 3 residual-group
++    stride2's = 32x), but compute it empirically to stay correct if T changes."""
++    with torch.no_grad():
++        probe = resnet_cls(block_cls, in_dim, 3, list(group_sizes), 1)
++        x = torch.randn(1, in_dim, T)
++        feat = probe.residual_groups(probe.input_block(x))
++        return feat.shape[-1]
++
++
++def evaluate(model, X, POS, device, window_seconds, batch_size=512):
++    model.eval()
++    vel_mses, ates, ferrs, plens = [], [], [], []
++    with torch.no_grad():
++        for i in range(0, len(X), batch_size):
++            xb = torch.from_numpy(X[i:i + batch_size]).to(device)
++            mean, _logstd = model(xb)
++            disp = mean.cpu().numpy()
++            for j in range(disp.shape[0]):
++                traj_pred = np.stack([np.zeros(3, dtype=np.float64), disp[j].astype(np.float64)], axis=0)
++                vel_mse, ate, ferr, plen = score_window(traj_pred, POS[i + j], window_seconds)
++                vel_mses.append(vel_mse); ates.append(ate); ferrs.append(ferr); plens.append(plen)
++    return aggregate(vel_mses, ates, ferrs, plens)
++
++
++def main():
++    p = argparse.ArgumentParser(description=__doc__)
++    p.add_argument("--cache-dir", default=os.path.join(_ODOM_DIR, "data_cache"))
++    p.add_argument("--out-dir", default=os.path.join(_THIS_DIR, "runs_nymeria"))
++    p.add_argument("--epochs", type=int, default=80)
++    p.add_argument("--patience", type=int, default=10)
++    p.add_argument("--batch-size", type=int, default=512)
++    p.add_argument("--lr", type=float, default=1e-3)
++    p.add_argument("--weight-decay", type=float, default=1e-4)
++    p.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
++    args = p.parse_args()
++
++    os.makedirs(args.out_dir, exist_ok=True)
++    device = torch.device(args.device)
++
++    tr = np.load(os.path.join(args.cache_dir, "nymeria_worldframe_train.npz"))
++    va = np.load(os.path.join(args.cache_dir, "nymeria_worldframe_val.npz"))
++    X_tr, POS_tr = tr["X"], tr["POS"]
++    X_va, POS_va = va["X"], va["POS"]
++    window_seconds = float(tr["window_seconds"])
++    T = X_tr.shape[-1]
++    print(f"train windows={len(X_tr)}  val windows={len(X_va)}  T={T}  window_seconds={window_seconds}")
++
++    ResNet1D, BasicBlock1D = load_resnet1d_classes()
++    inter_dim = infer_inter_dim(ResNet1D, BasicBlock1D, T)
++    print(f"inter_dim (downsampled temporal length) = {inter_dim}")
++    model = ResNet1D(BasicBlock1D, 6, 3, [2, 2, 2, 2], inter_dim).to(device)
++    print(f"params: {sum(p.numel() for p in model.parameters()):,}")
++
++    disp_gt_tr = POS_tr[:, -1, :].astype(np.float32)  # [N,3] net window displacement
++
++    opt = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
++    sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=args.epochs)
++    mse = nn.MSELoss()
++
++    n = len(X_tr)
++    best_ate, best_state, no_imp = float("inf"), None, 0
++    for ep in range(args.epochs):
++        model.train()
++        perm = np.random.permutation(n)
++        ep_loss = 0.0
++        for i in range(0, n, args.batch_size):
++            idx = perm[i:i + args.batch_size]
++            xb = torch.from_numpy(X_tr[idx]).to(device)
++            yb = torch.from_numpy(disp_gt_tr[idx]).to(device)
++            opt.zero_grad()
++            mean, _logstd = model(xb)
++            loss = mse(mean, yb)
++            loss.backward()
++            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
++            opt.step()
++            ep_loss += loss.item() * len(idx)
++        sched.step()
++        ep_loss /= n
++
++        m = evaluate(model, X_va, POS_va, device, window_seconds, batch_size=args.batch_size)
++        improved = m["ate"] < best_ate - 1e-6
++        if improved:
++            best_ate = m["ate"]
++            best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
++            no_imp = 0
++        else:
++            no_imp += 1
++        print(f"epoch {ep+1:3d}/{args.epochs}  train_loss={ep_loss:.5f}  "
++              f"val vel_mse={m['vel_mse']:.5f} ATE={m['ate']:.4f} drift={m['drift']:.2f}%  "
++              f"best_ATE={best_ate:.4f}  {'*' if improved else ''}")
++        if args.patience > 0 and no_imp >= args.patience:
++            print(f"early stopping at epoch {ep+1}")
++            break
++
++    if best_state is not None:
++        model.load_state_dict(best_state)
++    final_metrics = evaluate(model, X_va, POS_va, device, window_seconds, batch_size=args.batch_size)
++    print(f"\nFINAL: vel_mse={final_metrics['vel_mse']:.5f} ATE={final_metrics['ate']:.4f}m "
++          f"drift={final_metrics['drift']:.2f}%")
++
++    torch.save({"model_state_dict": model.state_dict(), "inter_dim": inter_dim, "metrics": final_metrics},
++               os.path.join(args.out_dir, "best.pt"))
++    with open(os.path.join(args.out_dir, "metrics.csv"), "w", newline="") as f:
++        w = csv.DictWriter(f, fieldnames=["model", "vel_mse", "ate", "drift"])
++        w.writeheader()
++        w.writerow({"model": "TLIO", **final_metrics})
++    print(f"saved checkpoint + metrics to {args.out_dir}")
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/train_nymeria_tlio_local.py b/train_nymeria_tlio_local.py
+new file mode 100644
+index 0000000..25b0207
+--- /dev/null
++++ b/train_nymeria_tlio_local.py
+@@ -0,0 +1,71 @@
++#!/usr/bin/env python3
++"""TLIO's ResNet1D on Nymeria wrist IMU under the benchmark's WRIST-FRAME odometry protocol.
++
++Same network, optimiser, schedule and best-epoch rule as train_nymeria_tlio.py (the world-frame variant);
++only the target frame and the scorer change. TLIO's network emits ONE 3-vector per window: in the world-frame
++variant that is the window's net displacement, scored as a constant-velocity trajectory. Its wrist-frame
++counterpart is the window-mean pelvis velocity expressed in the wrist (FLU) frame, held constant over the
++benchmark's 8 x 4 sub-step grid and scored by the benchmark's own reconstruct_batch (common_local_eval.py).
++"""
++import argparse, os, sys
++import numpy as np
++import torch
++import torch.nn as nn
++
++_THIS = os.path.dirname(os.path.abspath(__file__))
++sys.path.insert(0, _THIS); sys.path.insert(0, os.path.dirname(_THIS))
++from train_nymeria_tlio import load_resnet1d_classes, infer_inter_dim      # noqa: E402
++from common_local_eval import score, write_result                           # noqa: E402
++
++
++def predict(model, X, device, bs=1024):
++    model.eval(); out = []
++    with torch.no_grad():
++        for i in range(0, len(X), bs):
++            out.append(model(torch.from_numpy(X[i:i + bs]).to(device))[0].cpu().numpy())
++    v = np.concatenate(out)                                   # [N, 3] window-mean wrist-frame velocity
++    return np.broadcast_to(v[:, None, None, :], (len(v), 8, 4, 3)).astype(np.float32).copy()
++
++
++def main():
++    p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
++    p.add_argument("--cache-dir", default=os.path.join(os.path.dirname(_THIS), "data_cache"))
++    p.add_argument("--out-dir", default=os.path.join(_THIS, "runs_nymeria_local"))
++    p.add_argument("--epochs", type=int, default=100); p.add_argument("--patience", type=int, default=15)
++    p.add_argument("--batch-size", type=int, default=512); p.add_argument("--lr", type=float, default=1e-3)
++    p.add_argument("--weight-decay", type=float, default=1e-4)
++    a = p.parse_args()
++    os.makedirs(a.out_dir, exist_ok=True)
++    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
++    tr = np.load(os.path.join(a.cache_dir, "nymeria_local_train.npz")); va = dict(np.load(os.path.join(a.cache_dir, "nymeria_local_val.npz")))
++    X_tr, y_tr = tr["X"], tr["Y"].mean(axis=(1, 2)).astype(np.float32)
++    print(f"train windows={len(X_tr)}  val windows={len(va['X'])}", flush=True)
++    ResNet1D, Block = load_resnet1d_classes()
++    model = ResNet1D(Block, 6, 3, [2, 2, 2, 2], infer_inter_dim(ResNet1D, Block, X_tr.shape[-1])).to(device)
++    opt = torch.optim.AdamW(model.parameters(), lr=a.lr, weight_decay=a.weight_decay)
++    sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=a.epochs); mse = nn.MSELoss()
++    best, best_m, no_imp, n = float("inf"), None, 0, len(X_tr)
++    for ep in range(a.epochs):
++        model.train(); perm = np.random.permutation(n); tot = 0.0
++        for i in range(0, n, a.batch_size):
++            idx = np.sort(perm[i:i + a.batch_size])
++            xb, yb = torch.from_numpy(X_tr[idx]).to(device), torch.from_numpy(y_tr[idx]).to(device)
++            opt.zero_grad(); loss = mse(model(xb)[0], yb); loss.backward()
++            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0); opt.step(); tot += loss.item() * len(idx)
++        sched.step(); m = score(predict(model, va["X"], device), va)
++        imp = m["ate_m"] < best - 1e-6
++        if imp:
++            best, best_m, no_imp = m["ate_m"], m, 0; torch.save(model.state_dict(), os.path.join(a.out_dir, "best.pt"))
++        else:
++            no_imp += 1
++        print(f"epoch {ep + 1:3d}/{a.epochs} train_loss={tot / n:.5f} val ATE={m['ate_m']:.4f} drift={m['drift_pct']:.2f}% best={best:.4f} {'*' if imp else ''}", flush=True)
++        if no_imp >= a.patience:
++            break
++    write_result("tlio", best_m, {"script": "TLIO/train_nymeria_tlio_local.py", "epochs_run": ep + 1, "n_val_windows": int(len(va["X"])),
++                                  "n_train_windows": int(n), "output": "window-mean wrist-frame velocity, constant over the 8x4 grid"},
++                 "TLIO's ResNet1D trained on the benchmark's Nymeria training windows to predict the window-mean pelvis velocity in the "
++                 "wrist frame, scored by the benchmark's wrist-frame reconstruction (same windows and scorer as every other row).")
++
++
++if __name__ == "__main__":
++    main()

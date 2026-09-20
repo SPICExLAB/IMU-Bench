@@ -51,6 +51,13 @@ EXPERTS = [(e, c.get("name", e)) for e, c in encoders.items() if (c or {}).get("
 # The wrist-frame odometry task has no external systems of its own; TLIO and Air-IO were scored under
 # the world-frame protocol on the same 73,515 windows and 33-point trajectories.
 EXPERT_ALIAS = {"odometry_nymeria_local": ("odometry_nymeria_worldframe", ["tlio", "airio"], " (world-frame protocol)")}
+# Caption note once a task's systems have been run under the task's own protocol (replaces EXPERT_NOTE).
+EXPERT_DIRECT_NOTE = {
+    "odometry_nymeria_local": "TLIO and Air-IO are retrained on the benchmark's Nymeria training windows for this "
+                              "protocol and scored by the same wrist-frame reconstruction on the same 73,515 windows: "
+                              "Air-IO predicts per-step velocity in the sensor frame, its native target, and TLIO, whose "
+                              "network emits one vector per window, the window-mean wrist-frame velocity.",
+}
 # Caveats that belong in the caption of the task they apply to.
 EXPERT_NOTE = {
     "arm_pose_nymeria": "Our arm-pose metric supplies ground-truth ancestor joints, which a full-body "
@@ -160,7 +167,7 @@ def write_table(table_id, columns, header_lines, caption, wide):
     lines += [r"\midrule"] + block(columns, [("scratch", "Scratch", "scratch")])
     expert = [(e, tex(lab), "external") for e, lab in EXPERTS
               if any(get(e, "external") is not None for _, _, get in columns)]
-    if table_id in EXPERT_ALIAS:
+    if table_id in EXPERT_ALIAS and not expert:      # sibling-protocol rows only while the task has none of its own
         sib, encs, suffix = EXPERT_ALIAS[table_id]
         names = dict(EXPERTS)
         for e in encs:
@@ -205,9 +212,11 @@ for task, short, _ in COLS:
         header = ["Encoder & " + " & ".join(label(task, k) for k in keys) + r" \\"]
     # Grouped headers drop the per-column "(%)", so say it once in the caption instead.
     unit = " All values in \\%." if (task in GROUPED and any(pct(task, k) for k in keys)) else ""
+    note = EXPERT_NOTE.get(task, "")
+    if task in EXPERT_DIRECT_NOTE and any(cells.get((task, e, "external")) and cells[(task, e, "external")].ok for e, _ in EXPERTS):
+        note = EXPERT_DIRECT_NOTE[task]           # the task now has systems run under its own protocol
     caption = (f"{short}: {tex(card['subtitle'].strip())}.{unit} Evaluation on the "
-               f"{card.get('eval_split', 'val')} split; {COMMON}"
-               + (" " + EXPERT_NOTE[task] if task in EXPERT_NOTE else ""))
+               f"{card.get('eval_split', 'val')} split; {COMMON}" + (" " + note if note else ""))
     rows = write_table(task, columns, header, caption, wide=len(keys) >= 6)
     written.append(task)
     for enc, lab, proto in rows:

@@ -1,0 +1,266 @@
+diff --git a/train_nymeria_airio.py b/train_nymeria_airio.py
+new file mode 100644
+index 0000000..74137f6
+--- /dev/null
++++ b/train_nymeria_airio.py
+@@ -0,0 +1,180 @@
++#!/usr/bin/env python3
++"""Train + evaluate Air-IO's CodeNetMotion velocity-sequence network on
++Nymeria wrist IMU -> world-frame pelvis odometry, scored in the exact metric
++definition of "4b. Odometry -- canonical world-frame variant".
++
++Adaptation notes (documented, not hidden)
++------------------------------------------
++* Reuses Air-IO's actual network (``model/code.py::CodeNetMotion``, the real
++  learned component) loaded directly from its source file.
++* Air-IO's own training pipeline (``train_motion.py``) uses pypose Lie-group
++  ground-truth rotation labels, a HOCON config system, wandb logging, and its
++  own ``SeqeuncesMotionDataset``/hdf5 data format. None of that is
++  reproduced here -- this script trains the SAME architecture (with
++  ``conf.propcov=False``, i.e. no covariance branch/loss -- this benchmark
++  doesn't do EKF fusion for any baseline, see the TLIO adapter's docstring
++  for the same reasoning) with plain MSE regression against per-sample
++  instantaneous velocity, using the network's own ``get_label()`` utility to
++  align targets to its native output stride (no rotation input used, i.e.
++  the base ``CodeNetMotion``, not ``CodeNetMotionwithRot`` -- this benchmark
++  has no pelvis orientation ground truth, only position, matching every
++  other model here).
++* CodeNetMotion naturally outputs a short PER-STEP velocity sequence (~15
++  steps for a 128-sample/2.56s window, set by its conv strides), closer to
++  "Ours"'s 32-segment resolution than TLIO's single displacement. The
++  resulting piecewise-constant-velocity trajectory is interpolated onto the
++  same 33-point grid "Ours" is scored on -- see ../common_worldframe_eval.py.
++"""
++from __future__ import annotations
++
++import argparse
++import csv
++import importlib.util
++import os
++import sys
++from types import SimpleNamespace
++
++import numpy as np
++import torch
++import torch.nn as nn
++
++_THIS_DIR = os.path.dirname(os.path.abspath(__file__))
++_ODOM_DIR = os.path.dirname(_THIS_DIR)
++sys.path.insert(0, _ODOM_DIR)
++from common_worldframe_eval import score_window, aggregate  # noqa: E402
++
++
++def load_codenet_motion_class():
++    spec = importlib.util.spec_from_file_location(
++        "airio_code", os.path.join(_THIS_DIR, "model", "code.py")
++    )
++    mod = importlib.util.module_from_spec(spec)
++    spec.loader.exec_module(mod)
++    return mod.CodeNetMotion
++
++
++def to_acc_gyro(X):
++    """X: [B,6,T] (acc_F,acc_L,acc_U,gyro_F,gyro_L,gyro_U) channels-first ->
++    data dict with acc/gyro each [B,T,3] channels-last, as CodeNetMotion expects."""
++    acc = X[:, :3, :].transpose(1, 2)
++    gyro = X[:, 3:, :].transpose(1, 2)
++    return {"acc": acc, "gyro": gyro}
++
++
++def native_velocity_labels(POS):
++    """POS: [N, T+1, 3] native-resolution position -> [N, T, 3] per-sample
++    instantaneous velocity (forward difference at 50Hz), the format
++    CodeNetMotion.get_label() expects (same length as the input sequence)."""
++    dt = 1.0 / 50.0  # native cache resolution; overridden by --target-hz if needed
++    return np.diff(POS, axis=1) / dt
++
++
++def evaluate(model, X, POS, device, window_seconds, batch_size=512):
++    model.eval()
++    vel_mses, ates, ferrs, plens = [], [], [], []
++    with torch.no_grad():
++        for i in range(0, len(X), batch_size):
++            xb = torch.from_numpy(X[i:i + batch_size]).to(device)
++            data = to_acc_gyro(xb)
++            out = model(data)
++            net_vel = out["net_vel"].cpu().numpy()  # [b, L_out, 3]
++            L_out = net_vel.shape[1]
++            dt_step = window_seconds / L_out
++            for j in range(net_vel.shape[0]):
++                traj_pred = np.zeros((L_out + 1, 3), dtype=np.float64)
++                traj_pred[1:] = np.cumsum(net_vel[j].astype(np.float64) * dt_step, axis=0)
++                vel_mse, ate, ferr, plen = score_window(traj_pred, POS[i + j], window_seconds)
++                vel_mses.append(vel_mse); ates.append(ate); ferrs.append(ferr); plens.append(plen)
++    return aggregate(vel_mses, ates, ferrs, plens)
++
++
++def main():
++    p = argparse.ArgumentParser(description=__doc__)
++    p.add_argument("--cache-dir", default=os.path.join(_ODOM_DIR, "data_cache"))
++    p.add_argument("--out-dir", default=os.path.join(_THIS_DIR, "runs_nymeria"))
++    p.add_argument("--epochs", type=int, default=80)
++    p.add_argument("--patience", type=int, default=10)
++    p.add_argument("--batch-size", type=int, default=512)
++    p.add_argument("--lr", type=float, default=1e-3)
++    p.add_argument("--weight-decay", type=float, default=1e-4)
++    p.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
++    args = p.parse_args()
++
++    os.makedirs(args.out_dir, exist_ok=True)
++    device = torch.device(args.device)
++
++    tr = np.load(os.path.join(args.cache_dir, "nymeria_worldframe_train.npz"))
++    va = np.load(os.path.join(args.cache_dir, "nymeria_worldframe_val.npz"))
++    X_tr, POS_tr = tr["X"], tr["POS"]
++    X_va, POS_va = va["X"], va["POS"]
++    window_seconds = float(tr["window_seconds"])
++    target_hz = float(tr["target_hz"])
++    T = X_tr.shape[-1]
++    print(f"train windows={len(X_tr)}  val windows={len(X_va)}  T={T}  window_seconds={window_seconds}")
++
++    CodeNetMotion = load_codenet_motion_class()
++    conf = SimpleNamespace(propcov=False)
++    model = CodeNetMotion(conf).to(device)
++    print(f"params: {sum(p.numel() for p in model.parameters()):,}")
++
++    dt_native = 1.0 / target_hz
++    vel_gt_tr = (np.diff(POS_tr, axis=1) / dt_native).astype(np.float32)  # [N,T,3]
++
++    opt = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
++    sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=args.epochs)
++    mse = nn.MSELoss()
++
++    n = len(X_tr)
++    best_ate, best_state, no_imp = float("inf"), None, 0
++    for ep in range(args.epochs):
++        model.train()
++        perm = np.random.permutation(n)
++        ep_loss = 0.0
++        for i in range(0, n, args.batch_size):
++            idx = perm[i:i + args.batch_size]
++            xb = torch.from_numpy(X_tr[idx]).to(device)
++            gt_label = torch.from_numpy(vel_gt_tr[idx]).to(device)
++            opt.zero_grad()
++            data = to_acc_gyro(xb)
++            out = model(data)
++            aligned = model.get_label(gt_label)
++            loss = mse(out["net_vel"], aligned)
++            loss.backward()
++            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
++            opt.step()
++            ep_loss += loss.item() * len(idx)
++        sched.step()
++        ep_loss /= n
++
++        m = evaluate(model, X_va, POS_va, device, window_seconds, batch_size=args.batch_size)
++        improved = m["ate"] < best_ate - 1e-6
++        if improved:
++            best_ate = m["ate"]
++            best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
++            no_imp = 0
++        else:
++            no_imp += 1
++        print(f"epoch {ep+1:3d}/{args.epochs}  train_loss={ep_loss:.5f}  "
++              f"val vel_mse={m['vel_mse']:.5f} ATE={m['ate']:.4f} drift={m['drift']:.2f}%  "
++              f"best_ATE={best_ate:.4f}  {'*' if improved else ''}")
++        if args.patience > 0 and no_imp >= args.patience:
++            print(f"early stopping at epoch {ep+1}")
++            break
++
++    if best_state is not None:
++        model.load_state_dict(best_state)
++    final_metrics = evaluate(model, X_va, POS_va, device, window_seconds, batch_size=args.batch_size)
++    print(f"\nFINAL: vel_mse={final_metrics['vel_mse']:.5f} ATE={final_metrics['ate']:.4f}m "
++          f"drift={final_metrics['drift']:.2f}%")
++
++    torch.save({"model_state_dict": model.state_dict(), "metrics": final_metrics},
++               os.path.join(args.out_dir, "best.pt"))
++    with open(os.path.join(args.out_dir, "metrics.csv"), "w", newline="") as f:
++        w = csv.DictWriter(f, fieldnames=["model", "vel_mse", "ate", "drift"])
++        w.writeheader()
++        w.writerow({"model": "Air-IO", **final_metrics})
++    print(f"saved checkpoint + metrics to {args.out_dir}")
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/train_nymeria_airio_local.py b/train_nymeria_airio_local.py
+new file mode 100644
+index 0000000..556b44b
+--- /dev/null
++++ b/train_nymeria_airio_local.py
+@@ -0,0 +1,74 @@
++#!/usr/bin/env python3
++"""Air-IO's CodeNetMotion on Nymeria wrist IMU under the benchmark's WRIST-FRAME odometry protocol.
++
++Air-IO regresses body-frame velocity by design, so this is its native target: the same network, optimiser,
++schedule and best-epoch rule as train_nymeria_airio.py, trained on per-sample pelvis velocity in the wrist (FLU)
++frame (the benchmark's 8 x 4 sub-step targets, each held for its 4 samples, aligned with the network's own
++get_label()). Its ~15-step output is mapped onto the benchmark's 32 sub-steps by nearest time and scored by the
++benchmark's own reconstruct_batch (common_local_eval.py).
++"""
++import argparse, os, sys
++from types import SimpleNamespace
++import numpy as np
++import torch
++import torch.nn as nn
++
++_THIS = os.path.dirname(os.path.abspath(__file__))
++sys.path.insert(0, _THIS); sys.path.insert(0, os.path.dirname(_THIS))
++from train_nymeria_airio import load_codenet_motion_class, to_acc_gyro      # noqa: E402
++from common_local_eval import score, write_result                            # noqa: E402
++
++
++def predict(model, X, device, bs=1024):
++    model.eval(); out = []
++    with torch.no_grad():
++        for i in range(0, len(X), bs):
++            out.append(model(to_acc_gyro(torch.from_numpy(X[i:i + bs]).to(device)))["net_vel"].cpu().numpy())
++    v = np.concatenate(out)                                                 # [N, L, 3]
++    L = v.shape[1]
++    idx = np.clip(np.floor((np.arange(32) + 0.5) / 32 * L).astype(int), 0, L - 1)   # sub-step centre -> nearest output step
++    return v[:, idx].reshape(len(v), 8, 4, 3).astype(np.float32)
++
++
++def main():
++    p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
++    p.add_argument("--cache-dir", default=os.path.join(os.path.dirname(_THIS), "data_cache"))
++    p.add_argument("--out-dir", default=os.path.join(_THIS, "runs_nymeria_local"))
++    p.add_argument("--epochs", type=int, default=80); p.add_argument("--patience", type=int, default=10)
++    p.add_argument("--batch-size", type=int, default=512); p.add_argument("--lr", type=float, default=1e-3)
++    p.add_argument("--weight-decay", type=float, default=1e-4)
++    a = p.parse_args()
++    os.makedirs(a.out_dir, exist_ok=True)
++    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
++    tr = np.load(os.path.join(a.cache_dir, "nymeria_local_train.npz")); va = dict(np.load(os.path.join(a.cache_dir, "nymeria_local_val.npz")))
++    X_tr = tr["X"]; T = X_tr.shape[-1]
++    vel_tr = np.repeat(tr["Y"].reshape(len(X_tr), 32, 3), T // 32, axis=1).astype(np.float32)      # [N, 128, 3] per-sample label
++    print(f"train windows={len(X_tr)}  val windows={len(va['X'])}", flush=True)
++    model = load_codenet_motion_class()(SimpleNamespace(propcov=False)).to(device)
++    opt = torch.optim.AdamW(model.parameters(), lr=a.lr, weight_decay=a.weight_decay)
++    sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=a.epochs); mse = nn.MSELoss()
++    best, best_m, no_imp, n = float("inf"), None, 0, len(X_tr)
++    for ep in range(a.epochs):
++        model.train(); perm = np.random.permutation(n); tot = 0.0
++        for i in range(0, n, a.batch_size):
++            idx = np.sort(perm[i:i + a.batch_size])
++            xb, gt = torch.from_numpy(X_tr[idx]).to(device), torch.from_numpy(vel_tr[idx]).to(device)
++            opt.zero_grad(); out = model(to_acc_gyro(xb)); loss = mse(out["net_vel"], model.get_label(gt)); loss.backward()
++            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0); opt.step(); tot += loss.item() * len(idx)
++        sched.step(); m = score(predict(model, va["X"], device), va)
++        imp = m["ate_m"] < best - 1e-6
++        if imp:
++            best, best_m, no_imp = m["ate_m"], m, 0; torch.save(model.state_dict(), os.path.join(a.out_dir, "best.pt"))
++        else:
++            no_imp += 1
++        print(f"epoch {ep + 1:3d}/{a.epochs} train_loss={tot / n:.5f} val ATE={m['ate_m']:.4f} drift={m['drift_pct']:.2f}% best={best:.4f} {'*' if imp else ''}", flush=True)
++        if no_imp >= a.patience:
++            break
++    write_result("airio", best_m, {"script": "Air-IO/train_nymeria_airio_local.py", "epochs_run": ep + 1, "n_val_windows": int(len(va["X"])),
++                                   "n_train_windows": int(n), "output": "per-step wrist-frame velocity, nearest-time mapped to the 8x4 grid"},
++                 "Air-IO's CodeNetMotion trained on the benchmark's Nymeria training windows to predict pelvis velocity in the wrist "
++                 "frame (its native body-frame target), scored by the benchmark's wrist-frame reconstruction.")
++
++
++if __name__ == "__main__":
++    main()

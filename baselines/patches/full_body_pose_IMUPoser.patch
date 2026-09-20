@@ -1,0 +1,185 @@
+diff --git a/train_nymeria_imuposer.py b/train_nymeria_imuposer.py
+new file mode 100644
+index 0000000..d4f99a5
+--- /dev/null
++++ b/train_nymeria_imuposer.py
+@@ -0,0 +1,179 @@
++#!/usr/bin/env python3
++r"""IMUPoser (Mollyn et al., CHI 2023) as a task-specific baseline on Nymeria right-wrist IMU.
++
++IMUPoser ships no pretrained weights, and its released models are trained on synthetic AMASS IMU for
++phone / watch / earbud combinations, so -- exactly as was done for MobilePoser in ../SimplePoser -- the
++network is trained here on the benchmark's Nymeria training sessions and scored on its evaluation sessions.
++
++What is IMUPoser's and what is the benchmark's:
++  network     src/imuposer/models/LSTMs/RNN.py verbatim: Linear -> 2-layer BiLSTM(512) -> Linear, dropout 0.2
++  input       the 'rw' device combination: right-wrist acceleration / acc_scale (3) and orientation matrix (9)
++              => n_input = 12 * len(joints_set) = 12, as in IMUPoser_Model.py
++  output      24 SMPL joints in r6d (144); loss = MSE(pose) + MSE(FK joints)   (r6d=True, use_joint_loss=True)
++  optimiser   Adam, lr 3e-4, batch 256, early stopping on validation loss, patience 5   (their train script)
++  data        ../SimplePoser/data_processed/Nymeria/{train,test}.pt -- the same preprocessed sessions, 30 fps
++              and right-wrist slot MobilePoser was trained and scored on; 10 % of training sessions held out
++              for early stopping
++  scoring     ../SimplePoser/evaluate_nymeria.py::evaluate + summarize, unchanged: independent 10.24 s windows,
++              FullMotionEvaluator, right-arm chain mask -- identical to the MobilePoser rows of the tables
++
++    cd baselines/full_body_pose/SimplePoser && python ../IMUPoser/train_nymeria_imuposer.py
++"""
++import argparse
++import json
++import os
++import sys
++import time
++
++import numpy as np
++import torch
++import torch.nn as nn
++
++HERE = os.path.dirname(os.path.abspath(__file__))
++SIMPLE = os.path.abspath(os.path.join(HERE, "..", "SimplePoser"))
++REPO = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
++os.chdir(SIMPLE)                                   # SimplePoser's config uses paths relative to itself
++sys.path.insert(0, SIMPLE)
++sys.path.insert(0, os.path.join(HERE, "src"))
++sys.path.insert(0, REPO)
++
++import articulate as art                                           # noqa: E402
++from config import acc_scale, paths                                # noqa: E402  (SimplePoser's)
++# IMUPoser's network file, loaded by path: importing the package would pull in pytorch_lightning through
++# its __init__, which this environment does not have and the network does not need.
++import importlib.util as _ilu                                      # noqa: E402
++_spec = _ilu.spec_from_file_location("imuposer_rnn", os.path.join(HERE, "src", "imuposer", "models", "LSTMs", "RNN.py"))
++_mod = _ilu.module_from_spec(_spec); _spec.loader.exec_module(_mod)
++RNN = _mod.RNN                                                      # verbatim IMUPoser network
++
++RW = 1                      # right-wrist slot in both IMUPoser's and MobilePoser's 5-device layout
++WIN, HOP = 300, 150         # IMUPoser's max_sample_len; 10 s at 30 fps
++
++
++def load_sequences(split):
++    d = torch.load(os.path.join(paths.data_dir, "Nymeria", f"{split}.pt"), map_location="cpu", weights_only=True)
++    seqs = []
++    for acc, ori, pose, tran in zip(d["acc"], d["ori"], d["pose"], d["tran"]):
++        x = torch.cat([acc[:, RW] / acc_scale, ori[:, RW].reshape(len(ori), 9)], dim=1).float()       # [T, 12]
++        y = art.math.rotation_matrix_to_r6d(pose.view(-1, 24, 3, 3)).view(-1, 144).float()            # [T, 144]
++        seqs.append((x, y, tran.view(-1, 3).float()))
++    return seqs
++
++
++def windows(seqs):
++    X, Y = [], []
++    for x, y, _ in seqs:
++        for s in range(0, len(x) - WIN + 1, HOP):
++            X.append(x[s:s + WIN]); Y.append(y[s:s + WIN])
++    return torch.stack(X), torch.stack(Y)
++
++
++class IMUPoserNet(nn.Module):
++    def __init__(self):
++        super().__init__()
++        self.dip_model = RNN(n_input=12, n_output=144, n_hidden=512, bidirectional=True)   # name as in IMUPoser_Model.py
++
++    def forward(self, x):
++        lens = torch.full((x.shape[0],), x.shape[1], dtype=torch.long)
++        return self.dip_model(x, lens)[0]
++
++
++class OfflineWrapper:
++    """The interface ../SimplePoser/evaluate_nymeria.py::evaluate expects of a model."""
++    def __init__(self, net, device):
++        self.net, self.device = net, device
++
++    def eval(self): self.net.eval(); return self
++    def reset(self): pass
++
++    def forward_offline(self, x):                                   # x [1, T, 12]
++        r6d = self.net(x.to(self.device))[0]
++        pose = art.math.r6d_to_rotation_matrix(r6d.reshape(-1, 6)).view(-1, 24, 3, 3)
++        return pose, None, torch.zeros(len(pose), 3, device=self.device), None   # no translation head in IMUPoser
++
++
++def main():
++    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
++    ap.add_argument("--max-epochs", type=int, default=200)
++    ap.add_argument("--patience", type=int, default=5)
++    ap.add_argument("--lr", type=float, default=3e-4)
++    ap.add_argument("--batch-size", type=int, default=256)
++    ap.add_argument("--out", default=os.path.join(HERE, "runs_nymeria"))
++    ap.add_argument("--smoke", action="store_true", help="tiny synthetic forward/backward + evaluator call, no data")
++    a = ap.parse_args()
++    dev = torch.device("cuda" if torch.cuda.is_available() else "cpu")
++    torch.manual_seed(42); np.random.seed(42)
++    net = IMUPoserNet().to(dev)
++    body = art.ParametricModel(paths.smpl_file, device=dev)
++    mse = nn.MSELoss()
++
++    def loss_fn(pred, tgt):
++        l = mse(pred, tgt)                                           # pose loss
++        R_p = art.math.r6d_to_rotation_matrix(pred.reshape(-1, 6)).view(-1, 24, 3, 3)
++        R_t = art.math.r6d_to_rotation_matrix(tgt.reshape(-1, 6)).view(-1, 24, 3, 3)
++        return l + mse(body.forward_kinematics(pose=R_p)[1], body.forward_kinematics(pose=R_t)[1])   # + joint loss
++
++    if a.smoke:
++        x, y = torch.randn(4, WIN, 12, device=dev), torch.randn(4, WIN, 144, device=dev)
++        l = loss_fn(net(x), y); l.backward(); print("smoke: loss", float(l), "| params", sum(p.numel() for p in net.parameters()))
++        from evaluate_nymeria import NymeriaEvaluator
++        ev = NymeriaEvaluator(device=dev); w = OfflineWrapper(net, dev).eval()
++        with torch.no_grad():
++            p, _, t, _ = w.forward_offline(x[:1])
++        fe, ae = ev.eval(p, p.clone(), t, t); print("smoke: evaluator ok, full errs shape", tuple(fe.shape)); return
++
++    print("[imuposer] loading Nymeria sessions ...", flush=True)
++    train, test = load_sequences("train"), load_sequences("test")
++    rng = np.random.default_rng(42); idx = rng.permutation(len(train)); n_val = max(1, len(train) // 10)
++    Xv, Yv = windows([train[i] for i in idx[:n_val]]); Xt, Yt = windows([train[i] for i in idx[n_val:]])
++    print(f"[imuposer] train {len(train) - n_val} sessions / {len(Xt)} windows | val {n_val} / {len(Xv)} | test {len(test)} sessions", flush=True)
++    opt = torch.optim.Adam(net.parameters(), lr=a.lr)
++    os.makedirs(a.out, exist_ok=True); best, bad, hist = float("inf"), 0, []
++    for ep in range(a.max_epochs):
++        net.train(); t0 = time.time(); perm = torch.randperm(len(Xt)); tl = []
++        for i in range(0, len(perm), a.batch_size):
++            b = perm[i:i + a.batch_size]; opt.zero_grad()
++            l = loss_fn(net(Xt[b].to(dev)), Yt[b].to(dev)); l.backward(); opt.step(); tl.append(float(l))
++        net.eval(); vl = []
++        with torch.no_grad():
++            for i in range(0, len(Xv), a.batch_size):
++                vl.append(float(loss_fn(net(Xv[i:i + a.batch_size].to(dev)), Yv[i:i + a.batch_size].to(dev))))
++        tr, va = float(np.mean(tl)), float(np.mean(vl)); hist.append({"epoch": ep, "train": tr, "val": va})
++        print(f"  epoch {ep:3d}  train {tr:.5f}  val {va:.5f}  ({time.time() - t0:.0f}s)", flush=True)
++        if va < best - 1e-5:
++            best, bad = va, 0; torch.save({"model": net.state_dict(), "epoch": ep, "val": va}, os.path.join(a.out, "best.pt"))
++        else:
++            bad += 1
++            if bad >= a.patience:
++                print(f"[imuposer] early stop at epoch {ep} (best val {best:.5f})", flush=True); break
++    net.load_state_dict(torch.load(os.path.join(a.out, "best.pt"), map_location=dev)["model"])
++
++    # ---- score with MobilePoser's own Nymeria evaluation, unchanged ---------------------------------------
++    from evaluate_nymeria import evaluate, summarize
++    dataset = [(x, y, None, tran, None, None) for x, y, tran in test]
++    res = evaluate(OfflineWrapper(net, dev), dataset, dev, window_seconds=10.24)
++    summary = summarize(*res, window_seconds=10.24) if isinstance(res, tuple) else res
++    summary["training"] = {"epochs_run": len(hist), "best_val_loss": best, "lr": a.lr, "batch_size": a.batch_size,
++                           "window_frames": WIN, "fps": 30, "n_train_windows": int(len(Xt)), "history_tail": hist[-5:]}
++    out_json = os.path.join(SIMPLE, "results", "nymeria_imuposer_results.json")
++    json.dump(summary, open(out_json, "w"), indent=2); print("[imuposer] wrote", out_json, flush=True)
++    fb, arm = summary["full_body_pose"], summary["arm_pose"]
++    print(f"[imuposer] full-body {fb['positional_error_cm'] * 10:.2f} mm | arm {arm['positional_error_cm']:.2f} cm, {arm['global_angular_error_deg']:.2f} deg", flush=True)
++
++    # ---- into the benchmark's results tree, same mapping as the MobilePoser rows --------------------------
++    from bench.schema import Result, save_result, stamp_provenance
++    note = ("IMUPoser's BiLSTM trained on the benchmark's Nymeria training sessions (right-wrist acceleration and "
++            "orientation), scored with the MobilePoser Nymeria evaluator on independent 10.24 s windows. It predicts "
++            "the whole kinematic chain; our arm metric holds ancestors at ground truth.")
++    prov = stamp_provenance("scorer:baselines/full_body_pose/IMUPoser/train_nymeria_imuposer.py", info=summary["training"])
++    for task, metrics, primary in (("full_body_pose_nymeria", {"mpjpe_mm": fb["positional_error_cm"] * 10}, "mpjpe_mm"),
++                                   ("arm_pose_nymeria", {"pos_err_cm": arm["positional_error_cm"],
++                                                         "ang_err_deg": arm["global_angular_error_deg"]}, "pos_err_cm")):
++        r = Result(task=task, encoder="imuposer", protocol="external", seed=0, metrics=metrics, primary_metric=primary,
++                   eval_split="val", selection={"split": "10 % of training sessions", "monitor": "val_loss"},
++                   job_ids={"train": os.environ.get("SLURM_JOB_ID")}, provenance=prov, status="ok", notes=note)
++        print("  ->", save_result(r), flush=True)
++
++
++if __name__ == "__main__":
++    main()
