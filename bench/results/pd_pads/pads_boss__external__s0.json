@@ -1,0 +1,56 @@
+{
+  "task": "pd_pads",
+  "encoder": "pads_boss",
+  "protocol": "external",
+  "seed": 0,
+  "metrics": {
+    "subject_macro_f1": 0.4810958658416286,
+    "subject_bal_acc": 0.5845648604269295,
+    "subject_acc": 0.48936170212765956,
+    "subject_vote_bal_acc": 0.5443349753694581,
+    "window_bal_acc": 0.42095047353668047,
+    "window_macro_f1": 0.35788427760012237,
+    "window_acc": 0.37192671394799054
+  },
+  "primary_metric": "subject_macro_f1",
+  "eval_split": "val",
+  "run": null,
+  "checkpoint": null,
+  "checkpoint_step": null,
+  "selection": {
+    "split": "train (5-fold GroupKFold by participant)",
+    "monitor": "window bal_acc",
+    "mode": "max"
+  },
+  "job_ids": {
+    "score": "6968021"
+  },
+  "provenance": {
+    "source": "scorer:baselines/pd/pads_pipeline.py",
+    "date": "2026-09-20T16:34:50-05:00",
+    "git": "unknown",
+    "info": {
+      "n_train_windows": 67500,
+      "n_val_windows": 16920,
+      "n_train_subjects": 375,
+      "n_val_subjects": 94,
+      "window_seconds": 2.56,
+      "hz": 50,
+      "deviations": "50 Hz cache (original 100 Hz); 2.56 s windows (original 10 s assessment steps); grid by GroupKFold on training participants; SVM on a <= svm-cap participant-stratified subsample",
+      "features": "MultiBOSS (experiment b)",
+      "classifier": "CatBoostClassifier",
+      "chosen_params": {
+        "depth": 4
+      },
+      "inner_bal_acc": 0.40383844716838724,
+      "subject_pred_class_counts": [
+        45,
+        26,
+        23
+      ]
+    }
+  },
+  "status": "ok",
+  "notes": "PADS authors' pipeline (Varghese et al. 2024) under the IMU-Bench protocol. Per-channel BOSS histograms (window sizes 20/40/80, word 2, 3 bins), CatBoost.",
+  "schema_version": 1
+}
