@@ -50,7 +50,7 @@
       ]
     }
   },
-  "status": "ok",
-  "notes": "PADS authors' pipeline (Varghese et al. 2024) under the IMU-Bench protocol. Per-channel BOSS histograms, RBF SVM with probability outputs fitted on 12000 participant-stratified training windows.",
+  "status": "invalid",
+  "notes": "PADS authors' pipeline (Varghese et al. 2024) under the IMU-Bench protocol. Per-channel BOSS histograms, RBF SVM with probability outputs fitted on 12000 participant-stratified training windows. INVALID FOR THE PAPER (2026-09-20): the classifier collapsed to the majority class (all 94 participants labelled Parkinson's; subject macro-F1 0.254 is the degenerate value). The collapse comes from this port's deviations -- an RBF SVM is quadratic in N, so it was fitted on a 12k-window participant-stratified subsample with probability outputs -- not from the authors' method, whose BOSS pipeline was their best smartwatch option. Kept for the record, not shown in the task table.",
   "schema_version": 1
 }
