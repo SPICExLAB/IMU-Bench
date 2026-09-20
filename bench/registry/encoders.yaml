@@ -3253,6 +3253,108 @@ encoders:
     pretrain_data: 5-source reference corpus, then contrastive IMU-text fine-tuning on HumanML3D (the task's own training split; the IMU-text protocol keeps the final checkpoint)
     pretrain_objective: MAE (var-len, alt-attn) + task fine-tuning
     eval_note: transfer source; its own task is excluded as a target
+  txs_prism:
+    name: Trained from scratch on PRISM activity recognition (no pretraining)
+    short: txs_prism
+    group: transfer
+    order: 4100
+    hide_in_summary: true
+    run: bench_har_prism__scratch__scratch__s42
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/vit1d_ssl_mae_varlen_altattn_realdata_ocdetect_eatingspeed_motionx_sonic_flu.yaml
+    pretrain_data: none -- the encoder is the benchmark's from-scratch run on PRISM activity recognition (random init, the task's own training split only)
+    pretrain_objective: supervised, from scratch
+    eval_note: transfer source without pretraining; its own task is excluded as a target. Counterpart of tx5_prism.
+  txs_fullbody:
+    name: Trained from scratch on full-body pose (no pretraining)
+    short: txs_fullbody
+    group: transfer
+    order: 4100
+    hide_in_summary: true
+    run: bench_full_body_pose_nymeria__scratch__scratch__s42
+    ckpt: /gpfs/home/vbc1591/IMU-SSL/runs/bench_full_body_pose_nymeria__scratch__scratch__s42/checkpoints/best_mpjpe.pt
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/vit1d_ssl_mae_varlen_altattn_realdata_ocdetect_eatingspeed_motionx_sonic_flu.yaml
+    pretrain_data: none -- the encoder is the benchmark's from-scratch run on full-body pose (random init, the task's own training split only)
+    pretrain_objective: supervised, from scratch
+    eval_note: transfer source without pretraining; its own task is excluded as a target. Counterpart of tx5_fullbody.
+  txs_gesture:
+    name: Trained from scratch on microgesture (no pretraining)
+    short: txs_gesture
+    group: transfer
+    order: 4100
+    hide_in_summary: true
+    run: bench_microgesture_openwatch__scratch__scratch__s42
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/vit1d_ssl_mae_varlen_altattn_realdata_ocdetect_eatingspeed_motionx_sonic_flu.yaml
+    pretrain_data: none -- the encoder is the benchmark's from-scratch run on microgesture (random init, the task's own training split only)
+    pretrain_objective: supervised, from scratch
+    eval_note: transfer source without pretraining; its own task is excluded as a target. Counterpart of tx5_gesture.
+  txs_odom:
+    name: Trained from scratch on odometry (wrist-frame velocity) (no pretraining)
+    short: txs_odom
+    group: transfer
+    order: 4100
+    hide_in_summary: true
+    run: bench_odometry_nymeria_local__scratch__scratch__s42
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/vit1d_ssl_mae_varlen_altattn_realdata_ocdetect_eatingspeed_motionx_sonic_flu.yaml
+    pretrain_data: none -- the encoder is the benchmark's from-scratch run on odometry (wrist-frame velocity) (random init, the task's own training split only)
+    pretrain_objective: supervised, from scratch
+    eval_note: transfer source without pretraining; its own task is excluded as a target. Counterpart of tx5_odom.
+  txs_pd:
+    name: Trained from scratch on Parkinson's disease (no pretraining)
+    short: txs_pd
+    group: transfer
+    order: 4100
+    hide_in_summary: true
+    run: bench_pd_pads__scratch__scratch__s42
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/vit1d_ssl_mae_varlen_altattn_realdata_ocdetect_eatingspeed_motionx_sonic_flu.yaml
+    pretrain_data: none -- the encoder is the benchmark's from-scratch run on Parkinson's disease (random init, the task's own training split only)
+    pretrain_objective: supervised, from scratch
+    eval_note: transfer source without pretraining; its own task is excluded as a target. Counterpart of tx5_pd.
+  txs_language:
+    name: Trained from scratch on IMU-text retrieval (no pretraining)
+    short: txs_language
+    group: transfer
+    order: 4100
+    hide_in_summary: true
+    run: bench_language_humanml3d__scratch__scratch__s42
+    ckpt: latest
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/vit1d_ssl_mae_varlen_altattn_realdata_ocdetect_eatingspeed_motionx_sonic_flu.yaml
+    pretrain_data: none -- the encoder is the benchmark's from-scratch run on IMU-text retrieval (random init, the task's own training split only)
+    pretrain_objective: supervised, from scratch
+    eval_note: transfer source without pretraining; its own task is excluded as a target. Counterpart of tx5_language.
   corpus_ref:
     name: Corpus ablation 'ref' (per-source counts identical to the reference corpus (HAR/SONIC/Motion-X in full)
     short: corpus_ref

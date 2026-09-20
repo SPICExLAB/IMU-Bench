@@ -45,14 +45,16 @@ def value(task, enc, proto, scale):
     return pt.PENDING if v is None else v * scale
 
 
-def build(proto, mae_label, mae_sub, out):
+def build(proto, mae_label, mae_sub, out, prefix="tx5_"):
+    """prefix tx5_: sources are the reference MAE fine-tuned on each task; txs_: sources are the
+    benchmark's from-scratch run on each task (no pretraining) -- same targets, same reference."""
     targets = []
     for own, task, name, metric, scale, fmt in TARGETS:
         m = TASKS[task]["metrics"]
         hib = m[m["primary"]].get("higher_is_better", True)
         vals = {"mae": value(task, "mae_5src", proto, scale)}
         for key, _, _ in SOURCES:
-            vals[key] = None if key == own else value(task, f"tx5_{key}", proto, scale)
+            vals[key] = None if key == own else value(task, f"{prefix}{key}", proto, scale)
         targets.append(dict(name=name, metric=metric, arrow="↑" if hib else "↓", higher_better=hib, fmt=fmt,
                             ref=value(task, "scratch", "scratch", scale), values=vals))
     return dict(out=out, ref_label="From scratch", ref_sub="(baseline)", cbar="Gain over from-scratch (%)",
@@ -65,7 +67,12 @@ def main():
     ap.add_argument("--dpi", type=int, default=400)
     a = ap.parse_args()
     pt.TABLES = {"scratch": build("probe", "MAE probe", "self-supervised", "transfer5_frozen.png"),
-                 "finetune": build("finetune", "MAE finetune", "direct", "transfer5_trainable.png")}
+                 "finetune": build("finetune", "MAE finetune", "direct", "transfer5_trainable.png"),
+                 # sources trained from scratch per task: does supervision transfer without pretraining?
+                 "scratch_src_probe": build("probe", "MAE probe", "self-supervised",
+                                            "transfer_scratchsrc_frozen.png", prefix="txs_"),
+                 "scratch_src_finetune": build("finetune", "MAE finetune", "direct",
+                                               "transfer_scratchsrc_trainable.png", prefix="txs_")}
     export_csv()
     if any(t["ref"] is pt.PENDING for spec in pt.TABLES.values() for t in spec["targets"]):
         print("a from-scratch reference cell is pending -> figure not re-rendered (CSV exported)")
