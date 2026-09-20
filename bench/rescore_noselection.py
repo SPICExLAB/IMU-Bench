@@ -44,6 +44,9 @@ from bench.rescore_units import PAPER_TASKS as _ALL_TASKS                    # n
 # selected one). IMU--text already uses the final checkpoint, so its two columns should come out
 # identical -- a useful self-check that the control reproduces the reported numbers.
 PAPER_TASKS = [t for t in _ALL_TASKS if not t.startswith("microgesture_")]
+# The two decoder controls are part of the reported table, so they need the control too;
+# bench.rescore_units lists only the pretrained encoders and scratch.
+CELLS = PAPER_CELLS + ["control_random__probe", "control_raw__probe"]
 from bench.score import score_cell                                           # noqa: E402
 from bench.score.common import run_dir_of                                    # noqa: E402
 
@@ -55,7 +58,7 @@ def _targets(task: str, all_cells: bool, only: Optional[List[str]]) -> List[str]
         enc_proto = cell.rsplit("__s", 1)[0]
         if only and cell not in only and enc_proto not in only:
             continue
-        if not only and not all_cells and enc_proto not in PAPER_CELLS:
+        if not only and not all_cells and enc_proto not in CELLS:
             continue
         out.append(p)
     return out
