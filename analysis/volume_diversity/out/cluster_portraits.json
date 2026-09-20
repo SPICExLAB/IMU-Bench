@@ -1,0 +1,191 @@
+{
+ "pool_percentiles_10_50_90": {
+  "acc_mag_std": [
+   0.26329663395881653,
+   1.359008550643921,
+   4.557892322540283
+  ],
+  "gyr_mag_mean": [
+   0.27001839876174927,
+   1.213207483291626,
+   6.213824272155762
+  ],
+  "stillness_frac": [
+   0.11113357543945312,
+   0.5,
+   0.92578125
+  ],
+  "acc_dom_hz": [
+   0.68359375,
+   1.953125,
+   8.984375
+  ],
+  "autocorr_peak": [
+   0.10624176263809204,
+   0.18448306620121002,
+   0.5268168449401855
+  ],
+  "autocorr_peak_hz": [
+   0.5050504803657532,
+   1.1904761791229248,
+   3.3333332538604736
+  ],
+  "gravity_dir_change_deg": [
+   0.6937976479530334,
+   11.171092987060547,
+   50.3419075012207
+  ]
+ },
+ "clusters": [
+  {
+   "rule": "largest overall",
+   "cluster": 369,
+   "size": 6358,
+   "source_pct": {
+    "ocdetect": 99.9,
+    "eatingspeed": 0.1,
+    "motionx": 0.0,
+    "sonic": 0.0
+   },
+   "median": {
+    "acc_mag_std": 1.474,
+    "gyr_mag_mean": 1.358,
+    "stillness_frac": 0.417,
+    "acc_dom_hz": 1.465,
+    "autocorr_peak": 0.168,
+    "autocorr_peak_hz": 0.833,
+    "gravity_dir_change_deg": 42.442
+   },
+   "examples": [
+    614181,
+    817659,
+    1199982
+   ]
+  },
+  {
+   "rule": "largest EatingSpeed-dominated",
+   "cluster": 503,
+   "size": 5812,
+   "source_pct": {
+    "ocdetect": 0.8,
+    "eatingspeed": 99.2,
+    "motionx": 0.0,
+    "sonic": 0.0
+   },
+   "median": {
+    "acc_mag_std": 0.015,
+    "gyr_mag_mean": 1.25,
+    "stillness_frac": 1.0,
+    "acc_dom_hz": 6.738,
+    "autocorr_peak": 0.126,
+    "autocorr_peak_hz": 1.064,
+    "gravity_dir_change_deg": 0.02
+   },
+   "examples": [
+    1255403,
+    1294367,
+    1325938
+   ]
+  },
+  {
+   "rule": "largest SONIC-dominated",
+   "cluster": 733,
+   "size": 2848,
+   "source_pct": {
+    "ocdetect": 0.0,
+    "eatingspeed": 0.0,
+    "motionx": 0.0,
+    "sonic": 100.0
+   },
+   "median": {
+    "acc_mag_std": 6.102,
+    "gyr_mag_mean": 1.284,
+    "stillness_frac": 0.252,
+    "acc_dom_hz": 0.684,
+    "autocorr_peak": 0.43,
+    "autocorr_peak_hz": 3.333,
+    "gravity_dir_change_deg": 2.045
+   },
+   "examples": [
+    1605099,
+    1606300,
+    1728410
+   ]
+  },
+  {
+   "rule": "largest Motion-X-dominated",
+   "cluster": 987,
+   "size": 1186,
+   "source_pct": {
+    "ocdetect": 0.6,
+    "eatingspeed": 0.3,
+    "motionx": 98.1,
+    "sonic": 1.0
+   },
+   "median": {
+    "acc_mag_std": 10.418,
+    "gyr_mag_mean": 3.099,
+    "stillness_frac": 0.062,
+    "acc_dom_hz": 2.539,
+    "autocorr_peak": 0.235,
+    "autocorr_peak_hz": 1.429,
+    "gravity_dir_change_deg": 2.722
+   },
+   "examples": [
+    1541852,
+    1545899,
+    1548544
+   ]
+  },
+  {
+   "rule": "stillest",
+   "cluster": 8,
+   "size": 1272,
+   "source_pct": {
+    "ocdetect": 1.5,
+    "eatingspeed": 97.6,
+    "motionx": 0.0,
+    "sonic": 0.9
+   },
+   "median": {
+    "acc_mag_std": 0.047,
+    "gyr_mag_mean": 2.055,
+    "stillness_frac": 1.0,
+    "acc_dom_hz": 4.004,
+    "autocorr_peak": 0.168,
+    "autocorr_peak_hz": 1.562,
+    "gravity_dir_change_deg": 0.612
+   },
+   "examples": [
+    1352047,
+    1482149,
+    1492440
+   ]
+  },
+  {
+   "rule": "most rhythmic",
+   "cluster": 288,
+   "size": 5356,
+   "source_pct": {
+    "ocdetect": 100.0,
+    "eatingspeed": 0.0,
+    "motionx": 0.0,
+    "sonic": 0.0
+   },
+   "median": {
+    "acc_mag_std": 3.707,
+    "gyr_mag_mean": 1.322,
+    "stillness_frac": 0.062,
+    "acc_dom_hz": 1.758,
+    "autocorr_peak": 0.846,
+    "autocorr_peak_hz": 0.893,
+    "gravity_dir_change_deg": 2.784
+   },
+   "examples": [
+    697404,
+    743568,
+    775831
+   ]
+  }
+ ]
+}

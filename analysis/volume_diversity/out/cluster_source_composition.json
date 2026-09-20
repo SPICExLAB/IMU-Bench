@@ -1,0 +1,520 @@
+{
+ "enc": {
+  "n_clusters": 1000,
+  "nonempty": 1000,
+  "size_min": 113,
+  "size_median": 1368.5,
+  "size_max": 6358,
+  "dominant_gt90": 797,
+  "dominant_gt50": 996,
+  "median_dominant_share": 0.9800738913443199,
+  "clusters_by_dominant_source": {
+   "ocdetect": 622,
+   "eatingspeed": 192,
+   "motionx": 65,
+   "sonic": 121
+  },
+  "clusters_gt90_by_source": {
+   "ocdetect": 527,
+   "eatingspeed": 110,
+   "motionx": 42,
+   "sonic": 118
+  },
+  "pool_share": {
+   "ocdetect": 0.7209489245115627,
+   "eatingspeed": 0.16551348776303237,
+   "motionx": 0.028994404215192043,
+   "sonic": 0.08454318351021291
+  },
+  "n_sources_present_hist": {
+   "1": 109,
+   "2": 445,
+   "3": 271,
+   "4": 175
+  },
+  "exclusive_clusters": {
+   "ocdetect": 32,
+   "eatingspeed": 1,
+   "motionx": 3,
+   "sonic": 73
+  },
+  "windows_in_gt90_clusters_by_source": {
+   "ocdetect": 0.8763818983190977,
+   "eatingspeed": 0.5679718296150558,
+   "motionx": 0.6183549955352714,
+   "sonic": 0.9759091898954704
+  },
+  "largest_first_cumulative": {
+   "1": {
+    "windows": 6358,
+    "ocdetect": 0.9992135891789871,
+    "eatingspeed": 0.0007864108210128972,
+    "motionx": 0.0,
+    "sonic": 0.0
+   },
+   "5": {
+    "windows": 29191,
+    "ocdetect": 0.7995957658182317,
+    "eatingspeed": 0.20040423418176836,
+    "motionx": 0.0,
+    "sonic": 0.0
+   },
+   "10": {
+    "windows": 56344,
+    "ocdetect": 0.894877892943348,
+    "eatingspeed": 0.105122107056652,
+    "motionx": 0.0,
+    "sonic": 0.0
+   },
+   "25": {
+    "windows": 130647,
+    "ocdetect": 0.8761318667860724,
+    "eatingspeed": 0.1238681332139276,
+    "motionx": 0.0,
+    "sonic": 0.0
+   },
+   "50": {
+    "windows": 238689,
+    "ocdetect": 0.9235616220269891,
+    "eatingspeed": 0.07643418842091591,
+    "motionx": 4.189552094985525e-06,
+    "sonic": 0.0
+   },
+   "100": {
+    "windows": 428148,
+    "ocdetect": 0.9207260106318376,
+    "eatingspeed": 0.07924129039491017,
+    "motionx": 1.8685127572708502e-05,
+    "sonic": 1.4013845679531377e-05
+   },
+   "1000": {
+    "windows": 1738094,
+    "ocdetect": 0.7209489245115627,
+    "eatingspeed": 0.16551348776303237,
+    "motionx": 0.028994404215192043,
+    "sonic": 0.08454318351021291
+   }
+  },
+  "top20": [
+   {
+    "cluster": 369,
+    "n": 6358,
+    "ocdetect": 0.9992135891789871,
+    "eatingspeed": 0.0007864108210128972,
+    "motionx": 0.0,
+    "sonic": 0.0
+   },
+   {
+    "cluster": 503,
+    "n": 5812,
+    "ocdetect": 0.008258774948382657,
+    "eatingspeed": 0.9917412250516173,
+    "motionx": 0.0,
+    "sonic": 0.0
+   },
+   {
+    "cluster": 83,
+    "n": 5771,
+    "ocdetect": 0.9996534396118524,
+    "eatingspeed": 0.00034656038814763474,
+    "motionx": 0.0,
+    "sonic": 0.0
+   },
+   {
+    "cluster": 662,
+    "n": 5703,
+    "ocdetect": 0.999123268455199,
+    "eatingspeed": 0.000876731544800982,
+    "motionx": 0.0,
+    "sonic": 0.0
+   },
+   {
+    "cluster": 550,
+    "n": 5547,
+    "ocdetect": 0.9866594555615648,
+    "eatingspeed": 0.01334054443843519,
+    "motionx": 0.0,
+    "sonic": 0.0
+   },
+   {
+    "cluster": 896,
+    "n": 5530,
+    "ocdetect": 1.0,
+    "eatingspeed": 0.0,
+    "motionx": 0.0,
+    "sonic": 0.0
+   },
+   {
+    "cluster": 297,
+    "n": 5485,
+    "ocdetect": 0.9992707383773929,
+    "eatingspeed": 0.0007292616226071103,
+    "motionx": 0.0,
+    "sonic": 0.0
+   },
+   {
+    "cluster": 419,
+    "n": 5437,
+    "ocdetect": 0.9970572006621299,
+    "eatingspeed": 0.002942799337870149,
+    "motionx": 0.0,
+    "sonic": 0.0
+   },
+   {
+    "cluster": 288,
+    "n": 5356,
+    "ocdetect": 0.9996265870052278,
+    "eatingspeed": 0.0003734129947722181,
+    "motionx": 0.0,
+    "sonic": 0.0
+   },
+   {
+    "cluster": 491,
+    "n": 5345,
+    "ocdetect": 0.9904583723105707,
+    "eatingspeed": 0.009541627689429373,
+    "motionx": 0.0,
+    "sonic": 0.0
+   },
+   {
+    "cluster": 732,
+    "n": 5298,
+    "ocdetect": 0.9990562476406191,
+    "eatingspeed": 0.0009437523593808985,
+    "motionx": 0.0,
+    "sonic": 0.0
+   },
+   {
+    "cluster": 768,
+    "n": 5291,
+    "ocdetect": 0.9814779814779815,
+    "eatingspeed": 0.018522018522018523,
+    "motionx": 0.0,
+    "sonic": 0.0
+   },
+   {
+    "cluster": 790,
+    "n": 5231,
+    "ocdetect": 0.9992353278531829,
+    "eatingspeed": 0.0007646721468170522,
+    "motionx": 0.0,
+    "sonic": 0.0
+   },
+   {
+    "cluster": 866,
+    "n": 5025,
+    "ocdetect": 1.0,
+    "eatingspeed": 0.0,
+    "motionx": 0.0,
+    "sonic": 0.0
+   },
+   {
+    "cluster": 379,
+    "n": 4945,
+    "ocdetect": 1.0,
+    "eatingspeed": 0.0,
+    "motionx": 0.0,
+    "sonic": 0.0
+   },
+   {
+    "cluster": 757,
+    "n": 4944,
+    "ocdetect": 0.9991909385113269,
+    "eatingspeed": 0.0008090614886731392,
+    "motionx": 0.0,
+    "sonic": 0.0
+   },
+   {
+    "cluster": 455,
+    "n": 4915,
+    "ocdetect": 0.9450661241098678,
+    "eatingspeed": 0.054933875890132246,
+    "motionx": 0.0,
+    "sonic": 0.0
+   },
+   {
+    "cluster": 31,
+    "n": 4915,
+    "ocdetect": 0.006307222787385555,
+    "eatingspeed": 0.9936927772126144,
+    "motionx": 0.0,
+    "sonic": 0.0
+   },
+   {
+    "cluster": 475,
+    "n": 4901,
+    "ocdetect": 0.9995919200163232,
+    "eatingspeed": 0.00040807998367680065,
+    "motionx": 0.0,
+    "sonic": 0.0
+   },
+   {
+    "cluster": 51,
+    "n": 4859,
+    "ocdetect": 0.9936200864375386,
+    "eatingspeed": 0.006379913562461412,
+    "motionx": 0.0,
+    "sonic": 0.0
+   }
+  ]
+ },
+ "phys": {
+  "n_clusters": 1000,
+  "nonempty": 1000,
+  "size_min": 171,
+  "size_median": 1482.0,
+  "size_max": 5200,
+  "dominant_gt90": 886,
+  "dominant_gt50": 998,
+  "median_dominant_share": 0.9956479978354978,
+  "clusters_by_dominant_source": {
+   "ocdetect": 555,
+   "eatingspeed": 220,
+   "motionx": 62,
+   "sonic": 163
+  },
+  "clusters_gt90_by_source": {
+   "ocdetect": 514,
+   "eatingspeed": 219,
+   "motionx": 28,
+   "sonic": 125
+  },
+  "pool_share": {
+   "ocdetect": 0.7209489245115627,
+   "eatingspeed": 0.16551348776303237,
+   "motionx": 0.028994404215192043,
+   "sonic": 0.08454318351021291
+  },
+  "n_sources_present_hist": {
+   "1": 214,
+   "2": 289,
+   "3": 340,
+   "4": 157
+  },
+  "exclusive_clusters": {
+   "ocdetect": 62,
+   "eatingspeed": 139,
+   "motionx": 1,
+   "sonic": 12
+  },
+  "windows_in_gt90_clusters_by_source": {
+   "ocdetect": 0.9721134455424527,
+   "eatingspeed": 0.9858000959406003,
+   "motionx": 0.3152693719615041,
+   "sonic": 0.7770102896341463
+  },
+  "largest_first_cumulative": {
+   "1": {
+    "windows": 5200,
+    "ocdetect": 0.9990384615384615,
+    "eatingspeed": 0.0,
+    "motionx": 0.0009615384615384616,
+    "sonic": 0.0
+   },
+   "5": {
+    "windows": 24740,
+    "ocdetect": 0.996645109135004,
+    "eatingspeed": 8.084074373484237e-05,
+    "motionx": 0.0032336297493936943,
+    "sonic": 4.0420371867421184e-05
+   },
+   "10": {
+    "windows": 47822,
+    "ocdetect": 0.9978043578269415,
+    "eatingspeed": 4.182175567730333e-05,
+    "motionx": 0.0021119986617038184,
+    "sonic": 4.182175567730333e-05
+   },
+   "25": {
+    "windows": 110408,
+    "ocdetect": 0.996630678936309,
+    "eatingspeed": 0.00014491703499746396,
+    "motionx": 0.003133830881820158,
+    "sonic": 9.057314687341498e-05
+   },
+   "50": {
+    "windows": 207307,
+    "ocdetect": 0.9965799514729363,
+    "eatingspeed": 0.0004341387410941261,
+    "motionx": 0.002889434510170906,
+    "sonic": 9.647527579869469e-05
+   },
+   "100": {
+    "windows": 381346,
+    "ocdetect": 0.9875572314905624,
+    "eatingspeed": 0.009450735028032285,
+    "motionx": 0.0029028756037823918,
+    "sonic": 8.915787762294609e-05
+   },
+   "1000": {
+    "windows": 1738094,
+    "ocdetect": 0.7209489245115627,
+    "eatingspeed": 0.16551348776303237,
+    "motionx": 0.028994404215192043,
+    "sonic": 0.08454318351021291
+   }
+  },
+  "top20": [
+   {
+    "cluster": 836,
+    "n": 5200,
+    "ocdetect": 0.9990384615384615,
+    "eatingspeed": 0.0,
+    "motionx": 0.0009615384615384616,
+    "sonic": 0.0
+   },
+   {
+    "cluster": 32,
+    "n": 5117,
+    "ocdetect": 0.9882743795192496,
+    "eatingspeed": 0.0,
+    "motionx": 0.01172562048075044,
+    "sonic": 0.0
+   },
+   {
+    "cluster": 297,
+    "n": 4816,
+    "ocdetect": 0.9993770764119602,
+    "eatingspeed": 0.0,
+    "motionx": 0.0006229235880398671,
+    "sonic": 0.0
+   },
+   {
+    "cluster": 414,
+    "n": 4804,
+    "ocdetect": 0.9995836802664446,
+    "eatingspeed": 0.00041631973355537054,
+    "motionx": 0.0,
+    "sonic": 0.0
+   },
+   {
+    "cluster": 60,
+    "n": 4803,
+    "ocdetect": 0.9972933583177181,
+    "eatingspeed": 0.0,
+    "motionx": 0.0024984384759525295,
+    "sonic": 0.00020820320632937748
+   },
+   {
+    "cluster": 453,
+    "n": 4773,
+    "ocdetect": 1.0,
+    "eatingspeed": 0.0,
+    "motionx": 0.0,
+    "sonic": 0.0
+   },
+   {
+    "cluster": 930,
+    "n": 4697,
+    "ocdetect": 1.0,
+    "eatingspeed": 0.0,
+    "motionx": 0.0,
+    "sonic": 0.0
+   },
+   {
+    "cluster": 136,
+    "n": 4694,
+    "ocdetect": 0.9955262036642523,
+    "eatingspeed": 0.0,
+    "motionx": 0.004260758414997869,
+    "sonic": 0.00021303792074989347
+   },
+   {
+    "cluster": 365,
+    "n": 4501,
+    "ocdetect": 1.0,
+    "eatingspeed": 0.0,
+    "motionx": 0.0,
+    "sonic": 0.0
+   },
+   {
+    "cluster": 638,
+    "n": 4417,
+    "ocdetect": 0.9997736019923025,
+    "eatingspeed": 0.0,
+    "motionx": 0.00022639800769753225,
+    "sonic": 0.0
+   },
+   {
+    "cluster": 434,
+    "n": 4327,
+    "ocdetect": 1.0,
+    "eatingspeed": 0.0,
+    "motionx": 0.0,
+    "sonic": 0.0
+   },
+   {
+    "cluster": 710,
+    "n": 4313,
+    "ocdetect": 0.9932761418965917,
+    "eatingspeed": 0.0,
+    "motionx": 0.006492000927428704,
+    "sonic": 0.00023185717597959656
+   },
+   {
+    "cluster": 598,
+    "n": 4312,
+    "ocdetect": 0.99791280148423,
+    "eatingspeed": 0.0,
+    "motionx": 0.0020871985157699443,
+    "sonic": 0.0
+   },
+   {
+    "cluster": 815,
+    "n": 4291,
+    "ocdetect": 0.9995339081799114,
+    "eatingspeed": 0.0,
+    "motionx": 0.0,
+    "sonic": 0.00046609182008855747
+   },
+   {
+    "cluster": 369,
+    "n": 4256,
+    "ocdetect": 0.9988251879699248,
+    "eatingspeed": 0.00023496240601503758,
+    "motionx": 0.0009398496240601503,
+    "sonic": 0.0
+   },
+   {
+    "cluster": 235,
+    "n": 4234,
+    "ocdetect": 0.9919697685403873,
+    "eatingspeed": 0.0,
+    "motionx": 0.00803023145961266,
+    "sonic": 0.0
+   },
+   {
+    "cluster": 758,
+    "n": 4171,
+    "ocdetect": 0.999280748022057,
+    "eatingspeed": 0.0,
+    "motionx": 0.0007192519779429394,
+    "sonic": 0.0
+   },
+   {
+    "cluster": 512,
+    "n": 4155,
+    "ocdetect": 1.0,
+    "eatingspeed": 0.0,
+    "motionx": 0.0,
+    "sonic": 0.0
+   },
+   {
+    "cluster": 752,
+    "n": 4138,
+    "ocdetect": 1.0,
+    "eatingspeed": 0.0,
+    "motionx": 0.0,
+    "sonic": 0.0
+   },
+   {
+    "cluster": 615,
+    "n": 4132,
+    "ocdetect": 0.9869312681510165,
+    "eatingspeed": 0.0,
+    "motionx": 0.012342691190706679,
+    "sonic": 0.0007260406582768635
+   }
+  ]
+ }
+}

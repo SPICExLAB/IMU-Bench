@@ -1,0 +1,73 @@
+{
+  "k": 1000,
+  "seed": 42,
+  "pool_n": 1738094,
+  "phys_pca_var": 0.9979072183332809,
+  "phys_cluster_sizes": {
+    "nonempty": 1000,
+    "min": 171,
+    "q10": 539,
+    "median": 1482,
+    "q90": 3252,
+    "max": 5200
+  },
+  "enc_cluster_sizes": {
+    "nonempty": 1000,
+    "min": 113,
+    "median": 1368,
+    "max": 6358
+  },
+  "ami_phys_enc": 0.20873827195965725,
+  "ami_phys_source": 0.2038895371552847,
+  "ami_enc_source": 0.18111833546789702,
+  "stability_phys": {
+    "real": {
+      "ari_mean": 0.19273024107393522,
+      "ari_pairs": [
+        0.19081434979398615,
+        0.19356213467897077,
+        0.1938142387488487
+      ],
+      "silhouette": 0.026626046746969223
+    },
+    "null": {
+      "ari_mean": 0.011133002498973346,
+      "ari_pairs": [
+        0.011048905103174106,
+        0.011298633696263454,
+        0.011051468697482487
+      ],
+      "silhouette": -0.00295414961874485
+    },
+    "ari_excess": 0.1816,
+    "sil_excess": 0.0296
+  },
+  "per_source_types_phys": {
+    "ocdetect": {
+      "windows": 1253077,
+      "types_present": 763,
+      "effective_types": 503.29991342717204
+    },
+    "eatingspeed": {
+      "windows": 287678,
+      "types_present": 573,
+      "effective_types": 201.21349252951507
+    },
+    "motionx": {
+      "windows": 50395,
+      "types_present": 635,
+      "effective_types": 155.9561993778056
+    },
+    "sonic": {
+      "windows": 146944,
+      "types_present": 469,
+      "effective_types": 182.400262529233
+    }
+  },
+  "sources": [
+    "ocdetect",
+    "eatingspeed",
+    "motionx",
+    "sonic"
+  ]
+}

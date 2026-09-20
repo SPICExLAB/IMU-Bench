@@ -1,0 +1,26 @@
+{
+  "sources": {
+    "ocdetect": {
+      "status": "ok",
+      "sessions": 539,
+      "subjects": 22,
+      "probes_matched": 400,
+      "join": "positional"
+    },
+    "eatingspeed": {
+      "status": "not attempted (--sources)"
+    },
+    "motionx": {
+      "status": "not attempted (--sources)"
+    },
+    "sonic": {
+      "status": "not attempted (--sources)"
+    }
+  },
+  "probes": 400,
+  "coverage": {
+    "windows_with_session": 1253077,
+    "windows_with_subject": 1253077,
+    "pool_n": 1738094
+  }
+}

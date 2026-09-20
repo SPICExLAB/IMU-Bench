@@ -1,0 +1,307 @@
+encoders:
+  vd_nar_n12k:
+    name: VolDiv single-source, narrow motion band, N=12,500
+    short: nar_n12k
+    group: ablation
+    order: 900
+    hide_in_summary: true
+    run: vd_nar_n12k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_nar_n12k.yaml
+    pretrain_data: 'volume x diversity cell: single-source, narrow motion band, 12,500 windows (18 h)
+      of the full-size 4-source pool; 1 sources, 3 T-phys motion types (effective 2.8)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_nar_n50k:
+    name: VolDiv single-source, narrow motion band, N=50,000
+    short: nar_n50k
+    group: ablation
+    order: 901
+    hide_in_summary: true
+    run: vd_nar_n50k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_nar_n50k.yaml
+    pretrain_data: 'volume x diversity cell: single-source, narrow motion band, 50,000 windows (71 h)
+      of the full-size 4-source pool; 1 sources, 11 T-phys motion types (effective 10.8)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_nar_n200k:
+    name: VolDiv single-source, narrow motion band, N=200,000
+    short: nar_n200k
+    group: ablation
+    order: 902
+    hide_in_summary: true
+    run: vd_nar_n200k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_nar_n200k.yaml
+    pretrain_data: 'volume x diversity cell: single-source, narrow motion band, 200,000 windows (284 h)
+      of the full-size 4-source pool; 1 sources, 49 T-phys motion types (effective 48.3)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_nar_n800k:
+    name: VolDiv single-source, narrow motion band, N=800,000
+    short: nar_n800k
+    group: ablation
+    order: 903
+    hide_in_summary: true
+    run: vd_nar_n800k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_nar_n800k.yaml
+    pretrain_data: 'volume x diversity cell: single-source, narrow motion band, 800,000 windows (1,138
+      h) of the full-size 4-source pool; 1 sources, 250 T-phys motion types (effective 245.9)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_one_n12k:
+    name: VolDiv single-source, uniform random, N=12,500
+    short: one_n12k
+    group: ablation
+    order: 904
+    hide_in_summary: true
+    run: vd_one_n12k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_one_n12k.yaml
+    pretrain_data: 'volume x diversity cell: single-source, uniform random, 12,500 windows (18 h) of the
+      full-size 4-source pool; 1 sources, 578 T-phys motion types (effective 487.3)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_one_n50k:
+    name: VolDiv single-source, uniform random, N=50,000
+    short: one_n50k
+    group: ablation
+    order: 905
+    hide_in_summary: true
+    run: vd_one_n50k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_one_n50k.yaml
+    pretrain_data: 'volume x diversity cell: single-source, uniform random, 50,000 windows (71 h) of the
+      full-size 4-source pool; 1 sources, 617 T-phys motion types (effective 500.5)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_one_n200k:
+    name: VolDiv single-source, uniform random, N=200,000
+    short: one_n200k
+    group: ablation
+    order: 906
+    hide_in_summary: true
+    run: vd_one_n200k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_one_n200k.yaml
+    pretrain_data: 'volume x diversity cell: single-source, uniform random, 200,000 windows (284 h) of
+      the full-size 4-source pool; 1 sources, 671 T-phys motion types (effective 503.0)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_one_n800k:
+    name: VolDiv single-source, uniform random, N=800,000
+    short: one_n800k
+    group: ablation
+    order: 907
+    hide_in_summary: true
+    run: vd_one_n800k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_one_n800k.yaml
+    pretrain_data: 'volume x diversity cell: single-source, uniform random, 800,000 windows (1,138 h)
+      of the full-size 4-source pool; 1 sources, 734 T-phys motion types (effective 503.0)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_nat_n12k:
+    name: VolDiv 4-source, natural proportions, N=12,500
+    short: nat_n12k
+    group: ablation
+    order: 908
+    hide_in_summary: true
+    run: vd_nat_n12k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_nat_n12k.yaml
+    pretrain_data: 'volume x diversity cell: 4-source, natural proportions, 12,500 windows (18 h) of the
+      full-size 4-source pool; 4 sources, 991 T-phys motion types (effective 799.6)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_nat_n50k:
+    name: VolDiv 4-source, natural proportions, N=50,000
+    short: nat_n50k
+    group: ablation
+    order: 909
+    hide_in_summary: true
+    run: vd_nat_n50k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_nat_n50k.yaml
+    pretrain_data: 'volume x diversity cell: 4-source, natural proportions, 50,000 windows (71 h) of the
+      full-size 4-source pool; 4 sources, 1000 T-phys motion types (effective 822.9)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_nat_n200k:
+    name: VolDiv 4-source, natural proportions, N=200,000
+    short: nat_n200k
+    group: ablation
+    order: 910
+    hide_in_summary: true
+    run: vd_nat_n200k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_nat_n200k.yaml
+    pretrain_data: 'volume x diversity cell: 4-source, natural proportions, 200,000 windows (284 h) of
+      the full-size 4-source pool; 4 sources, 1000 T-phys motion types (effective 831.0)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_nat_n800k:
+    name: VolDiv 4-source, natural proportions, N=800,000
+    short: nat_n800k
+    group: ablation
+    order: 911
+    hide_in_summary: true
+    run: vd_nat_n800k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_nat_n800k.yaml
+    pretrain_data: 'volume x diversity cell: 4-source, natural proportions, 800,000 windows (1,138 h)
+      of the full-size 4-source pool; 4 sources, 1000 T-phys motion types (effective 832.2)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_bal_n12k:
+    name: VolDiv 4-source, source- and type-balanced, N=12,500
+    short: bal_n12k
+    group: ablation
+    order: 912
+    hide_in_summary: true
+    run: vd_bal_n12k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_bal_n12k.yaml
+    pretrain_data: 'volume x diversity cell: 4-source, source- and type-balanced, 12,500 windows (18 h)
+      of the full-size 4-source pool; 4 sources, 1000 T-phys motion types (effective 894.5)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_bal_n50k:
+    name: VolDiv 4-source, source- and type-balanced, N=50,000
+    short: bal_n50k
+    group: ablation
+    order: 913
+    hide_in_summary: true
+    run: vd_bal_n50k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_bal_n50k.yaml
+    pretrain_data: 'volume x diversity cell: 4-source, source- and type-balanced, 50,000 windows (71 h)
+      of the full-size 4-source pool; 4 sources, 1000 T-phys motion types (effective 878.6)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_bal_n200k:
+    name: VolDiv 4-source, source- and type-balanced, N=200,000
+    short: bal_n200k
+    group: ablation
+    order: 914
+    hide_in_summary: true
+    run: vd_bal_n200k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_bal_n200k.yaml
+    pretrain_data: 'volume x diversity cell: 4-source, source- and type-balanced, 200,000 windows (284
+      h) of the full-size 4-source pool; 4 sources, 1000 T-phys motion types (effective 799.5)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_bal_n800k:
+    name: VolDiv 4-source, source- and type-balanced, N=800,000
+    short: bal_n800k
+    group: ablation
+    order: 915
+    hide_in_summary: true
+    run: vd_bal_n800k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_bal_n800k.yaml
+    pretrain_data: 'volume x diversity cell: 4-source, source- and type-balanced, 800,000 windows (1,138
+      h) of the full-size 4-source pool; 4 sources, 1000 T-phys motion types (effective 872.9)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_nat_nfull:
+    name: VolDiv 4-source, natural proportions, N=1,738,094
+    short: nat_nfull
+    group: ablation
+    order: 916
+    hide_in_summary: true
+    run: vd_nat_nfull
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_nat_nfull.yaml
+    pretrain_data: 'volume x diversity cell: 4-source, natural proportions, 1,738,094 windows (2,472 h)
+      of the full-size 4-source pool; 4 sources, 1000 T-phys motion types (effective 832.8)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_bal_nfull:
+    name: VolDiv 4-source, source- and type-balanced, N=1,738,094
+    short: bal_nfull
+    group: ablation
+    order: 917
+    hide_in_summary: true
+    run: vd_bal_nfull
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_bal_nfull.yaml
+    pretrain_data: 'volume x diversity cell: 4-source, source- and type-balanced, 1,738,094 windows (2,472
+      h) of the full-size 4-source pool; 4 sources, 1000 T-phys motion types (effective 832.8)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps

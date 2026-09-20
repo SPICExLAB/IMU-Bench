@@ -8,7 +8,7 @@ equal compute here. All cells are frozen-encoder probes at seed 42, scored by `b
 
 | mask ratio | wisdm | utd_mhad | pamap2 | recofit | hhar | mhealth | **HAR mean** | arm pose (cm)↓ | gesture clip-F1↑ |
 |---|---|---|---|---|---|---|---|---|---|
-| **0.30** | · | · | · | · | · | · | · (0/6) | · | · |
+| **0.30** | 0.363 | 0.439 | 0.288 | 0.405 | · | · | · (4/6) | · | · |
 | **0.40** | 0.511 | 0.599 | 0.438 | 0.554 | 0.489 | 0.644 | **0.539** | 8.46 | 0.536 |
 | **0.50** | 0.510 | 0.562 | 0.409 | 0.545 | 0.553 | 0.613 | **0.532** | 8.41 | 0.501 |
 | **0.60** | 0.500 | 0.627 | 0.430 | 0.537 | 0.525 | 0.668 | **0.548** | 8.53 | 0.550 |
@@ -29,9 +29,9 @@ table above: the ordering is REVERSED.
 
 | evaluated at | 0.30 | 0.40 | 0.50 | 0.60 | 0.75 | 0.85 | 0.90 |
 |---|---|---|---|---|---|---|---|
-| **0.5** | · | 0.34402 | 0.37146 | 0.34006 | 0.35400 | 0.28305 | 0.27080 |
-| **0.75** | · | 0.52536 | 0.49220 | 0.49983 | 0.48484 | 0.40084 | 0.38176 |
-| **0.9** | · | 0.50799 | 0.43704 | 0.51141 | 0.50322 | 0.48793 | 0.46625 |
+| **0.5** | 0.16839 | 0.34535 | 0.37352 | 0.33261 | 0.35711 | 0.28214 | 0.27178 |
+| **0.75** | 0.17577 | 0.52722 | 0.49510 | 0.50622 | 0.48491 | 0.40232 | 0.38136 |
+| **0.9** | 0.21887 | 0.50559 | 0.43443 | 0.51792 | 0.50445 | 0.48945 | 0.46418 |
 
 Lower is better. The 0.85/0.90 arms reconstruct best at every evaluation ratio while
 transferring worst, so reconstruction fidelity is anti-correlated with probe accuracy here:
@@ -77,4 +77,4 @@ the 0.75-over-0.90 gap at eval 0.90 (0.0080, 0.0083) is not.
 
 ## Still missing
 
-`har_wisdm/mae_mr30`, `har_utd_mhad/mae_mr30`, `har_pamap2/mae_mr30`, `har_recofit/mae_mr30`, `har_hhar/mae_mr30`, `har_mhealth/mae_mr30`, `arm_pose_nymeria/mae_mr30`, `microgesture_openwatch/mae_mr30`
+`har_hhar/mae_mr30`, `har_mhealth/mae_mr30`, `arm_pose_nymeria/mae_mr30`, `microgesture_openwatch/mae_mr30`

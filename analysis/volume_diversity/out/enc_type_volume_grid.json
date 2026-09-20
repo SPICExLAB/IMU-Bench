@@ -1,0 +1,1265 @@
+{
+  "ks": [
+    1,
+    5,
+    10,
+    25,
+    50,
+    100,
+    1000
+  ],
+  "fracs": [
+    0.0001,
+    0.001,
+    0.01,
+    0.1,
+    1.0
+  ],
+  "pool_n": 1738094,
+  "arms": {
+    "vd_ek1_f0p01": {
+      "n_windows": 174,
+      "hours": 0.24746666666666667,
+      "phys": {
+        "types_present": 93,
+        "types_present_frac": 0.093,
+        "pool_mass_covered": 0.16458258299033307,
+        "effective_types_shannon": 74.49640321390412,
+        "effective_types_simpson": 59.36470588235296,
+        "kl_subset_pool": 2.0032699412387927,
+        "max_type_share": 0.040229885057471264
+      },
+      "enc": {
+        "types_present": 1,
+        "types_present_frac": 0.001,
+        "pool_mass_covered": 0.0036580300029802762,
+        "effective_types_shannon": 1.0,
+        "effective_types_simpson": 1.0,
+        "kl_subset_pool": 5.6112484346621985,
+        "max_type_share": 1.0
+      },
+      "source_counts": {
+        "ocdetect": 174,
+        "eatingspeed": 0,
+        "motionx": 0,
+        "sonic": 0
+      },
+      "n_sources": 1,
+      "effective_sources": 1.0,
+      "participation_ratio_enc": 16.69187999159714,
+      "vendi_enc": 1.871415784821949,
+      "pool_coverage": {
+        "fill_median": 7.979120969772339,
+        "fill_p90": 16.43818168640137,
+        "fill_p99": 19.79641927719116,
+        "fill_mean": 8.860567512434017
+      },
+      "nn_self_median": 1.9281904697418213,
+      "diversity": "ek1",
+      "volume_tag": "f0p01",
+      "index_file": "/projects/b53017/vbc1591/volume_diversity/idx/vd_ek1_f0p01.npy",
+      "sampler": "natural",
+      "n_types_allowed": 1,
+      "type_space": "enc",
+      "grid_K": 1,
+      "grid_fraction": 0.0001,
+      "n_subjects_known": 20,
+      "n_sessions_known": 124
+    },
+    "vd_ek1_f0p1": {
+      "n_windows": 1738,
+      "hours": 2.471822222222222,
+      "phys": {
+        "types_present": 244,
+        "types_present_frac": 0.244,
+        "pool_mass_covered": 0.415230131396806,
+        "effective_types_shannon": 142.3290318761511,
+        "effective_types_simpson": 100.04120023845798,
+        "kl_subset_pool": 1.343862783882944,
+        "max_type_share": 0.03279631760644419
+      },
+      "enc": {
+        "types_present": 1,
+        "types_present_frac": 0.001,
+        "pool_mass_covered": 0.0036580300029802762,
+        "effective_types_shannon": 1.0,
+        "effective_types_simpson": 1.0,
+        "kl_subset_pool": 5.6112484346621985,
+        "max_type_share": 1.0
+      },
+      "source_counts": {
+        "ocdetect": 1737,
+        "eatingspeed": 1,
+        "motionx": 0,
+        "sonic": 0
+      },
+      "n_sources": 2,
+      "effective_sources": 1.0048796474224146,
+      "participation_ratio_enc": 19.079272615675997,
+      "vendi_enc": 1.8668546852956107,
+      "pool_coverage": {
+        "fill_median": 7.8065409660339355,
+        "fill_p90": 16.321870994567874,
+        "fill_p99": 19.549914855957024,
+        "fill_mean": 8.673440279499896
+      },
+      "nn_self_median": 1.6819956302642822,
+      "diversity": "ek1",
+      "volume_tag": "f0p1",
+      "index_file": "/projects/b53017/vbc1591/volume_diversity/idx/vd_ek1_f0p1.npy",
+      "sampler": "natural",
+      "n_types_allowed": 1,
+      "type_space": "enc",
+      "grid_K": 1,
+      "grid_fraction": 0.001,
+      "n_subjects_known": 22,
+      "n_sessions_known": 305
+    },
+    "vd_ek5_f0p01": {
+      "n_windows": 174,
+      "hours": 0.24746666666666667,
+      "phys": {
+        "types_present": 103,
+        "types_present_frac": 0.103,
+        "pool_mass_covered": 0.17558889220030677,
+        "effective_types_shannon": 87.59887545150787,
+        "effective_types_simpson": 73.84390243902442,
+        "kl_subset_pool": 1.9703806473905743,
+        "max_type_share": 0.034482758620689655
+      },
+      "enc": {
+        "types_present": 5,
+        "types_present_frac": 0.005,
+        "pool_mass_covered": 0.016794833881251532,
+        "effective_types_shannon": 4.999667794206878,
+        "effective_types_simpson": 4.999339498018493,
+        "kl_subset_pool": 4.088726028744024,
+        "max_type_share": 0.20114942528735633
+      },
+      "source_counts": {
+        "ocdetect": 139,
+        "eatingspeed": 35,
+        "motionx": 0,
+        "sonic": 0
+      },
+      "n_sources": 2,
+      "effective_sources": 1.6520083714727607,
+      "participation_ratio_enc": 1.1937638566788058,
+      "vendi_enc": 2.8405294236477676,
+      "pool_coverage": {
+        "fill_median": 6.928957223892212,
+        "fill_p90": 13.162726402282717,
+        "fill_p99": 16.0949065208435,
+        "fill_mean": 7.560803294735631
+      },
+      "nn_self_median": 2.0514020919799805,
+      "diversity": "ek5",
+      "volume_tag": "f0p01",
+      "index_file": "/projects/b53017/vbc1591/volume_diversity/idx/vd_ek5_f0p01.npy",
+      "sampler": "natural",
+      "n_types_allowed": 5,
+      "type_space": "enc",
+      "grid_K": 5,
+      "grid_fraction": 0.0001,
+      "n_subjects_known": 20,
+      "n_sessions_known": 109
+    },
+    "vd_ek5_f0p1": {
+      "n_windows": 1738,
+      "hours": 2.471822222222222,
+      "phys": {
+        "types_present": 282,
+        "types_present_frac": 0.282,
+        "pool_mass_covered": 0.4511453350624305,
+        "effective_types_shannon": 163.03044318665656,
+        "effective_types_simpson": 110.68684499816783,
+        "kl_subset_pool": 1.3180789810648341,
+        "max_type_share": 0.03164556962025317
+      },
+      "enc": {
+        "types_present": 5,
+        "types_present_frac": 0.005,
+        "pool_mass_covered": 0.016794833881251532,
+        "effective_types_shannon": 4.999995033219667,
+        "effective_types_simpson": 4.99999006836277,
+        "kl_subset_pool": 4.088212014842153,
+        "max_type_share": 0.2002301495972382
+      },
+      "source_counts": {
+        "ocdetect": 1387,
+        "eatingspeed": 351,
+        "motionx": 0,
+        "sonic": 0
+      },
+      "n_sources": 2,
+      "effective_sources": 1.6538443078933538,
+      "participation_ratio_enc": 1.1989387343709446,
+      "vendi_enc": 2.858683242730004,
+      "pool_coverage": {
+        "fill_median": 6.6690285205841064,
+        "fill_p90": 12.861997985839844,
+        "fill_p99": 15.82699029922485,
+        "fill_mean": 7.2707878477915395
+      },
+      "nn_self_median": 1.802464485168457,
+      "diversity": "ek5",
+      "volume_tag": "f0p1",
+      "index_file": "/projects/b53017/vbc1591/volume_diversity/idx/vd_ek5_f0p1.npy",
+      "sampler": "natural",
+      "n_types_allowed": 5,
+      "type_space": "enc",
+      "grid_K": 5,
+      "grid_fraction": 0.001,
+      "n_subjects_known": 22,
+      "n_sessions_known": 310
+    },
+    "vd_ek5_f1": {
+      "n_windows": 17381,
+      "hours": 24.719644444444445,
+      "phys": {
+        "types_present": 428,
+        "types_present_frac": 0.428,
+        "pool_mass_covered": 0.6203110993996872,
+        "effective_types_shannon": 185.82233675814814,
+        "effective_types_simpson": 124.72680006952683,
+        "kl_subset_pool": 1.202752843135039,
+        "max_type_share": 0.024567055980668547
+      },
+      "enc": {
+        "types_present": 5,
+        "types_present_frac": 0.005,
+        "pool_mass_covered": 0.016794833881251532,
+        "effective_types_shannon": 4.99999996690019,
+        "effective_types_simpson": 4.999999933796573,
+        "kl_subset_pool": 4.088166192993102,
+        "max_type_share": 0.20004602727115817
+      },
+      "source_counts": {
+        "ocdetect": 13879,
+        "eatingspeed": 3502,
+        "motionx": 0,
+        "sonic": 0
+      },
+      "n_sources": 2,
+      "effective_sources": 1.6527711063880917,
+      "participation_ratio_enc": 1.1956562028839222,
+      "vendi_enc": 2.8727490412582317,
+      "pool_coverage": {
+        "fill_median": 6.5707197189331055,
+        "fill_p90": 12.733172702789307,
+        "fill_p99": 15.616185245513911,
+        "fill_mean": 7.161097882465058
+      },
+      "nn_self_median": 1.7284538745880127,
+      "diversity": "ek5",
+      "volume_tag": "f1",
+      "index_file": "/projects/b53017/vbc1591/volume_diversity/idx/vd_ek5_f1.npy",
+      "sampler": "natural",
+      "n_types_allowed": 5,
+      "type_space": "enc",
+      "grid_K": 5,
+      "grid_fraction": 0.01,
+      "n_subjects_known": 22,
+      "n_sessions_known": 388
+    },
+    "vd_ek10_f0p01": {
+      "n_windows": 174,
+      "hours": 0.24746666666666667,
+      "phys": {
+        "types_present": 116,
+        "types_present_frac": 0.116,
+        "pool_mass_covered": 0.19795131908861083,
+        "effective_types_shannon": 94.63114598067071,
+        "effective_types_simpson": 67.58035714285715,
+        "kl_subset_pool": 1.827338332405303,
+        "max_type_share": 0.06896551724137931
+      },
+      "enc": {
+        "types_present": 10,
+        "types_present_frac": 0.01,
+        "pool_mass_covered": 0.032417118982057354,
+        "effective_types_shannon": 9.996051826741354,
+        "effective_types_simpson": 9.99207920792079,
+        "kl_subset_pool": 3.4320220763980593,
+        "max_type_share": 0.10344827586206896
+      },
+      "source_counts": {
+        "ocdetect": 156,
+        "eatingspeed": 18,
+        "motionx": 0,
+        "sonic": 0
+      },
+      "n_sources": 2,
+      "effective_sources": 1.394581282511637,
+      "participation_ratio_enc": 1.9905045741594691,
+      "vendi_enc": 3.547218139538205,
+      "pool_coverage": {
+        "fill_median": 6.054358005523682,
+        "fill_p90": 12.701239299774171,
+        "fill_p99": 15.861517200469967,
+        "fill_mean": 7.010250055461821
+      },
+      "nn_self_median": 2.23519229888916,
+      "diversity": "ek10",
+      "volume_tag": "f0p01",
+      "index_file": "/projects/b53017/vbc1591/volume_diversity/idx/vd_ek10_f0p01.npy",
+      "sampler": "natural",
+      "n_types_allowed": 10,
+      "type_space": "enc",
+      "grid_K": 10,
+      "grid_fraction": 0.0001,
+      "n_subjects_known": 20,
+      "n_sessions_known": 108
+    },
+    "vd_ek10_f0p1": {
+      "n_windows": 1738,
+      "hours": 2.471822222222222,
+      "phys": {
+        "types_present": 302,
+        "types_present_frac": 0.302,
+        "pool_mass_covered": 0.4820521789960727,
+        "effective_types_shannon": 190.75267444046108,
+        "effective_types_simpson": 117.40687189054727,
+        "kl_subset_pool": 1.124122472739519,
+        "max_type_share": 0.053509781357882626
+      },
+      "enc": {
+        "types_present": 10,
+        "types_present_frac": 0.01,
+        "pool_mass_covered": 0.032417118982057354,
+        "effective_types_shannon": 9.999973485063514,
+        "effective_types_simpson": 9.99994703144346,
+        "kl_subset_pool": 3.43079352228707,
+        "max_type_share": 0.1001150747986191
+      },
+      "source_counts": {
+        "ocdetect": 1555,
+        "eatingspeed": 183,
+        "motionx": 0,
+        "sonic": 0
+      },
+      "n_sources": 2,
+      "effective_sources": 1.400123658191757,
+      "participation_ratio_enc": 1.92264803398515,
+      "vendi_enc": 3.5040036751711154,
+      "pool_coverage": {
+        "fill_median": 5.7360334396362305,
+        "fill_p90": 12.447556400299073,
+        "fill_p99": 15.433639831542967,
+        "fill_mean": 6.687438919314928
+      },
+      "nn_self_median": 1.8404573202133179,
+      "diversity": "ek10",
+      "volume_tag": "f0p1",
+      "index_file": "/projects/b53017/vbc1591/volume_diversity/idx/vd_ek10_f0p1.npy",
+      "sampler": "natural",
+      "n_types_allowed": 10,
+      "type_space": "enc",
+      "grid_K": 10,
+      "grid_fraction": 0.001,
+      "n_subjects_known": 22,
+      "n_sessions_known": 323
+    },
+    "vd_ek10_f1": {
+      "n_windows": 17381,
+      "hours": 24.719644444444445,
+      "phys": {
+        "types_present": 459,
+        "types_present_frac": 0.459,
+        "pool_mass_covered": 0.6628180063909086,
+        "effective_types_shannon": 211.33980980342596,
+        "effective_types_simpson": 124.76430013062914,
+        "kl_subset_pool": 1.0183263914058824,
+        "max_type_share": 0.05132040734134975
+      },
+      "enc": {
+        "types_present": 10,
+        "types_present_frac": 0.01,
+        "pool_mass_covered": 0.032417118982057354,
+        "effective_types_shannon": 9.999999851065134,
+        "effective_types_simpson": 9.999999702084585,
+        "kl_subset_pool": 3.43070506573512,
+        "max_type_share": 0.10005178068005294
+      },
+      "source_counts": {
+        "ocdetect": 15599,
+        "eatingspeed": 1782,
+        "motionx": 0,
+        "sonic": 0
+      },
+      "n_sources": 2,
+      "effective_sources": 1.3917993779468634,
+      "participation_ratio_enc": 1.8760875957334961,
+      "vendi_enc": 3.4687537475977113,
+      "pool_coverage": {
+        "fill_median": 5.65567684173584,
+        "fill_p90": 12.342329502105715,
+        "fill_p99": 15.36157409667965,
+        "fill_mean": 6.605746578072037
+      },
+      "nn_self_median": 1.7619937658309937,
+      "diversity": "ek10",
+      "volume_tag": "f1",
+      "index_file": "/projects/b53017/vbc1591/volume_diversity/idx/vd_ek10_f1.npy",
+      "sampler": "natural",
+      "n_types_allowed": 10,
+      "type_space": "enc",
+      "grid_K": 10,
+      "grid_fraction": 0.01,
+      "n_subjects_known": 22,
+      "n_sessions_known": 386
+    },
+    "vd_ek25_f0p01": {
+      "n_windows": 174,
+      "hours": 0.24746666666666667,
+      "phys": {
+        "types_present": 119,
+        "types_present_frac": 0.119,
+        "pool_mass_covered": 0.2082004770743124,
+        "effective_types_shannon": 106.11620417085568,
+        "effective_types_simpson": 92.87116564417181,
+        "kl_subset_pool": 1.7148746916383346,
+        "max_type_share": 0.028735632183908046
+      },
+      "enc": {
+        "types_present": 25,
+        "types_present_frac": 0.025,
+        "pool_mass_covered": 0.07516682066677635,
+        "effective_types_shannon": 24.989623803273002,
+        "effective_types_simpson": 24.980198019801982,
+        "kl_subset_pool": 2.5928557361444042,
+        "max_type_share": 0.040229885057471264
+      },
+      "source_counts": {
+        "ocdetect": 150,
+        "eatingspeed": 24,
+        "motionx": 0,
+        "sonic": 0
+      },
+      "n_sources": 2,
+      "effective_sources": 1.4936008198994435,
+      "participation_ratio_enc": 1.741426505886571,
+      "vendi_enc": 4.082406856392662,
+      "pool_coverage": {
+        "fill_median": 5.374399662017822,
+        "fill_p90": 12.003786087036133,
+        "fill_p99": 15.167562608718852,
+        "fill_mean": 6.49192929687202
+      },
+      "nn_self_median": 2.296922206878662,
+      "diversity": "ek25",
+      "volume_tag": "f0p01",
+      "index_file": "/projects/b53017/vbc1591/volume_diversity/idx/vd_ek25_f0p01.npy",
+      "sampler": "natural",
+      "n_types_allowed": 25,
+      "type_space": "enc",
+      "grid_K": 25,
+      "grid_fraction": 0.0001,
+      "n_subjects_known": 21,
+      "n_sessions_known": 112
+    },
+    "vd_ek25_f0p1": {
+      "n_windows": 1738,
+      "hours": 2.471822222222222,
+      "phys": {
+        "types_present": 315,
+        "types_present_frac": 0.315,
+        "pool_mass_covered": 0.5034146599666072,
+        "effective_types_shannon": 213.2249692185329,
+        "effective_types_simpson": 160.6042109740536,
+        "kl_subset_pool": 1.0190755069714337,
+        "max_type_share": 0.020713463751438434
+      },
+      "enc": {
+        "types_present": 25,
+        "types_present_frac": 0.025,
+        "pool_mass_covered": 0.07516682066677635,
+        "effective_types_shannon": 24.999354321227347,
+        "effective_types_simpson": 24.998708951271183,
+        "kl_subset_pool": 2.5917838752990767,
+        "max_type_share": 0.04027617951668585
+      },
+      "source_counts": {
+        "ocdetect": 1522,
+        "eatingspeed": 216,
+        "motionx": 0,
+        "sonic": 0
+      },
+      "n_sources": 2,
+      "effective_sources": 1.4555273285178565,
+      "participation_ratio_enc": 1.7356734007150258,
+      "vendi_enc": 4.115210649227613,
+      "pool_coverage": {
+        "fill_median": 4.964448690414429,
+        "fill_p90": 11.587275314331055,
+        "fill_p99": 14.867026710510236,
+        "fill_mean": 6.093004880996752
+      },
+      "nn_self_median": 1.9854214191436768,
+      "diversity": "ek25",
+      "volume_tag": "f0p1",
+      "index_file": "/projects/b53017/vbc1591/volume_diversity/idx/vd_ek25_f0p1.npy",
+      "sampler": "natural",
+      "n_types_allowed": 25,
+      "type_space": "enc",
+      "grid_K": 25,
+      "grid_fraction": 0.001,
+      "n_subjects_known": 22,
+      "n_sessions_known": 332
+    },
+    "vd_ek25_f1": {
+      "n_windows": 17381,
+      "hours": 24.719644444444445,
+      "phys": {
+        "types_present": 468,
+        "types_present_frac": 0.468,
+        "pool_mass_covered": 0.6732829179549553,
+        "effective_types_shannon": 242.52847846417208,
+        "effective_types_simpson": 175.42496743799282,
+        "kl_subset_pool": 0.8839273067298653,
+        "max_type_share": 0.020712272021172543
+      },
+      "enc": {
+        "types_present": 25,
+        "types_present_frac": 0.025,
+        "pool_mass_covered": 0.07516682066677635,
+        "effective_types_shannon": 24.999995284181495,
+        "effective_types_simpson": 24.99999056601509,
+        "kl_subset_pool": 2.591325452839952,
+        "max_type_share": 0.040043725907600254
+      },
+      "source_counts": {
+        "ocdetect": 15195,
+        "eatingspeed": 2186,
+        "motionx": 0,
+        "sonic": 0
+      },
+      "n_sources": 2,
+      "effective_sources": 1.4597495395250166,
+      "participation_ratio_enc": 1.7300966605371524,
+      "vendi_enc": 4.138865069031944,
+      "pool_coverage": {
+        "fill_median": 4.849999666213989,
+        "fill_p90": 11.426996517181397,
+        "fill_p99": 14.75503273010253,
+        "fill_mean": 5.962942733863766
+      },
+      "nn_self_median": 1.896841287612915,
+      "diversity": "ek25",
+      "volume_tag": "f1",
+      "index_file": "/projects/b53017/vbc1591/volume_diversity/idx/vd_ek25_f1.npy",
+      "sampler": "natural",
+      "n_types_allowed": 25,
+      "type_space": "enc",
+      "grid_K": 25,
+      "grid_fraction": 0.01,
+      "n_subjects_known": 22,
+      "n_sessions_known": 392
+    },
+    "vd_ek50_f0p01": {
+      "n_windows": 174,
+      "hours": 0.24746666666666667,
+      "phys": {
+        "types_present": 132,
+        "types_present_frac": 0.132,
+        "pool_mass_covered": 0.21809637453440378,
+        "effective_types_shannon": 119.99473799373513,
+        "effective_types_simpson": 105.12499999999999,
+        "kl_subset_pool": 1.6456559738191385,
+        "max_type_share": 0.034482758620689655
+      },
+      "enc": {
+        "types_present": 50,
+        "types_present_frac": 0.05,
+        "pool_mass_covered": 0.13732801563091523,
+        "effective_types_shannon": 49.4875868354212,
+        "effective_types_simpson": 48.990291262135926,
+        "kl_subset_pool": 2.015680851680185,
+        "max_type_share": 0.022988505747126436
+      },
+      "source_counts": {
+        "ocdetect": 164,
+        "eatingspeed": 10,
+        "motionx": 0,
+        "sonic": 0
+      },
+      "n_sources": 2,
+      "effective_sources": 1.2460171277960121,
+      "participation_ratio_enc": 2.9819410264895883,
+      "vendi_enc": 4.610902946435377,
+      "pool_coverage": {
+        "fill_median": 5.114344358444214,
+        "fill_p90": 12.099810028076176,
+        "fill_p99": 15.345818243026729,
+        "fill_mean": 6.392905277788449
+      },
+      "nn_self_median": 2.637009859085083,
+      "diversity": "ek50",
+      "volume_tag": "f0p01",
+      "index_file": "/projects/b53017/vbc1591/volume_diversity/idx/vd_ek50_f0p01.npy",
+      "sampler": "natural",
+      "n_types_allowed": 50,
+      "type_space": "enc",
+      "grid_K": 50,
+      "grid_fraction": 0.0001,
+      "n_subjects_known": 21,
+      "n_sessions_known": 124
+    },
+    "vd_ek50_f0p1": {
+      "n_windows": 1738,
+      "hours": 2.471822222222222,
+      "phys": {
+        "types_present": 350,
+        "types_present_frac": 0.35,
+        "pool_mass_covered": 0.5434918939942259,
+        "effective_types_shannon": 254.00506576664196,
+        "effective_types_simpson": 205.0118094203882,
+        "kl_subset_pool": 0.848065079520357,
+        "max_type_share": 0.014384349827387802
+      },
+      "enc": {
+        "types_present": 50,
+        "types_present_frac": 0.05,
+        "pool_mass_covered": 0.13732801563091523,
+        "effective_types_shannon": 49.99620705601206,
+        "effective_types_simpson": 49.992453080003955,
+        "kl_subset_pool": 1.9931646538412304,
+        "max_type_share": 0.020138089758342925
+      },
+      "source_counts": {
+        "ocdetect": 1623,
+        "eatingspeed": 115,
+        "motionx": 0,
+        "sonic": 0
+      },
+      "n_sources": 2,
+      "effective_sources": 1.275849253903701,
+      "participation_ratio_enc": 2.6505445840071182,
+      "vendi_enc": 4.583511500957056,
+      "pool_coverage": {
+        "fill_median": 4.619946718215942,
+        "fill_p90": 11.552112483978272,
+        "fill_p99": 14.759165458679195,
+        "fill_mean": 5.9196719517981675
+      },
+      "nn_self_median": 2.1505160331726074,
+      "diversity": "ek50",
+      "volume_tag": "f0p1",
+      "index_file": "/projects/b53017/vbc1591/volume_diversity/idx/vd_ek50_f0p1.npy",
+      "sampler": "natural",
+      "n_types_allowed": 50,
+      "type_space": "enc",
+      "grid_K": 50,
+      "grid_fraction": 0.001,
+      "n_subjects_known": 22,
+      "n_sessions_known": 328
+    },
+    "vd_ek50_f1": {
+      "n_windows": 17381,
+      "hours": 24.719644444444445,
+      "phys": {
+        "types_present": 523,
+        "types_present_frac": 0.523,
+        "pool_mass_covered": 0.7266028189499532,
+        "effective_types_shannon": 294.63815746627307,
+        "effective_types_simpson": 230.08051012364675,
+        "kl_subset_pool": 0.6967396812958163,
+        "max_type_share": 0.014210919970082274
+      },
+      "enc": {
+        "types_present": 50,
+        "types_present_frac": 0.05,
+        "pool_mass_covered": 0.13732801563091523,
+        "effective_types_shannon": 49.99995124651296,
+        "effective_types_simpson": 49.99990251564259,
+        "kl_subset_pool": 1.9921117050504589,
+        "max_type_share": 0.020021862953800127
+      },
+      "source_counts": {
+        "ocdetect": 16124,
+        "eatingspeed": 1257,
+        "motionx": 0,
+        "sonic": 0
+      },
+      "n_sources": 2,
+      "effective_sources": 1.2964114633669208,
+      "participation_ratio_enc": 2.6915093066854805,
+      "vendi_enc": 4.669740009193536,
+      "pool_coverage": {
+        "fill_median": 4.43441367149353,
+        "fill_p90": 11.405484104156494,
+        "fill_p99": 14.609968194961533,
+        "fill_mean": 5.760166606990488
+      },
+      "nn_self_median": 2.054328680038452,
+      "diversity": "ek50",
+      "volume_tag": "f1",
+      "index_file": "/projects/b53017/vbc1591/volume_diversity/idx/vd_ek50_f1.npy",
+      "sampler": "natural",
+      "n_types_allowed": 50,
+      "type_space": "enc",
+      "grid_K": 50,
+      "grid_fraction": 0.01,
+      "n_subjects_known": 22,
+      "n_sessions_known": 399
+    },
+    "vd_ek50_f10": {
+      "n_windows": 173809,
+      "hours": 247.19502222222224,
+      "phys": {
+        "types_present": 646,
+        "types_present_frac": 0.646,
+        "pool_mass_covered": 0.8105211800972791,
+        "effective_types_shannon": 297.0002851594097,
+        "effective_types_simpson": 230.52053953229242,
+        "kl_subset_pool": 0.6907321702087672,
+        "max_type_share": 0.014981962959340426
+      },
+      "enc": {
+        "types_present": 50,
+        "types_present_frac": 0.05,
+        "pool_mass_covered": 0.13732801563091523,
+        "effective_types_shannon": 49.99999969465192,
+        "effective_types_simpson": 49.99999938926635,
+        "kl_subset_pool": 1.9919867935605613,
+        "max_type_share": 0.020004717822437273
+      },
+      "source_counts": {
+        "ocdetect": 161240,
+        "eatingspeed": 12568,
+        "motionx": 1,
+        "sonic": 0
+      },
+      "n_sources": 3,
+      "effective_sources": 1.296471671399303,
+      "participation_ratio_enc": 2.672059058349955,
+      "vendi_enc": 4.627082279967947,
+      "pool_coverage": {
+        "fill_median": 4.430681943893433,
+        "fill_p90": 11.208078956604005,
+        "fill_p99": 14.478986539840678,
+        "fill_mean": 5.700865578921165
+      },
+      "nn_self_median": 2.052978754043579,
+      "diversity": "ek50",
+      "volume_tag": "f10",
+      "index_file": "/projects/b53017/vbc1591/volume_diversity/idx/vd_ek50_f10.npy",
+      "sampler": "natural",
+      "n_types_allowed": 50,
+      "type_space": "enc",
+      "grid_K": 50,
+      "grid_fraction": 0.1,
+      "n_subjects_known": 22,
+      "n_sessions_known": 438
+    },
+    "vd_ek100_f0p01": {
+      "n_windows": 174,
+      "hours": 0.24746666666666667,
+      "phys": {
+        "types_present": 136,
+        "types_present_frac": 0.136,
+        "pool_mass_covered": 0.23298164541158303,
+        "effective_types_shannon": 125.24741610703096,
+        "effective_types_simpson": 112.97014925373132,
+        "kl_subset_pool": 1.5637374218298277,
+        "max_type_share": 0.022988505747126436
+      },
+      "enc": {
+        "types_present": 100,
+        "types_present_frac": 0.1,
+        "pool_mass_covered": 0.24633190149669695,
+        "effective_types_shannon": 96.49409698075078,
+        "effective_types_simpson": 94.02484472049687,
+        "kl_subset_pool": 1.4780741674798472,
+        "max_type_share": 0.011494252873563218
+      },
+      "source_counts": {
+        "ocdetect": 162,
+        "eatingspeed": 12,
+        "motionx": 0,
+        "sonic": 0
+      },
+      "n_sources": 2,
+      "effective_sources": 1.2852519952289732,
+      "participation_ratio_enc": 4.309853582179312,
+      "vendi_enc": 5.555566546822896,
+      "pool_coverage": {
+        "fill_median": 4.693445920944214,
+        "fill_p90": 11.611664390563966,
+        "fill_p99": 14.644483261108398,
+        "fill_mean": 6.064634591236199
+      },
+      "nn_self_median": 2.8351492881774902,
+      "diversity": "ek100",
+      "volume_tag": "f0p01",
+      "index_file": "/projects/b53017/vbc1591/volume_diversity/idx/vd_ek100_f0p01.npy",
+      "sampler": "natural",
+      "n_types_allowed": 100,
+      "type_space": "enc",
+      "grid_K": 100,
+      "grid_fraction": 0.0001,
+      "n_subjects_known": 20,
+      "n_sessions_known": 126
+    },
+    "vd_ek100_f0p1": {
+      "n_windows": 1738,
+      "hours": 2.471822222222222,
+      "phys": {
+        "types_present": 404,
+        "types_present_frac": 0.404,
+        "pool_mass_covered": 0.6120957784791847,
+        "effective_types_shannon": 307.0653417580437,
+        "effective_types_simpson": 255.55363790186124,
+        "kl_subset_pool": 0.6735042652813716,
+        "max_type_share": 0.009205983889528193
+      },
+      "enc": {
+        "types_present": 100,
+        "types_present_frac": 0.1,
+        "pool_mass_covered": 0.24633190149669695,
+        "effective_types_shannon": 99.96118252102607,
+        "effective_types_simpson": 99.92206417466096,
+        "kl_subset_pool": 1.4154504739662186,
+        "max_type_share": 0.010356731875719217
+      },
+      "source_counts": {
+        "ocdetect": 1598,
+        "eatingspeed": 140,
+        "motionx": 0,
+        "sonic": 0
+      },
+      "n_sources": 2,
+      "effective_sources": 1.3232837752056343,
+      "participation_ratio_enc": 3.80607680063556,
+      "vendi_enc": 5.747552735943744,
+      "pool_coverage": {
+        "fill_median": 4.0495569705963135,
+        "fill_p90": 10.883291721343994,
+        "fill_p99": 13.903667011260984,
+        "fill_mean": 5.433772739545894
+      },
+      "nn_self_median": 2.355142593383789,
+      "diversity": "ek100",
+      "volume_tag": "f0p1",
+      "index_file": "/projects/b53017/vbc1591/volume_diversity/idx/vd_ek100_f0p1.npy",
+      "sampler": "natural",
+      "n_types_allowed": 100,
+      "type_space": "enc",
+      "grid_K": 100,
+      "grid_fraction": 0.001,
+      "n_subjects_known": 22,
+      "n_sessions_known": 323
+    },
+    "vd_ek100_f1": {
+      "n_windows": 17381,
+      "hours": 24.719644444444445,
+      "phys": {
+        "types_present": 563,
+        "types_present_frac": 0.563,
+        "pool_mass_covered": 0.7529483445659442,
+        "effective_types_shannon": 347.85386298774245,
+        "effective_types_simpson": 286.36810205008277,
+        "kl_subset_pool": 0.5503779889772016,
+        "max_type_share": 0.007709567918992003
+      },
+      "enc": {
+        "types_present": 100,
+        "types_present_frac": 0.1,
+        "pool_mass_covered": 0.24633190149669695,
+        "effective_types_shannon": 99.99974497900898,
+        "effective_types_simpson": 99.99949056721813,
+        "kl_subset_pool": 1.4123232374656045,
+        "max_type_share": 0.010010931476900064
+      },
+      "source_counts": {
+        "ocdetect": 16000,
+        "eatingspeed": 1380,
+        "motionx": 0,
+        "sonic": 1
+      },
+      "n_sources": 3,
+      "effective_sources": 1.3203657097462405,
+      "participation_ratio_enc": 3.7978810117323416,
+      "vendi_enc": 5.827351600990646,
+      "pool_coverage": {
+        "fill_median": 3.864380121231079,
+        "fill_p90": 10.609157466888428,
+        "fill_p99": 13.752013425827023,
+        "fill_mean": 5.263531373471096
+      },
+      "nn_self_median": 2.2276086807250977,
+      "diversity": "ek100",
+      "volume_tag": "f1",
+      "index_file": "/projects/b53017/vbc1591/volume_diversity/idx/vd_ek100_f1.npy",
+      "sampler": "natural",
+      "n_types_allowed": 100,
+      "type_space": "enc",
+      "grid_K": 100,
+      "grid_fraction": 0.01,
+      "n_subjects_known": 22,
+      "n_sessions_known": 392
+    },
+    "vd_ek100_f10": {
+      "n_windows": 173809,
+      "hours": 247.19502222222224,
+      "phys": {
+        "types_present": 680,
+        "types_present_frac": 0.68,
+        "pool_mass_covered": 0.8323571682544213,
+        "effective_types_shannon": 353.59846430504064,
+        "effective_types_simpson": 289.53185806901496,
+        "kl_subset_pool": 0.532232187395021,
+        "max_type_share": 0.008377011547158088
+      },
+      "enc": {
+        "types_present": 100,
+        "types_present_frac": 0.1,
+        "pool_mass_covered": 0.24633190149669695,
+        "effective_types_shannon": 99.99999864468232,
+        "effective_types_simpson": 99.9999972889385,
+        "kl_subset_pool": 1.4120765608852894,
+        "max_type_share": 0.010005235632216974
+      },
+      "source_counts": {
+        "ocdetect": 160265,
+        "eatingspeed": 13540,
+        "motionx": 2,
+        "sonic": 2
+      },
+      "n_sources": 4,
+      "effective_sources": 1.3150794461802662,
+      "participation_ratio_enc": 3.665512546219296,
+      "vendi_enc": 5.757553377424947,
+      "pool_coverage": {
+        "fill_median": 3.880842447280884,
+        "fill_p90": 10.592928123474122,
+        "fill_p99": 13.560636558532712,
+        "fill_mean": 5.2515218930056795
+      },
+      "nn_self_median": 2.2241153717041016,
+      "diversity": "ek100",
+      "volume_tag": "f10",
+      "index_file": "/projects/b53017/vbc1591/volume_diversity/idx/vd_ek100_f10.npy",
+      "sampler": "natural",
+      "n_types_allowed": 100,
+      "type_space": "enc",
+      "grid_K": 100,
+      "grid_fraction": 0.1,
+      "n_subjects_known": 22,
+      "n_sessions_known": 444
+    },
+    "vd_ek1000_f0p01": {
+      "n_windows": 174,
+      "hours": 0.24746666666666667,
+      "phys": {
+        "types_present": 145,
+        "types_present_frac": 0.145,
+        "pool_mass_covered": 0.11644019253273988,
+        "effective_types_shannon": 136.45263336214796,
+        "effective_types_simpson": 126.14999999999996,
+        "kl_subset_pool": 2.4246781930901777,
+        "max_type_share": 0.017241379310344827
+      },
+      "enc": {
+        "types_present": 174,
+        "types_present_frac": 0.174,
+        "pool_mass_covered": 0.06251733220412706,
+        "effective_types_shannon": 174.00000000000017,
+        "effective_types_simpson": 173.99999999999994,
+        "kl_subset_pool": 2.809412316635785,
+        "max_type_share": 0.005747126436781609
+      },
+      "source_counts": {
+        "ocdetect": 70,
+        "eatingspeed": 34,
+        "motionx": 38,
+        "sonic": 32
+      },
+      "n_sources": 4,
+      "effective_sources": 3.7774134676941182,
+      "participation_ratio_enc": 10.440193082098448,
+      "vendi_enc": 11.521970194286604,
+      "pool_coverage": {
+        "fill_median": 8.304486274719238,
+        "fill_p90": 10.648840808868409,
+        "fill_p99": 11.798116388320919,
+        "fill_mean": 8.277963682042348
+      },
+      "nn_self_median": 6.80286979675293,
+      "diversity": "ek1000",
+      "volume_tag": "f0p01",
+      "index_file": "/projects/b53017/vbc1591/volume_diversity/idx/vd_ek1000_f0p01.npy",
+      "sampler": "natural",
+      "n_types_allowed": 1000,
+      "type_space": "enc",
+      "grid_K": 1000,
+      "grid_fraction": 0.0001,
+      "n_subjects_known": 19,
+      "n_sessions_known": 59
+    },
+    "vd_ek1000_f0p1": {
+      "n_windows": 1738,
+      "hours": 2.471822222222222,
+      "phys": {
+        "types_present": 747,
+        "types_present_frac": 0.747,
+        "pool_mass_covered": 0.7810785837820049,
+        "effective_types_shannon": 630.0925216434804,
+        "effective_types_simpson": 536.9079274795592,
+        "kl_subset_pool": 0.5120541639174097,
+        "max_type_share": 0.005178365937859608
+      },
+      "enc": {
+        "types_present": 1000,
+        "types_present_frac": 1.0,
+        "pool_mass_covered": 1.0,
+        "effective_types_shannon": 964.7159125608798,
+        "effective_types_simpson": 939.8394523957685,
+        "kl_subset_pool": 0.346951075535212,
+        "max_type_share": 0.0011507479861910242
+      },
+      "source_counts": {
+        "ocdetect": 1012,
+        "eatingspeed": 363,
+        "motionx": 128,
+        "sonic": 235
+      },
+      "n_sources": 4,
+      "effective_sources": 3.018167399027134,
+      "participation_ratio_enc": 7.843161587514373,
+      "vendi_enc": 13.671934715461008,
+      "pool_coverage": {
+        "fill_median": 3.588822364807129,
+        "fill_p90": 5.087698554992675,
+        "fill_p99": 6.497192373275757,
+        "fill_mean": 3.729253379177418
+      },
+      "nn_self_median": 4.393043041229248,
+      "diversity": "ek1000",
+      "volume_tag": "f0p1",
+      "index_file": "/projects/b53017/vbc1591/volume_diversity/idx/vd_ek1000_f0p1.npy",
+      "sampler": "natural",
+      "n_types_allowed": 1000,
+      "type_space": "enc",
+      "grid_K": 1000,
+      "grid_fraction": 0.001,
+      "n_subjects_known": 22,
+      "n_sessions_known": 308
+    },
+    "vd_ek1000_f1": {
+      "n_windows": 17381,
+      "hours": 24.719644444444445,
+      "phys": {
+        "types_present": 999,
+        "types_present_frac": 0.999,
+        "pool_mass_covered": 0.9998337259089554,
+        "effective_types_shannon": 871.8896256214321,
+        "effective_types_simpson": 784.9728623656304,
+        "kl_subset_pool": 0.1427638170875426,
+        "max_type_share": 0.0033369771589666876
+      },
+      "enc": {
+        "types_present": 1000,
+        "types_present_frac": 1.0,
+        "pool_mass_covered": 1.0,
+        "effective_types_shannon": 999.6114612957746,
+        "effective_types_simpson": 999.21994145567,
+        "kl_subset_pool": 0.20339467512826165,
+        "max_type_share": 0.0010356136010586272
+      },
+      "source_counts": {
+        "ocdetect": 10567,
+        "eatingspeed": 3520,
+        "motionx": 1151,
+        "sonic": 2143
+      },
+      "n_sources": 4,
+      "effective_sources": 2.8973863154941837,
+      "participation_ratio_enc": 7.038745030200846,
+      "vendi_enc": 13.240968596231085,
+      "pool_coverage": {
+        "fill_median": 3.3078192472457886,
+        "fill_p90": 4.756441831588745,
+        "fill_p99": 6.136640810966484,
+        "fill_mean": 3.43913097926306
+      },
+      "nn_self_median": 3.888617515563965,
+      "diversity": "ek1000",
+      "volume_tag": "f1",
+      "index_file": "/projects/b53017/vbc1591/volume_diversity/idx/vd_ek1000_f1.npy",
+      "sampler": "natural",
+      "n_types_allowed": 1000,
+      "type_space": "enc",
+      "grid_K": 1000,
+      "grid_fraction": 0.01,
+      "n_subjects_known": 22,
+      "n_sessions_known": 410
+    },
+    "vd_ek1000_f10": {
+      "n_windows": 173809,
+      "hours": 247.19502222222224,
+      "phys": {
+        "types_present": 1000,
+        "types_present_frac": 1.0,
+        "pool_mass_covered": 1.0,
+        "effective_types_shannon": 899.5284877227527,
+        "effective_types_simpson": 825.2214350136485,
+        "kl_subset_pool": 0.10661938231246543,
+        "max_type_share": 0.003055077700234165
+      },
+      "enc": {
+        "types_present": 1000,
+        "types_present_frac": 1.0,
+        "pool_mass_covered": 1.0,
+        "effective_types_shannon": 999.8867594380566,
+        "effective_types_simpson": 999.7990934760638,
+        "kl_subset_pool": 0.18871847525398272,
+        "max_type_share": 0.0010010989074213648
+      },
+      "source_counts": {
+        "ocdetect": 106657,
+        "eatingspeed": 34789,
+        "motionx": 10977,
+        "sonic": 21386
+      },
+      "n_sources": 4,
+      "effective_sources": 2.8688101685768306,
+      "participation_ratio_enc": 7.079060537312848,
+      "vendi_enc": 13.338463006921213,
+      "pool_coverage": {
+        "fill_median": 3.309280753135681,
+        "fill_p90": 4.796367263793946,
+        "fill_p99": 6.1894532060623115,
+        "fill_mean": 3.4502647169861222
+      },
+      "nn_self_median": 3.8404407501220703,
+      "diversity": "ek1000",
+      "volume_tag": "f10",
+      "index_file": "/projects/b53017/vbc1591/volume_diversity/idx/vd_ek1000_f10.npy",
+      "sampler": "natural",
+      "n_types_allowed": 1000,
+      "type_space": "enc",
+      "grid_K": 1000,
+      "grid_fraction": 0.1,
+      "n_subjects_known": 22,
+      "n_sessions_known": 494
+    },
+    "vd_ek1000_f100": {
+      "n_windows": 1738094,
+      "hours": 2471.9559111111107,
+      "phys": {
+        "types_present": 1000,
+        "types_present_frac": 1.0,
+        "pool_mass_covered": 1.0,
+        "effective_types_shannon": 832.8200713421728,
+        "effective_types_simpson": 730.9296364690347,
+        "kl_subset_pool": 9.71817485220882e-08,
+        "max_type_share": 0.0029917829530508705
+      },
+      "enc": {
+        "types_present": 1000,
+        "types_present_frac": 1.0,
+        "pool_mass_covered": 1.0,
+        "effective_types_shannon": 831.0796299257436,
+        "effective_types_simpson": 706.0260971908707,
+        "kl_subset_pool": 7.74666495008448e-08,
+        "max_type_share": 0.0036580300029802762
+      },
+      "source_counts": {
+        "ocdetect": 1253077,
+        "eatingspeed": 287678,
+        "motionx": 50395,
+        "sonic": 146944
+      },
+      "n_sources": 4,
+      "effective_sources": 2.3282503890654445,
+      "participation_ratio_enc": 5.626180012020898,
+      "vendi_enc": 11.848437288588846,
+      "pool_coverage": {
+        "fill_median": 3.244567632675171,
+        "fill_p90": 4.9707090854644775,
+        "fill_p99": 6.5937567281722975,
+        "fill_mean": 3.439776427872356
+      },
+      "nn_self_median": 3.251185178756714,
+      "diversity": "ek1000",
+      "volume_tag": "f100",
+      "index_file": "/projects/b53017/vbc1591/volume_diversity/idx/vd_ek1000_f100.npy",
+      "sampler": "natural",
+      "n_types_allowed": 1000,
+      "type_space": "enc",
+      "grid_K": 1000,
+      "grid_fraction": 1.0,
+      "n_subjects_known": 22,
+      "n_sessions_known": 539
+    }
+  },
+  "skipped": [
+    {
+      "arm": "vd_ek1_f1",
+      "K": 1,
+      "need": 17381,
+      "available": 6358
+    },
+    {
+      "arm": "vd_ek1_f10",
+      "K": 1,
+      "need": 173809,
+      "available": 6358
+    },
+    {
+      "arm": "vd_ek1_f100",
+      "K": 1,
+      "need": 1738094,
+      "available": 6358
+    },
+    {
+      "arm": "vd_ek5_f10",
+      "K": 5,
+      "need": 173809,
+      "available": 29191
+    },
+    {
+      "arm": "vd_ek5_f100",
+      "K": 5,
+      "need": 1738094,
+      "available": 29191
+    },
+    {
+      "arm": "vd_ek10_f10",
+      "K": 10,
+      "need": 173809,
+      "available": 56344
+    },
+    {
+      "arm": "vd_ek10_f100",
+      "K": 10,
+      "need": 1738094,
+      "available": 56344
+    },
+    {
+      "arm": "vd_ek25_f10",
+      "K": 25,
+      "need": 173809,
+      "available": 130647
+    },
+    {
+      "arm": "vd_ek25_f100",
+      "K": 25,
+      "need": 1738094,
+      "available": 130647
+    },
+    {
+      "arm": "vd_ek50_f100",
+      "K": 50,
+      "need": 1738094,
+      "available": 238689
+    },
+    {
+      "arm": "vd_ek100_f100",
+      "K": 100,
+      "need": 1738094,
+      "available": 428148
+    }
+  ]
+}

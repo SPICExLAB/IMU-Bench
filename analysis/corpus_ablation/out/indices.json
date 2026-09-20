@@ -1,0 +1,53 @@
+{
+ "ref": {
+  "n": 197094,
+  "counts": {
+   "realdata": 93510,
+   "ocdetect": 8703,
+   "eatingspeed": 57536,
+   "motionx": 4683,
+   "sonic": 32662
+  },
+  "share_pct": {
+   "realdata": 47.4,
+   "ocdetect": 4.4,
+   "eatingspeed": 29.2,
+   "motionx": 2.4,
+   "sonic": 16.6
+  }
+ },
+ "temp03": {
+  "n": 195929,
+  "counts": {
+   "realdata": 33954,
+   "ocdetect": 73965,
+   "eatingspeed": 58562,
+   "motionx": 4683,
+   "sonic": 24765
+  },
+  "share_pct": {
+   "realdata": 17.3,
+   "ocdetect": 37.8,
+   "eatingspeed": 29.9,
+   "motionx": 2.4,
+   "sonic": 12.6
+  }
+ },
+ "uniform": {
+  "n": 195929,
+  "counts": {
+   "realdata": 9285,
+   "ocdetect": 125453,
+   "eatingspeed": 57400,
+   "motionx": 498,
+   "sonic": 3293
+  },
+  "share_pct": {
+   "realdata": 4.7,
+   "ocdetect": 64.0,
+   "eatingspeed": 29.3,
+   "motionx": 0.3,
+   "sonic": 1.7
+  }
+ }
+}

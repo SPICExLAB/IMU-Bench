@@ -1,0 +1,62 @@
+# Canonical 4-source paper numbers, seed 42, generated from bench/results/
+# columns as listed per block
+
+# arm pose: val_pose_mse | pos_err_cm | ang_err_deg
+
+### arm_pose_nymeria
+  Ours (MAE, 4-src)      probe     0.0164 | 8.1617 | 9.8666
+  Ours (MAE, 4-src)      finetune  0.0158 | 7.9899 | 9.8152
+  SimMTM (4-src)         probe     0.0166 | 8.1013 | 9.8870
+  SimMTM (4-src)         finetune  0.0165 | 8.1578 | 9.9440
+  FOCAL (4-src)          probe     0.0174 | 8.2453 | 10.1822
+  FOCAL (4-src)          finetune  0.0180 | 8.3766 | 10.5018
+  MAE acc-only (4-src)   probe     0.0174 | 8.4491 | 10.2961
+  MAE acc-only (4-src)   finetune  0.0174 | 8.5046 | 10.3788
+  Scratch                scratch   0.0167 | 8.1529 | 9.9395
+  MobilePoser            external  -- | 9.7400 | 24.2800
+
+# full body: mpjpe_mm
+
+### full_body_pose_nymeria
+  Ours (MAE, 4-src)      probe     91.45
+  Ours (MAE, 4-src)      finetune  89.22
+  SimMTM (4-src)         probe     100.83
+  FOCAL (4-src)          probe     105.50
+  MAE acc-only (4-src)   probe     101.87
+  MAE acc-only (4-src)   finetune  96.01
+  Scratch                scratch   92.43
+  MobilePoser            external  91.88
+
+# odometry: vel_mse | ate_m | drift_pct
+
+### odometry_nymeria_worldframe
+  Ours (MAE, 4-src)      probe     0.0166 | 0.1228 | 33.1924
+  Ours (MAE, 4-src)      finetune  0.0143 | 0.1079 | 29.1800
+  SimMTM (4-src)         probe     0.0223 | 0.1655 | 49.5229
+  SimMTM (4-src)         finetune  0.0143 | 0.1079 | 29.3184
+  FOCAL (4-src)          probe     0.0265 | 0.1911 | 57.5595
+  FOCAL (4-src)          finetune  0.0164 | 0.1236 | 34.5263
+  MAE acc-only (4-src)   probe     0.0224 | 0.1596 | 45.8813
+  MAE acc-only (4-src)   finetune  0.0193 | 0.1431 | 40.6737
+  Scratch                scratch   0.0191 | 0.1400 | 37.6903
+  MobilePoser            external  0.0296 | 0.2355 | 59.4194
+  TLIO                   external  0.0242 | 0.1510 | 38.7900
+  Air-IO                 external  0.0246 | 0.1444 | 38.5600
+
+### HAR accuracy (%)  wisdm|utd|pamap2|recofit|hhar|mhealth
+  Ours (MAE, 4-src)      probe     67.37 | 73.43 | 56.33 | 75.92 | 64.04 | 87.13
+  Ours (MAE, 4-src)      finetune  77.10 | 85.51 | 53.23 | 87.17 | 66.37 | 90.28
+  SimMTM (4-src)         probe     62.85 | 69.08 | 54.26 | 64.60 | 63.62 | 68.54
+  SimMTM (4-src)         finetune  76.99 | 73.43 | 52.46 | 87.01 | 64.98 | 85.61
+  FOCAL (4-src)          probe     53.79 | 53.62 | 42.13 | 65.06 | 54.75 | 67.97
+  FOCAL (4-src)          finetune  73.58 | 66.18 | 50.36 | 79.17 | 62.23 | 87.70
+  MAE acc-only (4-src)   probe     61.84 | 65.70 | 49.66 | 74.54 | 68.32 | 85.13
+  MAE acc-only (4-src)   finetune  74.92 | 81.64 | 51.81 | 85.18 | 69.90 | 89.32
+  Scratch                scratch   60.89 | 71.01 | 28.48 | 80.97 | 50.09 | 67.59
+
+### language HumanML3D  i2t R@1/R@5/R@10/MRR ; t2i R@1/R@5/R@10/MRR
+  Ours (MAE, 4-src)      probe     24.5 / 54.3 / 67.1 / 38.6   ;   23.7 / 53.1 / 66.3 / 37.7
+  Ours (MAE, 4-src)      finetune  38.3 / 72.6 / 82.8 / 53.5   ;   36.7 / 71.3 / 81.9 / 52.2
+  SimMTM (4-src)         probe     16.8 / 43.2 / 56.8 / 29.8   ;   16.5 / 42.2 / 55.6 / 29.2
+  SimMTM (4-src)         finetune  34.0 / 67.9 / 79.0 / 49.3   ;   33.5 / 66.6 / 78.0 / 48.5
+  Scratch                scratch   23.6 / 55.7 / 69.3 / 38.5   ;   22.8 / 54.6 / 68.0 / 37.6

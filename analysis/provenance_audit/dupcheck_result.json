@@ -1,0 +1,214 @@
+{
+ "motionx": {
+  "tag": "hml_test_vs_motionxpp",
+  "n_snippets": 46032,
+  "n_clips": 4208,
+  "snippet_nn_rms_m_quantiles": {
+   "0.001": 0.04214606434106827,
+   "0.01": 0.04949598386883736,
+   "0.05": 0.06601011008024216,
+   "0.5": 0.14130203425884247
+  },
+  "snippet_frac_lt_1cm": 0.0,
+  "snippet_frac_lt_2cm": 0.0,
+  "clip_median_nn_lt_1cm": 0,
+  "clip_median_nn_lt_2cm": 0,
+  "clip_min_nn_lt_1cm": 0,
+  "clip_min_nn_lt_2cm": 0,
+  "motionx_coverage": {
+   "animation": {
+    "clips": 559,
+    "frames20": 36647,
+    "frames_in_ge2s_clips": 31953
+   },
+   "haa500": {
+    "clips": 6944,
+    "frames20": 291885,
+    "frames_in_ge2s_clips": 175174
+   },
+   "humman": {
+    "clips": 971,
+    "frames20": 125044,
+    "frames_in_ge2s_clips": 121247
+   },
+   "idea400": {
+    "clips": 12042,
+    "frames20": 1406070,
+    "frames_in_ge2s_clips": 1400263
+   },
+   "kungfu": {
+    "clips": 1032,
+    "frames20": 207585,
+    "frames_in_ge2s_clips": 205131
+   },
+   "music": {
+    "clips": 3394,
+    "frames20": 609152,
+    "frames_in_ge2s_clips": 589802
+   },
+   "perform": {
+    "clips": 923,
+    "frames20": 218495,
+    "frames_in_ge2s_clips": 217634
+   }
+  }
+ },
+ "trainval": {
+  "tag": "hml_test_vs_hml_trainval (positive control)",
+  "n_snippets": 46032,
+  "n_clips": 4208,
+  "snippet_nn_rms_m_quantiles": {
+   "0.001": 0.0,
+   "0.01": 0.006758001167327166,
+   "0.05": 0.015274840407073498,
+   "0.5": 0.0870194360613823
+  },
+  "snippet_frac_lt_1cm": 0.019899200556134863,
+  "snippet_frac_lt_2cm": 0.07010340632603407,
+  "clip_median_nn_lt_1cm": 36,
+  "clip_median_nn_lt_2cm": 225,
+  "clip_min_nn_lt_1cm": 290,
+  "clip_min_nn_lt_2cm": 768
+ },
+ "control": {
+  "test_clips_with_frame_overlap": 874,
+  "of_those_min_nn_lt_1cm": 147,
+  "of_those_min_nn_lt_2cm": 245,
+  "non_overlap_clips_min_nn_lt_1cm": 143,
+  "non_overlap_clips": 3334,
+  "motionx_min_nn_quantiles_per_clip": {
+   "0.0": 0.03601384535431862,
+   "0.01": 0.04446350783109665,
+   "0.05": 0.051732439547777176,
+   "0.5": 0.10214981436729431
+  },
+  "trainval_min_nn_quantiles_per_clip_nonoverlap": {
+   "0.0": 0.0,
+   "0.01": 0.007620687130838633,
+   "0.05": 0.010584619827568531,
+   "0.5": 0.05214913561940193
+  }
+ },
+ "closest_motionx": [
+  {
+   "hml_id": "M009383",
+   "mx": [
+    "idea400",
+    "standing_while_Angry_expression_clip1.npy"
+   ],
+   "rms_m": 0.03601384535431862
+  },
+  {
+   "hml_id": "M009383",
+   "mx": [
+    "idea400",
+    "standing_while_Angry_expression_clip1.npy"
+   ],
+   "rms_m": 0.036060038954019547
+  },
+  {
+   "hml_id": "M009383",
+   "mx": [
+    "idea400",
+    "standing_while_Angry_expression_clip1.npy"
+   ],
+   "rms_m": 0.03649783879518509
+  },
+  {
+   "hml_id": "M009383",
+   "mx": [
+    "idea400",
+    "standing_while_Angry_expression_clip1.npy"
+   ],
+   "rms_m": 0.03655290603637695
+  },
+  {
+   "hml_id": "M009383",
+   "mx": [
+    "idea400",
+    "standing_while_Angry_expression_clip1.npy"
+   ],
+   "rms_m": 0.03679875284433365
+  },
+  {
+   "hml_id": "M009383",
+   "mx": [
+    "idea400",
+    "standing_while_Angry_expression_clip1.npy"
+   ],
+   "rms_m": 0.0369773730635643
+  },
+  {
+   "hml_id": "M009383",
+   "mx": [
+    "idea400",
+    "standing_while_Angry_expression_clip1.npy"
+   ],
+   "rms_m": 0.03721855208277702
+  },
+  {
+   "hml_id": "009383",
+   "mx": [
+    "idea400",
+    "standing_while_Angry_expression_clip1.npy"
+   ],
+   "rms_m": 0.037257663905620575
+  },
+  {
+   "hml_id": "009383",
+   "mx": [
+    "idea400",
+    "standing_while_Angry_expression_clip1.npy"
+   ],
+   "rms_m": 0.03726325184106827
+  },
+  {
+   "hml_id": "M009383",
+   "mx": [
+    "idea400",
+    "standing_while_Angry_expression_clip1.npy"
+   ],
+   "rms_m": 0.03726697340607643
+  },
+  {
+   "hml_id": "M009383",
+   "mx": [
+    "idea400",
+    "standing_while_Angry_expression_clip1.npy"
+   ],
+   "rms_m": 0.03731347247958183
+  },
+  {
+   "hml_id": "M003765",
+   "mx": [
+    "kungfu",
+    "Shaolin_Kung_Fu_Wushu_Selfdefense_Sword_Form_Session_7_clip1.npy"
+   ],
+   "rms_m": 0.037578340619802475
+  },
+  {
+   "hml_id": "009383",
+   "mx": [
+    "idea400",
+    "standing_while_Angry_expression_clip1.npy"
+   ],
+   "rms_m": 0.03782302141189575
+  },
+  {
+   "hml_id": "009383",
+   "mx": [
+    "idea400",
+    "standing_while_Angry_expression_clip1.npy"
+   ],
+   "rms_m": 0.037899959832429886
+  },
+  {
+   "hml_id": "M009383",
+   "mx": [
+    "idea400",
+    "standing_while_Angry_expression_clip1.npy"
+   ],
+   "rms_m": 0.037912767380476
+  }
+ ]
+}

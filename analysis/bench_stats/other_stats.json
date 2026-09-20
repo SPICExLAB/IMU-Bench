@@ -1,0 +1,62 @@
+{
+ "hhar": {
+  "hhar": {
+   "subjects": 9,
+   "sessions": 320,
+   "hours": 4.76,
+   "classes": 6
+  }
+ },
+ "mhealth": {
+  "mhealth": {
+   "subjects": 10,
+   "sessions": 126,
+   "hours": 1.91,
+   "classes": 12
+  }
+ },
+ "pads": {
+  "pads": {
+   "subjects": 469,
+   "sessions": 10318,
+   "hours": 35.93,
+   "classes": 3
+  }
+ },
+ "nymeria": {
+  "train": {
+   "sessions": 867,
+   "participants": 234,
+   "hours": 226.88
+  },
+  "val": {
+   "sessions": 101,
+   "participants": 82,
+   "hours": 26.2
+  },
+  "participants_total": 235,
+  "val_participants_also_in_train": 81
+ },
+ "openwatch": {
+  "canonical_subjects": 43,
+  "clips": 2300,
+  "hours": 1.917
+ },
+ "humanml3d": {
+  "train": {
+   "listed": 23384,
+   "with_joints": 23384,
+   "hours": 45.74
+  },
+  "val": {
+   "listed": 1460,
+   "with_joints": 1460,
+   "hours": 2.87
+  },
+  "test": {
+   "listed": 4384,
+   "with_joints": 4384,
+   "hours": 8.57
+  }
+ }
+}

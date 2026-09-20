@@ -1,0 +1,62 @@
+{
+ "pool": "5-source (realdata, ocdetect, eatingspeed, motionx, sonic)",
+ "n_pool": 1959288,
+ "k": 1000,
+ "n_draws": 5,
+ "seed": 42,
+ "points": [
+  {
+   "fraction_pct": 0.01,
+   "n_windows": 196,
+   "coverage_pct": 17.659999999999997,
+   "sd_pct": 0.28705400188814684
+  },
+  {
+   "fraction_pct": 0.05,
+   "n_windows": 980,
+   "coverage_pct": 59.58,
+   "sd_pct": 1.0127191120937735
+  },
+  {
+   "fraction_pct": 0.1,
+   "n_windows": 1959,
+   "coverage_pct": 82.02,
+   "sd_pct": 1.527612516314264
+  },
+  {
+   "fraction_pct": 0.5,
+   "n_windows": 9796,
+   "coverage_pct": 99.68,
+   "sd_pct": 0.07483314773548065
+  },
+  {
+   "fraction_pct": 1.0,
+   "n_windows": 19593,
+   "coverage_pct": 99.9,
+   "sd_pct": 0.06324555320336848
+  },
+  {
+   "fraction_pct": 5.0,
+   "n_windows": 97964,
+   "coverage_pct": 100.0,
+   "sd_pct": 0.0
+  },
+  {
+   "fraction_pct": 10.0,
+   "n_windows": 195929,
+   "coverage_pct": 100.0,
+   "sd_pct": 0.0
+  },
+  {
+   "fraction_pct": 25.0,
+   "n_windows": 489822,
+   "coverage_pct": 100.0,
+   "sd_pct": 0.0
+  }
+ ],
+ "cluster_size": {
+  "min": 181,
+  "median": 1829.0,
+  "max": 7114
+ }
+}

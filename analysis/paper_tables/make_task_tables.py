@@ -185,7 +185,8 @@ header = [" & " + " & ".join(r"\multicolumn{" + str(len(KEYS)) + r"}{c}{" + HAR_
           "Encoder & " + " & ".join(label(t, k, short=True) for t in HAR_TASKS for k in KEYS)
           + " & " + label(HAR_TASKS[0], KEYS[0], short=True) + r" \\"]
 caption = ("Activity recognition, all four sets (\\%). HHAR (6 classes) and MHEALTH (12) are subject-disjoint "
-           "with two held-out subjects each, PRISM (96) with six; the user-study set (60) is split in time, so it "
+           "with two held-out subjects each, PRISM (5 global ADL classes) with six; the user-study set (60) is "
+           "split in time, so it "
            "measures recognition later in the same recording rather than generalisation to new people. "
            "\\emph{Mean} is the mean macro-F1 over the four sets quoted in Section~\\ref{sec:results}. "
            "Evaluation on the validation split; " + COMMON)

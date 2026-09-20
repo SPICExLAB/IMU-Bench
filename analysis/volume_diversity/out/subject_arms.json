@@ -1,0 +1,194 @@
+{
+  "vd_sub1_n50k": {
+    "n_windows": 50000,
+    "hours": 71.11111111111111,
+    "phys": {
+      "types_present": 620,
+      "types_present_frac": 0.62,
+      "pool_mass_covered": 0.7625059404151905,
+      "effective_types_shannon": 487.44967879937764,
+      "effective_types_simpson": 458.5954359114712,
+      "kl_subset_pool": 0.4200889306885607,
+      "max_type_share": 0.00246
+    },
+    "enc": {
+      "types_present": 760,
+      "types_present_frac": 0.76,
+      "pool_mass_covered": 0.8332472236829538,
+      "effective_types_shannon": 483.87772337513354,
+      "effective_types_simpson": 398.27943285008763,
+      "kl_subset_pool": 0.4749256576379194,
+      "max_type_share": 0.00614
+    },
+    "source_counts": {
+      "ocdetect": 50000,
+      "eatingspeed": 0,
+      "motionx": 0,
+      "sonic": 0
+    },
+    "n_sources": 1,
+    "effective_sources": 1.0,
+    "participation_ratio_enc": 4.863449913241753,
+    "vendi_enc": 10.635200109359975,
+    "pool_coverage": {
+      "fill_median": 3.494405508041382,
+      "fill_p90": 7.586231756210329,
+      "fill_p99": 10.434844636917111,
+      "fill_mean": 4.213797478627248
+    },
+    "diversity": "sub1",
+    "volume_tag": "n50k",
+    "n_subjects": 1,
+    "index_file": "/projects/b53017/vbc1591/volume_diversity/idx/vd_sub1_n50k.npy",
+    "sampler": "natural",
+    "n_subjects_known": 1,
+    "n_sessions_known": 34,
+    "effective_subjects": 1.0,
+    "effective_sessions": 16.272240794455822,
+    "provenance_coverage": 1.0
+  },
+  "vd_sub3_n50k": {
+    "n_windows": 50000,
+    "hours": 71.11111111111111,
+    "phys": {
+      "types_present": 679,
+      "types_present_frac": 0.679,
+      "pool_mass_covered": 0.7935957433832693,
+      "effective_types_shannon": 570.4306943659625,
+      "effective_types_simpson": 555.0712866952076,
+      "kl_subset_pool": 0.4050639039534636,
+      "max_type_share": 0.00186
+    },
+    "enc": {
+      "types_present": 791,
+      "types_present_frac": 0.791,
+      "pool_mass_covered": 0.8568955418981943,
+      "effective_types_shannon": 555.2453660036332,
+      "effective_types_simpson": 479.7280364194174,
+      "kl_subset_pool": 0.38452741152867675,
+      "max_type_share": 0.00598
+    },
+    "source_counts": {
+      "ocdetect": 50000,
+      "eatingspeed": 0,
+      "motionx": 0,
+      "sonic": 0
+    },
+    "n_sources": 1,
+    "effective_sources": 1.0,
+    "participation_ratio_enc": 4.942511150667265,
+    "vendi_enc": 11.109023874757826,
+    "pool_coverage": {
+      "fill_median": 3.440836787223816,
+      "fill_p90": 7.3884676933288596,
+      "fill_p99": 10.258715820312498,
+      "fill_mean": 4.1314820781864166
+    },
+    "diversity": "sub3",
+    "volume_tag": "n50k",
+    "n_subjects": 3,
+    "index_file": "/projects/b53017/vbc1591/volume_diversity/idx/vd_sub3_n50k.npy",
+    "sampler": "natural",
+    "n_subjects_known": 3,
+    "n_sessions_known": 97,
+    "effective_subjects": 2.9789868742410106,
+    "effective_sessions": 56.26808916987365,
+    "provenance_coverage": 1.0
+  },
+  "vd_sub10_n50k": {
+    "n_windows": 50000,
+    "hours": 71.11111111111111,
+    "phys": {
+      "types_present": 737,
+      "types_present_frac": 0.737,
+      "pool_mass_covered": 0.8250307520767001,
+      "effective_types_shannon": 606.4897929425513,
+      "effective_types_simpson": 591.5213693009874,
+      "kl_subset_pool": 0.3985168462011146,
+      "max_type_share": 0.00174
+    },
+    "enc": {
+      "types_present": 818,
+      "types_present_frac": 0.818,
+      "pool_mass_covered": 0.8742576638547742,
+      "effective_types_shannon": 601.4201003960476,
+      "effective_types_simpson": 527.7604085963304,
+      "kl_subset_pool": 0.3587003376773008,
+      "max_type_share": 0.00474
+    },
+    "source_counts": {
+      "ocdetect": 50000,
+      "eatingspeed": 0,
+      "motionx": 0,
+      "sonic": 0
+    },
+    "n_sources": 1,
+    "effective_sources": 1.0,
+    "participation_ratio_enc": 5.289926067182439,
+    "vendi_enc": 11.44857385090956,
+    "pool_coverage": {
+      "fill_median": 3.420123815536499,
+      "fill_p90": 7.099141883850099,
+      "fill_p99": 10.120699348449701,
+      "fill_mean": 4.080531050391158
+    },
+    "diversity": "sub10",
+    "volume_tag": "n50k",
+    "n_subjects": 10,
+    "index_file": "/projects/b53017/vbc1591/volume_diversity/idx/vd_sub10_n50k.npy",
+    "sampler": "natural",
+    "n_subjects_known": 10,
+    "n_sessions_known": 257,
+    "effective_subjects": 9.584552893049647,
+    "effective_sessions": 176.12520418820637,
+    "provenance_coverage": 1.0
+  },
+  "vd_suball_n50k": {
+    "n_windows": 50000,
+    "hours": 71.11111111111111,
+    "phys": {
+      "types_present": 763,
+      "types_present_frac": 0.763,
+      "pool_mass_covered": 0.841801421557177,
+      "effective_types_shannon": 620.4127857854342,
+      "effective_types_simpson": 603.1563897664143,
+      "kl_subset_pool": 0.3881999803129299,
+      "max_type_share": 0.0017
+    },
+    "enc": {
+      "types_present": 826,
+      "types_present_frac": 0.826,
+      "pool_mass_covered": 0.8813297784814861,
+      "effective_types_shannon": 622.8062553161386,
+      "effective_types_simpson": 557.5933734711347,
+      "kl_subset_pool": 0.32073766397109127,
+      "max_type_share": 0.0041
+    },
+    "source_counts": {
+      "ocdetect": 50000,
+      "eatingspeed": 0,
+      "motionx": 0,
+      "sonic": 0
+    },
+    "n_sources": 1,
+    "effective_sources": 1.0,
+    "participation_ratio_enc": 5.249129512535426,
+    "vendi_enc": 11.478581405023505,
+    "pool_coverage": {
+      "fill_median": 3.407491445541382,
+      "fill_p90": 7.1572267532348635,
+      "fill_p99": 10.15407216072082,
+      "fill_mean": 4.054187927597751
+    },
+    "diversity": "suball",
+    "volume_tag": "n50k",
+    "n_subjects": 22,
+    "index_file": "/projects/b53017/vbc1591/volume_diversity/idx/vd_suball_n50k.npy",
+    "sampler": "natural",
+    "n_subjects_known": 22,
+    "n_sessions_known": 453,
+    "effective_subjects": 19.53222282035172,
+    "effective_sessions": 317.14797961921545,
+    "provenance_coverage": 1.0
+  }
+}

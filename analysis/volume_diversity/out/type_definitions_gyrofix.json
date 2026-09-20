@@ -1,0 +1,53 @@
+{
+  "k": 1000,
+  "seed": 42,
+  "pool_n": 1738094,
+  "unit_fix": "eatingspeed gyro deg/s -> rad/s",
+  "phys_pca_var": 0.9981517679238081,
+  "ami_new_old": 0.5132111692159801,
+  "ami_new_source": 0.13798186300337367,
+  "ami_old_source": 0.2038895371552847,
+  "new": {
+    "sizes": {
+      "min": 131,
+      "median": 1609.0,
+      "max": 5251,
+      "nonempty": 1000
+    },
+    "clusters_gt90pct_one_source": 628,
+    "clusters_by_dominant_source": {
+      "ocdetect": 639,
+      "eatingspeed": 122,
+      "motionx": 66,
+      "sonic": 173
+    },
+    "exclusive_clusters": {
+      "ocdetect": 2,
+      "eatingspeed": 48,
+      "motionx": 8,
+      "sonic": 6
+    }
+  },
+  "old": {
+    "sizes": {
+      "min": 171,
+      "median": 1482.0,
+      "max": 5200,
+      "nonempty": 1000
+    },
+    "clusters_gt90pct_one_source": 886,
+    "clusters_by_dominant_source": {
+      "ocdetect": 555,
+      "eatingspeed": 220,
+      "motionx": 62,
+      "sonic": 163
+    },
+    "exclusive_clusters": {
+      "ocdetect": 62,
+      "eatingspeed": 139,
+      "motionx": 1,
+      "sonic": 12
+    }
+  },
+  "seconds": 71.63095712661743
+}

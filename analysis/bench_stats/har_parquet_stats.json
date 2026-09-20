@@ -1,0 +1,68 @@
+{
+ "opportunity++": {
+  "subjects": 4,
+  "sessions": 23,
+  "hours": 6.74,
+  "classes": 21
+ },
+ "pamap2": {
+  "subjects": 9,
+  "sessions": 14,
+  "hours": 10.09,
+  "classes": 18
+ },
+ "recofit": {
+  "subjects": 94,
+  "sessions": 1961,
+  "hours": 43.02,
+  "classes": 123
+ },
+ "samosa": {
+  "subjects": 20,
+  "sessions": 1624,
+  "hours": 6.68,
+  "classes": 27
+ },
+ "ut_watch": {
+  "subjects": 20,
+  "sessions": 39,
+  "hours": 45.26,
+  "classes": 24
+ },
+ "wear": {
+  "subjects": 24,
+  "sessions": 24,
+  "hours": 19.25,
+  "classes": 19
+ },
+ "capture24": {
+  "subjects": 151,
+  "sessions": 151,
+  "hours": 3883.44,
+  "classes": 74
+ },
+ "shoaib": {
+  "subjects": 1,
+  "sessions": 13,
+  "hours": 6.5,
+  "classes": 13
+ },
+ "wisdm": {
+  "subjects": 51,
+  "sessions": 907,
+  "hours": 44.69,
+  "classes": 18
+ },
+ "prism": {
+  "subjects": 31,
+  "sessions": 186,
+  "hours": 16.28,
+  "classes": 96
+ },
+ "utd_mhad": {
+  "subjects": 8,
+  "sessions": 671,
+  "hours": 0.66,
+  "classes": 21
+ }
+}

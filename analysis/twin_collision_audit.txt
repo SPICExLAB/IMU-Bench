@@ -1,0 +1,33 @@
+# Twin-collision audit — bench cells whose run dir had two concurrent jobs writing into it
+# fingerprint: >=2 wandb run dirs, second started >5 min before the first stopped writing
+# generated 2026-09-04
+
+   170 min   bench_odometry_nymeria_worldframe__simmtm_4src__probe__s42
+   128 min   bench_odometry_nymeria_worldframe__acconly_4src__probe__s42
+   100 min   bench_full_body_pose_nymeria__mae_4src_dc__probe__s42
+    99 min   bench_full_body_pose_nymeria__mae_4src_dc__finetune__s42
+    78 min   bench_full_body_pose_nymeria__mae_nhanes2x2_b__probe__s42
+    76 min   bench_odometry_nymeria_worldframe__mae_4src_z__finetune__s42
+    74 min   bench_odometry_nymeria_worldframe__focal_4src__probe__s42
+    71 min   bench_odometry_nymeria_worldframe__mae_4src_physnp__probe__s42
+    67 min   bench_odometry_nymeria_worldframe__simmtm_4src__finetune__s42
+    62 min   bench_arm_pose_nymeria__mae_4src_z__finetune__s42
+    30 min   bench_har_recofit__mae_4src_dc__probe__s42
+    25 min   bench_pd_pads__focal_4src__finetune__s42
+    24 min   bench_arm_pose_nymeria__acconly_4src__probe__s42
+    21 min   bench_full_body_pose_nymeria__mae_4src_physnp__probe__s42
+    21 min   bench_full_body_pose_nymeria__simmtm_4src__probe__s42
+    19 min   bench_microgesture_openwatch__simmtm_4src__finetune__s42
+    14 min   bench_har_hhar__mae_4src_dc__probe__s42
+    14 min   bench_microgesture_openwatch__mae_4src_z__finetune__s42
+    11 min   bench_har_mhealth__mae_4src_dc__probe__s42
+    11 min   bench_har_ut_watch__mae_nhanes2x2_b__probe__s42
+    10 min   bench_arm_pose_nymeria__simmtm_4src__finetune__s42
+    10 min   bench_har_prism__mae_nhanes2x2_a__probe__s42
+    10 min   bench_har_ut_watch__mae_nhanes2x2_a__probe__s42
+    10 min   bench_microgesture_openwatch__mae_div60_dc__finetune__s42
+    10 min   bench_pd_pads__acconly_4src__probe__s42
+     6 min   bench_microgesture_openwatch__mae_4src_physnp__finetune__s42
+     5 min   bench_arm_pose_nymeria__simmtm_4src__probe__s42
+
+# total: 27 contaminated cells
