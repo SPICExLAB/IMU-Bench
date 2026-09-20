@@ -47,13 +47,19 @@ cells = collect()
 # marks the best controlled encoder, and these are not controlled.
 # tex(): a published system's name can carry "&" or "_", which would otherwise break the row.
 EXPERTS = [(e, c.get("name", e)) for e, c in encoders.items() if (c or {}).get("group") == "external"]
+# Published systems evaluated under a sibling task's protocol: (sibling task, encoders, row suffix).
+# The wrist-frame odometry task has no external systems of its own; TLIO and Air-IO were scored under
+# the world-frame protocol on the same 73,515 windows and 33-point trajectories.
+EXPERT_ALIAS = {"odometry_nymeria_local": ("odometry_nymeria_worldframe", ["tlio", "airio"], " (world-frame protocol)")}
 # Caveats that belong in the caption of the task they apply to.
 EXPERT_NOTE = {
     "arm_pose_nymeria": "Our arm-pose metric supplies ground-truth ancestor joints, which a full-body "
                         "system such as MobilePoser must predict itself.",
-    "odometry_nymeria_local": "Published inertial-odometry systems (TLIO, Air-IO, MobilePoser) predict a "
-                              "world-frame trajectory and are not comparable with this wrist-frame protocol, "
-                              "so none is listed.",
+    "odometry_nymeria_local": "TLIO and Air-IO predict a world-frame trajectory and were scored under the "
+                              "benchmark's world-frame protocol on the same 73,515 windows and 33-point "
+                              "trajectories; that protocol gives systematically lower error than the wrist-frame "
+                              "one (the same frozen MAE probe scores 0.148\\,m under it against 0.200\\,m here), "
+                              "so their rows are a reference point, not a ranking.",
     "language_humanml3d": "The official UniMTS checkpoint is left out because it was pretrained on "
                           "HumanML3D; the row is its wrist-only reimplementation trained from scratch.",
 }
@@ -122,7 +128,7 @@ def block(columns, rows, bold_group=None):
     for enc, lab, proto in rows:
         cs = []
         for i, (task, k, get) in enumerate(columns):
-            v = get(enc, proto)
+            v = value(enc[1], enc[2], "external", k) if isinstance(enc, tuple) else get(enc, proto)
             s = fmt(task, k, v)
             if bold_group and enc in bold_group and v is not None and best.get(i) == v:
                 s = r"\textbf{" + s + "}"
@@ -154,6 +160,12 @@ def write_table(table_id, columns, header_lines, caption, wide):
     lines += [r"\midrule"] + block(columns, [("scratch", "Scratch", "scratch")])
     expert = [(e, tex(lab), "external") for e, lab in EXPERTS
               if any(get(e, "external") is not None for _, _, get in columns)]
+    if table_id in EXPERT_ALIAS:
+        sib, encs, suffix = EXPERT_ALIAS[table_id]
+        names = dict(EXPERTS)
+        for e in encs:
+            if cells.get((sib, e, "external")) and cells[(sib, e, "external")].ok:
+                expert.append((("alias", sib, e), tex(names.get(e, e)) + suffix, "external"))
     if expert:
         lines += [r"\midrule",
                   rf"\multicolumn{{{n + 1}}}{{@{{}}l}}{{\emph{{Task-specific systems}} (not ranked)}} \\"]
@@ -199,7 +211,10 @@ for task, short, _ in COLS:
     rows = write_table(task, columns, header, caption, wide=len(keys) >= 6)
     written.append(task)
     for enc, lab, proto in rows:
-        csv_rows.append([task, enc, lab, proto] + [value(task, enc, proto, k) for k in keys] + [";".join(keys)])
+        if isinstance(enc, tuple):
+            csv_rows.append([task, f"{enc[2]}@{enc[1]}", lab, proto] + [value(enc[1], enc[2], "external", k) for k in keys] + [";".join(keys)])
+        else:
+            csv_rows.append([task, enc, lab, proto] + [value(task, enc, proto, k) for k in keys] + [";".join(keys)])
 
 # ---- the four activity sets in one table -----------------------------------------------------------
 KEYS = metric_keys(HAR_TASKS[0])
