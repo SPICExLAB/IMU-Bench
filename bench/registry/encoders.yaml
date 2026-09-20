@@ -3355,6 +3355,16 @@ encoders:
     pretrain_data: none -- the encoder is the benchmark's from-scratch run on IMU-text retrieval (random init, the task's own training split only)
     pretrain_objective: supervised, from scratch
     eval_note: transfer source without pretraining; its own task is excluded as a target. Counterpart of tx5_language.
+  imuposer:
+    name: IMUPoser (Mollyn et al.)
+    short: imuposer
+    group: external
+    order: 5050
+    hide_in_summary: false
+    channels: 6
+    pretrain_data: none -- IMUPoser releases no weights; its BiLSTM is trained on the benchmark's Nymeria training sessions, as MobilePoser was
+    pretrain_objective: supervised, task-specific (right-wrist acceleration + orientation -> SMPL pose, pose + joint MSE)
+    eval_note: task-specific system; scored with the MobilePoser Nymeria evaluator on independent 10.24 s windows; predicts the whole chain, so the arm metric's ground-truth ancestors do not apply to it
   pads_boss:
     name: PADS pipeline, BOSS + CatBoost (Varghese et al.)
     short: pads_boss
