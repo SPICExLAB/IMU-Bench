@@ -37,7 +37,8 @@ PAIRS = [("tx5_fullbody", "full_body_pose_nymeria", "Full-body pose", "Full-body
          ("tx5_odom", "odometry_nymeria_local", "Odometry", "Odometry"),
          ("tx5_gesture", "microgesture_openwatch", "Microgesture", "Microgesture"),
          ("tx5_pd", "pd_pads", "Parkinson's", "Parkinson's"),
-         ("tx5_prism", "har_prism", "PRISM activity", "PRISM")]
+         ("tx5_prism", "har_prism", "PRISM activity", "PRISM"),
+         ("tx5_language", "language_humanml3d", "IMU--text", "IMU-text")]
 tasks = load_tasks()["tasks"]
 cells = collect()
 

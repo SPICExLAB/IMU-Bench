@@ -27,13 +27,14 @@ REPO = Path(__file__).resolve().parents[1]
 TASKS = yaml.safe_load(open(REPO / "bench/registry/tasks.yaml"))["tasks"]
 
 SOURCES = [("prism", "PRISM", "activity"), ("fullbody", "Full-body", "pose"), ("gesture", "Gesture", "OpenWatch"),
-           ("odom", "Odometry", "Nymeria"), ("pd", "Parkinson's", "PADS")]
+           ("odom", "Odometry", "Nymeria"), ("pd", "Parkinson's", "PADS"), ("language", "IMU–text", "HumanML3D")]
 # (source key of the same task, bench task id, row name, metric label, scale, fmt)
 TARGETS = [("prism", "har_prism", "PRISM activity", "Macro-F1 (%)", 100, "{:.1f}"),
            ("fullbody", "full_body_pose_nymeria", "Nymeria full-body pose", "MPJPE (mm)", 1, "{:.2f}"),
            ("gesture", "microgesture_openwatch", "OpenWatch gesture", "Clip macro-F1 (%)", 100, "{:.1f}"),
            ("odom", "odometry_nymeria_local", "Nymeria odometry", "ATE (m)", 1, "{:.4f}"),
-           ("pd", "pd_pads", "PADS Parkinson's", "Subject macro-F1 (%)", 100, "{:.1f}")]
+           ("pd", "pd_pads", "PADS Parkinson's", "Subject macro-F1 (%)", 100, "{:.1f}"),
+           ("language", "language_humanml3d", "HumanML3D IMU–text", "R@1, G=100 (%)", 1, "{:.1f}")]
 
 
 def value(task, enc, proto, scale):

@@ -1,6 +1,6 @@
 encoders:
   mae_11src:
-    name: Ours (MAE, 11-source)
+    name: "Ours (MAE, 11-source) \u26A0 eval-overlap pool"
     short: MAE
     group: ours
     order: 0
@@ -12,8 +12,11 @@ encoders:
     params_m: 21
     pretrain_data: 11-source multidata cache (mae_multidata_cache)
     pretrain_objective: MAE (var-len, alt-attn)
+    hide_in_summary: false
+    _hidden_note: pretrained on a pool that overlaps the evaluation sets; kept in the coverage grid and
+      per-task detail, out of the headline tables
   mae_5src:
-    name: Ours (MAE, 5-source)
+    name: "Ours (MAE, 5-source) \u26A0 eval-overlap pool"
     short: MAE-5src
     group: ours
     order: 1
@@ -23,9 +26,14 @@ encoders:
     channels: 6
     shared_kernel: acc_gyro
     params_m: 21
-    pretrain_data: realdata, ocdetect, eatingspeed, motionx, sonic (5-source; Nymeria/TotalCapture
-      genuinely held out)
+    pretrain_data: realdata, ocdetect, eatingspeed, motionx, sonic (5-source; Nymeria/TotalCapture genuinely
+      held out)
     pretrain_objective: MAE (var-len, alt-attn)
+    normalize_method: zscore
+    preprocess_from: configs/vit1d_ssl_mae_varlen_altattn_realdata_ocdetect_eatingspeed_motionx_sonic_flu.yaml
+    hide_in_summary: false
+    _hidden_note: pretrained on a pool that overlaps the evaluation sets; kept in the coverage grid and
+      per-task detail, out of the headline tables
   mae_noaltattn:
     name: Ours (MAE, no alt-attn)
     short: MAE-noAA
@@ -182,8 +190,8 @@ encoders:
     - har_recofit
     - har_hhar
     - har_mhealth
-    source: "configs/deepconvlstm_har_*.yaml (supervised from scratch, same windows/splits;\
-      \ Experiments_table \xA73)"
+    source: "configs/deepconvlstm_har_*.yaml (supervised from scratch, same windows/splits; Experiments_table\
+      \ \xA73)"
   inertia1_patchtst:
     name: Inertia-1 PatchTST-small (NHANES repro)
     short: Inertia-1 PT
@@ -196,8 +204,8 @@ encoders:
     ckpt: best
     channels: 3
     params_m: 8.5
-    pretrain_data: NHANES 2011-14 wrist accelerometry, 30 s @ 20 Hz, g units (our
-      1/3-hour subsample of all 14,693 participants)
+    pretrain_data: NHANES 2011-14 wrist accelerometry, 30 s @ 20 Hz, g units (our 1/3-hour subsample of
+      all 14,693 participants)
     pretrain_objective: PatchTST masked patch reconstruction (mask 0.4, patch 10)
     tasks:
     - arm_pose_nymeria
@@ -221,8 +229,8 @@ encoders:
     ckpt: best
     channels: 3
     params_m: 8.4
-    pretrain_data: NHANES 2011-14 wrist accelerometry, 30 s @ 20 Hz, g units (our
-      1/3-hour subsample of all 14,693 participants)
+    pretrain_data: NHANES 2011-14 wrist accelerometry, 30 s @ 20 Hz, g units (our 1/3-hour subsample of
+      all 14,693 participants)
     pretrain_objective: causal next-patch prediction (patch 10)
     tasks:
     - arm_pose_nymeria
@@ -247,10 +255,9 @@ encoders:
     ckpt: best
     channels: 3
     params_m: 100.9
-    pretrain_data: NHANES 2011-14 wrist accelerometry, 30 s @ 20 Hz, g units (same
-      1/3-hour subsample of all 14,693 participants)
-    pretrain_objective: PatchTST masked patch reconstruction (mask 0.4, patch 10),
-      large preset
+    pretrain_data: NHANES 2011-14 wrist accelerometry, 30 s @ 20 Hz, g units (same 1/3-hour subsample
+      of all 14,693 participants)
+    pretrain_objective: PatchTST masked patch reconstruction (mask 0.4, patch 10), large preset
     tasks:
     - arm_pose_nymeria
     - full_body_pose_nymeria
@@ -273,8 +280,8 @@ encoders:
     ckpt: best
     channels: 3
     params_m: 100.8
-    pretrain_data: NHANES 2011-14 wrist accelerometry, 30 s @ 20 Hz, g units (same
-      1/3-hour subsample of all 14,693 participants)
+    pretrain_data: NHANES 2011-14 wrist accelerometry, 30 s @ 20 Hz, g units (same 1/3-hour subsample
+      of all 14,693 participants)
     pretrain_objective: AR-Transformer next-patch prediction, large preset
     tasks:
     - arm_pose_nymeria
@@ -299,8 +306,8 @@ encoders:
     channels: 3
     params_m: 8.5
     pretrain_data: none
-    pretrain_objective: none (random init; supervised end-to-end, raw-g input pipeline
-      of the Inertia-1 adapter)
+    pretrain_objective: none (random init; supervised end-to-end, raw-g input pipeline of the Inertia-1
+      adapter)
     tasks:
     - har_wisdm
     - har_utd_mhad
@@ -323,8 +330,7 @@ encoders:
     channels: 3
     params_m: 8.5
     pretrain_data: none
-    pretrain_objective: none (random init, seed 42; frozen random features + linear
-      head)
+    pretrain_objective: none (random init, seed 42; frozen random features + linear head)
     tasks:
     - har_wisdm
     - har_utd_mhad
@@ -344,10 +350,9 @@ encoders:
     channels: 6
     shared_kernel: acc_gyro
     params_m: 21
-    pretrain_data: 11-source pool, realdata WITHOUT the 4 HAR eval sets; 400 h NHANES
-      + z-score; balanced sampling, NHANES 25 % of mass; 50k steps
-    pretrain_objective: MAE (var-len, alt-attn) + modality loss weights acc 1.0 /
-      gyro 2.0
+    pretrain_data: 11-source pool, realdata WITHOUT the 4 HAR eval sets; 400 h NHANES + z-score; balanced
+      sampling, NHANES 25 % of mass; 50k steps
+    pretrain_objective: MAE (var-len, alt-attn) + modality loss weights acc 1.0 / gyro 2.0
     normalize_method: zscore
     hide_in_summary: true
   mae_nhanes2x2_b:
@@ -361,10 +366,9 @@ encoders:
     channels: 6
     shared_kernel: acc_gyro
     params_m: 21
-    pretrain_data: 11-source pool, realdata WITHOUT the 4 HAR eval sets; 20k h NHANES
-      + z-score; balanced sampling, NHANES 25 % of mass; 50k steps
-    pretrain_objective: MAE (var-len, alt-attn) + modality loss weights acc 1.0 /
-      gyro 2.0
+    pretrain_data: 11-source pool, realdata WITHOUT the 4 HAR eval sets; 20k h NHANES + z-score; balanced
+      sampling, NHANES 25 % of mass; 50k steps
+    pretrain_objective: MAE (var-len, alt-attn) + modality loss weights acc 1.0 / gyro 2.0
     normalize_method: zscore
     hide_in_summary: true
   mae_nhanes2x2_c:
@@ -378,10 +382,9 @@ encoders:
     channels: 6
     shared_kernel: acc_gyro
     params_m: 21
-    pretrain_data: 11-source pool, realdata WITHOUT the 4 HAR eval sets; 400 h NHANES
-      + physical scaling; balanced sampling, NHANES 25 % of mass; 50k steps
-    pretrain_objective: MAE (var-len, alt-attn) + modality loss weights acc 1.0 /
-      gyro 2.0
+    pretrain_data: 11-source pool, realdata WITHOUT the 4 HAR eval sets; 400 h NHANES + physical scaling;
+      balanced sampling, NHANES 25 % of mass; 50k steps
+    pretrain_objective: MAE (var-len, alt-attn) + modality loss weights acc 1.0 / gyro 2.0
     normalize_method: physical
     hide_in_summary: true
   mae_nhanes2x2_d:
@@ -395,15 +398,13 @@ encoders:
     channels: 6
     shared_kernel: acc_gyro
     params_m: 21
-    pretrain_data: 11-source pool, realdata WITHOUT the 4 HAR eval sets; 20k h NHANES
-      + physical scaling; balanced sampling, NHANES 25 % of mass; 50k steps
-    pretrain_objective: MAE (var-len, alt-attn) + modality loss weights acc 1.0 /
-      gyro 2.0
+    pretrain_data: 11-source pool, realdata WITHOUT the 4 HAR eval sets; 20k h NHANES + physical scaling;
+      balanced sampling, NHANES 25 % of mass; 50k steps
+    pretrain_objective: MAE (var-len, alt-attn) + modality loss weights acc 1.0 / gyro 2.0
     normalize_method: physical
     hide_in_summary: true
   mae_recipe_r0:
-    name: MAE recipe R0 (baseline recipe (z-score, octahedral rotation, full_mse,
-      lr 1e-4))
+    name: MAE recipe R0 (baseline recipe (z-score, octahedral rotation, full_mse, lr 1e-4))
     short: recipe-R0
     group: ablation
     order: 50
@@ -413,10 +414,8 @@ encoders:
     channels: 6
     shared_kernel: acc_gyro
     params_m: 21
-    pretrain_data: 514 h leak-free diversity-balanced pool (raw cache, unit-harmonised),
-      30k steps
-    pretrain_objective: baseline recipe (z-score, octahedral rotation, full_mse, lr
-      1e-4)
+    pretrain_data: 514 h leak-free diversity-balanced pool (raw cache, unit-harmonised), 30k steps
+    pretrain_objective: baseline recipe (z-score, octahedral rotation, full_mse, lr 1e-4)
     normalize_method: zscore
     hide_in_summary: true
   mae_recipe_r1:
@@ -430,8 +429,7 @@ encoders:
     channels: 6
     shared_kernel: acc_gyro
     params_m: 21
-    pretrain_data: 514 h leak-free diversity-balanced pool (raw cache, unit-harmonised),
-      30k steps
+    pretrain_data: 514 h leak-free diversity-balanced pool (raw cache, unit-harmonised), 30k steps
     pretrain_objective: physical scaling + yaw rotation + lr 3e-4
     normalize_method: physical
     hide_in_summary: true
@@ -446,8 +444,7 @@ encoders:
     channels: 6
     shared_kernel: acc_gyro
     params_m: 21
-    pretrain_data: 514 h leak-free diversity-balanced pool (raw cache, unit-harmonised),
-      30k steps
+    pretrain_data: 514 h leak-free diversity-balanced pool (raw cache, unit-harmonised), 30k steps
     pretrain_objective: R1 + band-weighted loss (4/2/1/0.5)
     normalize_method: physical
     hide_in_summary: true
@@ -462,8 +459,7 @@ encoders:
     channels: 6
     shared_kernel: acc_gyro
     params_m: 21
-    pretrain_data: 514 h leak-free diversity-balanced pool (raw cache, unit-harmonised),
-      30k steps
+    pretrain_data: 514 h leak-free diversity-balanced pool (raw cache, unit-harmonised), 30k steps
     pretrain_objective: R2 + modality masking p=0.3 (replace-mode loss)
     normalize_method: physical
     hide_in_summary: true
@@ -478,10 +474,9 @@ encoders:
     channels: 6
     shared_kernel: acc_gyro
     params_m: 21
-    pretrain_data: 514 h leak-free diversity-balanced pool (raw cache, unit-harmonised),
-      30k steps
-    pretrain_objective: 'mask-ratio ablation: baseline R0 recipe with objective.mask_ratio
-      = 0.40 (mask_ratio 0.75 arm = encoder mae_recipe_r0)'
+    pretrain_data: 514 h leak-free diversity-balanced pool (raw cache, unit-harmonised), 30k steps
+    pretrain_objective: 'mask-ratio ablation: baseline R0 recipe with objective.mask_ratio = 0.40 (mask_ratio
+      0.75 arm = encoder mae_recipe_r0)'
     normalize_method: zscore
     hide_in_summary: true
   mae_mr50:
@@ -495,10 +490,9 @@ encoders:
     channels: 6
     shared_kernel: acc_gyro
     params_m: 21
-    pretrain_data: 514 h leak-free diversity-balanced pool (raw cache, unit-harmonised),
-      30k steps
-    pretrain_objective: 'mask-ratio ablation: baseline R0 recipe with objective.mask_ratio
-      = 0.50 (mask_ratio 0.75 arm = encoder mae_recipe_r0)'
+    pretrain_data: 514 h leak-free diversity-balanced pool (raw cache, unit-harmonised), 30k steps
+    pretrain_objective: 'mask-ratio ablation: baseline R0 recipe with objective.mask_ratio = 0.50 (mask_ratio
+      0.75 arm = encoder mae_recipe_r0)'
     normalize_method: zscore
     hide_in_summary: true
   mae_mr60:
@@ -512,10 +506,9 @@ encoders:
     channels: 6
     shared_kernel: acc_gyro
     params_m: 21
-    pretrain_data: 514 h leak-free diversity-balanced pool (raw cache, unit-harmonised),
-      30k steps
-    pretrain_objective: 'mask-ratio ablation: baseline R0 recipe with objective.mask_ratio
-      = 0.60 (mask_ratio 0.75 arm = encoder mae_recipe_r0)'
+    pretrain_data: 514 h leak-free diversity-balanced pool (raw cache, unit-harmonised), 30k steps
+    pretrain_objective: 'mask-ratio ablation: baseline R0 recipe with objective.mask_ratio = 0.60 (mask_ratio
+      0.75 arm = encoder mae_recipe_r0)'
     normalize_method: zscore
     hide_in_summary: true
   mae_mr85:
@@ -529,10 +522,9 @@ encoders:
     channels: 6
     shared_kernel: acc_gyro
     params_m: 21
-    pretrain_data: 514 h leak-free diversity-balanced pool (raw cache, unit-harmonised),
-      30k steps
-    pretrain_objective: 'mask-ratio ablation: baseline R0 recipe with objective.mask_ratio
-      = 0.85 (mask_ratio 0.75 arm = encoder mae_recipe_r0)'
+    pretrain_data: 514 h leak-free diversity-balanced pool (raw cache, unit-harmonised), 30k steps
+    pretrain_objective: 'mask-ratio ablation: baseline R0 recipe with objective.mask_ratio = 0.85 (mask_ratio
+      0.75 arm = encoder mae_recipe_r0)'
     normalize_method: zscore
     hide_in_summary: true
   mae_mr90:
@@ -546,10 +538,9 @@ encoders:
     channels: 6
     shared_kernel: acc_gyro
     params_m: 21
-    pretrain_data: 514 h leak-free diversity-balanced pool (raw cache, unit-harmonised),
-      30k steps
-    pretrain_objective: 'mask-ratio ablation: baseline R0 recipe with objective.mask_ratio
-      = 0.90 (mask_ratio 0.75 arm = encoder mae_recipe_r0)'
+    pretrain_data: 514 h leak-free diversity-balanced pool (raw cache, unit-harmonised), 30k steps
+    pretrain_objective: 'mask-ratio ablation: baseline R0 recipe with objective.mask_ratio = 0.90 (mask_ratio
+      0.75 arm = encoder mae_recipe_r0)'
     normalize_method: zscore
     hide_in_summary: true
   mae_recipe_r4:
@@ -564,8 +555,7 @@ encoders:
     shared_kernel: acc_gyro
     params_m: 21
     pretrain_data: 514 h leak-free diversity-balanced pool, 30k steps
-    pretrain_objective: R0 baseline with ONLY normalize=physical (octahedral rotation,
-      lr 1e-4, full_mse)
+    pretrain_objective: R0 baseline with ONLY normalize=physical (octahedral rotation, lr 1e-4, full_mse)
     normalize_method: physical
     hide_in_summary: true
   mae_frame_canon:
@@ -579,12 +569,10 @@ encoders:
     channels: 6
     shared_kernel: acc_gyro
     params_m: 21
-    pretrain_data: OCDetect only, 200.0 h (hop-based) of the raw gravity-preserving
-      cache, 30k steps -- single source so the pretraining coordinate frame is fixed
-      by construction
-    pretrain_objective: 'FRAME-MATCH ABLATION arm CANON: OCDetect-only 200 h pool,
-      random_rotation DISABLED -- the encoder only ever sees the one wrist frame the
-      data was recorded in.'
+    pretrain_data: OCDetect only, 200.0 h (hop-based) of the raw gravity-preserving cache, 30k steps --
+      single source so the pretraining coordinate frame is fixed by construction
+    pretrain_objective: 'FRAME-MATCH ABLATION arm CANON: OCDetect-only 200 h pool, random_rotation DISABLED
+      -- the encoder only ever sees the one wrist frame the data was recorded in.'
     normalize_method: zscore
     hide_in_summary: true
   mae_frame_oct:
@@ -598,11 +586,10 @@ encoders:
     channels: 6
     shared_kernel: acc_gyro
     params_m: 21
-    pretrain_data: OCDetect only, 200.0 h (hop-based) of the raw gravity-preserving
-      cache, 30k steps -- single source so the pretraining coordinate frame is fixed
-      by construction
-    pretrain_objective: 'FRAME-MATCH ABLATION arm OCT: same pool, random_rotation=octahedral
-      (24 proper cube rotations) -- the R0 baseline''s setting.'
+    pretrain_data: OCDetect only, 200.0 h (hop-based) of the raw gravity-preserving cache, 30k steps --
+      single source so the pretraining coordinate frame is fixed by construction
+    pretrain_objective: 'FRAME-MATCH ABLATION arm OCT: same pool, random_rotation=octahedral (24 proper
+      cube rotations) -- the R0 baseline''s setting.'
     normalize_method: zscore
     hide_in_summary: true
   mae_frame_so3:
@@ -616,11 +603,10 @@ encoders:
     channels: 6
     shared_kernel: acc_gyro
     params_m: 21
-    pretrain_data: OCDetect only, 200.0 h (hop-based) of the raw gravity-preserving
-      cache, 30k steps -- single source so the pretraining coordinate frame is fixed
-      by construction
-    pretrain_objective: 'FRAME-MATCH ABLATION arm SO3: same pool, random_rotation=so3
-      (continuous uniform SO(3)) -- every window in an arbitrary frame.'
+    pretrain_data: OCDetect only, 200.0 h (hop-based) of the raw gravity-preserving cache, 30k steps --
+      single source so the pretraining coordinate frame is fixed by construction
+    pretrain_objective: 'FRAME-MATCH ABLATION arm SO3: same pool, random_rotation=so3 (continuous uniform
+      SO(3)) -- every window in an arbitrary frame.'
     normalize_method: zscore
     hide_in_summary: true
   mae_mr30:
@@ -634,10 +620,9 @@ encoders:
     channels: 6
     shared_kernel: acc_gyro
     params_m: 21
-    pretrain_data: 514 h leak-free diversity-balanced pool (raw cache, unit-harmonised),
-      30k steps
-    pretrain_objective: 'mask-ratio ablation: baseline R0 recipe with objective.mask_ratio
-      = 0.30 (added after 0.40/0.50/0.75 came out monotone toward low ratios)'
+    pretrain_data: 514 h leak-free diversity-balanced pool (raw cache, unit-harmonised), 30k steps
+    pretrain_objective: 'mask-ratio ablation: baseline R0 recipe with objective.mask_ratio = 0.30 (added
+      after 0.40/0.50/0.75 came out monotone toward low ratios)'
     normalize_method: zscore
     hide_in_summary: true
   mae_recipe_rraw:
@@ -651,10 +636,9 @@ encoders:
     channels: 6
     shared_kernel: acc_gyro
     params_m: 21
-    pretrain_data: 514 h leak-free diversity-balanced pool (raw cache, units harmonised),
-      30k steps
-    pretrain_objective: R0 baseline with normalisation OFF (DC kept); octahedral rotation,
-      lr 1e-4, full_mse, mask 0.75
+    pretrain_data: 514 h leak-free diversity-balanced pool (raw cache, units harmonised), 30k steps
+    pretrain_objective: R0 baseline with normalisation OFF (DC kept); octahedral rotation, lr 1e-4, full_mse,
+      mask 0.75
     normalize_method: raw
     hide_in_summary: true
   mae_full60_dc:
@@ -668,10 +652,8 @@ encoders:
     channels: 6
     shared_kernel: acc_gyro
     params_m: 21
-    pretrain_data: leak-free raw pool ~5877 h (7 sources, short mocap clips recovered),
-      diversity-weighted
-    pretrain_objective: MAE mask 0.60, raw/DC-preserving, octahedral, lr 1e-4, 100k
-      steps
+    pretrain_data: leak-free raw pool ~5877 h (7 sources, short mocap clips recovered), diversity-weighted
+    pretrain_objective: MAE mask 0.60, raw/DC-preserving, octahedral, lr 1e-4, 100k steps
     normalize_method: raw
     hide_in_summary: true
   mae_div60_dc:
@@ -685,11 +667,9 @@ encoders:
     channels: 6
     shared_kernel: acc_gyro
     params_m: 21
-    pretrain_data: 'leak-free raw diversity pool ~853 h: balanced subsets nhanes 54
-      h / capture24 60 h / ocdetect 300 h / eatingspeed 150 h + SONIC, MotionX, TotalCapture
-      in full'
-    pretrain_objective: MAE mask 0.60, raw/DC-preserving, octahedral, lr 1e-4, 100k
-      steps
+    pretrain_data: 'leak-free raw diversity pool ~853 h: balanced subsets nhanes 54 h / capture24 60 h
+      / ocdetect 300 h / eatingspeed 150 h + SONIC, MotionX, TotalCapture in full'
+    pretrain_objective: MAE mask 0.60, raw/DC-preserving, octahedral, lr 1e-4, 100k steps
     normalize_method: raw
     preprocess_from: configs/nhanes_scale/mae_div60_dc.yaml
     hide_in_summary: true
@@ -705,9 +685,8 @@ encoders:
     ckpt: best
     channels: 3
     params_m: 8.5
-    pretrain_data: SAME five sources as mae_5src (realdata 7-set HAR pool incl. eval
-      leak, ocdetect, eatingspeed both wrists, motionx++, sonic), 30 s @ 20 Hz acc-only
-      in g (~occupied hours reported by build_5src_corpus)
+    pretrain_data: SAME five sources as mae_5src (realdata 7-set HAR pool incl. eval leak, ocdetect, eatingspeed
+      both wrists, motionx++, sonic), 30 s @ 20 Hz acc-only in g (~occupied hours reported by build_5src_corpus)
     pretrain_objective: PatchTST masked patch reconstruction (mask 0.4, patch 10)
     tasks:
     - arm_pose_nymeria
@@ -731,9 +710,8 @@ encoders:
     ckpt: best
     channels: 3
     params_m: 8.4
-    pretrain_data: SAME five sources as mae_5src (realdata 7-set HAR pool incl. eval
-      leak, ocdetect, eatingspeed both wrists, motionx++, sonic), 30 s @ 20 Hz acc-only
-      in g (~occupied hours reported by build_5src_corpus)
+    pretrain_data: SAME five sources as mae_5src (realdata 7-set HAR pool incl. eval leak, ocdetect, eatingspeed
+      both wrists, motionx++, sonic), 30 s @ 20 Hz acc-only in g (~occupied hours reported by build_5src_corpus)
     pretrain_objective: causal next-patch prediction (patch 10)
     tasks:
     - arm_pose_nymeria
@@ -758,10 +736,9 @@ encoders:
     params_m: 21
     normalize_method: raw
     preprocess_from: configs/nhanes_scale/mae_4src_dc.yaml
-    pretrain_data: leak-free 4-source pool 2,479 h (ocdetect, eatingspeed R-wrist,
-      sonic, motionx; sanitized), balanced diversity-weighted sampling
-    pretrain_objective: MAE mask 0.60, raw/DC-preserving input, octahedral rotation,
-      lr 1e-4, 100k steps
+    pretrain_data: leak-free 4-source pool 2,479 h (ocdetect, eatingspeed R-wrist, sonic, motionx; sanitized),
+      balanced diversity-weighted sampling
+    pretrain_objective: MAE mask 0.60, raw/DC-preserving input, octahedral rotation, lr 1e-4, 100k steps
   mae_4src_phys:
     name: MAE 4-source (no HAR pool), physical rescale
     short: MAE-4src-phys
@@ -775,10 +752,9 @@ encoders:
     params_m: 21
     normalize_method: physical
     preprocess_from: configs/nhanes_scale/mae_4src_phys.yaml
-    pretrain_data: leak-free 4-source pool 2,479 h (ocdetect, eatingspeed R-wrist,
-      sonic, motionx; sanitized), balanced diversity-weighted sampling
-    pretrain_objective: MAE mask 0.60, physical rescale input, octahedral rotation,
-      lr 1e-4, 100k steps
+    pretrain_data: leak-free 4-source pool 2,479 h (ocdetect, eatingspeed R-wrist, sonic, motionx; sanitized),
+      balanced diversity-weighted sampling
+    pretrain_objective: MAE mask 0.60, physical rescale input, octahedral rotation, lr 1e-4, 100k steps
   mae_4src_physnp:
     name: MAE 4-source, physical input + patch-normalised loss
     short: MAE-4src-physNP
@@ -792,10 +768,10 @@ encoders:
     params_m: 21
     normalize_method: physical
     preprocess_from: configs/nhanes_scale/mae_4src_physnp.yaml
-    pretrain_data: leak-free 4-source pool 2,479 h (ocdetect, eatingspeed R-wrist,
-      sonic, motionx; sanitized), balanced diversity-weighted sampling
-    pretrain_objective: MAE mask 0.60, physical-scaled DC-preserving input, PATCH-NORMALISED
-      (norm-pix) targets, octahedral rotation, lr 1e-4, 100k steps
+    pretrain_data: leak-free 4-source pool 2,479 h (ocdetect, eatingspeed R-wrist, sonic, motionx; sanitized),
+      balanced diversity-weighted sampling
+    pretrain_objective: MAE mask 0.60, physical-scaled DC-preserving input, PATCH-NORMALISED (norm-pix)
+      targets, octahedral rotation, lr 1e-4, 100k steps
   mae_4src_z:
     name: MAE 4-source (no HAR pool), per-window z-score
     short: MAE-4src-z
@@ -809,16 +785,31 @@ encoders:
     params_m: 21
     normalize_method: zscore
     preprocess_from: configs/nhanes_scale/mae_4src_z.yaml
-    pretrain_data: leak-free 4-source pool 2,479 h (ocdetect, eatingspeed R-wrist,
-      sonic, motionx; sanitized), balanced diversity-weighted sampling
-    pretrain_objective: MAE mask 0.60, per-window z-score input, octahedral rotation,
-      lr 1e-4, 100k steps
+    pretrain_data: leak-free 4-source pool 2,479 h (ocdetect, eatingspeed R-wrist, sonic, motionx; sanitized),
+      balanced diversity-weighted sampling
+    pretrain_objective: MAE mask 0.60, per-window z-score input, octahedral rotation, lr 1e-4, 100k steps
+  mae_4src_nocls:
+    name: MAE 4-source, no CLS token (mean-pooled)
+    short: MAE-4src-noCLS
+    group: ours
+    order: 62
+    run: mae_4src_nocls
+    ckpt: best
+    alt_attention: true
+    use_cls: false
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/nhanes_scale/mae_4src_nocls.yaml
+    pretrain_data: leak-free 4-source pool 2,479 h (ocdetect, eatingspeed R-wrist, sonic, motionx; sanitized),
+      balanced diversity-weighted sampling
+    pretrain_objective: CLS ablation of mae_4src_z (use_cls=false); MAE mask 0.60, per-window z-score input, octahedral rotation, lr 1e-4, 100k steps
   simmtm_4src:
     name: SimMTM (4-source pool)
     short: SimMTM-4src
     group: ablation
     order: 70
-    hide_in_summary: true
     run: simmtm_4src
     ckpt: best
     alt_attention: false
@@ -827,16 +818,13 @@ encoders:
     params_m: 21
     normalize_method: zscore
     preprocess_from: configs/nhanes_scale/simmtm_4src.yaml
-    pretrain_data: leak-free 4-source pool 2,479 h (ocdetect, eatingspeed R-wrist,
-      sonic, motionx; sanitized)
-    pretrain_objective: SimMTM, z-score input, octahedral rotation, lr 1e-4, 100k
-      steps
+    pretrain_data: leak-free 4-source pool 2,479 h (ocdetect, eatingspeed R-wrist, sonic, motionx; sanitized)
+    pretrain_objective: SimMTM, z-score input, octahedral rotation, lr 1e-4, 100k steps
   focal_4src:
     name: FOCAL (4-source pool)
     short: FOCAL-4src
     group: ablation
     order: 71
-    hide_in_summary: true
     run: focal_4src
     ckpt: best
     alt_attention: false
@@ -845,15 +833,13 @@ encoders:
     params_m: 21
     normalize_method: zscore
     preprocess_from: configs/nhanes_scale/focal_4src.yaml
-    pretrain_data: leak-free 4-source pool 2,479 h (ocdetect, eatingspeed R-wrist,
-      sonic, motionx; sanitized)
+    pretrain_data: leak-free 4-source pool 2,479 h (ocdetect, eatingspeed R-wrist, sonic, motionx; sanitized)
     pretrain_objective: FOCAL, z-score input, octahedral rotation, lr 1e-4, 100k steps
   relcon_4src:
     name: RelCon (4-source pool)
     short: RelCon-4src
     group: ablation
     order: 72
-    hide_in_summary: true
     run: relcon_4src
     ckpt: best
     alt_attention: false
@@ -862,16 +848,13 @@ encoders:
     params_m: 21
     normalize_method: zscore
     preprocess_from: configs/nhanes_scale/relcon_4src.yaml
-    pretrain_data: leak-free 4-source pool 2,479 h (ocdetect, eatingspeed R-wrist,
-      sonic, motionx; sanitized)
-    pretrain_objective: RelCon, z-score input, octahedral rotation, lr 1e-4, 100k
-      steps
+    pretrain_data: leak-free 4-source pool 2,479 h (ocdetect, eatingspeed R-wrist, sonic, motionx; sanitized)
+    pretrain_objective: RelCon, z-score input, octahedral rotation, lr 1e-4, 100k steps
   acconly_4src:
     name: MAE acc-only (4-source pool)
     short: MAE-4src-acc
     group: ablation
     order: 73
-    hide_in_summary: true
     run: acconly_4src
     ckpt: best
     alt_attention: true
@@ -880,7 +863,2512 @@ encoders:
     params_m: 21
     normalize_method: zscore
     preprocess_from: configs/nhanes_scale/acconly_4src.yaml
-    pretrain_data: leak-free 4-source pool 2,479 h (ocdetect, eatingspeed R-wrist,
-      sonic, motionx; sanitized)
-    pretrain_objective: MAE acc-only, z-score input, octahedral rotation, lr 1e-4,
-      100k steps
+    pretrain_data: leak-free 4-source pool 2,479 h (ocdetect, eatingspeed R-wrist, sonic, motionx; sanitized)
+    pretrain_objective: MAE acc-only, z-score input, octahedral rotation, lr 1e-4, 100k steps
+  vd_nar_n12k:
+    name: VolDiv single-source, narrow motion band, N=12,500
+    short: nar_n12k
+    group: ablation
+    order: 900
+    hide_in_summary: true
+    run: vd_nar_n12k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_nar_n12k.yaml
+    pretrain_data: 'volume x diversity cell: single-source, narrow motion band, 12,500 windows (18 h)
+      of the full-size 4-source pool; 1 sources, 3 T-phys motion types (effective 2.8)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_nar_n50k:
+    name: VolDiv single-source, narrow motion band, N=50,000
+    short: nar_n50k
+    group: ablation
+    order: 901
+    hide_in_summary: true
+    run: vd_nar_n50k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_nar_n50k.yaml
+    pretrain_data: 'volume x diversity cell: single-source, narrow motion band, 50,000 windows (71 h)
+      of the full-size 4-source pool; 1 sources, 11 T-phys motion types (effective 10.8)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_nar_n200k:
+    name: VolDiv single-source, narrow motion band, N=200,000
+    short: nar_n200k
+    group: ablation
+    order: 902
+    hide_in_summary: true
+    run: vd_nar_n200k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_nar_n200k.yaml
+    pretrain_data: 'volume x diversity cell: single-source, narrow motion band, 200,000 windows (284 h)
+      of the full-size 4-source pool; 1 sources, 49 T-phys motion types (effective 48.3)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_nar_n800k:
+    name: VolDiv single-source, narrow motion band, N=800,000
+    short: nar_n800k
+    group: ablation
+    order: 903
+    hide_in_summary: true
+    run: vd_nar_n800k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_nar_n800k.yaml
+    pretrain_data: 'volume x diversity cell: single-source, narrow motion band, 800,000 windows (1,138
+      h) of the full-size 4-source pool; 1 sources, 250 T-phys motion types (effective 245.9)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_one_n12k:
+    name: VolDiv single-source, uniform random, N=12,500
+    short: one_n12k
+    group: ablation
+    order: 904
+    hide_in_summary: true
+    run: vd_one_n12k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_one_n12k.yaml
+    pretrain_data: 'volume x diversity cell: single-source, uniform random, 12,500 windows (18 h) of the
+      full-size 4-source pool; 1 sources, 578 T-phys motion types (effective 487.3)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_one_n50k:
+    name: VolDiv single-source, uniform random, N=50,000
+    short: one_n50k
+    group: ablation
+    order: 905
+    hide_in_summary: true
+    run: vd_one_n50k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_one_n50k.yaml
+    pretrain_data: 'volume x diversity cell: single-source, uniform random, 50,000 windows (71 h) of the
+      full-size 4-source pool; 1 sources, 617 T-phys motion types (effective 500.5)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_one_n200k:
+    name: VolDiv single-source, uniform random, N=200,000
+    short: one_n200k
+    group: ablation
+    order: 906
+    hide_in_summary: true
+    run: vd_one_n200k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_one_n200k.yaml
+    pretrain_data: 'volume x diversity cell: single-source, uniform random, 200,000 windows (284 h) of
+      the full-size 4-source pool; 1 sources, 671 T-phys motion types (effective 503.0)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_one_n800k:
+    name: VolDiv single-source, uniform random, N=800,000
+    short: one_n800k
+    group: ablation
+    order: 907
+    hide_in_summary: true
+    run: vd_one_n800k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_one_n800k.yaml
+    pretrain_data: 'volume x diversity cell: single-source, uniform random, 800,000 windows (1,138 h)
+      of the full-size 4-source pool; 1 sources, 734 T-phys motion types (effective 503.0)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_nat_n12k:
+    name: VolDiv 4-source, natural proportions, N=12,500
+    short: nat_n12k
+    group: ablation
+    order: 908
+    hide_in_summary: true
+    run: vd_nat_n12k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_nat_n12k.yaml
+    pretrain_data: 'volume x diversity cell: 4-source, natural proportions, 12,500 windows (18 h) of the
+      full-size 4-source pool; 4 sources, 991 T-phys motion types (effective 799.6)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_nat_n50k:
+    name: VolDiv 4-source, natural proportions, N=50,000
+    short: nat_n50k
+    group: ablation
+    order: 909
+    hide_in_summary: true
+    run: vd_nat_n50k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_nat_n50k.yaml
+    pretrain_data: 'volume x diversity cell: 4-source, natural proportions, 50,000 windows (71 h) of the
+      full-size 4-source pool; 4 sources, 1000 T-phys motion types (effective 822.9)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_nat_n200k:
+    name: VolDiv 4-source, natural proportions, N=200,000
+    short: nat_n200k
+    group: ablation
+    order: 910
+    hide_in_summary: true
+    run: vd_nat_n200k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_nat_n200k.yaml
+    pretrain_data: 'volume x diversity cell: 4-source, natural proportions, 200,000 windows (284 h) of
+      the full-size 4-source pool; 4 sources, 1000 T-phys motion types (effective 831.0)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_nat_n800k:
+    name: VolDiv 4-source, natural proportions, N=800,000
+    short: nat_n800k
+    group: ablation
+    order: 911
+    hide_in_summary: true
+    run: vd_nat_n800k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_nat_n800k.yaml
+    pretrain_data: 'volume x diversity cell: 4-source, natural proportions, 800,000 windows (1,138 h)
+      of the full-size 4-source pool; 4 sources, 1000 T-phys motion types (effective 832.2)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_bal_n12k:
+    name: VolDiv 4-source, source- and type-balanced, N=12,500
+    short: bal_n12k
+    group: ablation
+    order: 912
+    hide_in_summary: true
+    run: vd_bal_n12k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_bal_n12k.yaml
+    pretrain_data: 'volume x diversity cell: 4-source, source- and type-balanced, 12,500 windows (18 h)
+      of the full-size 4-source pool; 4 sources, 1000 T-phys motion types (effective 894.5)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_bal_n50k:
+    name: VolDiv 4-source, source- and type-balanced, N=50,000
+    short: bal_n50k
+    group: ablation
+    order: 913
+    hide_in_summary: true
+    run: vd_bal_n50k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_bal_n50k.yaml
+    pretrain_data: 'volume x diversity cell: 4-source, source- and type-balanced, 50,000 windows (71 h)
+      of the full-size 4-source pool; 4 sources, 1000 T-phys motion types (effective 878.6)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_bal_n200k:
+    name: VolDiv 4-source, source- and type-balanced, N=200,000
+    short: bal_n200k
+    group: ablation
+    order: 914
+    hide_in_summary: true
+    run: vd_bal_n200k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_bal_n200k.yaml
+    pretrain_data: 'volume x diversity cell: 4-source, source- and type-balanced, 200,000 windows (284
+      h) of the full-size 4-source pool; 4 sources, 1000 T-phys motion types (effective 799.5)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_bal_n800k:
+    name: VolDiv 4-source, source- and type-balanced, N=800,000
+    short: bal_n800k
+    group: ablation
+    order: 915
+    hide_in_summary: true
+    run: vd_bal_n800k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_bal_n800k.yaml
+    pretrain_data: 'volume x diversity cell: 4-source, source- and type-balanced, 800,000 windows (1,138
+      h) of the full-size 4-source pool; 4 sources, 1000 T-phys motion types (effective 872.9)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_nat_nfull:
+    name: VolDiv 4-source, natural proportions, N=1,738,094
+    short: nat_nfull
+    group: ablation
+    order: 916
+    hide_in_summary: true
+    run: vd_nat_nfull
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_nat_nfull.yaml
+    pretrain_data: 'volume x diversity cell: 4-source, natural proportions, 1,738,094 windows (2,472 h)
+      of the full-size 4-source pool; 4 sources, 1000 T-phys motion types (effective 832.8)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_bal_nfull:
+    name: VolDiv 4-source, source- and type-balanced, N=1,738,094
+    short: bal_nfull
+    group: ablation
+    order: 917
+    hide_in_summary: true
+    run: vd_bal_nfull
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_bal_nfull.yaml
+    pretrain_data: 'volume x diversity cell: 4-source, source- and type-balanced, 1,738,094 windows (2,472
+      h) of the full-size 4-source pool; 4 sources, 1000 T-phys motion types (effective 832.8)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_src1_n50k:
+    name: VolDiv src1, N=50,000
+    short: src1_n50k
+    group: ablation
+    order: 918
+    hide_in_summary: true
+    run: vd_src1_n50k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_src1_n50k.yaml
+    pretrain_data: 'volume x diversity cell: src1, 50,000 windows (71 h) of the full-size 4-source pool;
+      1 sources, 635 T-phys motion types (effective 158.0)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_src2_n50k:
+    name: VolDiv src2, N=50,000
+    short: src2_n50k
+    group: ablation
+    order: 919
+    hide_in_summary: true
+    run: vd_src2_n50k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_src2_n50k.yaml
+    pretrain_data: 'volume x diversity cell: src2, 50,000 windows (71 h) of the full-size 4-source pool;
+      2 sources, 708 T-phys motion types (effective 385.4)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_src3_n50k:
+    name: VolDiv src3, N=50,000
+    short: src3_n50k
+    group: ablation
+    order: 920
+    hide_in_summary: true
+    run: vd_src3_n50k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_src3_n50k.yaml
+    pretrain_data: 'volume x diversity cell: src3, 50,000 windows (71 h) of the full-size 4-source pool;
+      3 sources, 938 T-phys motion types (effective 700.0)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_src4_n50k:
+    name: VolDiv src4, N=50,000
+    short: src4_n50k
+    group: ablation
+    order: 921
+    hide_in_summary: true
+    run: vd_src4_n50k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_src4_n50k.yaml
+    pretrain_data: 'volume x diversity cell: src4, 50,000 windows (71 h) of the full-size 4-source pool;
+      4 sources, 1000 T-phys motion types (effective 1000.0)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_typ3_n12k:
+    name: VolDiv ocdetect only, 3 T-phys type(s), water-filled, N=12,500
+    short: typ3_n12k
+    group: ablation
+    order: 922
+    hide_in_summary: true
+    run: vd_typ3_n12k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_typ3_n12k.yaml
+    pretrain_data: 'volume x diversity cell: ocdetect only, 3 T-phys type(s), water-filled, 12,500 windows
+      (18 h) of the full-size 4-source pool; 1 sources, 3 T-phys motion types (effective 3.0)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_typ30_n12k:
+    name: VolDiv ocdetect only, 30 T-phys type(s), water-filled, N=12,500
+    short: typ30_n12k
+    group: ablation
+    order: 923
+    hide_in_summary: true
+    run: vd_typ30_n12k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_typ30_n12k.yaml
+    pretrain_data: 'volume x diversity cell: ocdetect only, 30 T-phys type(s), water-filled, 12,500 windows
+      (18 h) of the full-size 4-source pool; 1 sources, 30 T-phys motion types (effective 30.0)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_typ300_n12k:
+    name: VolDiv ocdetect only, 300 T-phys type(s), water-filled, N=12,500
+    short: typ300_n12k
+    group: ablation
+    order: 924
+    hide_in_summary: true
+    run: vd_typ300_n12k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_typ300_n12k.yaml
+    pretrain_data: 'volume x diversity cell: ocdetect only, 300 T-phys type(s), water-filled, 12,500 windows
+      (18 h) of the full-size 4-source pool; 1 sources, 300 T-phys motion types (effective 300.0)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_typall_n12k:
+    name: VolDiv ocdetect only, every T-phys type(s), water-filled, N=12,500
+    short: typall_n12k
+    group: ablation
+    order: 925
+    hide_in_summary: true
+    run: vd_typall_n12k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_typall_n12k.yaml
+    pretrain_data: 'volume x diversity cell: ocdetect only, every T-phys type(s), water-filled, 12,500
+      windows (18 h) of the full-size 4-source pool; 1 sources, 763 T-phys motion types (effective 673.1)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  mae_4src_noaltattn:
+    name: MAE 4-source, plain attention (no alt-attn)
+    short: MAE-4src-noAA
+    group: ours
+    order: 65
+    run: mae_4src_noaltattn
+    ckpt: best
+    alt_attention: false
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/nhanes_scale/mae_4src_noaltattn.yaml
+    pretrain_data: leak-free 4-source pool 2,479 h (ocdetect, eatingspeed R-wrist, sonic, motionx; sanitized),
+      balanced diversity-weighted sampling
+    pretrain_objective: MAE mask 0.60, per-window z-score, octahedral rotation, lr 1e-4, 100k steps; PLAIN
+      whole-sequence attention encoder -- the alt-attn ablation on the leak-free pool (the earlier mae_11src/mae_noaltattn
+      pair was run on the 11-source pool, which contains the HAR and Nymeria evaluation sets)
+  harnet5:
+    name: HarNet-5s (Yuan et al. 2024, UK Biobank)
+    short: HarNet5
+    group: external_pretrained
+    order: 120
+    external: false
+    external_encoder: harnet
+    variant: harnet5
+    run: null
+    ckpt: null
+    weights: /projects/b53017/vbc1591/harnet/mtl_5_best.mdl
+    alt_attention: false
+    channels: 3
+    shared_kernel: null
+    params_m: 4.2
+    pretrain_data: UK Biobank wrist accelerometry, ~700,000 person-days (~17 M hours), accelerometer-only,
+      30 Hz -- roughly 7,000x this project's 2,472 h four-source corpus
+    pretrain_objective: multi-task self-supervision (arrow-of-time / scale / permutation / time-warp),
+      1-D ResNet; AUTHORS' RELEASED WEIGHTS (mtl_5_best.mdl), not a reproduction
+    note: 'window-level encoder: 108x downsampling collapses a 5 s window to one vector, so the harness
+      token sequence is built by sliding the native 5 s crop across the window (imu_lm/models/baselines/harnet_encoder.py)'
+  vd_sub1_n50k:
+    name: VolDiv ocdetect only, 1 subject(s), type-matched, N=50,000
+    short: sub1_n50k
+    group: ablation
+    order: 926
+    hide_in_summary: true
+    run: vd_sub1_n50k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_sub1_n50k.yaml
+    pretrain_data: 'volume x diversity cell: ocdetect only, 1 subject(s), type-matched, 50,000 windows
+      (71 h) of the full-size 4-source pool; 1 sources, 620 T-phys motion types (effective 487.4)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_sub3_n50k:
+    name: VolDiv ocdetect only, 3 subject(s), type-matched, N=50,000
+    short: sub3_n50k
+    group: ablation
+    order: 927
+    hide_in_summary: true
+    run: vd_sub3_n50k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_sub3_n50k.yaml
+    pretrain_data: 'volume x diversity cell: ocdetect only, 3 subject(s), type-matched, 50,000 windows
+      (71 h) of the full-size 4-source pool; 1 sources, 679 T-phys motion types (effective 570.4)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_sub10_n50k:
+    name: VolDiv ocdetect only, 10 subject(s), type-matched, N=50,000
+    short: sub10_n50k
+    group: ablation
+    order: 928
+    hide_in_summary: true
+    run: vd_sub10_n50k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_sub10_n50k.yaml
+    pretrain_data: 'volume x diversity cell: ocdetect only, 10 subject(s), type-matched, 50,000 windows
+      (71 h) of the full-size 4-source pool; 1 sources, 737 T-phys motion types (effective 606.5)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_suball_n50k:
+    name: VolDiv ocdetect only, every subject(s), type-matched, N=50,000
+    short: suball_n50k
+    group: ablation
+    order: 929
+    hide_in_summary: true
+    run: vd_suball_n50k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_suball_n50k.yaml
+    pretrain_data: 'volume x diversity cell: ocdetect only, every subject(s), type-matched, 50,000 windows
+      (71 h) of the full-size 4-source pool; 1 sources, 763 T-phys motion types (effective 620.4)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_etyp3_n12k:
+    name: VolDiv MAE-space types, 3 T-enc type(s), ocdetect only, N=12,500
+    short: etyp3_n12k
+    group: ablation
+    order: 930
+    hide_in_summary: true
+    run: vd_etyp3_n12k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_etyp3_n12k.yaml
+    pretrain_data: 'volume x diversity cell: MAE-space types, 3 T-enc type(s), ocdetect only, 12,500 windows
+      (18 h) of the full-size 4-source pool; 1 sources, 353 T-phys motion types (effective 181.5)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_etyp30_n12k:
+    name: VolDiv MAE-space types, 30 T-enc type(s), ocdetect only, N=12,500
+    short: etyp30_n12k
+    group: ablation
+    order: 931
+    hide_in_summary: true
+    run: vd_etyp30_n12k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_etyp30_n12k.yaml
+    pretrain_data: 'volume x diversity cell: MAE-space types, 30 T-enc type(s), ocdetect only, 12,500
+      windows (18 h) of the full-size 4-source pool; 1 sources, 411 T-phys motion types (effective 246.9)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_etyp300_n12k:
+    name: VolDiv MAE-space types, 300 T-enc type(s), ocdetect only, N=12,500
+    short: etyp300_n12k
+    group: ablation
+    order: 932
+    hide_in_summary: true
+    run: vd_etyp300_n12k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_etyp300_n12k.yaml
+    pretrain_data: 'volume x diversity cell: MAE-space types, 300 T-enc type(s), ocdetect only, 12,500
+      windows (18 h) of the full-size 4-source pool; 1 sources, 506 T-phys motion types (effective 414.0)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_etypall_n12k:
+    name: VolDiv MAE-space types, every T-enc type(s), ocdetect only, N=12,500
+    short: etypall_n12k
+    group: ablation
+    order: 933
+    hide_in_summary: true
+    run: vd_etypall_n12k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_etypall_n12k.yaml
+    pretrain_data: 'volume x diversity cell: MAE-space types, every T-enc type(s), ocdetect only, 12,500
+      windows (18 h) of the full-size 4-source pool; 1 sources, 607 T-phys motion types (effective 495.1)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_typ30_n50k:
+    name: VolDiv ocdetect only, 30 T-phys type(s), water-filled, N=50,000
+    short: typ30_n50k
+    group: ablation
+    order: 934
+    hide_in_summary: true
+    run: vd_typ30_n50k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_typ30_n50k.yaml
+    pretrain_data: 'volume x diversity cell: ocdetect only, 30 T-phys type(s), water-filled, 50,000 windows
+      (71 h) of the full-size 4-source pool; 1 sources, 30 T-phys motion types (effective 30.0)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_typ300_n50k:
+    name: VolDiv ocdetect only, 300 T-phys type(s), water-filled, N=50,000
+    short: typ300_n50k
+    group: ablation
+    order: 935
+    hide_in_summary: true
+    run: vd_typ300_n50k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_typ300_n50k.yaml
+    pretrain_data: 'volume x diversity cell: ocdetect only, 300 T-phys type(s), water-filled, 50,000 windows
+      (71 h) of the full-size 4-source pool; 1 sources, 300 T-phys motion types (effective 300.0)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_typ300_n200k:
+    name: VolDiv ocdetect only, 300 T-phys type(s), water-filled, N=200,000
+    short: typ300_n200k
+    group: ablation
+    order: 936
+    hide_in_summary: true
+    run: vd_typ300_n200k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_typ300_n200k.yaml
+    pretrain_data: 'volume x diversity cell: ocdetect only, 300 T-phys type(s), water-filled, 200,000
+      windows (284 h) of the full-size 4-source pool; 1 sources, 300 T-phys motion types (effective 300.0)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_typ300_n800k:
+    name: VolDiv ocdetect only, 300 T-phys type(s), water-filled, N=800,000
+    short: typ300_n800k
+    group: ablation
+    order: 937
+    hide_in_summary: true
+    run: vd_typ300_n800k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_typ300_n800k.yaml
+    pretrain_data: 'volume x diversity cell: ocdetect only, 300 T-phys type(s), water-filled, 800,000
+      windows (1,138 h) of the full-size 4-source pool; 1 sources, 300 T-phys motion types (effective
+      299.0)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_typall_n50k:
+    name: VolDiv ocdetect only, every T-phys type(s), water-filled, N=50,000
+    short: typall_n50k
+    group: ablation
+    order: 938
+    hide_in_summary: true
+    run: vd_typall_n50k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_typall_n50k.yaml
+    pretrain_data: 'volume x diversity cell: ocdetect only, every T-phys type(s), water-filled, 50,000
+      windows (71 h) of the full-size 4-source pool; 1 sources, 763 T-phys motion types (effective 620.4)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_typall_n200k:
+    name: VolDiv ocdetect only, every T-phys type(s), water-filled, N=200,000
+    short: typall_n200k
+    group: ablation
+    order: 939
+    hide_in_summary: true
+    run: vd_typall_n200k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_typall_n200k.yaml
+    pretrain_data: 'volume x diversity cell: ocdetect only, every T-phys type(s), water-filled, 200,000
+      windows (284 h) of the full-size 4-source pool; 1 sources, 763 T-phys motion types (effective 587.8)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_typall_n800k:
+    name: VolDiv ocdetect only, every T-phys type(s), water-filled, N=800,000
+    short: typall_n800k
+    group: ablation
+    order: 940
+    hide_in_summary: true
+    run: vd_typall_n800k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_typall_n800k.yaml
+    pretrain_data: 'volume x diversity cell: ocdetect only, every T-phys type(s), water-filled, 800,000
+      windows (1,138 h) of the full-size 4-source pool; 1 sources, 763 T-phys motion types (effective
+      549.3)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_ek1_f0p01:
+    name: VolDiv 4-source pool, 1 largest T-enc type(s), water-filled, N=174
+    short: ek1_f0p01
+    group: ablation
+    order: 941
+    hide_in_summary: true
+    run: vd_ek1_f0p01
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek1_f0p01.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 1 largest T-enc type(s), water-filled, 174
+      windows (0 h) of the full-size 4-source pool; 1 sources, 93 T-phys motion types (effective 74.5)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_ek1_f0p1:
+    name: VolDiv 4-source pool, 1 largest T-enc type(s), water-filled, N=1,738
+    short: ek1_f0p1
+    group: ablation
+    order: 942
+    hide_in_summary: true
+    run: vd_ek1_f0p1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek1_f0p1.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 1 largest T-enc type(s), water-filled, 1,738
+      windows (2 h) of the full-size 4-source pool; 2 sources, 244 T-phys motion types (effective 142.3)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_ek5_f0p01:
+    name: VolDiv 4-source pool, 5 largest T-enc type(s), water-filled, N=174
+    short: ek5_f0p01
+    group: ablation
+    order: 943
+    hide_in_summary: true
+    run: vd_ek5_f0p01
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek5_f0p01.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 5 largest T-enc type(s), water-filled, 174
+      windows (0 h) of the full-size 4-source pool; 2 sources, 103 T-phys motion types (effective 87.6)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_ek5_f0p1:
+    name: VolDiv 4-source pool, 5 largest T-enc type(s), water-filled, N=1,738
+    short: ek5_f0p1
+    group: ablation
+    order: 944
+    hide_in_summary: true
+    run: vd_ek5_f0p1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek5_f0p1.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 5 largest T-enc type(s), water-filled, 1,738
+      windows (2 h) of the full-size 4-source pool; 2 sources, 282 T-phys motion types (effective 163.0)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_ek5_f1:
+    name: VolDiv 4-source pool, 5 largest T-enc type(s), water-filled, N=17,381
+    short: ek5_f1
+    group: ablation
+    order: 945
+    hide_in_summary: true
+    run: vd_ek5_f1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek5_f1.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 5 largest T-enc type(s), water-filled, 17,381
+      windows (25 h) of the full-size 4-source pool; 2 sources, 428 T-phys motion types (effective 185.8)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_ek10_f0p01:
+    name: VolDiv 4-source pool, 10 largest T-enc type(s), water-filled, N=174
+    short: ek10_f0p01
+    group: ablation
+    order: 946
+    hide_in_summary: true
+    run: vd_ek10_f0p01
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek10_f0p01.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 10 largest T-enc type(s), water-filled, 174
+      windows (0 h) of the full-size 4-source pool; 2 sources, 116 T-phys motion types (effective 94.6)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_ek10_f0p1:
+    name: VolDiv 4-source pool, 10 largest T-enc type(s), water-filled, N=1,738
+    short: ek10_f0p1
+    group: ablation
+    order: 947
+    hide_in_summary: true
+    run: vd_ek10_f0p1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek10_f0p1.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 10 largest T-enc type(s), water-filled, 1,738
+      windows (2 h) of the full-size 4-source pool; 2 sources, 302 T-phys motion types (effective 190.8)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_ek10_f1:
+    name: VolDiv 4-source pool, 10 largest T-enc type(s), water-filled, N=17,381
+    short: ek10_f1
+    group: ablation
+    order: 948
+    hide_in_summary: true
+    run: vd_ek10_f1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek10_f1.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 10 largest T-enc type(s), water-filled, 17,381
+      windows (25 h) of the full-size 4-source pool; 2 sources, 459 T-phys motion types (effective 211.3)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_ek25_f0p01:
+    name: VolDiv 4-source pool, 25 largest T-enc type(s), water-filled, N=174
+    short: ek25_f0p01
+    group: ablation
+    order: 949
+    hide_in_summary: true
+    run: vd_ek25_f0p01
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek25_f0p01.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 25 largest T-enc type(s), water-filled, 174
+      windows (0 h) of the full-size 4-source pool; 2 sources, 119 T-phys motion types (effective 106.1)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_ek25_f0p1:
+    name: VolDiv 4-source pool, 25 largest T-enc type(s), water-filled, N=1,738
+    short: ek25_f0p1
+    group: ablation
+    order: 950
+    hide_in_summary: true
+    run: vd_ek25_f0p1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek25_f0p1.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 25 largest T-enc type(s), water-filled, 1,738
+      windows (2 h) of the full-size 4-source pool; 2 sources, 315 T-phys motion types (effective 213.2)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_ek25_f1:
+    name: VolDiv 4-source pool, 25 largest T-enc type(s), water-filled, N=17,381
+    short: ek25_f1
+    group: ablation
+    order: 951
+    hide_in_summary: true
+    run: vd_ek25_f1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek25_f1.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 25 largest T-enc type(s), water-filled, 17,381
+      windows (25 h) of the full-size 4-source pool; 2 sources, 468 T-phys motion types (effective 242.5)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_ek50_f0p01:
+    name: VolDiv 4-source pool, 50 largest T-enc type(s), water-filled, N=174
+    short: ek50_f0p01
+    group: ablation
+    order: 952
+    hide_in_summary: true
+    run: vd_ek50_f0p01
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek50_f0p01.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 50 largest T-enc type(s), water-filled, 174
+      windows (0 h) of the full-size 4-source pool; 2 sources, 132 T-phys motion types (effective 120.0)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_ek50_f0p1:
+    name: VolDiv 4-source pool, 50 largest T-enc type(s), water-filled, N=1,738
+    short: ek50_f0p1
+    group: ablation
+    order: 953
+    hide_in_summary: true
+    run: vd_ek50_f0p1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek50_f0p1.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 50 largest T-enc type(s), water-filled, 1,738
+      windows (2 h) of the full-size 4-source pool; 2 sources, 350 T-phys motion types (effective 254.0)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_ek50_f1:
+    name: VolDiv 4-source pool, 50 largest T-enc type(s), water-filled, N=17,381
+    short: ek50_f1
+    group: ablation
+    order: 954
+    hide_in_summary: true
+    run: vd_ek50_f1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek50_f1.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 50 largest T-enc type(s), water-filled, 17,381
+      windows (25 h) of the full-size 4-source pool; 2 sources, 523 T-phys motion types (effective 294.6)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_ek50_f10:
+    name: VolDiv 4-source pool, 50 largest T-enc type(s), water-filled, N=173,809
+    short: ek50_f10
+    group: ablation
+    order: 955
+    hide_in_summary: true
+    run: vd_ek50_f10
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek50_f10.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 50 largest T-enc type(s), water-filled, 173,809
+      windows (247 h) of the full-size 4-source pool; 3 sources, 646 T-phys motion types (effective 297.0)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_ek100_f0p01:
+    name: VolDiv 4-source pool, 100 largest T-enc type(s), water-filled, N=174
+    short: ek100_f0p01
+    group: ablation
+    order: 956
+    hide_in_summary: true
+    run: vd_ek100_f0p01
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek100_f0p01.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 100 largest T-enc type(s), water-filled, 174
+      windows (0 h) of the full-size 4-source pool; 2 sources, 136 T-phys motion types (effective 125.2)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_ek100_f0p1:
+    name: VolDiv 4-source pool, 100 largest T-enc type(s), water-filled, N=1,738
+    short: ek100_f0p1
+    group: ablation
+    order: 957
+    hide_in_summary: true
+    run: vd_ek100_f0p1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek100_f0p1.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 100 largest T-enc type(s), water-filled, 1,738
+      windows (2 h) of the full-size 4-source pool; 2 sources, 404 T-phys motion types (effective 307.1)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_ek100_f1:
+    name: VolDiv 4-source pool, 100 largest T-enc type(s), water-filled, N=17,381
+    short: ek100_f1
+    group: ablation
+    order: 958
+    hide_in_summary: true
+    run: vd_ek100_f1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek100_f1.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 100 largest T-enc type(s), water-filled, 17,381
+      windows (25 h) of the full-size 4-source pool; 3 sources, 563 T-phys motion types (effective 347.9)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_ek100_f10:
+    name: VolDiv 4-source pool, 100 largest T-enc type(s), water-filled, N=173,809
+    short: ek100_f10
+    group: ablation
+    order: 959
+    hide_in_summary: true
+    run: vd_ek100_f10
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek100_f10.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 100 largest T-enc type(s), water-filled, 173,809
+      windows (247 h) of the full-size 4-source pool; 4 sources, 680 T-phys motion types (effective 353.6)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_ek1000_f0p01:
+    name: VolDiv 4-source pool, 1000 largest T-enc type(s), water-filled, N=174
+    short: ek1000_f0p01
+    group: ablation
+    order: 960
+    hide_in_summary: true
+    run: vd_ek1000_f0p01
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek1000_f0p01.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 1000 largest T-enc type(s), water-filled,
+      174 windows (0 h) of the full-size 4-source pool; 4 sources, 145 T-phys motion types (effective
+      136.5)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_ek1000_f0p1:
+    name: VolDiv 4-source pool, 1000 largest T-enc type(s), water-filled, N=1,738
+    short: ek1000_f0p1
+    group: ablation
+    order: 961
+    hide_in_summary: true
+    run: vd_ek1000_f0p1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek1000_f0p1.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 1000 largest T-enc type(s), water-filled,
+      1,738 windows (2 h) of the full-size 4-source pool; 4 sources, 747 T-phys motion types (effective
+      630.1)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_ek1000_f1:
+    name: VolDiv 4-source pool, 1000 largest T-enc type(s), water-filled, N=17,381
+    short: ek1000_f1
+    group: ablation
+    order: 962
+    hide_in_summary: true
+    run: vd_ek1000_f1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek1000_f1.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 1000 largest T-enc type(s), water-filled,
+      17,381 windows (25 h) of the full-size 4-source pool; 4 sources, 999 T-phys motion types (effective
+      871.9)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_ek1000_f10:
+    name: VolDiv 4-source pool, 1000 largest T-enc type(s), water-filled, N=173,809
+    short: ek1000_f10
+    group: ablation
+    order: 963
+    hide_in_summary: true
+    run: vd_ek1000_f10
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek1000_f10.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 1000 largest T-enc type(s), water-filled,
+      173,809 windows (247 h) of the full-size 4-source pool; 4 sources, 1000 T-phys motion types (effective
+      899.5)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_ek1000_f100:
+    name: VolDiv 4-source pool, 1000 largest T-enc type(s), water-filled, N=1,738,094
+    short: ek1000_f100
+    group: ablation
+    order: 964
+    hide_in_summary: true
+    run: vd_ek1000_f100
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek1000_f100.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 1000 largest T-enc type(s), water-filled,
+      1,738,094 windows (2,472 h) of the full-size 4-source pool; 4 sources, 1000 T-phys motion types
+      (effective 832.8)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  # --- random physical-type x volume grid (24_phys_random_grid.py) ---
+  vd_pk1_n0p1:
+    name: VolDiv 4-source pool, 1% of T-phys types (random, source-stratified, gyro-unit fixed), N=1,738
+    short: pk1_n0p1
+    group: ablation
+    order: 1000
+    hide_in_summary: true
+    run: vd_pk1_n0p1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_pk1_n0p1.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 1% of T-phys types (random, source-stratified,
+      gyro-unit fixed), 1,738 windows (2 h) of the full-size 4-source pool; 4 sources, 10 T-phys motion
+      types (effective 7.5)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_pk1_n1:
+    name: VolDiv 4-source pool, 1% of T-phys types (random, source-stratified, gyro-unit fixed), N=16,113
+    short: pk1_n1
+    group: ablation
+    order: 1001
+    hide_in_summary: true
+    run: vd_pk1_n1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_pk1_n1.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 1% of T-phys types (random, source-stratified,
+      gyro-unit fixed), 16,113 windows (23 h) of the full-size 4-source pool; 4 sources, 10 T-phys motion
+      types (effective 7.6)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_pk10_n0p1:
+    name: VolDiv 4-source pool, 10% of T-phys types (random, source-stratified, gyro-unit fixed), N=1,738
+    short: pk10_n0p1
+    group: ablation
+    order: 1002
+    hide_in_summary: true
+    run: vd_pk10_n0p1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_pk10_n0p1.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 10% of T-phys types (random, source-stratified,
+      gyro-unit fixed), 1,738 windows (2 h) of the full-size 4-source pool; 4 sources, 100 T-phys motion
+      types (effective 81.0)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_pk10_n1:
+    name: VolDiv 4-source pool, 10% of T-phys types (random, source-stratified, gyro-unit fixed), N=17,381
+    short: pk10_n1
+    group: ablation
+    order: 1003
+    hide_in_summary: true
+    run: vd_pk10_n1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_pk10_n1.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 10% of T-phys types (random, source-stratified,
+      gyro-unit fixed), 17,381 windows (25 h) of the full-size 4-source pool; 4 sources, 100 T-phys motion
+      types (effective 83.1)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_pk10_n10:
+    name: VolDiv 4-source pool, 10% of T-phys types (random, source-stratified, gyro-unit fixed), N=173,809
+    short: pk10_n10
+    group: ablation
+    order: 1004
+    hide_in_summary: true
+    run: vd_pk10_n10
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_pk10_n10.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 10% of T-phys types (random, source-stratified,
+      gyro-unit fixed), 173,809 windows (247 h) of the full-size 4-source pool; 4 sources, 100 T-phys motion
+      types (effective 83.6)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_pk50_n0p1:
+    name: VolDiv 4-source pool, 50% of T-phys types (random, source-stratified, gyro-unit fixed), N=1,738
+    short: pk50_n0p1
+    group: ablation
+    order: 1005
+    hide_in_summary: true
+    run: vd_pk50_n0p1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_pk50_n0p1.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 50% of T-phys types (random, source-stratified,
+      gyro-unit fixed), 1,738 windows (2 h) of the full-size 4-source pool; 4 sources, 440 T-phys motion
+      types (effective 356.5)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_pk50_n1:
+    name: VolDiv 4-source pool, 50% of T-phys types (random, source-stratified, gyro-unit fixed), N=17,381
+    short: pk50_n1
+    group: ablation
+    order: 1006
+    hide_in_summary: true
+    run: vd_pk50_n1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_pk50_n1.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 50% of T-phys types (random, source-stratified,
+      gyro-unit fixed), 17,381 windows (25 h) of the full-size 4-source pool; 4 sources, 500 T-phys motion
+      types (effective 409.4)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_pk50_n10:
+    name: VolDiv 4-source pool, 50% of T-phys types (random, source-stratified, gyro-unit fixed), N=173,809
+    short: pk50_n10
+    group: ablation
+    order: 1007
+    hide_in_summary: true
+    run: vd_pk50_n10
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_pk50_n10.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 50% of T-phys types (random, source-stratified,
+      gyro-unit fixed), 173,809 windows (247 h) of the full-size 4-source pool; 4 sources, 500 T-phys motion
+      types (effective 414.3)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_pk100_n0p1:
+    name: VolDiv 4-source pool, 100% of T-phys types (random, source-stratified, gyro-unit fixed), N=1,738
+    short: pk100_n0p1
+    group: ablation
+    order: 1008
+    hide_in_summary: true
+    run: vd_pk100_n0p1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_pk100_n0p1.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 100% of T-phys types (random, source-stratified,
+      gyro-unit fixed), 1,738 windows (2 h) of the full-size 4-source pool; 4 sources, 725 T-phys motion
+      types (effective 605.0)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_pk100_n1:
+    name: VolDiv 4-source pool, 100% of T-phys types (random, source-stratified, gyro-unit fixed), N=17,381
+    short: pk100_n1
+    group: ablation
+    order: 1009
+    hide_in_summary: true
+    run: vd_pk100_n1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_pk100_n1.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 100% of T-phys types (random, source-stratified,
+      gyro-unit fixed), 17,381 windows (25 h) of the full-size 4-source pool; 4 sources, 995 T-phys motion
+      types (effective 815.7)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  vd_pk100_n10:
+    name: VolDiv 4-source pool, 100% of T-phys types (random, source-stratified, gyro-unit fixed), N=173,809
+    short: pk100_n10
+    group: ablation
+    order: 1010
+    hide_in_summary: true
+    run: vd_pk100_n10
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_pk100_n10.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 100% of T-phys types (random, source-stratified,
+      gyro-unit fixed), 173,809 windows (247 h) of the full-size 4-source pool; 4 sources, 1000 T-phys motion
+      types (effective 836.0)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+  # --- vd_ek grid re-probed with z-score input (matches pretraining; 2026-09-15) ---
+  vd_ek1_f0p01_zs:
+    name: VolDiv 4-source pool, 1 largest T-enc type(s), water-filled, N=174 (z-score probe input)
+    short: ek1_f0p01_zs
+    group: ablation
+    order: 2941
+    hide_in_summary: true
+    run: vd_ek1_f0p01
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek1_f0p01.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 1 largest T-enc type(s), water-filled, 174 windows
+      (0 h) of the full-size 4-source pool; 1 sources, 93 T-phys motion types (effective 74.5)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+    eval_note: Same checkpoint as vd_ek1_f0p01, re-probed after the 2026-09-14 bench fix with z-score input
+      matching its pretraining; vd_ek1_f0p01 itself was scored with physical input.
+  vd_ek1_f0p1_zs:
+    name: VolDiv 4-source pool, 1 largest T-enc type(s), water-filled, N=1,738 (z-score probe input)
+    short: ek1_f0p1_zs
+    group: ablation
+    order: 2942
+    hide_in_summary: true
+    run: vd_ek1_f0p1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek1_f0p1.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 1 largest T-enc type(s), water-filled, 1,738
+      windows (2 h) of the full-size 4-source pool; 2 sources, 244 T-phys motion types (effective 142.3)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+    eval_note: Same checkpoint as vd_ek1_f0p1, re-probed after the 2026-09-14 bench fix with z-score input
+      matching its pretraining; vd_ek1_f0p1 itself was scored with physical input.
+  vd_ek5_f0p01_zs:
+    name: VolDiv 4-source pool, 5 largest T-enc type(s), water-filled, N=174 (z-score probe input)
+    short: ek5_f0p01_zs
+    group: ablation
+    order: 2943
+    hide_in_summary: true
+    run: vd_ek5_f0p01
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek5_f0p01.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 5 largest T-enc type(s), water-filled, 174 windows
+      (0 h) of the full-size 4-source pool; 2 sources, 103 T-phys motion types (effective 87.6)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+    eval_note: Same checkpoint as vd_ek5_f0p01, re-probed after the 2026-09-14 bench fix with z-score input
+      matching its pretraining; vd_ek5_f0p01 itself was scored with physical input.
+  vd_ek5_f0p1_zs:
+    name: VolDiv 4-source pool, 5 largest T-enc type(s), water-filled, N=1,738 (z-score probe input)
+    short: ek5_f0p1_zs
+    group: ablation
+    order: 2944
+    hide_in_summary: true
+    run: vd_ek5_f0p1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek5_f0p1.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 5 largest T-enc type(s), water-filled, 1,738
+      windows (2 h) of the full-size 4-source pool; 2 sources, 282 T-phys motion types (effective 163.0)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+    eval_note: Same checkpoint as vd_ek5_f0p1, re-probed after the 2026-09-14 bench fix with z-score input
+      matching its pretraining; vd_ek5_f0p1 itself was scored with physical input.
+  vd_ek5_f1_zs:
+    name: VolDiv 4-source pool, 5 largest T-enc type(s), water-filled, N=17,381 (z-score probe input)
+    short: ek5_f1_zs
+    group: ablation
+    order: 2945
+    hide_in_summary: true
+    run: vd_ek5_f1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek5_f1.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 5 largest T-enc type(s), water-filled, 17,381
+      windows (25 h) of the full-size 4-source pool; 2 sources, 428 T-phys motion types (effective 185.8)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+    eval_note: Same checkpoint as vd_ek5_f1, re-probed after the 2026-09-14 bench fix with z-score input
+      matching its pretraining; vd_ek5_f1 itself was scored with physical input.
+  vd_ek10_f0p01_zs:
+    name: VolDiv 4-source pool, 10 largest T-enc type(s), water-filled, N=174 (z-score probe input)
+    short: ek10_f0p01_zs
+    group: ablation
+    order: 2946
+    hide_in_summary: true
+    run: vd_ek10_f0p01
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek10_f0p01.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 10 largest T-enc type(s), water-filled, 174
+      windows (0 h) of the full-size 4-source pool; 2 sources, 116 T-phys motion types (effective 94.6)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+    eval_note: Same checkpoint as vd_ek10_f0p01, re-probed after the 2026-09-14 bench fix with z-score input
+      matching its pretraining; vd_ek10_f0p01 itself was scored with physical input.
+  vd_ek10_f0p1_zs:
+    name: VolDiv 4-source pool, 10 largest T-enc type(s), water-filled, N=1,738 (z-score probe input)
+    short: ek10_f0p1_zs
+    group: ablation
+    order: 2947
+    hide_in_summary: true
+    run: vd_ek10_f0p1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek10_f0p1.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 10 largest T-enc type(s), water-filled, 1,738
+      windows (2 h) of the full-size 4-source pool; 2 sources, 302 T-phys motion types (effective 190.8)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+    eval_note: Same checkpoint as vd_ek10_f0p1, re-probed after the 2026-09-14 bench fix with z-score input
+      matching its pretraining; vd_ek10_f0p1 itself was scored with physical input.
+  vd_ek10_f1_zs:
+    name: VolDiv 4-source pool, 10 largest T-enc type(s), water-filled, N=17,381 (z-score probe input)
+    short: ek10_f1_zs
+    group: ablation
+    order: 2948
+    hide_in_summary: true
+    run: vd_ek10_f1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek10_f1.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 10 largest T-enc type(s), water-filled, 17,381
+      windows (25 h) of the full-size 4-source pool; 2 sources, 459 T-phys motion types (effective 211.3)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+    eval_note: Same checkpoint as vd_ek10_f1, re-probed after the 2026-09-14 bench fix with z-score input
+      matching its pretraining; vd_ek10_f1 itself was scored with physical input.
+  vd_ek25_f0p01_zs:
+    name: VolDiv 4-source pool, 25 largest T-enc type(s), water-filled, N=174 (z-score probe input)
+    short: ek25_f0p01_zs
+    group: ablation
+    order: 2949
+    hide_in_summary: true
+    run: vd_ek25_f0p01
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek25_f0p01.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 25 largest T-enc type(s), water-filled, 174
+      windows (0 h) of the full-size 4-source pool; 2 sources, 119 T-phys motion types (effective 106.1)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+    eval_note: Same checkpoint as vd_ek25_f0p01, re-probed after the 2026-09-14 bench fix with z-score input
+      matching its pretraining; vd_ek25_f0p01 itself was scored with physical input.
+  vd_ek25_f0p1_zs:
+    name: VolDiv 4-source pool, 25 largest T-enc type(s), water-filled, N=1,738 (z-score probe input)
+    short: ek25_f0p1_zs
+    group: ablation
+    order: 2950
+    hide_in_summary: true
+    run: vd_ek25_f0p1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek25_f0p1.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 25 largest T-enc type(s), water-filled, 1,738
+      windows (2 h) of the full-size 4-source pool; 2 sources, 315 T-phys motion types (effective 213.2)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+    eval_note: Same checkpoint as vd_ek25_f0p1, re-probed after the 2026-09-14 bench fix with z-score input
+      matching its pretraining; vd_ek25_f0p1 itself was scored with physical input.
+  vd_ek25_f1_zs:
+    name: VolDiv 4-source pool, 25 largest T-enc type(s), water-filled, N=17,381 (z-score probe input)
+    short: ek25_f1_zs
+    group: ablation
+    order: 2951
+    hide_in_summary: true
+    run: vd_ek25_f1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek25_f1.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 25 largest T-enc type(s), water-filled, 17,381
+      windows (25 h) of the full-size 4-source pool; 2 sources, 468 T-phys motion types (effective 242.5)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+    eval_note: Same checkpoint as vd_ek25_f1, re-probed after the 2026-09-14 bench fix with z-score input
+      matching its pretraining; vd_ek25_f1 itself was scored with physical input.
+  vd_ek50_f0p01_zs:
+    name: VolDiv 4-source pool, 50 largest T-enc type(s), water-filled, N=174 (z-score probe input)
+    short: ek50_f0p01_zs
+    group: ablation
+    order: 2952
+    hide_in_summary: true
+    run: vd_ek50_f0p01
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek50_f0p01.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 50 largest T-enc type(s), water-filled, 174
+      windows (0 h) of the full-size 4-source pool; 2 sources, 132 T-phys motion types (effective 120.0)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+    eval_note: Same checkpoint as vd_ek50_f0p01, re-probed after the 2026-09-14 bench fix with z-score input
+      matching its pretraining; vd_ek50_f0p01 itself was scored with physical input.
+  vd_ek50_f0p1_zs:
+    name: VolDiv 4-source pool, 50 largest T-enc type(s), water-filled, N=1,738 (z-score probe input)
+    short: ek50_f0p1_zs
+    group: ablation
+    order: 2953
+    hide_in_summary: true
+    run: vd_ek50_f0p1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek50_f0p1.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 50 largest T-enc type(s), water-filled, 1,738
+      windows (2 h) of the full-size 4-source pool; 2 sources, 350 T-phys motion types (effective 254.0)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+    eval_note: Same checkpoint as vd_ek50_f0p1, re-probed after the 2026-09-14 bench fix with z-score input
+      matching its pretraining; vd_ek50_f0p1 itself was scored with physical input.
+  vd_ek50_f1_zs:
+    name: VolDiv 4-source pool, 50 largest T-enc type(s), water-filled, N=17,381 (z-score probe input)
+    short: ek50_f1_zs
+    group: ablation
+    order: 2954
+    hide_in_summary: true
+    run: vd_ek50_f1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek50_f1.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 50 largest T-enc type(s), water-filled, 17,381
+      windows (25 h) of the full-size 4-source pool; 2 sources, 523 T-phys motion types (effective 294.6)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+    eval_note: Same checkpoint as vd_ek50_f1, re-probed after the 2026-09-14 bench fix with z-score input
+      matching its pretraining; vd_ek50_f1 itself was scored with physical input.
+  vd_ek50_f10_zs:
+    name: VolDiv 4-source pool, 50 largest T-enc type(s), water-filled, N=173,809 (z-score probe input)
+    short: ek50_f10_zs
+    group: ablation
+    order: 2955
+    hide_in_summary: true
+    run: vd_ek50_f10
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek50_f10.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 50 largest T-enc type(s), water-filled, 173,809
+      windows (247 h) of the full-size 4-source pool; 3 sources, 646 T-phys motion types (effective 297.0)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+    eval_note: Same checkpoint as vd_ek50_f10, re-probed after the 2026-09-14 bench fix with z-score input
+      matching its pretraining; vd_ek50_f10 itself was scored with physical input.
+  vd_ek100_f0p01_zs:
+    name: VolDiv 4-source pool, 100 largest T-enc type(s), water-filled, N=174 (z-score probe input)
+    short: ek100_f0p01_zs
+    group: ablation
+    order: 2956
+    hide_in_summary: true
+    run: vd_ek100_f0p01
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek100_f0p01.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 100 largest T-enc type(s), water-filled, 174
+      windows (0 h) of the full-size 4-source pool; 2 sources, 136 T-phys motion types (effective 125.2)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+    eval_note: Same checkpoint as vd_ek100_f0p01, re-probed after the 2026-09-14 bench fix with z-score
+      input matching its pretraining; vd_ek100_f0p01 itself was scored with physical input.
+  vd_ek100_f0p1_zs:
+    name: VolDiv 4-source pool, 100 largest T-enc type(s), water-filled, N=1,738 (z-score probe input)
+    short: ek100_f0p1_zs
+    group: ablation
+    order: 2957
+    hide_in_summary: true
+    run: vd_ek100_f0p1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek100_f0p1.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 100 largest T-enc type(s), water-filled, 1,738
+      windows (2 h) of the full-size 4-source pool; 2 sources, 404 T-phys motion types (effective 307.1)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+    eval_note: Same checkpoint as vd_ek100_f0p1, re-probed after the 2026-09-14 bench fix with z-score input
+      matching its pretraining; vd_ek100_f0p1 itself was scored with physical input.
+  vd_ek100_f1_zs:
+    name: VolDiv 4-source pool, 100 largest T-enc type(s), water-filled, N=17,381 (z-score probe input)
+    short: ek100_f1_zs
+    group: ablation
+    order: 2958
+    hide_in_summary: true
+    run: vd_ek100_f1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek100_f1.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 100 largest T-enc type(s), water-filled, 17,381
+      windows (25 h) of the full-size 4-source pool; 3 sources, 563 T-phys motion types (effective 347.9)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+    eval_note: Same checkpoint as vd_ek100_f1, re-probed after the 2026-09-14 bench fix with z-score input
+      matching its pretraining; vd_ek100_f1 itself was scored with physical input.
+  vd_ek100_f10_zs:
+    name: VolDiv 4-source pool, 100 largest T-enc type(s), water-filled, N=173,809 (z-score probe input)
+    short: ek100_f10_zs
+    group: ablation
+    order: 2959
+    hide_in_summary: true
+    run: vd_ek100_f10
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek100_f10.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 100 largest T-enc type(s), water-filled, 173,809
+      windows (247 h) of the full-size 4-source pool; 4 sources, 680 T-phys motion types (effective 353.6)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+    eval_note: Same checkpoint as vd_ek100_f10, re-probed after the 2026-09-14 bench fix with z-score input
+      matching its pretraining; vd_ek100_f10 itself was scored with physical input.
+  vd_ek1000_f0p01_zs:
+    name: VolDiv 4-source pool, 1000 largest T-enc type(s), water-filled, N=174 (z-score probe input)
+    short: ek1000_f0p01_zs
+    group: ablation
+    order: 2960
+    hide_in_summary: true
+    run: vd_ek1000_f0p01
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek1000_f0p01.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 1000 largest T-enc type(s), water-filled, 174
+      windows (0 h) of the full-size 4-source pool; 4 sources, 145 T-phys motion types (effective 136.5)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+    eval_note: Same checkpoint as vd_ek1000_f0p01, re-probed after the 2026-09-14 bench fix with z-score
+      input matching its pretraining; vd_ek1000_f0p01 itself was scored with physical input.
+  vd_ek1000_f0p1_zs:
+    name: VolDiv 4-source pool, 1000 largest T-enc type(s), water-filled, N=1,738 (z-score probe input)
+    short: ek1000_f0p1_zs
+    group: ablation
+    order: 2961
+    hide_in_summary: true
+    run: vd_ek1000_f0p1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek1000_f0p1.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 1000 largest T-enc type(s), water-filled, 1,738
+      windows (2 h) of the full-size 4-source pool; 4 sources, 747 T-phys motion types (effective 630.1)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+    eval_note: Same checkpoint as vd_ek1000_f0p1, re-probed after the 2026-09-14 bench fix with z-score
+      input matching its pretraining; vd_ek1000_f0p1 itself was scored with physical input.
+  vd_ek1000_f1_zs:
+    name: VolDiv 4-source pool, 1000 largest T-enc type(s), water-filled, N=17,381 (z-score probe input)
+    short: ek1000_f1_zs
+    group: ablation
+    order: 2962
+    hide_in_summary: true
+    run: vd_ek1000_f1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek1000_f1.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 1000 largest T-enc type(s), water-filled, 17,381
+      windows (25 h) of the full-size 4-source pool; 4 sources, 999 T-phys motion types (effective 871.9)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+    eval_note: Same checkpoint as vd_ek1000_f1, re-probed after the 2026-09-14 bench fix with z-score input
+      matching its pretraining; vd_ek1000_f1 itself was scored with physical input.
+  vd_ek1000_f10_zs:
+    name: VolDiv 4-source pool, 1000 largest T-enc type(s), water-filled, N=173,809 (z-score probe input)
+    short: ek1000_f10_zs
+    group: ablation
+    order: 2963
+    hide_in_summary: true
+    run: vd_ek1000_f10
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek1000_f10.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 1000 largest T-enc type(s), water-filled, 173,809
+      windows (247 h) of the full-size 4-source pool; 4 sources, 1000 T-phys motion types (effective 899.5)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+    eval_note: Same checkpoint as vd_ek1000_f10, re-probed after the 2026-09-14 bench fix with z-score input
+      matching its pretraining; vd_ek1000_f10 itself was scored with physical input.
+  vd_ek1000_f100_zs:
+    name: VolDiv 4-source pool, 1000 largest T-enc type(s), water-filled, N=1,738,094 (z-score probe input)
+    short: ek1000_f100_zs
+    group: ablation
+    order: 2964
+    hide_in_summary: true
+    run: vd_ek1000_f100
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/voldiv/vd_ek1000_f100.yaml
+    pretrain_data: 'volume x diversity cell: 4-source pool, 1000 largest T-enc type(s), water-filled, 1,738,094
+      windows (2,472 h) of the full-size 4-source pool; 4 sources, 1000 T-phys motion types (effective 832.8)'
+    pretrain_objective: MAE mask 0.60, z-score input, octahedral rotation, lr 1e-4, 50,000 steps
+    eval_note: Same checkpoint as vd_ek1000_f100, re-probed after the 2026-09-14 bench fix with z-score
+      input matching its pretraining; vd_ek1000_f100 itself was scored with physical input.
+  # --- 5-source motion-types x volume grid (EXPERIMENTS.md 11l; paper Fig 7c), registered 2026-09-17 ---
+  g5_k1_f0p01:
+    name: Grid 5-source pool, 1 largest motion type(s), 0.01% of pool, N=196
+    short: g5_k1_f0p01
+    group: ablation
+    order: 3000
+    hide_in_summary: true
+    run: vit1d_ssl_mae_grid_k1_f0p01
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/grid5src/vit1d_ssl_mae_grid_k1_f0p01.yaml
+    pretrain_data: '5-source grid cell (realdata, ocdetect, eatingspeed, motionx, sonic; 1,959,288-window pool): 1 largest k-means motion type(s), equal-per-cluster waterfill, 196 windows'
+    pretrain_objective: MAE mask 0.75, z-score input, 50,000 steps (grid budget)
+    eval_note: added 2026-09-17 to probe the grid on the leak-free HAR sets (HHAR, MHEALTH, PRISM); the original 8 probes live in analysis/diversity_saturation/out/grid_results.json (legacy runs)
+  g5_k1_f0p1:
+    name: Grid 5-source pool, 1 largest motion type(s), 0.1% of pool, N=1,959
+    short: g5_k1_f0p1
+    group: ablation
+    order: 3001
+    hide_in_summary: true
+    run: vit1d_ssl_mae_grid_k1_f0p1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/grid5src/vit1d_ssl_mae_grid_k1_f0p1.yaml
+    pretrain_data: '5-source grid cell (realdata, ocdetect, eatingspeed, motionx, sonic; 1,959,288-window pool): 1 largest k-means motion type(s), equal-per-cluster waterfill, 1,959 windows'
+    pretrain_objective: MAE mask 0.75, z-score input, 50,000 steps (grid budget)
+    eval_note: added 2026-09-17 to probe the grid on the leak-free HAR sets (HHAR, MHEALTH, PRISM); the original 8 probes live in analysis/diversity_saturation/out/grid_results.json (legacy runs)
+  g5_k5_f0p01:
+    name: Grid 5-source pool, 5 largest motion type(s), 0.01% of pool, N=196
+    short: g5_k5_f0p01
+    group: ablation
+    order: 3002
+    hide_in_summary: true
+    run: vit1d_ssl_mae_grid_k5_f0p01
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/grid5src/vit1d_ssl_mae_grid_k5_f0p01.yaml
+    pretrain_data: '5-source grid cell (realdata, ocdetect, eatingspeed, motionx, sonic; 1,959,288-window pool): 5 largest k-means motion type(s), equal-per-cluster waterfill, 196 windows'
+    pretrain_objective: MAE mask 0.75, z-score input, 50,000 steps (grid budget)
+    eval_note: added 2026-09-17 to probe the grid on the leak-free HAR sets (HHAR, MHEALTH, PRISM); the original 8 probes live in analysis/diversity_saturation/out/grid_results.json (legacy runs)
+  g5_k5_f0p1:
+    name: Grid 5-source pool, 5 largest motion type(s), 0.1% of pool, N=1,959
+    short: g5_k5_f0p1
+    group: ablation
+    order: 3003
+    hide_in_summary: true
+    run: vit1d_ssl_mae_grid_k5_f0p1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/grid5src/vit1d_ssl_mae_grid_k5_f0p1.yaml
+    pretrain_data: '5-source grid cell (realdata, ocdetect, eatingspeed, motionx, sonic; 1,959,288-window pool): 5 largest k-means motion type(s), equal-per-cluster waterfill, 1,959 windows'
+    pretrain_objective: MAE mask 0.75, z-score input, 50,000 steps (grid budget)
+    eval_note: added 2026-09-17 to probe the grid on the leak-free HAR sets (HHAR, MHEALTH, PRISM); the original 8 probes live in analysis/diversity_saturation/out/grid_results.json (legacy runs)
+  g5_k5_f1:
+    name: Grid 5-source pool, 5 largest motion type(s), 1% of pool, N=19,593
+    short: g5_k5_f1
+    group: ablation
+    order: 3004
+    hide_in_summary: true
+    run: vit1d_ssl_mae_grid_k5_f1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/grid5src/vit1d_ssl_mae_grid_k5_f1.yaml
+    pretrain_data: '5-source grid cell (realdata, ocdetect, eatingspeed, motionx, sonic; 1,959,288-window pool): 5 largest k-means motion type(s), equal-per-cluster waterfill, 19,593 windows'
+    pretrain_objective: MAE mask 0.75, z-score input, 50,000 steps (grid budget)
+    eval_note: added 2026-09-17 to probe the grid on the leak-free HAR sets (HHAR, MHEALTH, PRISM); the original 8 probes live in analysis/diversity_saturation/out/grid_results.json (legacy runs)
+  g5_k10_f0p01:
+    name: Grid 5-source pool, 10 largest motion type(s), 0.01% of pool, N=196
+    short: g5_k10_f0p01
+    group: ablation
+    order: 3005
+    hide_in_summary: true
+    run: vit1d_ssl_mae_grid_k10_f0p01
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/grid5src/vit1d_ssl_mae_grid_k10_f0p01.yaml
+    pretrain_data: '5-source grid cell (realdata, ocdetect, eatingspeed, motionx, sonic; 1,959,288-window pool): 10 largest k-means motion type(s), equal-per-cluster waterfill, 196 windows'
+    pretrain_objective: MAE mask 0.75, z-score input, 50,000 steps (grid budget)
+    eval_note: added 2026-09-17 to probe the grid on the leak-free HAR sets (HHAR, MHEALTH, PRISM); the original 8 probes live in analysis/diversity_saturation/out/grid_results.json (legacy runs)
+  g5_k10_f0p1:
+    name: Grid 5-source pool, 10 largest motion type(s), 0.1% of pool, N=1,959
+    short: g5_k10_f0p1
+    group: ablation
+    order: 3006
+    hide_in_summary: true
+    run: vit1d_ssl_mae_grid_k10_f0p1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/grid5src/vit1d_ssl_mae_grid_k10_f0p1.yaml
+    pretrain_data: '5-source grid cell (realdata, ocdetect, eatingspeed, motionx, sonic; 1,959,288-window pool): 10 largest k-means motion type(s), equal-per-cluster waterfill, 1,959 windows'
+    pretrain_objective: MAE mask 0.75, z-score input, 50,000 steps (grid budget)
+    eval_note: added 2026-09-17 to probe the grid on the leak-free HAR sets (HHAR, MHEALTH, PRISM); the original 8 probes live in analysis/diversity_saturation/out/grid_results.json (legacy runs)
+  g5_k10_f1:
+    name: Grid 5-source pool, 10 largest motion type(s), 1% of pool, N=19,593
+    short: g5_k10_f1
+    group: ablation
+    order: 3007
+    hide_in_summary: true
+    run: vit1d_ssl_mae_grid_k10_f1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/grid5src/vit1d_ssl_mae_grid_k10_f1.yaml
+    pretrain_data: '5-source grid cell (realdata, ocdetect, eatingspeed, motionx, sonic; 1,959,288-window pool): 10 largest k-means motion type(s), equal-per-cluster waterfill, 19,593 windows'
+    pretrain_objective: MAE mask 0.75, z-score input, 50,000 steps (grid budget)
+    eval_note: added 2026-09-17 to probe the grid on the leak-free HAR sets (HHAR, MHEALTH, PRISM); the original 8 probes live in analysis/diversity_saturation/out/grid_results.json (legacy runs)
+  g5_k25_f0p01:
+    name: Grid 5-source pool, 25 largest motion type(s), 0.01% of pool, N=196
+    short: g5_k25_f0p01
+    group: ablation
+    order: 3008
+    hide_in_summary: true
+    run: vit1d_ssl_mae_grid_k25_f0p01
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/grid5src/vit1d_ssl_mae_grid_k25_f0p01.yaml
+    pretrain_data: '5-source grid cell (realdata, ocdetect, eatingspeed, motionx, sonic; 1,959,288-window pool): 25 largest k-means motion type(s), equal-per-cluster waterfill, 196 windows'
+    pretrain_objective: MAE mask 0.75, z-score input, 50,000 steps (grid budget)
+    eval_note: added 2026-09-17 to probe the grid on the leak-free HAR sets (HHAR, MHEALTH, PRISM); the original 8 probes live in analysis/diversity_saturation/out/grid_results.json (legacy runs)
+  g5_k25_f0p1:
+    name: Grid 5-source pool, 25 largest motion type(s), 0.1% of pool, N=1,959
+    short: g5_k25_f0p1
+    group: ablation
+    order: 3009
+    hide_in_summary: true
+    run: vit1d_ssl_mae_grid_k25_f0p1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/grid5src/vit1d_ssl_mae_grid_k25_f0p1.yaml
+    pretrain_data: '5-source grid cell (realdata, ocdetect, eatingspeed, motionx, sonic; 1,959,288-window pool): 25 largest k-means motion type(s), equal-per-cluster waterfill, 1,959 windows'
+    pretrain_objective: MAE mask 0.75, z-score input, 50,000 steps (grid budget)
+    eval_note: added 2026-09-17 to probe the grid on the leak-free HAR sets (HHAR, MHEALTH, PRISM); the original 8 probes live in analysis/diversity_saturation/out/grid_results.json (legacy runs)
+  g5_k25_f1:
+    name: Grid 5-source pool, 25 largest motion type(s), 1% of pool, N=19,593
+    short: g5_k25_f1
+    group: ablation
+    order: 3010
+    hide_in_summary: true
+    run: vit1d_ssl_mae_grid_k25_f1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/grid5src/vit1d_ssl_mae_grid_k25_f1.yaml
+    pretrain_data: '5-source grid cell (realdata, ocdetect, eatingspeed, motionx, sonic; 1,959,288-window pool): 25 largest k-means motion type(s), equal-per-cluster waterfill, 19,593 windows'
+    pretrain_objective: MAE mask 0.75, z-score input, 50,000 steps (grid budget)
+    eval_note: added 2026-09-17 to probe the grid on the leak-free HAR sets (HHAR, MHEALTH, PRISM); the original 8 probes live in analysis/diversity_saturation/out/grid_results.json (legacy runs)
+  g5_k50_f0p01:
+    name: Grid 5-source pool, 50 largest motion type(s), 0.01% of pool, N=196
+    short: g5_k50_f0p01
+    group: ablation
+    order: 3011
+    hide_in_summary: true
+    run: vit1d_ssl_mae_grid_k50_f0p01
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/grid5src/vit1d_ssl_mae_grid_k50_f0p01.yaml
+    pretrain_data: '5-source grid cell (realdata, ocdetect, eatingspeed, motionx, sonic; 1,959,288-window pool): 50 largest k-means motion type(s), equal-per-cluster waterfill, 196 windows'
+    pretrain_objective: MAE mask 0.75, z-score input, 50,000 steps (grid budget)
+    eval_note: added 2026-09-17 to probe the grid on the leak-free HAR sets (HHAR, MHEALTH, PRISM); the original 8 probes live in analysis/diversity_saturation/out/grid_results.json (legacy runs)
+  g5_k50_f0p1:
+    name: Grid 5-source pool, 50 largest motion type(s), 0.1% of pool, N=1,959
+    short: g5_k50_f0p1
+    group: ablation
+    order: 3012
+    hide_in_summary: true
+    run: vit1d_ssl_mae_grid_k50_f0p1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/grid5src/vit1d_ssl_mae_grid_k50_f0p1.yaml
+    pretrain_data: '5-source grid cell (realdata, ocdetect, eatingspeed, motionx, sonic; 1,959,288-window pool): 50 largest k-means motion type(s), equal-per-cluster waterfill, 1,959 windows'
+    pretrain_objective: MAE mask 0.75, z-score input, 50,000 steps (grid budget)
+    eval_note: added 2026-09-17 to probe the grid on the leak-free HAR sets (HHAR, MHEALTH, PRISM); the original 8 probes live in analysis/diversity_saturation/out/grid_results.json (legacy runs)
+  g5_k50_f1:
+    name: Grid 5-source pool, 50 largest motion type(s), 1% of pool, N=19,593
+    short: g5_k50_f1
+    group: ablation
+    order: 3013
+    hide_in_summary: true
+    run: vit1d_ssl_mae_grid_k50_f1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/grid5src/vit1d_ssl_mae_grid_k50_f1.yaml
+    pretrain_data: '5-source grid cell (realdata, ocdetect, eatingspeed, motionx, sonic; 1,959,288-window pool): 50 largest k-means motion type(s), equal-per-cluster waterfill, 19,593 windows'
+    pretrain_objective: MAE mask 0.75, z-score input, 50,000 steps (grid budget)
+    eval_note: added 2026-09-17 to probe the grid on the leak-free HAR sets (HHAR, MHEALTH, PRISM); the original 8 probes live in analysis/diversity_saturation/out/grid_results.json (legacy runs)
+  g5_k100_f0p01:
+    name: Grid 5-source pool, 100 largest motion type(s), 0.01% of pool, N=196
+    short: g5_k100_f0p01
+    group: ablation
+    order: 3014
+    hide_in_summary: true
+    run: vit1d_ssl_mae_grid_k100_f0p01
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/grid5src/vit1d_ssl_mae_grid_k100_f0p01.yaml
+    pretrain_data: '5-source grid cell (realdata, ocdetect, eatingspeed, motionx, sonic; 1,959,288-window pool): 100 largest k-means motion type(s), equal-per-cluster waterfill, 196 windows'
+    pretrain_objective: MAE mask 0.75, z-score input, 50,000 steps (grid budget)
+    eval_note: added 2026-09-17 to probe the grid on the leak-free HAR sets (HHAR, MHEALTH, PRISM); the original 8 probes live in analysis/diversity_saturation/out/grid_results.json (legacy runs)
+  g5_k100_f0p1:
+    name: Grid 5-source pool, 100 largest motion type(s), 0.1% of pool, N=1,959
+    short: g5_k100_f0p1
+    group: ablation
+    order: 3015
+    hide_in_summary: true
+    run: vit1d_ssl_mae_grid_k100_f0p1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/grid5src/vit1d_ssl_mae_grid_k100_f0p1.yaml
+    pretrain_data: '5-source grid cell (realdata, ocdetect, eatingspeed, motionx, sonic; 1,959,288-window pool): 100 largest k-means motion type(s), equal-per-cluster waterfill, 1,959 windows'
+    pretrain_objective: MAE mask 0.75, z-score input, 50,000 steps (grid budget)
+    eval_note: added 2026-09-17 to probe the grid on the leak-free HAR sets (HHAR, MHEALTH, PRISM); the original 8 probes live in analysis/diversity_saturation/out/grid_results.json (legacy runs)
+  g5_k100_f1:
+    name: Grid 5-source pool, 100 largest motion type(s), 1% of pool, N=19,593
+    short: g5_k100_f1
+    group: ablation
+    order: 3016
+    hide_in_summary: true
+    run: vit1d_ssl_mae_grid_k100_f1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/grid5src/vit1d_ssl_mae_grid_k100_f1.yaml
+    pretrain_data: '5-source grid cell (realdata, ocdetect, eatingspeed, motionx, sonic; 1,959,288-window pool): 100 largest k-means motion type(s), equal-per-cluster waterfill, 19,593 windows'
+    pretrain_objective: MAE mask 0.75, z-score input, 50,000 steps (grid budget)
+    eval_note: added 2026-09-17 to probe the grid on the leak-free HAR sets (HHAR, MHEALTH, PRISM); the original 8 probes live in analysis/diversity_saturation/out/grid_results.json (legacy runs)
+  g5_k100_f10:
+    name: Grid 5-source pool, 100 largest motion type(s), 10% of pool, N=195,929
+    short: g5_k100_f10
+    group: ablation
+    order: 3017
+    hide_in_summary: true
+    run: vit1d_ssl_mae_grid_k100_f10
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/grid5src/vit1d_ssl_mae_grid_k100_f10.yaml
+    pretrain_data: '5-source grid cell (realdata, ocdetect, eatingspeed, motionx, sonic; 1,959,288-window pool): 100 largest k-means motion type(s), equal-per-cluster waterfill, 195,929 windows'
+    pretrain_objective: MAE mask 0.75, z-score input, 50,000 steps (grid budget)
+    eval_note: added 2026-09-17 to probe the grid on the leak-free HAR sets (HHAR, MHEALTH, PRISM); the original 8 probes live in analysis/diversity_saturation/out/grid_results.json (legacy runs)
+  g5_k1000_f0p1:
+    name: Grid 5-source pool, 1000 largest motion type(s), 0.1% of pool, N=1,959
+    short: g5_k1000_f0p1
+    group: ablation
+    order: 3018
+    hide_in_summary: true
+    run: vit1d_ssl_mae_grid_k1000_f0p1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/grid5src/vit1d_ssl_mae_grid_k1000_f0p1.yaml
+    pretrain_data: '5-source grid cell (realdata, ocdetect, eatingspeed, motionx, sonic; 1,959,288-window pool): 1000 largest k-means motion type(s), equal-per-cluster waterfill, 1,959 windows'
+    pretrain_objective: MAE mask 0.75, z-score input, 50,000 steps (grid budget)
+    eval_note: added 2026-09-17 to probe the grid on the leak-free HAR sets (HHAR, MHEALTH, PRISM); the original 8 probes live in analysis/diversity_saturation/out/grid_results.json (legacy runs)
+  g5_k1000_f1:
+    name: Grid 5-source pool, 1000 largest motion type(s), 1% of pool, N=19,593
+    short: g5_k1000_f1
+    group: ablation
+    order: 3019
+    hide_in_summary: true
+    run: vit1d_ssl_mae_grid_k1000_f1
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/grid5src/vit1d_ssl_mae_grid_k1000_f1.yaml
+    pretrain_data: '5-source grid cell (realdata, ocdetect, eatingspeed, motionx, sonic; 1,959,288-window pool): 1000 largest k-means motion type(s), equal-per-cluster waterfill, 19,593 windows'
+    pretrain_objective: MAE mask 0.75, z-score input, 50,000 steps (grid budget)
+    eval_note: added 2026-09-17 to probe the grid on the leak-free HAR sets (HHAR, MHEALTH, PRISM); the original 8 probes live in analysis/diversity_saturation/out/grid_results.json (legacy runs)
+  g5_k1000_f10:
+    name: Grid 5-source pool, 1000 largest motion type(s), 10% of pool, N=195,929
+    short: g5_k1000_f10
+    group: ablation
+    order: 3020
+    hide_in_summary: true
+    run: vit1d_ssl_mae_grid_k1000_f10
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/grid5src/vit1d_ssl_mae_grid_k1000_f10.yaml
+    pretrain_data: '5-source grid cell (realdata, ocdetect, eatingspeed, motionx, sonic; 1,959,288-window pool): 1000 largest k-means motion type(s), equal-per-cluster waterfill, 195,929 windows'
+    pretrain_objective: MAE mask 0.75, z-score input, 50,000 steps (grid budget)
+    eval_note: added 2026-09-17 to probe the grid on the leak-free HAR sets (HHAR, MHEALTH, PRISM); the original 8 probes live in analysis/diversity_saturation/out/grid_results.json (legacy runs)
+  g5_k1000_f100:
+    name: Grid 5-source pool, 1000 largest motion type(s), 100% of pool, N=1,959,288
+    short: g5_k1000_f100
+    group: ablation
+    order: 3021
+    hide_in_summary: true
+    run: vit1d_ssl_mae_grid_k1000_f100
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/grid5src/vit1d_ssl_mae_grid_k1000_f100.yaml
+    pretrain_data: '5-source grid cell (realdata, ocdetect, eatingspeed, motionx, sonic; 1,959,288-window pool): 1000 largest k-means motion type(s), equal-per-cluster waterfill, 1,959,288 windows'
+    pretrain_objective: MAE mask 0.75, z-score input, 50,000 steps (grid budget)
+    eval_note: added 2026-09-17 to probe the grid on the leak-free HAR sets (HHAR, MHEALTH, PRISM); the original 8 probes live in analysis/diversity_saturation/out/grid_results.json (legacy runs)
+  # --- 5-source baselines/ablations matched to mae_5src (paper headline pool), added 2026-09-17 ---
+  focal_5src:
+    name: FOCAL (5-source)
+    short: FOCAL-5src
+    group: ssl_baseline
+    order: 20.5
+    run: vit1d_ssl_focal_5src
+    ckpt: best
+    alt_attention: false
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/pretrain5src/focal_5src.yaml
+    pretrain_data: realdata, ocdetect, eatingspeed, motionx, sonic (same 5 sources and cache as mae_5src)
+    pretrain_objective: FOCAL (Liu et al. 2023) on shared ViT1D backbone
+    eval_note: same config as the 11-source row with the other sources disabled; early stopping (patience 10) capped at 160k steps; mae_5src stopped at 154k
+    hide_in_summary: true
+  simmtm_5src:
+    name: SimMTM (5-source)
+    short: SimMTM-5src
+    group: ssl_baseline
+    order: 21.5
+    run: vit1d_ssl_simmtm_5src
+    ckpt: best
+    alt_attention: false
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/pretrain5src/simmtm_5src.yaml
+    pretrain_data: realdata, ocdetect, eatingspeed, motionx, sonic (same 5 sources and cache as mae_5src)
+    pretrain_objective: SimMTM (Dong et al. 2023) on shared ViT1D backbone
+    eval_note: same config as the 11-source row with the other sources disabled; early stopping (patience 10) capped at 160k steps; mae_5src stopped at 154k
+    hide_in_summary: true
+  relcon_5src:
+    name: RelCon (5-source)
+    short: RelCon-5src
+    group: ssl_baseline
+    order: 22.5
+    run: vit1d_ssl_relcon_5src
+    ckpt: best
+    alt_attention: false
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/pretrain5src/relcon_5src.yaml
+    pretrain_data: realdata, ocdetect, eatingspeed, motionx, sonic (same 5 sources and cache as mae_5src)
+    pretrain_objective: RelCon (Xu et al. 2025) on shared ViT1D backbone; motif-distance stage 1 retrained on the same 5 sources (relcon_motifdist_5src)
+    eval_note: same config as the 11-source row with the other sources disabled; early stopping (patience 10) capped at 160k steps; mae_5src stopped at 154k
+    hide_in_summary: true
+  mae_5src_noaltattn:
+    name: Ours (MAE, 5-source, no alt-attn)
+    short: MAE-5src-noAA
+    group: ablation
+    order: 10.5
+    run: vit1d_ssl_mae_varlen_noaltattn_5src
+    ckpt: best
+    alt_attention: false
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/pretrain5src/mae_noaltattn_5src.yaml
+    pretrain_data: realdata, ocdetect, eatingspeed, motionx, sonic (same 5 sources and cache as mae_5src)
+    pretrain_objective: MAE (var-len, plain ViT1D encoder)
+    eval_note: same config as the 11-source row with the other sources disabled; early stopping (patience 10) capped at 160k steps; mae_5src stopped at 154k
+    hide_in_summary: true
+  mae_5src_acconly:
+    name: Ours (MAE, 5-source, acc-only)
+    short: MAE-5src-acc
+    group: ablation
+    order: 11.5
+    run: vit1d_ssl_mae_varlen_acconly_5src
+    ckpt: best
+    alt_attention: true
+    channels: 3
+    shared_kernel: true
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/pretrain5src/mae_acconly_5src.yaml
+    pretrain_data: realdata, ocdetect, eatingspeed, motionx, sonic (same 5 sources and cache as mae_5src)
+    pretrain_objective: MAE (var-len, alt-attn, acc-only)
+    eval_note: same config as the 11-source row with the other sources disabled; early stopping (patience 10) capped at 160k steps; mae_5src stopped at 154k
+    hide_in_summary: true
+  limubert_5src:
+    name: LIMU-BERT (5-source)
+    short: LIMU-BERT-5src
+    group: ssl_baseline
+    order: 23.5
+    run: vit1d_ssl_limubert_5src
+    ckpt: best
+    alt_attention: false
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/pretrain5src/limubert_5src.yaml
+    pretrain_data: realdata, ocdetect, eatingspeed, motionx, sonic (same 5 sources and cache as mae_5src)
+    pretrain_objective: LIMU-BERT (Xu et al. 2021) on shared ViT1D backbone -- 15% temporal masking, MSE reconstruction, 4-layer decoder
+    eval_note: shared-backbone baseline added 2026-09-17; same trainer, cap 160k steps and ES rule as the other 5-source baselines
+    hide_in_summary: true
+  # --- cross-task transfer sources: MAE-5src fine-tuned on one IMU-Bench task (paper Section 4), added 2026-09-17 ---
+  tx5_prism:
+    name: MAE-5src fine-tuned on PRISM activity recognition
+    short: tx5_prism
+    group: transfer
+    order: 4000
+    hide_in_summary: true
+    run: bench_har_prism__mae_5src__finetune__s42
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/vit1d_ssl_mae_varlen_altattn_realdata_ocdetect_eatingspeed_motionx_sonic_flu.yaml
+    pretrain_data: 5-source reference corpus, then supervised fine-tuning on PRISM activity recognition (the task's own training split)
+    pretrain_objective: MAE (var-len, alt-attn) + task fine-tuning
+    eval_note: transfer source; its own task is excluded as a target
+  tx5_fullbody:
+    name: MAE-5src fine-tuned on full-body pose
+    short: tx5_fullbody
+    group: transfer
+    order: 4000
+    hide_in_summary: true
+    run: bench_full_body_pose_nymeria__mae_5src__finetune__s42
+    ckpt: /gpfs/home/vbc1591/IMU-SSL/runs/bench_full_body_pose_nymeria__mae_5src__finetune__s42/checkpoints/best_mpjpe.pt
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/vit1d_ssl_mae_varlen_altattn_realdata_ocdetect_eatingspeed_motionx_sonic_flu.yaml
+    pretrain_data: 5-source reference corpus, then supervised fine-tuning on full-body pose (the task's own training split)
+    pretrain_objective: MAE (var-len, alt-attn) + task fine-tuning
+    eval_note: transfer source; its own task is excluded as a target
+  tx5_gesture:
+    name: MAE-5src fine-tuned on microgesture
+    short: tx5_gesture
+    group: transfer
+    order: 4000
+    hide_in_summary: true
+    run: bench_microgesture_openwatch__mae_5src__finetune__s42
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/vit1d_ssl_mae_varlen_altattn_realdata_ocdetect_eatingspeed_motionx_sonic_flu.yaml
+    pretrain_data: 5-source reference corpus, then supervised fine-tuning on microgesture (the task's own training split)
+    pretrain_objective: MAE (var-len, alt-attn) + task fine-tuning
+    eval_note: transfer source; its own task is excluded as a target
+  tx5_odom:
+    name: MAE-5src fine-tuned on odometry (wrist-frame velocity)
+    short: tx5_odom
+    group: transfer
+    order: 4000
+    hide_in_summary: true
+    run: bench_odometry_nymeria_local__mae_5src__finetune__s42
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/vit1d_ssl_mae_varlen_altattn_realdata_ocdetect_eatingspeed_motionx_sonic_flu.yaml
+    pretrain_data: 5-source reference corpus, then supervised fine-tuning on wrist-frame odometry (the task's own training split)
+    pretrain_objective: MAE (var-len, alt-attn) + task fine-tuning
+    eval_note: transfer source; its own task is excluded as a target
+  tx5_pd:
+    name: MAE-5src fine-tuned on Parkinson's disease
+    short: tx5_pd
+    group: transfer
+    order: 4000
+    hide_in_summary: true
+    run: bench_pd_pads__mae_5src__finetune__s42
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/vit1d_ssl_mae_varlen_altattn_realdata_ocdetect_eatingspeed_motionx_sonic_flu.yaml
+    pretrain_data: 5-source reference corpus, then supervised fine-tuning on Parkinson's disease (the task's own training split)
+    pretrain_objective: MAE (var-len, alt-attn) + task fine-tuning
+    eval_note: transfer source; its own task is excluded as a target
+  tx5_language:
+    name: MAE-5src fine-tuned on IMU-text retrieval
+    short: tx5_language
+    group: transfer
+    order: 4000
+    hide_in_summary: true
+    run: bench_language_humanml3d__mae_5src__finetune__s42
+    ckpt: latest
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/vit1d_ssl_mae_varlen_altattn_realdata_ocdetect_eatingspeed_motionx_sonic_flu.yaml
+    pretrain_data: 5-source reference corpus, then contrastive IMU-text fine-tuning on HumanML3D (the task's own training split; the IMU-text protocol keeps the final checkpoint)
+    pretrain_objective: MAE (var-len, alt-attn) + task fine-tuning
+    eval_note: transfer source; its own task is excluded as a target
+  corpus_ref:
+    name: Corpus ablation 'ref' (per-source counts identical to the reference corpus (HAR/SONIC/Motion-X in full)
+    short: corpus_ref
+    group: ablation
+    order: 3100
+    hide_in_summary: true
+    run: vit1d_ssl_mae_corpus_ref
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/corpus_ablation/vit1d_ssl_mae_corpus_ref.yaml
+    pretrain_data: '5-source pool (realdata, ocdetect, eatingspeed, motionx, sonic): per-source counts identical to the reference corpus (HAR/SONIC/Motion-X in full, EatingSpeed 57,536, OCDetect 8,703), 197,094 windows'
+    pretrain_objective: MAE mask 0.75, z-score input, 50,000 steps (same recipe as grid cell k1000_f10 = arm C)
+    eval_note: corpus-construction ablation 2026-09-18 (analysis/corpus_ablation); compare with g5_k1000_f10 (equal-per-cluster)
+  corpus_uniform:
+    name: Corpus ablation 'uniform' (uniform random draw from the 5-source pool)
+    short: corpus_uniform
+    group: ablation
+    order: 3101
+    hide_in_summary: true
+    run: vit1d_ssl_mae_corpus_uniform
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/corpus_ablation/vit1d_ssl_mae_corpus_uniform.yaml
+    pretrain_data: '5-source pool (realdata, ocdetect, eatingspeed, motionx, sonic): uniform random draw from the 5-source pool, 195,929 windows'
+    pretrain_objective: MAE mask 0.75, z-score input, 50,000 steps (same recipe as grid cell k1000_f10 = arm C)
+    eval_note: corpus-construction ablation 2026-09-18 (analysis/corpus_ablation); compare with g5_k1000_f10 (equal-per-cluster)
+  corpus_temp03:
+    name: Corpus ablation 'temp03' (source temperature sampling p_s ~ n_s^0.3 (Motion-X in full))
+    short: corpus_temp03
+    group: ablation
+    order: 3102
+    hide_in_summary: true
+    run: vit1d_ssl_mae_corpus_temp03
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/corpus_ablation/vit1d_ssl_mae_corpus_temp03.yaml
+    pretrain_data: '5-source pool (realdata, ocdetect, eatingspeed, motionx, sonic): source temperature sampling p_s ~ n_s^0.3 (Motion-X in full), uniform within source, 195,929 windows'
+    pretrain_objective: MAE mask 0.75, z-score input, 50,000 steps (same recipe as grid cell k1000_f10 = arm C)
+    eval_note: corpus-construction ablation 2026-09-18 (analysis/corpus_ablation); compare with g5_k1000_f10 (equal-per-cluster)
+  control_random:
+    name: Random-init frozen encoder (same architecture as MAE, never trained)
+    short: control_random
+    group: control
+    order: 3200
+    hide_in_summary: true
+    run: control_random_frozen_5src
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/vit1d_ssl_mae_varlen_altattn_realdata_ocdetect_eatingspeed_motionx_sonic_flu.yaml
+    pretrain_data: none (random initialisation, seed 42)
+    pretrain_objective: 'none -- control for decoder capacity (does the deep probe decoder do the work?)'
+  control_raw:
+    name: Raw input + random frozen patch projection (0-layer encoder)
+    short: control_raw
+    group: control
+    order: 3201
+    hide_in_summary: true
+    run: control_raw_input_5src
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 0.13
+    normalize_method: zscore
+    preprocess_from: configs/vit1d_ssl_mae_varlen_altattn_realdata_ocdetect_eatingspeed_motionx_sonic_flu.yaml
+    pretrain_data: none (random initialisation, seed 42)
+    pretrain_objective: 'none -- control for decoder capacity (does the deep probe decoder do the work?)'
+    vit1d_overrides:
+      vit1d.encoder.num_hidden_layers: 0
+  g5_k1000_f1_150k:
+    name: 'Grid 5-source pool, 1000 motion types, 1% of pool, N=19,593, 150K steps'
+    short: g5_k1000_f1_150k
+    group: ablation
+    order: 3030
+    hide_in_summary: true
+    run: vit1d_ssl_mae_grid_k1000_f1_150k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/budget_ablation/vit1d_ssl_mae_grid_k1000_f1_150k.yaml
+    pretrain_data: '5-source grid cell k1000_f1 (equal-per-cluster over 1,000 k-means modes), 19,593 windows'
+    pretrain_objective: MAE mask 0.75, z-score input, 150,000 steps (3x the grid budget)
+    eval_note: data x budget cross 2026-09-18; compare with g5_k1000_f1 (50K steps)
+  g5_k1000_f100_150k:
+    name: 'Grid 5-source pool, 1000 motion types, 100% of pool, N=1,959,288, 150K steps'
+    short: g5_k1000_f100_150k
+    group: ablation
+    order: 3031
+    hide_in_summary: true
+    run: vit1d_ssl_mae_grid_k1000_f100_150k
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/budget_ablation/vit1d_ssl_mae_grid_k1000_f100_150k.yaml
+    pretrain_data: '5-source grid cell k1000_f100 (equal-per-cluster over 1,000 k-means modes), 1,959,288 windows'
+    pretrain_objective: MAE mask 0.75, z-score input, 150,000 steps (3x the grid budget)
+    eval_note: data x budget cross 2026-09-18; compare with g5_k1000_f100 (50K steps)
