@@ -3,18 +3,22 @@
 
     python analysis/paper_tables/make_task_tables.py
 
-Writes <paper>/Sections/tab_task_<task>.tex for each of the ten tasks and the numbers behind them to
-paper_results/tab2_main_results/per_task/<task>.csv. Rows: the self-supervised encoders and the MAE
-ablations under both protocols, the two decoder controls (frozen probe) and training from scratch.
-Columns: the task card's metrics, primary first. Pending cells print "--".
-Replaces the single wide results table (make_main_table.py still writes it for the leaderboard/CSV).
+Writes <paper>/Sections/tab_task_<id>.tex and the numbers behind them to
+paper_results/tab2_main_results/per_task_all_metrics.csv. Rows: the self-supervised encoders and the
+MAE ablations under both protocols, the two decoder controls (frozen probe) and training from
+scratch. Columns: the task card's metrics, primary first. Pending cells print "--".
+
+The four activity-recognition sets share one metric set, so they share one table (tab:task_har) with
+a column group per dataset and the mean macro-F1 that Section~\\ref{sec:results} quotes; every other
+task gets its own. Replaces the single wide results table (make_main_table.py still writes it for
+the appendix summary and the leaderboard CSV).
 """
 import os
 import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 from bench.leaderboard import collect                       # noqa: E402
-from bench.leaderboard_paper import COLS, CONTROLLED        # noqa: E402
+from bench.leaderboard_paper import COLS, CONTROLLED, HAR3  # noqa: E402
 from bench.registry_io import load_tasks                    # noqa: E402
 
 PAPER = "/gpfs/home/vbc1591/paper_iclr/Sections"
@@ -22,33 +26,45 @@ REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 CONTROLS = [("control_random", "Random frozen encoder"), ("control_raw", "Raw input, 0 layers")]
 PCT = {"microgesture_openwatch", "pd_pads", "har_hhar", "har_mhealth", "har_prism", "har_userwatch"}
 SKIP = {"n_classes_predicted"}
-NAMES = {t: lab for t, lab, _ in COLS}
+HAR_TASKS = [t for t, _, _ in COLS if t.startswith("har_")]
+HAR_SHORT = {"har_hhar": "HHAR", "har_mhealth": "MHEALTH", "har_prism": "PRISM", "har_userwatch": "User study"}
+# Tasks whose metric labels repeat a qualifier (gallery size, direction) get a grouped header instead,
+# so the column heads stay narrow enough for the text width: (group title or None, [keys], [short labels]).
+GROUPED = {"language_humanml3d": [
+    (None, ["r1_g100"], ["R@1 mean"]),
+    ("Gallery of 100", ["r1_i2t_g100", "r1_t2i_g100", "mrr_i2t_g100", "mrr_t2i_g100"],
+     ["i2t R@1", "t2i R@1", "i2t MRR", "t2i MRR"]),
+    ("Full gallery", ["r1_i2t_full", "r1_t2i_full", "mrr_i2t_full", "mrr_t2i_full"],
+     ["i2t R@1", "t2i R@1", "i2t MRR", "t2i MRR"])]}
 tasks = load_tasks()["tasks"]
 cells = collect()
 
 
 def tex(t):
     """Unicode that appears in task subtitles -> LaTeX."""
-    for a, b in (("\u2194", "$\\leftrightarrow$"), ("\u2192", "$\\rightarrow$"), ("\u00b0", "$^\\circ$"),
-                 ("\u00d7", "$\\times$"), ("%", "\\%"), ("&", "\\&"), ("_", "\\_")):
+    for a, b in (("↔", "$\\leftrightarrow$"), ("→", "$\\rightarrow$"), ("°", "$^\\circ$"),
+                 ("×", "$\\times$"), ("%", "\\%"), ("&", "\\&"), ("_", "\\_")):
         t = t.replace(a, b)
     return t
 
 
 def metric_keys(task):
     m = tasks[task]["metrics"]
-    keys = [m["primary"]] + [k for k in m if k not in ("primary", m["primary"]) and not k.startswith("val_")
+    return [m["primary"]] + [k for k in m if k not in ("primary", m["primary"]) and not k.startswith("val_")
                              and k not in SKIP]
-    return keys
 
 
-def label(task, k):
-    lab = tasks[task]["metrics"][k].get("label", k.replace("_", " "))
-    up = tasks[task]["metrics"][k].get("higher_is_better", True)
+def pct(task, k):
+    return task in PCT and ("f1" in k or "acc" in k)
+
+
+def label(task, k, short=False):
+    m = tasks[task]["metrics"][k]
+    lab = m.get("label", k.replace("_", " "))
     lab = lab.replace("%", "\\%").replace("°", "$^\\circ$")
-    if task in PCT and ("f1" in k or "acc" in k):
+    if pct(task, k) and not short:
         lab += " (\\%)"
-    return lab + (r"$\uparrow$" if up else r"$\downarrow$")
+    return lab + (r"$\uparrow$" if m.get("higher_is_better", True) else r"$\downarrow$")
 
 
 def value(task, enc, proto, k):
@@ -59,72 +75,126 @@ def value(task, enc, proto, k):
     if not vals:
         return None
     v = sum(vals) / len(vals)
-    return v * 100 if (task in PCT and ("f1" in k or "acc" in k)) else v
+    return v * 100 if pct(task, k) else v
+
+
+def mean_value(enc, proto, k):
+    """Mean over the four activity sets, as Section 4 reports it; None unless all four are in."""
+    vs = [value(t, enc, proto, k) for t in HAR_TASKS]
+    return sum(vs) / len(vs) if all(v is not None for v in vs) else None
 
 
 def fmt(task, k, v):
     if v is None:
         return "--"
-    f = tasks[task]["metrics"][k].get("fmt", "{:.3f}")
-    if task in PCT and ("f1" in k or "acc" in k):
-        f = "{:.1f}"
-    return f.format(v)
+    return ("{:.1f}" if pct(task, k) else tasks[task]["metrics"][k].get("fmt", "{:.3f}")).format(v)
 
 
-def block(task, keys, rows, bold_group=None):
+def block(columns, rows, bold_group=None):
+    """One row per (encoder, label, protocol); `columns` is a list of (task, metric, getter)."""
     best = {}
     if bold_group:
-        for k in keys:
-            vs = [value(task, e, p, k) for e, _, p in rows if e in bold_group]
+        for i, (task, k, get) in enumerate(columns):
+            vs = [get(e, p) for e, _, p in rows if e in bold_group]
             vs = [v for v in vs if v is not None]
             if vs:
-                best[k] = max(vs) if tasks[task]["metrics"][k].get("higher_is_better", True) else min(vs)
+                best[i] = max(vs) if tasks[task]["metrics"][k].get("higher_is_better", True) else min(vs)
     out = []
     for enc, lab, proto in rows:
         cs = []
-        for k in keys:
-            v = value(task, enc, proto, k)
+        for i, (task, k, get) in enumerate(columns):
+            v = get(enc, proto)
             s = fmt(task, k, v)
-            if bold_group and enc in bold_group and v is not None and best.get(k) == v:
+            if bold_group and enc in bold_group and v is not None and best.get(i) == v:
                 s = r"\textbf{" + s + "}"
             cs.append(s)
         out.append(lab + " & " + " & ".join(cs) + r" \\")
     return out
 
 
-csv_rows = []
-for task, short, _ in COLS:
-    keys = metric_keys(task)
+def write_table(table_id, columns, header_lines, caption, wide):
     ssl = {e for e, _, g, _ in CONTROLLED if g == "ssl"}
     probe = [(e, lab, "probe") for e, lab, _, _ in CONTROLLED]
     ft = [(e, lab, "finetune") for e, lab, _, _ in CONTROLLED]
     ctrl = [(e, lab, "probe") for e, lab in CONTROLS]
-    card = tasks[task]
-    wide = len(keys) >= 6
+    n = len(columns)
     env, size = ("table*", r"\scriptsize") if wide else ("table", r"\small")
-    lines = [rf"% Generated by IMU-SSL/analysis/paper_tables/make_task_tables.py -- do not edit by hand.",
-             rf"\begin{{{env}}}[t]", r"\centering", size, r"\setlength{\tabcolsep}{4pt}",
-             rf"\caption{{{short}: {tex(card['subtitle'].strip())}. Evaluation on the {card.get('eval_split', 'val')} split; "
-             r"all encoders share the backbone, the pretraining corpus and this task's decoder. Bold: best "
-             r"self-supervised value per metric and protocol; one training seed per cell.}",
-             rf"\label{{tab:task_{task}}}",
-             r"\begin{tabular}{@{}l" + "r" * len(keys) + r"@{}}", r"\toprule",
-             "Encoder & " + " & ".join(label(task, k) for k in keys) + r" \\", r"\midrule",
-             rf"\multicolumn{{{len(keys) + 1}}}{{@{{}}l}}{{\emph{{Frozen probe}}}} \\"]
-    lines += block(task, keys, probe, ssl)
-    lines += [r"\cmidrule(l){1-" + str(len(keys) + 1) + "}"] + block(task, keys, ctrl)
-    lines += [r"\midrule", rf"\multicolumn{{{len(keys) + 1}}}{{@{{}}l}}{{\emph{{Fine-tune}}}} \\"]
-    lines += block(task, keys, ft, ssl)
-    lines += [r"\midrule"] + block(task, keys, [("scratch", "Scratch", "scratch")])
+    lines = ["% Generated by IMU-SSL/analysis/paper_tables/make_task_tables.py -- do not edit by hand.",
+             rf"\begin{{{env}}}[t]", r"\centering", size,
+             r"\setlength{\tabcolsep}{" + ("2.5pt" if n > 8 else "4pt") + "}",
+             rf"\caption{{{caption}}}", rf"\label{{tab:task_{table_id}}}",
+             r"\begin{tabular}{@{}l" + "r" * n + r"@{}}", r"\toprule"] + header_lines + \
+            [r"\midrule", rf"\multicolumn{{{n + 1}}}{{@{{}}l}}{{\emph{{Frozen probe}}}} \\"]
+    lines += block(columns, probe, ssl)
+    lines += [r"\cmidrule(l){1-" + str(n + 1) + "}"] + block(columns, ctrl)
+    lines += [r"\midrule", rf"\multicolumn{{{n + 1}}}{{@{{}}l}}{{\emph{{Fine-tune}}}} \\"]
+    lines += block(columns, ft, ssl)
+    lines += [r"\midrule"] + block(columns, [("scratch", "Scratch", "scratch")])
     lines += [r"\bottomrule", r"\end{tabular}", rf"\end{{{env}}}", ""]
-    open(os.path.join(PAPER, f"tab_task_{task}.tex"), "w").write("\n".join(lines))
-    for enc, lab, proto in probe + ft + ctrl + [("scratch", "Scratch", "scratch")]:
+    open(os.path.join(PAPER, f"tab_task_{table_id}.tex"), "w").write("\n".join(lines))
+    return probe + ctrl + ft + [("scratch", "Scratch", "scratch")]
+
+
+COMMON = (r"all encoders share the backbone, the pretraining corpus and this task's decoder. Bold: best "
+          r"self-supervised value per metric and protocol; one training seed per cell.")
+csv_rows, written = [], []
+
+# ---- the six single-task tables --------------------------------------------------------------------
+for task, short, _ in COLS:
+    if task in HAR_TASKS:
+        continue
+    keys = metric_keys(task)
+    columns = [(task, k, (lambda k: lambda e, p: value(task, e, p, k))(k)) for k in keys]
+    card = tasks[task]
+    if task in GROUPED:
+        groups = GROUPED[task]
+        assert [k for _, ks, _ in groups for k in ks] == keys, f"{task}: GROUPED does not cover its metrics"
+        top, rule, col = [], [], 1
+        for title, ks, _ in groups:
+            top.append(r"\multicolumn{" + str(len(ks)) + r"}{c}{" + (title or "") + "}")
+            if title:
+                rule.append(r"\cmidrule(lr){" + f"{col + 1}-{col + len(ks)}" + "}")
+            col += len(ks)
+        up = r"$\uparrow$" if tasks[task]["metrics"][keys[0]].get("higher_is_better", True) else r"$\downarrow$"
+        header = [" & " + " & ".join(top) + r" \\", "".join(rule),
+                  "Encoder & " + " & ".join(lab + up for _, _, labs in groups for lab in labs) + r" \\"]
+    else:
+        header = ["Encoder & " + " & ".join(label(task, k) for k in keys) + r" \\"]
+    caption = (f"{short}: {tex(card['subtitle'].strip())}. Evaluation on the "
+               f"{card.get('eval_split', 'val')} split; {COMMON}")
+    rows = write_table(task, columns, header, caption, wide=len(keys) >= 6)
+    written.append(task)
+    for enc, lab, proto in rows:
         csv_rows.append([task, enc, lab, proto] + [value(task, enc, proto, k) for k in keys] + [";".join(keys)])
+
+# ---- the four activity sets in one table -----------------------------------------------------------
+KEYS = metric_keys(HAR_TASKS[0])
+assert all(metric_keys(t) == KEYS for t in HAR_TASKS), "activity sets no longer share a metric set"
+columns = [(t, k, (lambda t, k: lambda e, p: value(t, e, p, k))(t, k)) for t in HAR_TASKS for k in KEYS]
+columns.append((HAR_TASKS[0], KEYS[0], (lambda e, p: mean_value(e, p, KEYS[0]))))
+header = [" & " + " & ".join(r"\multicolumn{" + str(len(KEYS)) + r"}{c}{" + HAR_SHORT[t] + "}" for t in HAR_TASKS)
+          + r" & Mean \\",
+          "".join(r"\cmidrule(lr){" + f"{2 + i * len(KEYS)}-{1 + (i + 1) * len(KEYS)}" + "}"
+                  for i in range(len(HAR_TASKS))),
+          "Encoder & " + " & ".join(label(t, k, short=True) for t in HAR_TASKS for k in KEYS)
+          + " & " + label(HAR_TASKS[0], KEYS[0], short=True) + r" \\"]
+caption = ("Activity recognition, all four sets (\\%). HHAR (6 classes) and MHEALTH (12) are subject-disjoint "
+           "with two held-out subjects each, PRISM (96) with six; the user-study set (60) is split in time, so it "
+           "measures recognition later in the same recording rather than generalisation to new people. "
+           "\\emph{Mean} is the mean macro-F1 over the four sets quoted in Section~\\ref{sec:results}. "
+           "Evaluation on the validation split; " + COMMON)
+rows = write_table("har", columns, header, caption, wide=True)
+written.append("har")
+for enc, lab, proto in rows:
+    for t in HAR_TASKS:
+        csv_rows.append([t, enc, lab, proto] + [value(t, enc, proto, k) for k in KEYS] + [";".join(KEYS)])
+    csv_rows.append(["har_mean", enc, lab, proto, mean_value(enc, proto, KEYS[0])] + [None] * (len(KEYS) - 1)
+                    + [KEYS[0]])
 
 sys.path.insert(0, os.path.join(REPO, "paper_results"))
 from paper_io import write_csv  # noqa: E402
 maxk = max(len(metric_keys(t)) for t, _, _ in COLS)
 write_csv("tab2_main_results", "per_task_all_metrics.csv",
-          ["task", "encoder", "encoder_label", "protocol"] + [f"m{i+1}" for i in range(maxk)] + ["metric_keys"],
+          ["task", "encoder", "encoder_label", "protocol"] + [f"m{i + 1}" for i in range(maxk)] + ["metric_keys"],
           [r[:4] + r[4:-1] + [None] * (maxk - (len(r) - 5)) + [r[-1]] for r in csv_rows])
-print(f"wrote {len(COLS)} per-task tables to {PAPER}/tab_task_*.tex")
+print(f"wrote {len(written)} tables to {PAPER}/tab_task_*.tex: {', '.join(written)}")
