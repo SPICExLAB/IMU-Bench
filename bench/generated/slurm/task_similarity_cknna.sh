@@ -22,7 +22,7 @@ Arm pose=bench_arm_pose_nymeria__mae_5src__finetune__s42:best.pt;\
 Full-body pose=bench_full_body_pose_nymeria__mae_5src__finetune__s42:best_mpjpe.pt;\
 Odometry=bench_odometry_nymeria_local__mae_5src__finetune__s42:best.pt;\
 Microgesture=bench_microgesture_openwatch__mae_5src__finetune__s42:best.pt;\
-IMU-text=bench_language_humanml3d__mae_5src__finetune__s42:best.pt;\
+IMU-text=bench_language_humanml3d__mae_5src__finetune__s42:latest.pt;\
 Parkinson's=bench_pd_pads__mae_5src__finetune__s42:best.pt;\
 PRISM=bench_har_prism__mae_5src__finetune__s42:best.pt"
 echo "[cknna] done $(date -Is)"
