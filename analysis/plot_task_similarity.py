@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Figure: task similarity read off the reference MAE encoder, two ways.
+"""Figure: representational task similarity (CKNNA) between the MAE encoder's task-adapted copies.
 
     python analysis/plot_task_similarity.py [--outdir <paper>/Pictures]
 
@@ -139,15 +139,12 @@ def main():
     cmax = float(np.nanmax(C)) if np.isfinite(C).any() else 0.5
     snorm = plt.Normalize(vmin=0, vmax=cmax)
 
-    fig, (axL, axR) = plt.subplots(1, 2, figsize=(11.2, 4.6), gridspec_kw=dict(width_ratios=[n, m], wspace=0.45))
+    # Single panel: the representational view. The directional transfer matrix stays in the appendix
+    # table and in paper_results; Figure 2 of the transfer section shows transfer against scratch.
+    fig, axR = plt.subplots(1, 1, figsize=(6.4, 5.6))
     fig.patch.set_facecolor("white")
-    draw_matrix(axL, T, [SHORT[t] for t in TASKS], div, dnorm, lambda v: f"{v:+.0f}" if abs(v) >= 0.5 else "0",
-                "Transfer: source (rows) → target (columns)", pending=pending,
-                cbar_label="Frozen-probe change vs. unadapted MAE (%)")
-    axL.set_xlabel("probed on", fontsize=8, color=INK2, labelpad=6)
-    axL.set_ylabel("encoder fine-tuned on", fontsize=8, color=INK2, labelpad=6)
     draw_matrix(axR, C, [lab for _, lab, _ in ck_labels], seq, snorm, lambda v: f"{v:.2f}",
-                "Representation: CKNNA between adapted encoders", cbar_label="CKNNA (shared Nymeria windows)")
+                "CKNNA between task-adapted encoders", cbar_label="CKNNA (shared held-out Nymeria windows)")
 
     os.makedirs(a.outdir, exist_ok=True)
     for ext in ("png", "pdf"):
@@ -159,7 +156,7 @@ def main():
     import sys
     sys.path.insert(0, os.path.join(REPO, "paper_results"))
     from paper_io import write_csv  # noqa: E402
-    rows = [["transfer_pct", s, t, None if np.isnan(T[i, j]) else T[i, j]]
+    rows = [["transfer_pct", s, t, None if np.isnan(T[i, j]) else T[i, j]]     # kept for the record
             for i, s in enumerate(TASKS) for j, t in enumerate(TASKS) if i != j]
     rows += [["cknna", ck_labels[i][0], ck_labels[j][0], None if np.isnan(C[i, j]) else C[i, j]]
              for i in range(m) for j in range(m) if i < j]
