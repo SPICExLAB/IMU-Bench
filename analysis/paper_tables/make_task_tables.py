@@ -67,6 +67,13 @@ EXPERT_NOTE = {
                               "trajectories; that protocol gives systematically lower error than the wrist-frame "
                               "one (the same frozen MAE probe scores 0.148\\,m under it against 0.200\\,m here), "
                               "so their rows are a reference point, not a ranking.",
+    "pd_pads": "Unlike the systems in the other task tables, the three PADS rows are the dataset authors' "
+               "smartwatch classifiers \\citep{varghese2024pads} re-run under this benchmark's protocol --- the same "
+               "2.56\\,s windows, the same 375/94 participant split and the same per-participant aggregation, with "
+               "their class-balanced sample weights and their hyperparameter grid resolved on training participants "
+               "only --- so they are directly comparable with the rows above. The spectral-feature classifier assigns "
+               "participants to all three classes (29/47/18 against a true 14/58/22); the BOSS + SVM variant "
+               "collapses to the majority class like the frozen probes.",
     "language_humanml3d": "The official UniMTS checkpoint is left out because it was pretrained on "
                           "HumanML3D; the row is its wrist-only reimplementation trained from scratch.",
 }
