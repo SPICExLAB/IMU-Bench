@@ -213,6 +213,10 @@ def plot_heatmap(matrix: np.ndarray, labels: list[str], title: str, out_path: st
 def parse_args():
     p = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
+    p.add_argument("--encoders", default=None,
+                   help="override the encoder set: 'Label=run_name:ckpt_file' entries separated by ';'. "
+                        "Used for the task-similarity table, which compares the MAE encoder after "
+                        "fine-tuning on each benchmark task instead of the from-scratch encoders.")
     p.add_argument("--runs-root", default="runs")
     p.add_argument("--nymeria-val-root", default=NYMERIA_VAL_PKL_ROOT)
     p.add_argument("--n-sessions", type=int, default=16,
@@ -226,7 +230,14 @@ def parse_args():
 
 
 def main():
+    global TASKS
     args = parse_args()
+    if args.encoders:          # task-similarity run: MAE after fine-tuning on each source task
+        TASKS = {}
+        for part in args.encoders.split(";"):
+            lab, spec = part.split("=", 1)
+            run, _, ck = spec.partition(":")
+            TASKS[lab.strip()] = (run.strip(), (ck or "best.pt").strip())
     device = torch.device(args.device)
     os.makedirs(args.out_dir, exist_ok=True)
 

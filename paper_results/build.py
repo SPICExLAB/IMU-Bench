@@ -22,6 +22,8 @@ STEPS = [  # (paper element folder, command, cwd)
     ("tab2_main_results", ["analysis/paper_tables/make_main_table.py"], REPO),
     ("tab2_main_results/per_task", ["analysis/paper_tables/make_task_tables.py"], REPO),
     ("appendix_selection", ["analysis/paper_tables/make_selection_table.py"], REPO),
+    ("appendix_confidence_intervals", ["analysis/paper_tables/make_ci_table.py"], REPO),
+    ("tab3_task_similarity", ["analysis/paper_tables/make_task_similarity.py"], REPO),
     ("appendix_pretrain_details + appendix_downstream_protocols", ["analysis/paper_tables/make_impl_tables.py"], REPO),
     ("appendix_decoder_controls + appendix_corpus_budget", ["analysis/paper_tables/make_ablation_tables.py"], REPO),
     ("appendix_audit_openwatch", ["analysis/paper_tables/make_audit_table.py"], REPO),
