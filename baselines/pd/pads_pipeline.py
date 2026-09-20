@@ -89,8 +89,8 @@ class MultiBOSS:
 
 
 # ---- data through the benchmark's own dataset class ---------------------------------------------------
-def load_windows(cfg, keys, split_name):
-    ds = WindowDataset(cfg_get(cfg, ["paths", "dataset_path"]), cfg._session_index, keys, cfg, split_name=split_name)
+def load_windows(cfg, si, keys, split_name):
+    ds = WindowDataset(cfg_get(cfg, ["paths", "dataset_path"]), si, keys, cfg, split_name=split_name)
     X, y, subj = [], [], []
     t0 = time.time()
     for i in range(len(ds)):
@@ -185,11 +185,10 @@ def main():
         if isinstance(cfg.get(k), dict):
             cfg[k]["enabled"] = False            # the benchmark evaluates un-augmented windows
     si = build_session_index(cfg_get(cfg, ["paths", "dataset_path"]), cfg, dataset_filter=["pads"])
-    cfg._session_index = si
     sp = make_splits(si, cfg)
     print("[pads] loading windows through the benchmark's WindowDataset ...", flush=True)
-    Xtr, ytr, gtr = load_windows(cfg, sp["train_keys"], "val")   # split_name 'val' => no train-time augmentation
-    Xva, yva, gva = load_windows(cfg, sp["val_keys"], "val")
+    Xtr, ytr, gtr = load_windows(cfg, si, sp["train_keys"], "val")   # split_name 'val' => no train-time augmentation
+    Xva, yva, gva = load_windows(cfg, si, sp["val_keys"], "val")
     print(f"[pads] train {Xtr.shape} from {len(set(gtr))} participants | val {Xva.shape} from {len(set(gva))} participants", flush=True)
     assert len(set(gtr)) == 375 and len(set(gva)) == 94 and not (set(gtr) & set(gva))
     wtr = balanced_weights(ytr)
