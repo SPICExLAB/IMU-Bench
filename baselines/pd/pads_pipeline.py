@@ -74,7 +74,8 @@ class MultiBOSS:
     """ml/multi_boss.py without the on-disk cache: one BOSS per (channel, window size)."""
     def __init__(self, n_channels, window_sizes=(20, 40, 80), window_step=2, word_size=2, n_bins=3):
         from pyts.transformation import BOSS
-        self.boss = [[BOSS(sparse=False, window_size=ws, window_step=window_step, word_size=word_size,
+        # sparse=True and our own .toarray(): pyts 0.13's dense path calls scipy's removed `.A` attribute
+        self.boss = [[BOSS(sparse=True, window_size=ws, window_step=window_step, word_size=word_size,
                            n_bins=n_bins, norm_std=False) for ws in window_sizes] for _ in range(n_channels)]
 
     def fit(self, X, y):
@@ -84,7 +85,7 @@ class MultiBOSS:
         return self
 
     def transform(self, X):
-        return np.concatenate([b.transform(X[:, ch, :]) for ch, row in enumerate(self.boss) for b in row],
+        return np.concatenate([b.transform(X[:, ch, :]).toarray() for ch, row in enumerate(self.boss) for b in row],
                               axis=1).astype(np.float32)
 
 
