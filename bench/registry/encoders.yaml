@@ -3355,6 +3355,36 @@ encoders:
     pretrain_data: none -- the encoder is the benchmark's from-scratch run on IMU-text retrieval (random init, the task's own training split only)
     pretrain_objective: supervised, from scratch
     eval_note: transfer source without pretraining; its own task is excluded as a target. Counterpart of tx5_language.
+  pads_boss:
+    name: PADS pipeline, BOSS + CatBoost (Varghese et al.)
+    short: pads_boss
+    group: external
+    order: 5100
+    hide_in_summary: false
+    channels: 6
+    pretrain_data: none -- the dataset authors' smartwatch classifier trained on the benchmark's 375 training participants
+    pretrain_objective: supervised, task-specific (per-channel BOSS histograms + CatBoost)
+    eval_note: task-specific system run under the IMU-Bench Parkinson's protocol (same windows, split and subject aggregation); baselines/pd/pads_pipeline.py
+  pads_boss_svm:
+    name: PADS pipeline, BOSS + SVM (Varghese et al.)
+    short: pads_boss_svm
+    group: external
+    order: 5101
+    hide_in_summary: false
+    channels: 6
+    pretrain_data: none -- the dataset authors' smartwatch classifier trained on the benchmark's 375 training participants
+    pretrain_objective: supervised, task-specific (per-channel BOSS histograms + RBF SVM)
+    eval_note: task-specific system run under the IMU-Bench Parkinson's protocol; SVM fitted on a participant-stratified subsample of training windows
+  pads_features:
+    name: PADS pipeline, spectral features + CatBoost (Varghese et al.)
+    short: pads_features
+    group: external
+    order: 5102
+    hide_in_summary: false
+    channels: 6
+    pretrain_data: none -- the dataset authors' smartwatch classifier trained on the benchmark's 375 training participants
+    pretrain_objective: supervised, task-specific (band power + windowed statistics + CatBoost)
+    eval_note: task-specific system run under the IMU-Bench Parkinson's protocol; baselines/pd/pads_pipeline.py
   corpus_ref:
     name: Corpus ablation 'ref' (per-source counts identical to the reference corpus (HAR/SONIC/Motion-X in full)
     short: corpus_ref
