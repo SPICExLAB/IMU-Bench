@@ -1,0 +1,65 @@
+{
+  "task": "full_body_pose_nymeria",
+  "encoder": "imuposer",
+  "protocol": "external",
+  "seed": 0,
+  "metrics": {
+    "mpjpe_mm": 96.86602652072906
+  },
+  "primary_metric": "mpjpe_mm",
+  "eval_split": "val",
+  "run": null,
+  "checkpoint": null,
+  "checkpoint_step": null,
+  "selection": {
+    "split": "10 % of training sessions",
+    "monitor": "val_loss"
+  },
+  "job_ids": {
+    "train": "6968474"
+  },
+  "provenance": {
+    "source": "scorer:baselines/full_body_pose/IMUPoser/train_nymeria_imuposer.py",
+    "date": "2026-09-20T18:20:04-05:00",
+    "git": "unknown",
+    "info": {
+      "epochs_run": 25,
+      "best_val_loss": 0.032279897551491576,
+      "lr": 0.0003,
+      "batch_size": 256,
+      "window_frames": 300,
+      "fps": 30,
+      "n_train_windows": 121102,
+      "history_tail": [
+        {
+          "epoch": 20,
+          "train": 0.023427418837881794,
+          "val": 0.032436398402699886
+        },
+        {
+          "epoch": 21,
+          "train": 0.022892529529987004,
+          "val": 0.032472650854373876
+        },
+        {
+          "epoch": 22,
+          "train": 0.022449214530142047,
+          "val": 0.03256418784412573
+        },
+        {
+          "epoch": 23,
+          "train": 0.02203258328171219,
+          "val": 0.03297919604294705
+        },
+        {
+          "epoch": 24,
+          "train": 0.021492240746124384,
+          "val": 0.03268911179928285
+        }
+      ]
+    }
+  },
+  "status": "ok",
+  "notes": "IMUPoser's BiLSTM trained on the benchmark's Nymeria training sessions (right-wrist acceleration and orientation), scored with the MobilePoser Nymeria evaluator on independent 10.24 s windows. It predicts the whole kinematic chain; our arm metric holds ancestors at ground truth.",
+  "schema_version": 1
+}

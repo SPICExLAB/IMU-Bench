@@ -56,12 +56,19 @@ EXPERT_DIRECT_NOTE = {
     "odometry_nymeria_local": "TLIO and Air-IO are retrained on the benchmark's Nymeria training windows for this "
                               "protocol and scored by the same wrist-frame reconstruction on the same 73,515 windows: "
                               "Air-IO predicts per-step velocity in the sensor frame, its native target, and TLIO, whose "
-                              "network emits one vector per window, the window-mean wrist-frame velocity.",
+                              "network emits one vector per window, the window-mean wrist-frame velocity. Their "
+                              "reported epoch is the one with the lowest ATE on these windows, a slightly more "
+                              "favourable rule than the validation-loss selection of the controlled rows.",
 }
 # Caveats that belong in the caption of the task they apply to.
 EXPERT_NOTE = {
-    "arm_pose_nymeria": "Our arm-pose metric supplies ground-truth ancestor joints, which a full-body "
-                        "system such as MobilePoser must predict itself.",
+    "arm_pose_nymeria": "MobilePoser and IMUPoser are retrained on the benchmark's Nymeria training sessions "
+                        "with right-wrist acceleration \\emph{and orientation} as input, an input the controlled "
+                        "encoders do not receive. Our arm-pose metric supplies ground-truth ancestor joints, which "
+                        "these full-body systems must predict themselves.",
+    "full_body_pose_nymeria": "MobilePoser and IMUPoser are retrained on the benchmark's Nymeria training sessions "
+                              "with right-wrist acceleration \\emph{and orientation} as input, an input the "
+                              "controlled encoders do not receive.",
     "odometry_nymeria_local": "TLIO and Air-IO predict a world-frame trajectory and were scored under the "
                               "benchmark's world-frame protocol on the same 73,515 windows and 33-point "
                               "trajectories; that protocol gives systematically lower error than the wrist-frame "

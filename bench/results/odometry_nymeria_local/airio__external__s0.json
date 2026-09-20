@@ -1,0 +1,39 @@
+{
+  "task": "odometry_nymeria_local",
+  "encoder": "airio",
+  "protocol": "external",
+  "seed": 0,
+  "metrics": {
+    "ate_m": 0.18026211711512127,
+    "drift_pct": 48.985323841773024,
+    "vel_mse": 0.031480807811021805
+  },
+  "primary_metric": "ate_m",
+  "eval_split": "val",
+  "run": null,
+  "checkpoint": null,
+  "checkpoint_step": null,
+  "selection": {
+    "split": "val",
+    "monitor": "ate_m",
+    "mode": "min"
+  },
+  "job_ids": {
+    "train": "6968595"
+  },
+  "provenance": {
+    "source": "scorer:baselines/odometry/Air-IO/train_nymeria_airio_local.py",
+    "date": "2026-09-20T18:43:39-05:00",
+    "git": "unknown",
+    "info": {
+      "script": "Air-IO/train_nymeria_airio_local.py",
+      "epochs_run": 71,
+      "n_val_windows": 73515,
+      "n_train_windows": 635167,
+      "output": "per-step wrist-frame velocity, nearest-time mapped to the 8x4 grid"
+    }
+  },
+  "status": "ok",
+  "notes": "Air-IO's CodeNetMotion trained on the benchmark's Nymeria training windows to predict pelvis velocity in the wrist frame (its native body-frame target), scored by the benchmark's wrist-frame reconstruction.",
+  "schema_version": 1
+}

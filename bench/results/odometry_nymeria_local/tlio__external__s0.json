@@ -1,0 +1,39 @@
+{
+  "task": "odometry_nymeria_local",
+  "encoder": "tlio",
+  "protocol": "external",
+  "seed": 0,
+  "metrics": {
+    "ate_m": 0.18743787711058468,
+    "drift_pct": 48.85711765683768,
+    "vel_mse": 0.02977583557367325
+  },
+  "primary_metric": "ate_m",
+  "eval_split": "val",
+  "run": null,
+  "checkpoint": null,
+  "checkpoint_step": null,
+  "selection": {
+    "split": "val",
+    "monitor": "ate_m",
+    "mode": "min"
+  },
+  "job_ids": {
+    "train": "6968590"
+  },
+  "provenance": {
+    "source": "scorer:baselines/odometry/TLIO/train_nymeria_tlio_local.py",
+    "date": "2026-09-20T18:32:02-05:00",
+    "git": "unknown",
+    "info": {
+      "script": "TLIO/train_nymeria_tlio_local.py",
+      "epochs_run": 41,
+      "n_val_windows": 73515,
+      "n_train_windows": 635167,
+      "output": "window-mean wrist-frame velocity, constant over the 8x4 grid"
+    }
+  },
+  "status": "ok",
+  "notes": "TLIO's ResNet1D trained on the benchmark's Nymeria training windows to predict the window-mean pelvis velocity in the wrist frame, scored by the benchmark's wrist-frame reconstruction (same windows and scorer as every other row).",
+  "schema_version": 1
+}
