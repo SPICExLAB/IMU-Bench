@@ -176,12 +176,40 @@ def write(encoder, metrics, info, notes):
     print("  ->", save_result(r), flush=True)
 
 
+def dump_units(encoder, ids, y_true, y_pred, y_vote, n_windows, metric):
+    """Per-participant sidecar in the format of bench/score/common.py::save_units, so bench.bootstrap can pair this
+    cell with any other pd_pads cell on the same 94 participants."""
+    import datetime as dt
+    out = os.path.join(REPO, "bench", "results", "_units", "pd_pads"); os.makedirs(out, exist_ok=True)
+    rep_path = os.path.join(REPO, "bench", "results", "pd_pads", f"{encoder}__external__s0.json")
+    reported = json.load(open(rep_path))["metrics"]["subject_macro_f1"] if os.path.exists(rep_path) else None
+    meta = {"schema": 1, "task": "pd_pads", "encoder": encoder, "protocol": "external", "seed": 0, "run": None,
+            "checkpoint": None, "checkpoint_step": None, "scorer": "baselines/pd/pads_pipeline.py",
+            "primary_metric": "subject_macro_f1", "higher_is_better": True, "eval_split": "val",
+            "metric_kind": "macro_f1", "metric_scale": 1.0, "group_levels": ["subject"], "n_units": len(ids),
+            "metric_reported": reported, "created": dt.datetime.now().astimezone().isoformat(timespec="seconds"),
+            "slurm_job": os.environ.get("SLURM_JOB_ID"),
+            "notes": "unit = val participant (mean posterior over the participant's windows, argmax)",
+            "metric_from_units": float(metric),
+            "self_check": {"abs_diff": None if reported is None else abs(float(metric) - reported), "tol": 1e-9,
+                           "ok": reported is not None and abs(float(metric) - reported) < 1e-9}}
+    path = os.path.join(out, f"{encoder}__external__s0.npz")
+    np.savez_compressed(path, unit_key=np.asarray([str(i) for i in ids]), y_true=np.asarray(y_true), y_pred=np.asarray(y_pred),
+                        x__pred_vote=np.asarray(y_vote), x__n_windows=np.asarray(n_windows),
+                        group__subject=np.asarray([str(i) for i in ids]), meta_json=np.asarray(json.dumps(meta)))
+    print(f"  [units] {path}  reproduces reported metric: {meta['self_check']['ok']} (from units {metric:.6f}, reported {reported})", flush=True)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--model-config", default="configs/vit1d_pd_probe_pads_mae_multidata_flu.yaml")
     ap.add_argument("--n-jobs", type=int, default=int(os.environ.get("SLURM_CPUS_PER_TASK", 8)))
     ap.add_argument("--svm-cap", type=int, default=12000, help="max training windows for the RBF SVM")
     ap.add_argument("--skip-svm", action="store_true")
+    ap.add_argument("--only", choices=["all", "features", "boss"], default="all", help="run one arm only")
+    ap.add_argument("--units-only", action="store_true",
+                    help="write the per-participant sidecar (bench/results/_units/pd_pads/) for the paired bootstrap and "
+                         "leave the result JSON alone; the sidecar records whether it reproduces the reported metric")
     a = ap.parse_args()
 
     cfg = deep_update(load_yaml(os.path.join(REPO, "configs/base.yaml")), load_yaml(os.path.join(REPO, a.model_config)))
@@ -214,14 +242,19 @@ def main():
         info = dict(base_info, features=feat_name, classifier=type(clf).__name__, chosen_params=chosen,
                     inner_bal_acc=inner, subject_pred_class_counts=conf)
         print(f"  {encoder}: window {win} | subject mean-prob {sm} | vote bal-acc {sv['bal_acc']:.3f} | pred counts {conf}", flush=True)
-        write(encoder, metrics, info, "PADS authors' pipeline (Varghese et al. 2024) under the IMU-Bench protocol. " + extra_note)
+        dump_units(encoder, ids, ys, ymp, yvote, [int((gva == s).sum()) for s in ids], sm["macro_f1"])
+        if not a.units_only:
+            write(encoder, metrics, info, "PADS authors' pipeline (Varghese et al. 2024) under the IMU-Bench protocol. " + extra_note)
 
     # ---- (a) hand-crafted features -> CatBoost ------------------------------------------------------------
-    print("[pads] (a) features ...", flush=True)
-    Fa_tr, Fa_va = features_a(Xtr), features_a(Xva)
-    clf, chosen, inner = select_and_fit("features+cat", make_cat, [{"depth": d} for d in (4, 5, 6)], Fa_tr, ytr, gtr, wtr, a.n_jobs)
-    score_and_write("pads_features", clf, Fa_va, "spectral+statistical (experiment a)", chosen, inner,
-                    "Band power 1-19 Hz and windowed std / abs-energy / abs-max per channel, CatBoost.")
+    if a.only in ("all", "features"):
+        print("[pads] (a) features ...", flush=True)
+        Fa_tr, Fa_va = features_a(Xtr), features_a(Xva)
+        clf, chosen, inner = select_and_fit("features+cat", make_cat, [{"depth": d} for d in (4, 5, 6)], Fa_tr, ytr, gtr, wtr, a.n_jobs)
+        score_and_write("pads_features", clf, Fa_va, "spectral+statistical (experiment a)", chosen, inner,
+                        "Band power 1-19 Hz and windowed std / abs-energy / abs-max per channel, CatBoost.")
+    if a.only == "features":
+        return
 
     # ---- (b) MultiBOSS -> CatBoost (the paper's best smartwatch-only option) ------------------------------
     print("[pads] (b) MultiBOSS ...", flush=True)

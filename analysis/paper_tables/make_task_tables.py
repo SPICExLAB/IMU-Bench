@@ -60,6 +60,10 @@ EXPERT_DIRECT_NOTE = {
                               "reported epoch is the one with the lowest ATE on these windows, a slightly more "
                               "favourable rule than the validation-loss selection of the controlled rows.",
 }
+# Tasks whose table lists ONE of several published options, chosen by a rule that does not look at our scores.
+# pd_pads: the option Varghese et al. report as best on smartwatch data (BOSS wins 8 of their 10 outer folds). The
+# spectral-feature option stays in bench/results and is reported in the caption and in Appendix B.
+EXPERT_SHOW = {"pd_pads": ["pads_boss"]}
 # Caveats that belong in the caption of the task they apply to.
 EXPERT_NOTE = {
     "arm_pose_nymeria": "MobilePoser and IMUPoser are retrained on the benchmark's Nymeria training sessions "
@@ -74,15 +78,17 @@ EXPERT_NOTE = {
                               "trajectories; that protocol gives systematically lower error than the wrist-frame "
                               "one (the same frozen MAE probe scores 0.148\\,m under it against 0.200\\,m here), "
                               "so their rows are a reference point, not a ranking.",
-    "pd_pads": "Unlike the systems in the other task tables, the two PADS rows are the dataset authors' "
-               "smartwatch classifiers \\citep{varghese2024pads} re-run under this benchmark's protocol --- the same "
-               "2.56\\,s windows, the same 375/94 participant split and the same per-participant aggregation, with "
-               "their class-balanced sample weights and their hyperparameter grid resolved on training participants "
-               "only --- so they are directly comparable with the rows above. The numbers are ours, not the "
-               "publication's: the original classifies one sample per participant, built from all eleven assessment "
-               "steps and both wrists at 100\\,Hz, on binary tasks, whereas here the same features and classifier see "
-               "one single-wrist window at 50\\,Hz at a time. The spectral-feature classifier assigns "
-               "participants to all three classes (29/47/18 against a true 14/58/22).",
+    "pd_pads": "Unlike the systems in the other task tables, the PADS row is the dataset authors' smartwatch "
+               "classifier \\citep{varghese2024pads} re-run under this benchmark's protocol --- the same 2.56\\,s windows, "
+               "the same 375/94 participant split and the same per-participant aggregation, with their class-balanced "
+               "sample weights and their hyperparameter grid resolved on training participants only --- so it is "
+               "directly comparable with the rows above. The numbers are ours, not the publication's: the original "
+               "classifies one sample per participant, built from all eleven assessment steps and both wrists at "
+               "100\\,Hz, on binary tasks, whereas here the same features and classifier see one single-wrist window at "
+               "50\\,Hz at a time. The row is the option their paper reports as best on smartwatch data (BOSS), chosen "
+               "by that ranking and not by its score here; their hand-crafted spectral-feature option reaches 61.8 "
+               "subject macro-F1 and 66.8 balanced accuracy under the same protocol "
+               "(Appendix~\\ref{app:tasks}).",
     "language_humanml3d": "The official UniMTS checkpoint is left out because it was pretrained on "
                           "HumanML3D; the row is its wrist-only reimplementation trained from scratch on the "
                           "training split, scored by the same retrieval script on the same test items, captions "
@@ -190,7 +196,8 @@ def write_table(table_id, columns, header_lines, caption, wide):
     lines += block(columns, ft, ssl)
     lines += [r"\midrule"] + block(columns, [("scratch", "Scratch", "scratch")])
     expert = [(e, tex(lab), "external") for e, lab in EXPERTS
-              if any(get(e, "external") is not None for _, _, get in columns)]
+              if any(get(e, "external") is not None for _, _, get in columns)
+              and (table_id not in EXPERT_SHOW or e in EXPERT_SHOW[table_id])]
     if table_id in EXPERT_ALIAS and not expert:      # sibling-protocol rows only while the task has none of its own
         sib, encs, suffix = EXPERT_ALIAS[table_id]
         names = dict(EXPERTS)
