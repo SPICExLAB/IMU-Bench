@@ -1512,6 +1512,83 @@ tasks:
       gres: gpu:1
       mem: 48G
       cpus: 8
+  fall_smartfallmm:
+    name: Fall detection · SmartFallMM
+    subtitle: SmartFallMM right-wrist IMU → fall vs activity of daily living (31 participants)
+    family: fall
+    order: 31
+    dataset:
+      name: 'SmartFallMM (Texas State SmartFall group): right-wrist MbientLab Meta sensor, acc + gyro, 50 Hz; 31 young participants, 1,352 trials (538 simulated falls
+        onto an air mattress in 5 directions, 814 ADLs of 9 kinds), 3.6 h. Sensor ranges +-2 g / +-125 deg/s: the gyroscope saturates for a median 14 % of a trial''s
+        samples, the accelerometer at fall impacts'
+      path: /projects/b53017/vbc1591/smartfallmm_dataset.parquet
+      train_on_datasets:
+      - smartfallmm
+      label_column: global_activity_id
+      test: null
+      split_rule: subject-disjoint 20 % val split (splits.val_ratio 0.2, seed 42); val is reported
+      leakage: none -- in no pretraining pool; the older-adult ADL-only recordings (dataset smartfallmm_old) are not used
+    input:
+      channels: 6
+      hz: 50
+      window_seconds: 2.56
+      T: 128
+      frame: sensor
+      gravity: included
+    output:
+      shape: '[K=2]'
+      desc: fall / ADL logits, one per 2.56 s window (every window of a trial carries the trial's label)
+      head: LinearHead on mean-pooled tokens
+    selection:
+      split: val
+      monitor: val_loss
+      mode: min
+      note: same convention as Experiments_table §3 (metrics read at the min-val-loss checkpoint)
+    eval_split: val
+    metrics:
+      primary: macro_f1
+      macro_f1:
+        higher_is_better: true
+        fmt: '{:.3f}'
+        label: macro-F1
+        desc: window-level macro-F1 on the val split at the min-val-loss checkpoint (trainer eval, imu_lm/objectives/supervised.py)
+      bal_acc:
+        higher_is_better: true
+        fmt: '{:.1%}'
+        label: bal-acc
+      acc:
+        higher_is_better: true
+        fmt: '{:.1%}'
+        label: acc
+      val_loss:
+        higher_is_better: false
+        fmt: '{:.4f}'
+        label: val loss
+    scorer: bench.score.har
+    templates:
+      probe:
+        config: configs/har_extra/vit1d_fall_probe_smartfallmm_mae_multidata_flu.yaml
+        objective_type: utd_mhad_probe
+      finetune:
+        config: configs/har_extra/vit1d_fall_finetune_smartfallmm_mae_multidata_flu.yaml
+        objective_type: utd_mhad_finetune
+      scratch:
+        config: configs/har_extra/vit1d_fall_supervised_smartfallmm_altattn_scratch.yaml
+        objective_type: supervised
+    recipe:
+      trainer.early_stopping:
+        enabled: true
+        monitor: val_loss
+        patience: 20
+      logging.save_step_checkpoints: false
+      data.label_column: global_activity_id
+    slurm:
+      time: 04:00:00
+      gres: gpu:1
+      mem: 48G
+      cpus: 8
+    notes: Additional task (2026-09-20). Only falls by young participants exist, so this does not validate fall detection in older adults. Meta sensor chosen over the
+      left-wrist watch because the watch timestamps are batched and irregular.
   har_prism:
     name: "HAR \xB7 PRISM"
     subtitle: "PrISM-Tracker (Arakawa et al.) \u2014 PRISM activity recognition from\
