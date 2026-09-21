@@ -61,6 +61,74 @@ def build(proto, mae_label, mae_sub, out, prefix="tx5_"):
                 sources=[("mae", mae_label, mae_sub)] + SOURCES, targets=targets)
 
 
+
+# ---- compact renderer for the side-by-side layout ----------------------------------------------------------
+# The full renderer draws a 15-inch-wide panel; two of those side by side in a 5.5-inch text block would print
+# their numbers at about 2 pt. This one is laid out at twice the PRINTED size of a half-width panel (5.4 x 3.5 in
+# for 2.7 x 1.75 in on the page), so a 10-pt value prints at 5 pt. Same colour ramp, hatching and ink as the full
+# renderer; short labels, integer gains and no colour bar (every cell prints its gain).
+SHORT_SRC = {"PRISM": "PRISM", "Full-body": "Body", "Gesture": "Gest.", "Odometry": "Odom.", "Parkinson's": "PD",
+             "IMU-text": "Text", "IMU–text": "Text", "MAE probe": "MAE", "MAE finetune": "MAE"}
+SHORT_TGT = {"PRISM activity": ("PRISM", "F1 %"), "Nymeria full-body pose": ("Body", "mm"),
+             "OpenWatch gesture": ("Gesture", "F1 %"), "Nymeria odometry": ("Odom.", "ATE m"),
+             "PADS Parkinson's": ("PD", "F1 %"), "HumanML3D IMU–text": ("Text", "R@1 %"), "HumanML3D IMU-text": ("Text", "R@1 %")}
+
+
+def render_compact(spec, outdir, dpi, vmax, title):
+    import matplotlib.pyplot as plt
+    import numpy as np
+    from matplotlib.colors import Normalize
+    sources, targets = spec["sources"], spec["targets"]
+    nr, nc = len(targets), len(sources)
+    LAB, REF, GAP, CW, CH, HEAD, PAD = 0.62, 0.62, 0.10, 0.58, 0.50, (0.46 if title else 0.24), 0.04
+    fw = PAD + LAB + REF + GAP + nc * CW + PAD
+    fh = PAD + HEAD + nr * CH + PAD
+    fig = plt.figure(figsize=(fw, fh), dpi=dpi, facecolor="white")
+    ax = fig.add_axes([0, 0, 1, 1]); ax.set_xlim(0, fw); ax.set_ylim(fh, 0); ax.axis("off")
+    norm = Normalize(vmin=0.0, vmax=vmax)
+    x_ref, x0, y0 = PAD + LAB, PAD + LAB + REF + GAP, PAD + HEAD
+
+    def cell(x, y, w, h, **kw):
+        ax.add_patch(plt.Rectangle((x + 0.015, y + 0.015), w - 0.03, h - 0.03, **kw))
+
+    def short(fmt, v):
+        t = fmt.format(v)
+        return t[1:] if t.startswith("0.") and len(t) > 5 else t         # 0.1667 -> .1667 keeps four digits in a narrow cell
+
+    if title:
+        ax.text(PAD, PAD + 0.02, title, ha="left", va="top", fontsize=9.5, fontweight="bold", color=pt.INK)
+    ax.text(x_ref + REF / 2, y0 - 0.05, "Scratch", ha="center", va="bottom", fontsize=8.5, fontweight="bold", color=pt.INK_2)
+    for j, (_, lab, _) in enumerate(sources):
+        ax.text(x0 + (j + 0.5) * CW, y0 - 0.05, SHORT_SRC.get(lab, lab), ha="center", va="bottom", fontsize=8.5,
+                fontweight="bold", color=pt.INK)
+    for i, t in enumerate(targets):
+        y = y0 + i * CH
+        name, unit = SHORT_TGT.get(t["name"], (t["name"], t["metric"]))
+        ax.text(x_ref - 0.06, y + CH * 0.30, name, ha="right", va="center", fontsize=8.5, fontweight="bold", color=pt.INK)
+        ax.text(x_ref - 0.06, y + CH * 0.70, f"{unit} {t['arrow']}", ha="right", va="center", fontsize=6.5, color=pt.MUTED)
+        cell(x_ref, y, REF, CH, facecolor="#f4f3f0", edgecolor="#e1e0d9", linewidth=0.6)
+        ax.text(x_ref + REF / 2, y + CH / 2, short(t["fmt"], t["ref"]), ha="center", va="center", fontsize=9, color=pt.INK_2)
+        for j, (key, _, _) in enumerate(sources):
+            x, v = x0 + j * CW, t["values"][key]
+            if v is None or v is pt.PENDING:
+                cell(x, y, CW, CH, facecolor="#f4f3f0", edgecolor="#e1e0d9", linewidth=0.6)
+                ax.text(x + CW / 2, y + CH / 2, "—" if v is None else "…", ha="center", va="center", fontsize=9, color=pt.MUTED)
+                continue
+            g = pt.transfer_gain(v, t["ref"], t["higher_better"])
+            if g < 0:
+                cell(x, y, CW, CH, facecolor=pt.NEUTRAL_MID, edgecolor=pt.CRITICAL, linewidth=0.9, hatch="////")
+                ink, dink = pt.INK, pt.CRITICAL
+                bb = dict(facecolor=pt.NEUTRAL_MID, edgecolor="none", boxstyle="square,pad=0.12")
+            else:
+                fill = pt.CMAP(norm(g)); cell(x, y, CW, CH, facecolor=fill, edgecolor="none", linewidth=0)
+                ink = dink = pt.ink_on(fill); bb = None
+            ax.text(x + CW / 2, y + CH * 0.36, short(t["fmt"], v), ha="center", va="center", fontsize=9.5, fontweight="bold",
+                    color=ink, bbox=bb)
+            ax.text(x + CW / 2, y + CH * 0.74, f"{g:+.0f}%", ha="center", va="center", fontsize=7, color=dink, bbox=bb)
+    out = Path(outdir) / spec["out"].replace(".png", "_compact.png")
+    fig.savefig(out, dpi=dpi, facecolor="white"); fig.savefig(str(out).replace(".png", ".pdf"), facecolor="white"); plt.close(fig)
+    print(f"wrote {out}  ({fw:.2f} x {fh:.2f} in; prints at half size)")
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--outdir", default="/gpfs/home/vbc1591/paper_iclr/Pictures")
@@ -80,6 +148,8 @@ def main():
     vmax = pt.nice_ceiling(pt.global_gain_max())
     for spec in pt.TABLES.values():
         pt.render(spec, "absolute", a.outdir, a.dpi, vmax)
+        if spec["out"].startswith("transfer5_"):
+            render_compact(spec, a.outdir, a.dpi, vmax, "")      # panel titles are the LaTeX subcaptions
 
 
 def export_csv():
