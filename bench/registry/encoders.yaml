@@ -3488,6 +3488,23 @@ encoders:
     pretrain_data: '5-source pool (realdata, ocdetect, eatingspeed, motionx, sonic): per-source counts identical to the reference corpus (HAR/SONIC/Motion-X in full, EatingSpeed 57,536, OCDetect 8,703), 197,094 windows'
     pretrain_objective: MAE mask 0.75, z-score input, 50,000 steps (same recipe as grid cell k1000_f10 = arm C)
     eval_note: design ablation 2026-09-21 -- compare with corpus_ref (the full model at the same corpus and 50,000 steps)
+  abl_nozscore:
+    name: Design ablation 'nozscore' (physical-unit input, no per-window z-score, in pretraining AND downstream; otherwise the corpus 'ref' arm)
+    short: abl_nozscore
+    group: ablation
+    order: 3150
+    hide_in_summary: true
+    run: vit1d_ssl_mae_abl_nozscore
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: physical
+    preprocess_from: configs/design_ablation/vit1d_ssl_mae_abl_nozscore.yaml
+    pretrain_data: '5-source pool (realdata, ocdetect, eatingspeed, motionx, sonic): the SAME 197,094 windows as the reference corpus, read from the un-normalised cache twin mae_multidata_cache_v3raw'
+    pretrain_objective: MAE mask 0.75, physical input (acc / 9.81, gyro / 5, clip 8; gravity kept), 50,000 steps (same recipe as grid cell k1000_f10 = arm C)
+    eval_note: design ablation 2026-09-21 -- compare with corpus_ref (z-score input at the same corpus and 50,000 steps); downstream input is physical too
   abl_fixedlen:
     name: Design ablation 'fixedlen' (fixed 10.24 s windows, no variable-length crop; otherwise the corpus 'ref' arm)
     short: abl_fixedlen
