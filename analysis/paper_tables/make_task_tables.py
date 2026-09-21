@@ -53,12 +53,7 @@ EXPERTS = [(e, c.get("name", e)) for e, c in encoders.items() if (c or {}).get("
 EXPERT_ALIAS = {"odometry_nymeria_local": ("odometry_nymeria_worldframe", ["tlio", "airio"], " (world-frame protocol)")}
 # Caption note once a task's systems have been run under the task's own protocol (replaces EXPERT_NOTE).
 EXPERT_DIRECT_NOTE = {
-    "odometry_nymeria_local": "TLIO and Air-IO are retrained on the benchmark's Nymeria training windows for this "
-                              "protocol and scored by the same wrist-frame reconstruction on the same 73,515 windows: "
-                              "Air-IO predicts per-step velocity in the sensor frame, its native target, and TLIO, whose "
-                              "network emits one vector per window, the window-mean wrist-frame velocity. Their "
-                              "reported epoch is the one with the lowest ATE on these windows, a slightly more "
-                              "favourable rule than the validation-loss selection of the controlled rows.",
+    "odometry_nymeria_local": "TLIO and Air-IO are retrained for this protocol and report the epoch with the lowest evaluation ATE.",
 }
 # Per-task whitelist of task-specific rows, chosen by a rule that does not look at our scores.
 # pd_pads: the option Varghese et al. report as best on smartwatch data (BOSS wins 8 of their 10 outer folds); their
@@ -66,39 +61,15 @@ EXPERT_DIRECT_NOTE = {
 EXPERT_SHOW = {"pd_pads": ["pads_boss"]}
 # Caveats that belong in the caption of the task they apply to.
 EXPERT_NOTE = {
-    "arm_pose_nymeria": "MobilePoser and IMUPoser are retrained on the benchmark's Nymeria training sessions "
-                        "with right-wrist acceleration \\emph{and orientation} as input, an input the controlled "
-                        "encoders do not receive. Our arm-pose metric supplies ground-truth ancestor joints, which "
-                        "these full-body systems must predict themselves.",
-    "full_body_pose_nymeria": "MobilePoser and IMUPoser are retrained on the benchmark's Nymeria training sessions "
-                              "with right-wrist acceleration \\emph{and orientation} as input, an input the "
-                              "controlled encoders do not receive.",
-    "odometry_nymeria_local": "TLIO and Air-IO predict a world-frame trajectory and were scored under the "
-                              "benchmark's world-frame protocol on the same 73,515 windows and 33-point "
-                              "trajectories; that protocol gives systematically lower error than the wrist-frame "
-                              "one (the same frozen MAE probe scores 0.148\\,m under it against 0.200\\,m here), "
-                              "so their rows are a reference point, not a ranking.",
-    "pd_pads": "Unlike the systems in the other task tables, the PADS row is the dataset authors' smartwatch "
-               "classifier \\citep{varghese2024pads} re-run under this benchmark's protocol --- the same 2.56\\,s windows, "
-               "the same 375/94 participant split and the same per-participant aggregation, with their class-balanced "
-               "sample weights and their hyperparameter grid resolved on training participants only --- so it is "
-               "directly comparable with the rows above. The numbers are ours, not the publication's: the original "
-               "classifies one sample per participant, built from all eleven assessment steps and both wrists at "
-               "100\\,Hz, on binary tasks, whereas here the same features and classifier see one single-wrist window at "
-               "50\\,Hz at a time. The row is the option their paper reports as best on smartwatch data (BOSS), chosen "
-               "by that ranking and not by its score here; their hand-crafted spectral-feature option reaches 61.8 "
-               "subject macro-F1 and 66.8 balanced accuracy under the same protocol "
-               "(Appendix~\\ref{app:tasks}).",
-    "language_humanml3d": "The official UniMTS checkpoint is left out because it was pretrained on "
-                          "HumanML3D; the row is its wrist-only reimplementation trained from scratch on the "
-                          "training split, scored by the same retrieval script on the same test items, captions "
-                          "and galleries as every other row (its final checkpoint, no selection). Its text-to-IMU direction "
-                          "is at chance because of hubness, not a scoring fault: its text embeddings are nearly "
-                          "collinear (mean pairwise cosine 0.996), so every text query retrieves one of a handful of "
-                          "IMU items, while IMU-to-text ranks within a row and is unaffected; removing each IMU "
-                          "item's mean similarity brings the two directions level.",
-    "har": "DeepConvLSTM is trained from scratch with its published architecture on the same windows and splits "
-           "as the scratch row.",
+    "arm_pose_nymeria": "MobilePoser and IMUPoser also read wrist orientation, and must predict the ancestor joints "
+                        "that our arm-pose metric supplies.",
+    "full_body_pose_nymeria": "MobilePoser and IMUPoser also read wrist orientation.",
+    "odometry_nymeria_local": "TLIO and Air-IO are scored under the world-frame protocol, which gives lower error.",
+    "pd_pads": "The task-specific row is the dataset authors' BOSS classifier \\citep{varghese2024pads} re-run under this "
+               "protocol, chosen by their own ranking; their spectral-feature option reaches 61.8 subject macro-F1 and 66.8 balanced accuracy.",
+    "language_humanml3d": "The task-specific row is a wrist-only UniMTS reimplementation trained from scratch (the official "
+                          "checkpoint was pretrained on HumanML3D); its text-to-IMU direction is at chance because of hubness.",
+    "har": "DeepConvLSTM is trained from scratch on the same windows and splits.",
 }
 
 
@@ -219,13 +190,8 @@ def write_table(table_id, columns, header_lines, caption, wide):
     return probe + ctrl + ft + [("scratch", "Scratch", "scratch")] + expert
 
 
-COMMON = (r"all encoders share the backbone's depth, width and tokenisation, the pretraining corpus and this task's decoder "
-          r"(the MAE alternates frame and global attention, the other objectives use plain attention; see the plain-attention "
-          r"MAE row). Bold: best "
-          r"self-supervised value per metric and protocol; one training seed per cell. Task-specific "
-          r"systems are published models for this task alone, with their own inputs, output rates and "
-          r"training recipes; they are listed for orientation and are not ranked against the controlled "
-          r"encoders (Appendix~\ref{app:tasks}).")
+COMMON = (r"Bold: best self-supervised value per metric and protocol; one training seed per cell. Task-specific "
+          r"systems are listed for orientation and are not ranked (Appendix~\ref{app:tasks}).")
 csv_rows, written = [], []
 
 # ---- the six single-task tables --------------------------------------------------------------------
@@ -254,8 +220,8 @@ for task, short, _ in COLS:
     note = EXPERT_NOTE.get(task, "")
     if task in EXPERT_DIRECT_NOTE and any(cells.get((task, e, "external")) and cells[(task, e, "external")].ok for e, _ in EXPERTS):
         note = EXPERT_DIRECT_NOTE[task]           # the task now has systems run under its own protocol
-    caption = (f"{short}: {tex(card['subtitle'].strip())}.{unit} Evaluation on the "
-               f"{card.get('eval_split', 'val')} split; {COMMON}" + (" " + note if note else ""))
+    caption = (f"{short}: {tex(card['subtitle'].strip())}; {card.get('eval_split', 'val')} split.{unit} {COMMON}"
+               + (" " + note if note else ""))
     rows = write_table(task, columns, header, caption, wide=len(keys) >= 6)
     written.append(task)
     for enc, lab, proto in rows:
@@ -334,12 +300,9 @@ header = [" & " + " & ".join(r"\multicolumn{" + str(len(KEYS)) + r"}{c}{" + HAR_
                   for i in range(len(HAR_TASKS))),
           "Encoder & " + " & ".join(label(t, k, short=True) for t in HAR_TASKS for k in KEYS)
           + " & " + label(HAR_TASKS[0], KEYS[0], short=True) + r" \\"]
-caption = ("Activity recognition, all four sets (\\%). HHAR (6 classes) and MHEALTH (12) are subject-disjoint "
-           "with two held-out subjects each, PRISM (5 global ADL classes) with six; the TransfHAR set (60 classes) \\citep{bradshaw2026transfhar} is "
-           "split in time, so it "
-           "measures recognition later in the same recording rather than generalisation to new people. "
-           "\\emph{Mean} is the mean macro-F1 over the four sets quoted in Section~\\ref{sec:results}. "
-           "Evaluation on the validation split; " + COMMON + " " + EXPERT_NOTE["har"])
+caption = ("Activity recognition on four sets (\\%), validation split. HHAR, MHEALTH and PRISM are subject-disjoint; TransfHAR "
+           "\\citep{bradshaw2026transfhar} is split in time, so it measures recognition later in the same recording. "
+           "\\emph{Mean} is the mean macro-F1 over the four sets. " + COMMON + " " + EXPERT_NOTE["har"])
 rows = write_table("har", columns, header, caption, wide=True)
 written.append("har")
 for enc, lab, proto in rows:
