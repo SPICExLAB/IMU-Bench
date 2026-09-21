@@ -74,6 +74,17 @@ SHORT_TGT = {"PRISM activity": ("PRISM", "F1 %"), "Nymeria full-body pose": ("Bo
              "PADS Parkinson's": ("PD", "F1 %"), "HumanML3D IMU–text": ("Text", "R@1 %"), "HumanML3D IMU-text": ("Text", "R@1 %")}
 
 
+# Diverging encoding of the gain over training from scratch: green = benefit, orange-pink = harm, neutral grey at
+# zero (dataviz method: two hues + a neutral midpoint, equal steps per arm). Validated with the dataviz palette
+# validator: the poles #1a8f5f / #f2917f clear the CVD target (protan dE 9.1, normal 28.3), but LIGHT green and LIGHT
+# pink tints are indistinguishable under protanopia (dE ~1), so colour is never the only channel -- every cell prints
+# its signed gain and every negative cell carries a diagonal hatch.
+GAIN_POS = ["#f0efec", "#a9dcc3", "#6cc29c", "#1a8f5f", "#0f6b45"]
+GAIN_NEG = ["#f0efec", "#fbd3ca", "#f7b3a5", "#f2917f", "#ec7a66"]
+GAIN_SAT = 40.0           # |gain| in % at which the colour saturates (the number in the cell is never clipped)
+HATCH_INK = "#d9604c"
+
+
 def render_compact(spec, outdir, dpi, vmax, title):
     import matplotlib.pyplot as plt
     import numpy as np
@@ -85,7 +96,9 @@ def render_compact(spec, outdir, dpi, vmax, title):
     fh = PAD + HEAD + nr * CH + PAD
     fig = plt.figure(figsize=(fw, fh), dpi=dpi, facecolor="white")
     ax = fig.add_axes([0, 0, 1, 1]); ax.set_xlim(0, fw); ax.set_ylim(fh, 0); ax.axis("off")
-    norm = Normalize(vmin=0.0, vmax=vmax)
+    from matplotlib.colors import LinearSegmentedColormap
+    cm_pos = LinearSegmentedColormap.from_list("gain_pos", GAIN_POS)
+    cm_neg = LinearSegmentedColormap.from_list("gain_neg", GAIN_NEG)
     x_ref, x0, y0 = PAD + LAB, PAD + LAB + REF + GAP, PAD + HEAD
 
     def cell(x, y, w, h, **kw):
@@ -115,13 +128,15 @@ def render_compact(spec, outdir, dpi, vmax, title):
                 ax.text(x + CW / 2, y + CH / 2, "—" if v is None else "…", ha="center", va="center", fontsize=9, color=pt.MUTED)
                 continue
             g = pt.transfer_gain(v, t["ref"], t["higher_better"])
-            if g < 0:
-                cell(x, y, CW, CH, facecolor=pt.NEUTRAL_MID, edgecolor=pt.CRITICAL, linewidth=0.9, hatch="////")
-                ink, dink = pt.INK, pt.CRITICAL
-                bb = dict(facecolor=pt.NEUTRAL_MID, edgecolor="none", boxstyle="square,pad=0.12")
-            else:
-                fill = pt.CMAP(norm(g)); cell(x, y, CW, CH, facecolor=fill, edgecolor="none", linewidth=0)
-                ink = dink = pt.ink_on(fill); bb = None
+            mag = min(abs(g), GAIN_SAT) / GAIN_SAT
+            fill = (cm_neg if g < 0 else cm_pos)(mag)
+            cell(x, y, CW, CH, facecolor=fill, edgecolor="none", linewidth=0)
+            if g < 0:          # texture = the second, colour-independent channel for "worse than scratch"
+                ax.add_patch(plt.Rectangle((x + 0.015, y + 0.015), CW - 0.03, CH - 0.03, facecolor="none",
+                                           edgecolor=HATCH_INK, linewidth=0, hatch="////", alpha=0.55))
+            lum = 0.2126 * fill[0] + 0.7152 * fill[1] + 0.0722 * fill[2]
+            ink, dink = ("white", "white") if lum < 0.42 else (pt.INK, pt.INK_2)   # text wears ink tokens, not the series colour
+            bb = dict(facecolor=fill, edgecolor="none", boxstyle="square,pad=0.10") if g < 0 else None
             ax.text(x + CW / 2, y + CH * 0.36, short(t["fmt"], v), ha="center", va="center", fontsize=9.5, fontweight="bold",
                     color=ink, bbox=bb)
             ax.text(x + CW / 2, y + CH * 0.74, f"{g:+.0f}%", ha="center", va="center", fontsize=7, color=dink, bbox=bb)
