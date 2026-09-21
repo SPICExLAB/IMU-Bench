@@ -22,7 +22,7 @@ FIT = r"\resizebox{\ifdim\width>\textwidth\textwidth\else\width\fi}{!}{%"
 cells = collect()
 SCALE = {t: 100 for t in ("microgesture_openwatch", "pd_pads", *HAR3)}
 DIG = {"arm_pose_nymeria": 2, "full_body_pose_nymeria": 1, "odometry_nymeria_local": 3, "language_humanml3d": 1}
-SHORT = ["Arm", "Body", "Odom.", "Gest.", "Text", "PD", "HHAR", "MHLTH", "PRISM", "User", "HAR"]
+SHORT = ["Arm", "Body", "Odom.", "Gest.", "Text", "PD", "HHAR", "MHLTH", "PRISM", "TrHAR", "HAR"]
 
 
 def v(task, enc, proto="probe"):

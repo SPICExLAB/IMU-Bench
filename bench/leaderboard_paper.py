@@ -40,7 +40,7 @@ COLS = [  # task id, short label, metric label
     ("har_hhar", "HHAR", "macro-F1"),
     ("har_mhealth", "MHEALTH", "macro-F1"),
     ("har_prism", "PRISM", "macro-F1"),
-    ("har_userwatch", "User study", "macro-F1"),
+    ("har_userwatch", "TransfHAR", "macro-F1"),
 ]
 # A task whose primary metric alone would misrepresent it gets a second column in the wide tables.
 # Parkinson's subject-level aggregation is near-degenerate (most models label every participant with
@@ -230,7 +230,7 @@ def task_table(tasks) -> str:
     uw = _pd.read_parquet("/projects/b53017/vbc1591/userstudy_watch_dataset.parquet",
                           columns=["subject_id", "session_id", "timestamp_ns", "dataset_activity_id"])
     uw_h = float(uw.groupby("session_id").timestamp_ns.agg(lambda t: (t.max() - t.min()) / 3.6e12).sum())
-    rows.append(("Activity recognition", "User study (ours)", int(uw.subject_id.nunique()), uw_h,
+    rows.append(("Activity recognition", "TransfHAR", int(uw.subject_id.nunique()), uw_h,
                  f"{uw.dataset_activity_id.nunique()} classes / window", "time", False))
     body = []
     for task, ds, subj, hrs, out, split, leak in rows:

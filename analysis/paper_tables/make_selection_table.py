@@ -22,7 +22,7 @@ PAPER = "/gpfs/home/vbc1591/paper_iclr/Sections"
 MAIN, NOSEL = os.path.join(REPO, "bench", "results"), os.path.join(REPO, "bench", "results_nosel")
 SHORT = {"arm_pose_nymeria": "Arm", "full_body_pose_nymeria": "Body", "odometry_nymeria_local": "Odom.",
          "microgesture_openwatch": "Gest.", "language_humanml3d": "Text", "pd_pads": "PD", "har_hhar": "HHAR",
-         "har_mhealth": "MHLTH", "har_prism": "PRISM", "har_userwatch": "User"}
+         "har_mhealth": "MHLTH", "har_prism": "PRISM", "har_userwatch": "TrHAR"}
 SCALE = {t: 100 for t in ("microgesture_openwatch", "pd_pads", *HAR3)}
 DIG = {"arm_pose_nymeria": 2, "full_body_pose_nymeria": 1, "odometry_nymeria_local": 3, "language_humanml3d": 1}
 CONTROLS = [("control_random", "Random frozen encoder"), ("control_raw", "Raw input, 0 layers")]

@@ -27,7 +27,7 @@ CONTROLS = [("control_random", "Random frozen encoder"), ("control_raw", "Raw in
 PCT = {"microgesture_openwatch", "pd_pads", "har_hhar", "har_mhealth", "har_prism", "har_userwatch"}
 SKIP = {"n_classes_predicted"}
 HAR_TASKS = [t for t, _, _ in COLS if t.startswith("har_")]
-HAR_SHORT = {"har_hhar": "HHAR", "har_mhealth": "MHEALTH", "har_prism": "PRISM", "har_userwatch": "User study"}
+HAR_SHORT = {"har_hhar": "HHAR", "har_mhealth": "MHEALTH", "har_prism": "PRISM", "har_userwatch": "TransfHAR"}
 # Tasks whose metric labels repeat a qualifier (gallery size, direction) get a grouped header instead,
 # so the column heads stay narrow enough for the text width: (group title or None, [keys], [short labels]).
 GROUPED = {"pd_pads": [
@@ -60,10 +60,9 @@ EXPERT_DIRECT_NOTE = {
                               "reported epoch is the one with the lowest ATE on these windows, a slightly more "
                               "favourable rule than the validation-loss selection of the controlled rows.",
 }
-# Tasks whose table lists ONE of several published options, chosen by a rule that does not look at our scores.
-# pd_pads: the option Varghese et al. report as best on smartwatch data (BOSS wins 8 of their 10 outer folds). The
-# spectral-feature option stays in bench/results and is reported in the caption and in Appendix B.
-EXPERT_SHOW = {"pd_pads": ["pads_boss"]}
+# Optional per-task whitelist of task-specific rows (empty: every external cell of the task is listed).
+# pd_pads listed BOSS only for one draft; both of the authors' options are shown again since 2026-09-21.
+EXPERT_SHOW = {}
 # Caveats that belong in the caption of the task they apply to.
 EXPERT_NOTE = {
     "arm_pose_nymeria": "MobilePoser and IMUPoser are retrained on the benchmark's Nymeria training sessions "
@@ -78,17 +77,15 @@ EXPERT_NOTE = {
                               "trajectories; that protocol gives systematically lower error than the wrist-frame "
                               "one (the same frozen MAE probe scores 0.148\\,m under it against 0.200\\,m here), "
                               "so their rows are a reference point, not a ranking.",
-    "pd_pads": "Unlike the systems in the other task tables, the PADS row is the dataset authors' smartwatch "
-               "classifier \\citep{varghese2024pads} re-run under this benchmark's protocol --- the same 2.56\\,s windows, "
+    "pd_pads": "Unlike the systems in the other task tables, the two PADS rows are the dataset authors' smartwatch "
+               "classifiers \\citep{varghese2024pads} re-run under this benchmark's protocol --- the same 2.56\\,s windows, "
                "the same 375/94 participant split and the same per-participant aggregation, with their class-balanced "
-               "sample weights and their hyperparameter grid resolved on training participants only --- so it is "
+               "sample weights and their hyperparameter grid resolved on training participants only --- so they are "
                "directly comparable with the rows above. The numbers are ours, not the publication's: the original "
                "classifies one sample per participant, built from all eleven assessment steps and both wrists at "
                "100\\,Hz, on binary tasks, whereas here the same features and classifier see one single-wrist window at "
-               "50\\,Hz at a time. The row is the option their paper reports as best on smartwatch data (BOSS), chosen "
-               "by that ranking and not by its score here; their hand-crafted spectral-feature option reaches 61.8 "
-               "subject macro-F1 and 66.8 balanced accuracy under the same protocol "
-               "(Appendix~\\ref{app:tasks}).",
+               "50\\,Hz at a time. BOSS is the option their paper reports as best on smartwatch data; under this protocol "
+               "their hand-crafted spectral features are the stronger of the two.",
     "language_humanml3d": "The official UniMTS checkpoint is left out because it was pretrained on "
                           "HumanML3D; the row is its wrist-only reimplementation trained from scratch on the "
                           "training split, scored by the same retrieval script on the same test items, captions "
@@ -213,7 +210,9 @@ def write_table(table_id, columns, header_lines, caption, wide):
     return probe + ctrl + ft + [("scratch", "Scratch", "scratch")] + expert
 
 
-COMMON = (r"all encoders share the backbone, the pretraining corpus and this task's decoder. Bold: best "
+COMMON = (r"all encoders share the backbone's depth, width and tokenisation, the pretraining corpus and this task's decoder "
+          r"(the MAE alternates frame and global attention, the other objectives use plain attention; see the plain-attention "
+          r"MAE row). Bold: best "
           r"self-supervised value per metric and protocol; one training seed per cell. Task-specific "
           r"systems are published models for this task alone, with their own inputs, output rates and "
           r"training recipes; they are listed for orientation and are not ranked against the controlled "
@@ -268,7 +267,7 @@ header = [" & " + " & ".join(r"\multicolumn{" + str(len(KEYS)) + r"}{c}{" + HAR_
           "Encoder & " + " & ".join(label(t, k, short=True) for t in HAR_TASKS for k in KEYS)
           + " & " + label(HAR_TASKS[0], KEYS[0], short=True) + r" \\"]
 caption = ("Activity recognition, all four sets (\\%). HHAR (6 classes) and MHEALTH (12) are subject-disjoint "
-           "with two held-out subjects each, PRISM (5 global ADL classes) with six; the user-study set (60) is "
+           "with two held-out subjects each, PRISM (5 global ADL classes) with six; the TransfHAR set (60 classes) \\citep{bradshaw2026transfhar} is "
            "split in time, so it "
            "measures recognition later in the same recording rather than generalisation to new people. "
            "\\emph{Mean} is the mean macro-F1 over the four sets quoted in Section~\\ref{sec:results}. "
