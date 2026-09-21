@@ -1370,6 +1370,24 @@ encoders:
       AUTHORS' RELEASED WEIGHTS (release v1.0.0-alpha, normwear_pretrain_ckpt.pth, Apache-2.0), not a reproduction
     note: 'external reference, neither backbone nor corpus is shared with the controlled rows; tokens = mean over the 13
       frequency patches of each 9-sample slot, interpolated to the harness grid (imu_lm/models/baselines/normwear_encoder.py)'
+  mae_5src_physin:
+    name: DIAGNOSTIC -- the reference MAE (mae_5src, z-score pretrained) probed / fine-tuned on PHYSICAL-unit input
+    short: MAE-5src-physin
+    group: ablation
+    order: 3160
+    hide_in_summary: true
+    run: vit1d_ssl_mae_varlen_altattn_realdata_ocdetect_eatingspeed_motionx_sonic
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: physical
+    pretrain_data: identical to mae_5src (same checkpoint)
+    pretrain_objective: MAE (var-len, alt-attn), pretrained on per-window z-scored input
+    eval_note: 'diagnostic 2026-09-21: does the per-window z-score (which removes gravity direction and amplitude) explain
+      the gap to HarNet on HHAR / MHEALTH? Same encoder and recipe as mae_5src, only preprocess.normalize differs. No
+      preprocess_from on purpose: the input deliberately does NOT match the pretraining normalisation.'
   vd_sub1_n50k:
     name: VolDiv ocdetect only, 1 subject(s), type-matched, N=50,000
     short: sub1_n50k
