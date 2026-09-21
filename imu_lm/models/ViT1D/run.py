@@ -119,6 +119,10 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
     if cfg_get(cfg, ["inertia1"], None):
         from imu_lm.models.baselines.inertia1_encoder import Inertia1Encoder
         encoder = Inertia1Encoder(cfg)
+    elif cfg_get(cfg, ["harnet"], None):
+        # HarNet (Yuan et al. 2024) external baseline, released UK Biobank weights
+        from imu_lm.models.baselines.harnet_encoder import HarnetEncoder
+        encoder = HarnetEncoder(cfg)
     else:
         encoder = ViT1DEncoder(cfg)
     
@@ -1306,6 +1310,16 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
         _log.info("[odom_finetune_nymeria_real_wrist_flu] warm-starting encoder from %s (encoder stays trainable)", enc_ckpt_path)
         enc_state = torch.load(enc_ckpt_path, map_location="cpu", weights_only=False)
         _load_encoder_state_dict(encoder, enc_state)
+        # IMU-Bench (2026-09-18, local-frame odometry replaces the world-frame task):
+        # `freeze_encoder: true` turns this branch into the frozen local-frame PROBE,
+        # mirroring odom_finetune_nymeria_real_wrist_worldframe_flu, so probe and
+        # finetune rows share one loader / decoder / label convention.
+        _lf_freeze = bool(odom_ft_rw_cfg.get("freeze_encoder", False))
+        if _lf_freeze:
+            _log.info("[odom_finetune_nymeria_real_wrist_flu] freeze_encoder=true -> "
+                      "encoder frozen (probe mode)")
+            encoder.requires_grad_(False)
+            encoder.eval()
 
         from imu_lm.data.nymeria_real_wrist_odom_loader_FLU import make_nymeria_real_wrist_odom_loaders_flu
 
@@ -1333,13 +1347,28 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
             out_dim=12,   # 4 sub-patches × 3D FLU velocity
         )
 
-        def objective_fn(batch, model, cfg):
-            x, y = batch
-            # y: [B, N_patches, 4, 3] → [B, N_patches, 12]
-            y_flat = y.reshape(y.shape[0], y.shape[1], -1)
-            return odom_1d_obj.forward_loss((x, y_flat), encoder, odom_decoder, cfg)
-
-        all_params = list(encoder.parameters()) + list(odom_decoder.parameters())
+        if _lf_freeze:
+            def objective_fn(batch, model, cfg):
+                encoder.eval()
+                x, y = batch[0], batch[1]
+                y_flat = y.reshape(y.shape[0], y.shape[1], -1).float()
+                with torch.no_grad():
+                    tokens, _ = encoder.forward_tokens(x.float())
+                pred = odom_decoder(tokens)
+                loss = torch.nn.functional.mse_loss(pred, y_flat)
+                with torch.no_grad():
+                    mae = (pred.detach() - y_flat).abs().mean()
+                return loss, {"loss": float(loss.detach()),
+                              "odom_mse": float(loss.detach()),
+                              "odom_mae": float(mae)}
+            all_params = list(odom_decoder.parameters())
+        else:
+            def objective_fn(batch, model, cfg):
+                x, y = batch
+                # y: [B, N_patches, 4, 3] → [B, N_patches, 12]
+                y_flat = y.reshape(y.shape[0], y.shape[1], -1)
+                return odom_1d_obj.forward_loss((x, y_flat), encoder, odom_decoder, cfg)
+            all_params = list(encoder.parameters()) + list(odom_decoder.parameters())
         loaders = make_nymeria_real_wrist_odom_loaders_flu(
             cfg=cfg,
             pkl_root="/",
@@ -3721,10 +3750,23 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
                     _log.info("[mae_multidata_varlen_altattn_flu] stage warm-start: encoder only, "
                               "decoder re-initialized (load_decoder: false)")
 
+            # IMU-Bench transfer study, "masked reconstruction" as a TARGET task: `freeze_encoder: true`
+            # keeps the (warm-started) encoder fixed and trains only the MAE decoder, the frozen-probe
+            # counterpart of every other target; without it this branch is the trainable transfer.
+            _mae_freeze = bool(_mm_cfg.get("freeze_encoder", False))
+            if _mae_freeze:
+                _log.info("[mae_multidata_varlen_altattn_flu] freeze_encoder=true -> encoder frozen, "
+                          "only the MAE decoder is trained")
+                encoder.requires_grad_(False)
+                encoder.eval()
+
             def objective_fn(batch, model, cfg):
+                if _mae_freeze:
+                    encoder.eval()
                 return freq_mae_obj.forward_loss(batch, encoder, decoder, cfg)
 
-            all_params = list(encoder.parameters()) + list(decoder.parameters())
+            all_params = (list(decoder.parameters()) if _mae_freeze
+                          else list(encoder.parameters()) + list(decoder.parameters()))
             loaders = make_combined_mae_multidata_loaders(cfg)
 
     elif objective_type == "mae_ocdetect_anyrot":
