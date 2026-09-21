@@ -367,6 +367,14 @@ def build_encoder(cfg: Any) -> nn.Module:
     before (alt-attn variant when vit1d.encoder.alt_attention is set)."""
     if is_inertia1_cfg(cfg):
         return Inertia1Encoder(cfg)
+    # Despite this module's name, build_encoder is the single external-encoder
+    # factory every eval script imports, so other adapters dispatch here too.
+    if isinstance(cfg, dict) and cfg.get("normwear"):
+        from imu_lm.models.baselines.normwear_encoder import NormWearEncoder
+        return NormWearEncoder(cfg)
+    if isinstance(cfg, dict) and cfg.get("harnet"):
+        from imu_lm.models.baselines.harnet_encoder import HarnetEncoder
+        return HarnetEncoder(cfg)
     from imu_lm.utils.helpers import cfg_get
     from imu_lm.models.ViT1D.model import build_dual_stream, maybe_stats_wrap
     if (cfg_get(cfg, ["dual_stream"], None) or {}).get("enabled", False):

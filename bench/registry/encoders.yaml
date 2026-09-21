@@ -1348,6 +1348,28 @@ encoders:
       1-D ResNet; AUTHORS' RELEASED WEIGHTS (mtl_5_best.mdl), not a reproduction
     note: 'window-level encoder: 108x downsampling collapses a 5 s window to one vector, so the harness
       token sequence is built by sliding the native 5 s crop across the window (imu_lm/models/baselines/harnet_encoder.py)'
+  normwear_base:
+    name: NormWear (Luo et al. 2024, released checkpoint)
+    short: NormWear
+    group: external_pretrained
+    order: 121
+    external: false
+    external_encoder: normwear
+    run: null
+    ckpt: null
+    weights: /gpfs/home/vbc1591/IMU-SSL/baselines/SSL/NormWear/checkpoints/normwear_pretrain_ckpt.pth
+    chunk_samples: 256
+    alt_attention: false
+    channels: 6
+    shared_kernel: null
+    params_m: 136
+    normalize_method: zscore
+    pretrain_data: about 2.5 M segments of heterogeneous wearable signals (PPG, ECG, EEG, GSR, IMU) from public datasets;
+      NOT our corpus and not wrist-IMU-specific
+    pretrain_objective: masked reconstruction of per-channel wavelet scalograms with cross-channel fusion, ViT-B-sized;
+      AUTHORS' RELEASED WEIGHTS (release v1.0.0-alpha, normwear_pretrain_ckpt.pth, Apache-2.0), not a reproduction
+    note: 'external reference, neither backbone nor corpus is shared with the controlled rows; tokens = mean over the 13
+      frequency patches of each 9-sample slot, interpolated to the harness grid (imu_lm/models/baselines/normwear_encoder.py)'
   vd_sub1_n50k:
     name: VolDiv ocdetect only, 1 subject(s), type-matched, N=50,000
     short: sub1_n50k

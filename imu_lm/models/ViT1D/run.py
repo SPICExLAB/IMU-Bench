@@ -119,6 +119,10 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
     if cfg_get(cfg, ["inertia1"], None):
         from imu_lm.models.baselines.inertia1_encoder import Inertia1Encoder
         encoder = Inertia1Encoder(cfg)
+    elif cfg_get(cfg, ["normwear"], None):
+        # NormWear (Luo et al. 2024) external baseline, the authors' released checkpoint
+        from imu_lm.models.baselines.normwear_encoder import NormWearEncoder
+        encoder = NormWearEncoder(cfg)
     elif cfg_get(cfg, ["harnet"], None):
         # HarNet (Yuan et al. 2024) external baseline, released UK Biobank weights
         from imu_lm.models.baselines.harnet_encoder import HarnetEncoder

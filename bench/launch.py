@@ -42,6 +42,7 @@ _HEADER = """#!/bin/bash
 #SBATCH --gres={gres}
 #SBATCH --time={time}
 #SBATCH --nodes=1 --ntasks=1 --cpus-per-task={cpus} --mem={mem}
+#SBATCH --exclude=qgpu3006,qgpu3013,qgpu2014,qgpu2006
 #SBATCH --job-name={job}
 #SBATCH --output=logs/%x_%j.out
 #SBATCH --error=logs/%x_%j.err
@@ -93,7 +94,7 @@ def train_script(task_id, enc, proto, seed, tasks, encoders) -> Tuple[str, str]:
     task = tasks["tasks"][task_id]
     sl = task.get("slurm", {})
     body = _HEADER.format(account=ACCOUNT, partition=PARTITION, gres=sl.get("gres", "gpu:1"),
-                          time=sl.get("time", "06:00:00"), cpus=sl.get("cpus", 8), mem=sl.get("mem", "64G"),
+                          time=os.environ.get("BENCH_TIME") or sl.get("time", "06:00:00"), cpus=sl.get("cpus", 8), mem=sl.get("mem", "64G"),
                           job=name, repo=REPO, venv=VENV)
     body += f"""
 # ---- train ----------------------------------------------------------------
@@ -255,6 +256,8 @@ def main():
     ap.add_argument("--dependency", default=None, help="sbatch --dependency spec for --cell jobs, e.g. afterok:123")
     ap.add_argument("--partition", default=None)
     ap.add_argument("--account", default=None)
+    ap.add_argument("--allow-disabled", action="store_true",
+                    help="--cell: allow a task whose card has enabled: false (e.g. a 4-source experiment on a dropped HAR set)")
     args = ap.parse_args()
     global ACCOUNT, PARTITION
     if args.buyin:
@@ -274,6 +277,9 @@ def main():
         fill_missing(args.tasks, args.seeds, args.dry_run, tasks, encoders, allow_legacy=not args.no_legacy, no_train=args.no_train)
     if args.cell:
         t, e, p = args.cell
+        if t in tasks["tasks"] and not tasks["tasks"][t].get("enabled", True) and not args.allow_disabled:
+            raise SystemExit(f"[launch] task {t} is disabled in bench/registry/tasks.yaml (not part of IMU-Bench); "
+                             "pass --allow-disabled to run it anyway")
         if args.score_only:
             run = args.run or run_name(t, e, p, args.seed)
             job, path = score_script(t, e, p, args.seed, run, tasks, legacy=bool(args.run))
