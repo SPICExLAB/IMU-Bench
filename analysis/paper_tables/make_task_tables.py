@@ -273,6 +273,14 @@ assert all(metric_keys(t) == KEYS for t in HAR_TASKS), "activity sets no longer 
 # per-task notes, go once into a note under the row. The stand-alone tab_task_<task>.tex files are still written.
 KIN_SCALE = 0.72          # one scale for all three tabulars: same font size, same row height
 KIN_COL_WIDTH = 0.32      # three equal columns; the widest tabular (odometry, ~169 pt natural) must fit: 0.72 * 169 < 0.32 * 397
+# The shared note under the row: short on purpose (the per-task details live in Appendix B, "Task-specific systems").
+KIN_NOTE = ("All three tasks read the real right-wrist IMU of Nymeria and are evaluated on the validation split: arm pose predicts "
+            "the rotations of the five-joint right-arm chain, full-body pose the 23 non-root SMPL joints, and odometry the pelvis "
+            "velocity in the wrist frame. Rows share the backbone size, the pretraining corpus and each task's decoder; bold marks "
+            "the best self-supervised value per metric and protocol, with one training seed per cell. Task-specific systems are "
+            "retrained on the same Nymeria data and are listed for orientation, not ranked: the pose systems also read wrist "
+            "orientation, which the controlled encoders do not, and TLIO and Air-IO report the epoch with the lowest evaluation "
+            "ATE (Appendix~\\ref{app:tasks}).")
 KIN_CAPTION = {"arm_pose_nymeria": "Arm pose: right-arm chain, five joints.",
                "full_body_pose_nymeria": "Full-body pose: 23 SMPL joints.",
                "odometry_nymeria_local": "Odometry: pelvis velocity, wrist frame."}
@@ -312,7 +320,7 @@ def write_kinematic_row():
     first, last = parts[0][0], parts[-1][0]
     lines += [r"\par\vspace{6pt}",
               r"\parbox{\textwidth}{\scriptsize \emph{Tables~\ref{tab:task_" + first + r"}--\ref{tab:task_" + last +
-              r"}.} " + "; ".join(descr) + ". Evaluation on the val split; " + COMMON + " " + " ".join(notes) + "}",
+              r"}.} " + KIN_NOTE + "}",
               r"\end{table}", ""]
     open(os.path.join(PAPER, "tab_task_kinematic_row.tex"), "w").write("\n".join(lines))
     return "kinematic_row"
