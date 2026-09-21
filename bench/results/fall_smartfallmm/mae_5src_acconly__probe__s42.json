@@ -1,0 +1,44 @@
+{
+  "task": "fall_smartfallmm",
+  "encoder": "mae_5src_acconly",
+  "protocol": "probe",
+  "seed": 42,
+  "metrics": {
+    "macro_f1": 0.74252569708437,
+    "bal_acc": 0.7445023481290713,
+    "acc": 0.7950502706883217,
+    "val_loss": 0.454271
+  },
+  "primary_metric": "macro_f1",
+  "eval_split": "val",
+  "run": "bench_fall_smartfallmm__mae_5src_acconly__probe__s42",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 5400,
+  "selection": {
+    "split": "val",
+    "monitor": "val_loss",
+    "mode": "min",
+    "note": "same convention as Experiments_table \u00a73 (metrics read at the min-val-loss checkpoint)"
+  },
+  "job_ids": {
+    "train": 6989995,
+    "score": "6989995"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.har",
+    "date": "2026-09-21T02:06:03-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_val_samples": 1293,
+      "n_classes_seen": 2,
+      "n_classes_head": 2,
+      "n_val_batches": 6,
+      "logged_macro_f1_at_ckpt": 0.742526,
+      "train_end": "early stopping at step=9400 epoch=349"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

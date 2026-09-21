@@ -1,0 +1,67 @@
+{
+  "task": "language_humanml3d",
+  "encoder": "txs_fullbody",
+  "protocol": "probe",
+  "seed": 42,
+  "metrics": {
+    "r1_i2t_g100": 12.475,
+    "r1_t2i_g100": 11.028263388583808,
+    "r5_i2t_g100": 35.949999999999996,
+    "r5_t2i_g100": 33.76492518514787,
+    "r10_i2t_g100": 50.265,
+    "r10_t2i_g100": 48.80346616958033,
+    "mrr_i2t_g100": 24.683405440711134,
+    "mrr_t2i_g100": 23.071472584258235,
+    "r1_i2t_full": 0.6484733855714672,
+    "r1_t2i_full": 0.7326007326007326,
+    "mrr_i2t_full": 2.8704622232133175,
+    "mrr_t2i_full": 2.6756123450894465,
+    "medr_i2t_full": 263.0,
+    "medr_t2i_full": 309.5,
+    "r1_g100": 11.751631694291904,
+    "val_r1_i2t_g100": 12.33,
+    "val_r1_t2i_g100": 10.247638498851162,
+    "val_r5_i2t_g100": 35.93,
+    "val_r5_t2i_g100": 33.1937707429155,
+    "val_r10_i2t_g100": 51.51,
+    "val_r10_t2i_g100": 49.2775082971662,
+    "val_mrr_i2t_g100": 24.703393569534537,
+    "val_mrr_t2i_g100": 22.387925338213783,
+    "val_r1_i2t_full": 1.921470342522974,
+    "val_r1_t2i_full": 1.5555555555555556,
+    "val_mrr_i2t_full": 6.655943068154839,
+    "val_mrr_t2i_full": 5.167979503667236,
+    "val_medr_i2t_full": 86.0,
+    "val_medr_t2i_full": 107.0,
+    "val_r1_g100": 11.28881924942558
+  },
+  "primary_metric": "r1_g100",
+  "eval_split": "test",
+  "run": "bench_language_humanml3d__txs_fullbody__probe__s42",
+  "checkpoint": "latest.pt",
+  "checkpoint_step": 8000,
+  "selection": {
+    "split": "none",
+    "monitor": "fixed_budget",
+    "mode": "latest",
+    "note": "fixed 8k-step budget, final checkpoint (latest.pt); \u00a713e: val-loss best.pt under-selects for retrieval, latest \u2265 best on every arm"
+  },
+  "job_ids": {
+    "train": 6966524,
+    "score": "6966524"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.language",
+    "date": "2026-09-21T06:47:03-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_items_test": 3701,
+      "n_items_val": 1197,
+      "train_end": "max_steps reached at step=8000 epoch=1"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

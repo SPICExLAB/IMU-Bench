@@ -1,0 +1,67 @@
+{
+  "task": "language_humanml3d",
+  "encoder": "txs_odom",
+  "protocol": "probe",
+  "seed": 42,
+  "metrics": {
+    "r1_i2t_g100": 12.31,
+    "r1_t2i_g100": 11.013149277041665,
+    "r5_i2t_g100": 36.21,
+    "r5_t2i_g100": 33.55836566073857,
+    "r10_i2t_g100": 50.415,
+    "r10_t2i_g100": 48.536450199002466,
+    "mrr_i2t_g100": 24.639076624736823,
+    "mrr_t2i_g100": 22.838178104159837,
+    "r1_i2t_full": 0.5944339367738449,
+    "r1_t2i_full": 0.5860805860805861,
+    "mrr_i2t_full": 2.939388524797211,
+    "mrr_t2i_full": 2.622066055535722,
+    "medr_i2t_full": 259.0,
+    "medr_t2i_full": 321.0,
+    "r1_g100": 11.661574638520833,
+    "val_r1_i2t_g100": 12.42,
+    "val_r1_t2i_g100": 10.273168241000766,
+    "val_r5_i2t_g100": 35.915,
+    "val_r5_t2i_g100": 32.07046208833291,
+    "val_r10_i2t_g100": 51.745,
+    "val_r10_t2i_g100": 48.098034209854475,
+    "val_mrr_i2t_g100": 24.741873438430044,
+    "val_mrr_t2i_g100": 22.075818877091045,
+    "val_r1_i2t_full": 2.6733500417710943,
+    "val_r1_t2i_full": 1.8888888888888888,
+    "val_mrr_i2t_full": 7.1024615725392675,
+    "val_mrr_t2i_full": 5.5838403319952,
+    "val_medr_i2t_full": 82.0,
+    "val_medr_t2i_full": 112.0,
+    "val_r1_g100": 11.346584120500383
+  },
+  "primary_metric": "r1_g100",
+  "eval_split": "test",
+  "run": "bench_language_humanml3d__txs_odom__probe__s42",
+  "checkpoint": "latest.pt",
+  "checkpoint_step": 8000,
+  "selection": {
+    "split": "none",
+    "monitor": "fixed_budget",
+    "mode": "latest",
+    "note": "fixed 8k-step budget, final checkpoint (latest.pt); \u00a713e: val-loss best.pt under-selects for retrieval, latest \u2265 best on every arm"
+  },
+  "job_ids": {
+    "train": 6966549,
+    "score": "6966549"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.language",
+    "date": "2026-09-21T08:13:54-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_items_test": 3701,
+      "n_items_val": 1197,
+      "train_end": "max_steps reached at step=8000 epoch=1"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

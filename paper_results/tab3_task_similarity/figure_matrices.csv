@@ -1,0 +1,104 @@
+panel,row,col,value
+transfer_pct,Full-body pose,Odometry,16.58712530324828
+transfer_pct,Full-body pose,Microgesture,-22.889130432669077
+transfer_pct,Full-body pose,Parkinson's,24.67337265737191
+transfer_pct,Full-body pose,PRISM activity,10.46972661875678
+transfer_pct,Full-body pose,IMU--text,-29.92023581329537
+transfer_pct,Odometry,Full-body pose,2.860330529863215
+transfer_pct,Odometry,Microgesture,-7.971504585496946
+transfer_pct,Odometry,Parkinson's,-16.038417304908503
+transfer_pct,Odometry,PRISM activity,-6.715368932344244
+transfer_pct,Odometry,IMU--text,-28.56824351373004
+transfer_pct,Microgesture,Full-body pose,-0.12938353907647288
+transfer_pct,Microgesture,Odometry,0.5535017748417242
+transfer_pct,Microgesture,Parkinson's,28.53532734717234
+transfer_pct,Microgesture,PRISM activity,1.2543485501940868
+transfer_pct,Microgesture,IMU--text,-9.77670825993115
+transfer_pct,Parkinson's,Full-body pose,-1.7335311459889302
+transfer_pct,Parkinson's,Odometry,-1.325121058165415
+transfer_pct,Parkinson's,Microgesture,-6.454008074887503
+transfer_pct,Parkinson's,PRISM activity,0.7823284734710221
+transfer_pct,Parkinson's,IMU--text,-20.680496772270075
+transfer_pct,PRISM activity,Full-body pose,-0.9366402671186264
+transfer_pct,PRISM activity,Odometry,0.033058183739544694
+transfer_pct,PRISM activity,Microgesture,-7.978362542113329
+transfer_pct,PRISM activity,Parkinson's,0.0
+transfer_pct,PRISM activity,IMU--text,-14.964866787081704
+transfer_pct,IMU--text,Full-body pose,-1.1655177671656356
+transfer_pct,IMU--text,Odometry,-2.6817763326557884
+transfer_pct,IMU--text,Microgesture,-8.907088981300545
+transfer_pct,IMU--text,Parkinson's,26.700680272108855
+transfer_pct,IMU--text,PRISM activity,3.722978627100616
+cknna,Full-body pose,Odometry,0.0903
+cknna,Full-body pose,Microgesture,0.1929
+cknna,Full-body pose,Parkinson's,0.056
+cknna,Full-body pose,PRISM activity,0.0936
+cknna,Full-body pose,IMU--text,0.0905
+cknna,Full-body pose,Arm pose,0.2043
+cknna,Full-body pose,MAE (no task),0.2242
+cknna,Odometry,Microgesture,0.0809
+cknna,Odometry,Parkinson's,0.053
+cknna,Odometry,PRISM activity,0.115
+cknna,Odometry,IMU--text,0.1116
+cknna,Odometry,Arm pose,0.0734
+cknna,Odometry,MAE (no task),0.0797
+cknna,Microgesture,Parkinson's,0.0489
+cknna,Microgesture,PRISM activity,0.0867
+cknna,Microgesture,IMU--text,0.0951
+cknna,Microgesture,Arm pose,0.1593
+cknna,Microgesture,MAE (no task),0.4064
+cknna,Parkinson's,PRISM activity,0.0938
+cknna,Parkinson's,IMU--text,0.0847
+cknna,Parkinson's,Arm pose,0.0405
+cknna,Parkinson's,MAE (no task),0.0505
+cknna,PRISM activity,IMU--text,0.174
+cknna,PRISM activity,Arm pose,0.0828
+cknna,PRISM activity,MAE (no task),0.0934
+cknna,IMU--text,Arm pose,0.0798
+cknna,IMU--text,MAE (no task),0.0974
+cknna,Arm pose,MAE (no task),0.1762
+cknna_scratch,Full-body pose,Odometry,0.0452
+cknna_scratch,Full-body pose,Microgesture,0.0438
+cknna_scratch,Full-body pose,Parkinson's,0.0166
+cknna_scratch,Full-body pose,PRISM,0.0285
+cknna_scratch,Full-body pose,IMU-text,0.0372
+cknna_scratch,Full-body pose,Arm pose,0.1481
+cknna_scratch,Full-body pose,HHAR,0.0287
+cknna_scratch,Full-body pose,MHEALTH,0.0359
+cknna_scratch,Full-body pose,User study,0.0547
+cknna_scratch,Odometry,Microgesture,0.0129
+cknna_scratch,Odometry,Parkinson's,0.015
+cknna_scratch,Odometry,PRISM,0.0332
+cknna_scratch,Odometry,IMU-text,0.0579
+cknna_scratch,Odometry,Arm pose,0.0428
+cknna_scratch,Odometry,HHAR,0.0319
+cknna_scratch,Odometry,MHEALTH,0.0523
+cknna_scratch,Odometry,User study,0.0713
+cknna_scratch,Microgesture,Parkinson's,0.0143
+cknna_scratch,Microgesture,PRISM,0.0123
+cknna_scratch,Microgesture,IMU-text,0.0185
+cknna_scratch,Microgesture,Arm pose,0.0412
+cknna_scratch,Microgesture,HHAR,0.0152
+cknna_scratch,Microgesture,MHEALTH,0.0146
+cknna_scratch,Microgesture,User study,0.0248
+cknna_scratch,Parkinson's,PRISM,0.0179
+cknna_scratch,Parkinson's,IMU-text,0.0223
+cknna_scratch,Parkinson's,Arm pose,0.016
+cknna_scratch,Parkinson's,HHAR,0.0207
+cknna_scratch,Parkinson's,MHEALTH,0.0206
+cknna_scratch,Parkinson's,User study,0.0219
+cknna_scratch,PRISM,IMU-text,0.0331
+cknna_scratch,PRISM,Arm pose,0.0236
+cknna_scratch,PRISM,HHAR,0.0496
+cknna_scratch,PRISM,MHEALTH,0.0324
+cknna_scratch,PRISM,User study,0.0646
+cknna_scratch,IMU-text,Arm pose,0.0257
+cknna_scratch,IMU-text,HHAR,0.0439
+cknna_scratch,IMU-text,MHEALTH,0.0466
+cknna_scratch,IMU-text,User study,0.0529
+cknna_scratch,Arm pose,HHAR,0.0237
+cknna_scratch,Arm pose,MHEALTH,0.0288
+cknna_scratch,Arm pose,User study,0.0459
+cknna_scratch,HHAR,MHEALTH,0.0468
+cknna_scratch,HHAR,User study,0.0563
+cknna_scratch,MHEALTH,User study,0.0757

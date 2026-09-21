@@ -1,0 +1,44 @@
+{
+  "task": "fall_smartfallmm",
+  "encoder": "limubert_5src",
+  "protocol": "finetune",
+  "seed": 42,
+  "metrics": {
+    "macro_f1": 0.7868950573166555,
+    "bal_acc": 0.7861233146492956,
+    "acc": 0.8321732405259087,
+    "val_loss": 0.399028
+  },
+  "primary_metric": "macro_f1",
+  "eval_split": "val",
+  "run": "bench_fall_smartfallmm__limubert_5src__finetune__s42",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 200,
+  "selection": {
+    "split": "val",
+    "monitor": "val_loss",
+    "mode": "min",
+    "note": "same convention as Experiments_table \u00a73 (metrics read at the min-val-loss checkpoint)"
+  },
+  "job_ids": {
+    "train": 6989984,
+    "score": "6989984"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.har",
+    "date": "2026-09-21T05:44:25-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_val_samples": 1293,
+      "n_classes_seen": 2,
+      "n_classes_head": 2,
+      "n_val_batches": 6,
+      "logged_macro_f1_at_ckpt": 0.786895,
+      "train_end": "early stopping at step=4200 epoch=156"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}
