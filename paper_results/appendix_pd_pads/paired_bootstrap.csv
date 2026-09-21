@@ -1,0 +1,11 @@
+cell_a,cell_b,metric,diff_a_minus_b,lo,hi,excludes_zero
+pads_features__external__s0,mae_5src__finetune__s42,subject_macro_f1,2.1,-8.93,15.37,False
+pads_features__external__s0,mae_5src__finetune__s42,subject_bal_acc,10.65,0.11,22.34,True
+pads_features__external__s0,limubert_5src__finetune__s42,subject_macro_f1,5.5,-3.29,15.24,False
+pads_features__external__s0,limubert_5src__finetune__s42,subject_bal_acc,6.93,-1.36,16.36,False
+pads_boss__external__s0,mae_5src__finetune__s42,subject_macro_f1,-11.6,-23.77,2.79,False
+pads_boss__external__s0,mae_5src__finetune__s42,subject_bal_acc,2.32,-9.42,14.79,False
+pads_boss__external__s0,limubert_5src__finetune__s42,subject_macro_f1,-8.21,-19.79,3.52,False
+pads_boss__external__s0,limubert_5src__finetune__s42,subject_bal_acc,-1.4,-12.43,10.08,False
+pads_boss__external__s0,scratch__scratch__s42,subject_macro_f1,14.16,3.75,24.77,True
+pads_boss__external__s0,scratch__scratch__s42,subject_bal_acc,20.58,10.34,30.25,True
