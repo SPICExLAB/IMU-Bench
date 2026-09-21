@@ -78,7 +78,10 @@ EXPERT_NOTE = {
                "smartwatch classifiers \\citep{varghese2024pads} re-run under this benchmark's protocol --- the same "
                "2.56\\,s windows, the same 375/94 participant split and the same per-participant aggregation, with "
                "their class-balanced sample weights and their hyperparameter grid resolved on training participants "
-               "only --- so they are directly comparable with the rows above. The spectral-feature classifier assigns "
+               "only --- so they are directly comparable with the rows above. The numbers are ours, not the "
+               "publication's: the original classifies one sample per participant, built from all eleven assessment "
+               "steps and both wrists at 100\\,Hz, on binary tasks, whereas here the same features and classifier see "
+               "one single-wrist window at 50\\,Hz at a time. The spectral-feature classifier assigns "
                "participants to all three classes (29/47/18 against a true 14/58/22).",
     "language_humanml3d": "The official UniMTS checkpoint is left out because it was pretrained on "
                           "HumanML3D; the row is its wrist-only reimplementation trained from scratch on the "

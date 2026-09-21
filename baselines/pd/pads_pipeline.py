@@ -17,8 +17,11 @@ class-balanced sample weights. Ported here as faithfully as the protocol allows:
                       resolved by 5-fold GroupKFold over TRAINING participants on window balanced accuracy,
                       never on the 94 evaluation participants
 
-Deviations, all recorded in the result JSON: 50 Hz instead of 100 Hz (the benchmark's cache), 2.56 s
-windows instead of whole 10 s assessment steps, SVM fitted on a participant-stratified subsample of
+Deviations, all recorded in the result JSON: 50 Hz instead of 100 Hz (the benchmark's cache; the BOSS window
+sizes stay 20/40/80 SAMPLES as in ml/utils.py, so they span twice the time), ONE SAMPLE PER 2.56 s SINGLE-WRIST
+WINDOW instead of their one sample per participant (all 11 assessment steps x both wrists stacked as channels,
+preprocessing/data_handling.py), three classes instead of their binary pd_vs_hc / pd_vs_dd modes, a fixed
+CatBoost instead of their choice among SVM / NN / CatBoost (utils/experiments.csv), SVM fitted on a participant-stratified subsample of
 <= --svm-cap windows (RBF SVM is quadratic in N), probability=True on the SVM for mean-prob aggregation.
 
     python baselines/pd/pads_pipeline.py            # writes bench/results/pd_pads/pads_{boss,features}__external__s0.json
