@@ -50,10 +50,10 @@ EXPERTS = [(e, c.get("name", e)) for e, c in encoders.items() if (c or {}).get("
 # Released pretrained models run THROUGH the benchmark (same decoder, splits and recipe; their own backbone, input and
 # pretraining corpus). Shown inside each protocol block under a rule, never bolded: they are not part of the controlled
 # comparison. HarNet = OxWearables/ssl-wearables (PyTorch Hub `harnet5`), accelerometer-only, UK Biobank.
-PRETRAINED_EXT = [("harnet5", r"HarNet$^{\ddagger}$"), ("normwear_base", r"NormWear$^{\ddagger}$")]
-PRETRAINED_NOTE = (r" $^{\ddagger}$Released pretrained models with their own backbone and corpus, run through the same "
-                   r"protocol and not part of the controlled comparison: HarNet~\citep{yuan2024harnet} (accelerometer only, "
-                   r"UK Biobank) and NormWear~\citep{luo2026normwear}.")
+# HarNet rows were removed from the paper on 2026-09-21 (user decision); its cells stay in bench/results.
+PRETRAINED_EXT = [("normwear_base", r"NormWear$^{\ddagger}$")]
+PRETRAINED_NOTE = (r" $^{\ddagger}$A released pretrained model with its own backbone and corpus~\citep{luo2026normwear}, "
+                   r"run through the same protocol and not part of the controlled comparison.")
 # Published systems evaluated under a sibling task's protocol: (sibling task, encoders, row suffix).
 # The wrist-frame odometry task has no external systems of its own; TLIO and Air-IO were scored under
 # the world-frame protocol on the same 73,515 windows and 33-point trajectories.
