@@ -74,15 +74,22 @@ EXPERT_NOTE = {
                               "trajectories; that protocol gives systematically lower error than the wrist-frame "
                               "one (the same frozen MAE probe scores 0.148\\,m under it against 0.200\\,m here), "
                               "so their rows are a reference point, not a ranking.",
-    "pd_pads": "Unlike the systems in the other task tables, the three PADS rows are the dataset authors' "
+    "pd_pads": "Unlike the systems in the other task tables, the two PADS rows are the dataset authors' "
                "smartwatch classifiers \\citep{varghese2024pads} re-run under this benchmark's protocol --- the same "
                "2.56\\,s windows, the same 375/94 participant split and the same per-participant aggregation, with "
                "their class-balanced sample weights and their hyperparameter grid resolved on training participants "
                "only --- so they are directly comparable with the rows above. The spectral-feature classifier assigns "
-               "participants to all three classes (29/47/18 against a true 14/58/22); the BOSS + SVM variant "
-               "collapses to the majority class like the frozen probes.",
+               "participants to all three classes (29/47/18 against a true 14/58/22).",
     "language_humanml3d": "The official UniMTS checkpoint is left out because it was pretrained on "
-                          "HumanML3D; the row is its wrist-only reimplementation trained from scratch.",
+                          "HumanML3D; the row is its wrist-only reimplementation trained from scratch on the "
+                          "training split, scored by the same retrieval script on the same test items, captions "
+                          "and galleries as every other row (its final checkpoint, no selection). Its text-to-IMU direction "
+                          "is at chance because of hubness, not a scoring fault: its text embeddings are nearly "
+                          "collinear (mean pairwise cosine 0.996), so every text query retrieves one of a handful of "
+                          "IMU items, while IMU-to-text ranks within a row and is unaffected; removing each IMU "
+                          "item's mean similarity brings the two directions level.",
+    "har": "DeepConvLSTM is trained from scratch with its published architecture on the same windows and splits "
+           "as the scratch row.",
 }
 
 
@@ -255,7 +262,7 @@ caption = ("Activity recognition, all four sets (\\%). HHAR (6 classes) and MHEA
            "split in time, so it "
            "measures recognition later in the same recording rather than generalisation to new people. "
            "\\emph{Mean} is the mean macro-F1 over the four sets quoted in Section~\\ref{sec:results}. "
-           "Evaluation on the validation split; " + COMMON)
+           "Evaluation on the validation split; " + COMMON + " " + EXPERT_NOTE["har"])
 rows = write_table("har", columns, header, caption, wide=True)
 written.append("har")
 for enc, lab, proto in rows:

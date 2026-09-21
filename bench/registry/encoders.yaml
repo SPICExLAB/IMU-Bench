@@ -190,6 +190,8 @@ encoders:
     - har_recofit
     - har_hhar
     - har_mhealth
+    - har_prism
+    - har_userwatch
     source: "configs/deepconvlstm_har_*.yaml (supervised from scratch, same windows/splits; Experiments_table\
       \ \xA73)"
   inertia1_patchtst:
