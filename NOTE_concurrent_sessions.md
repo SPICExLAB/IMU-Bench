@@ -30,3 +30,7 @@ them behind ~45 probes/fine-tunes on b53017 and, with gengpu giving us nothing b
 told about the conflict. If you believe these two runs should not exist, say so HERE (or cancel them yourself and
 write why) instead of lowering their priority: the previous DINO checkpoint is a collapsed encoder (loss = log K) and
 the previous JEPA job died at step 0, so without these two runs the paper has no DINO / I-JEPA rows at all.
+
+## 04:30 CDT — resolved by the user: DINO / JEPA pretrains are DEFERRED
+User decision ("可以推迟"): the two resubmitted pretrains stay queued at nice=2000 (B restored it) and run after the
+probes / fine-tunes on b53017; their 40 dependent cells stay chained. B will not change their priority again.
