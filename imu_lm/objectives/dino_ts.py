@@ -184,7 +184,8 @@ def forward_loss(batch, encoder: nn.Module, st: DINOState, cfg: Any) -> Tuple[to
         logs["proto_eff_k"] = math.exp(ent)
     if encoder.training:
         with torch.no_grad():
-            st.center.mul_(st.center_momentum).add_(t_out.mean(dim=(0, 1), keepdim=True), alpha=1.0 - st.center_momentum)
+            st.center.mul_(st.center_momentum).add_(t_out.reshape(-1, t_out.shape[-1]).mean(dim=0, keepdim=True),
+                                                    alpha=1.0 - st.center_momentum)
         logs["ema_momentum"] = st.ema_update(encoder)
         st.step += 1
     return loss, logs

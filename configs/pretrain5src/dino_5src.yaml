@@ -88,9 +88,9 @@ objective:
       hidden_dim: 2048
       bottleneck_dim: 256
     student_temp: 0.1
-    teacher_temp: 0.07
+    teacher_temp: 0.04
     warmup_teacher_temp: 0.04
-    warmup_teacher_temp_steps: 16000
+    warmup_teacher_temp_steps: 0
     center_momentum: 0.9
     ema_momentum: 0.996
     freeze_last_layer_steps: 1500
