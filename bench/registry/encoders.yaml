@@ -479,8 +479,9 @@ encoders:
     pretrain_data: 514 h leak-free diversity-balanced pool (raw cache, unit-harmonised), 30k steps
     pretrain_objective: 'mask-ratio ablation: baseline R0 recipe with objective.mask_ratio = 0.40 (mask_ratio
       0.75 arm = encoder mae_recipe_r0)'
-    normalize_method: zscore
+    normalize_method: physical
     hide_in_summary: true
+    eval_note: '⚠ NOT comparable with the paper''s rows and NOT usable as a mask-ratio ablation for it (audited 2026-09-22): pretrained on a 7-source pool (ocdetect, totalcapture, eatingspeed, motionx, sonic, capture24, nhanes) from mae_multidata_cache_raw for 30k steps with PHYSICAL input, while the reference corpus is 5 sources / 50k-160k steps; there is no matched 0.75 arm; and the landed cells were probed with z-score input because this card said zscore (fixed to physical here, so every cell must be re-run before it is read). Its task set also mixes leaked HAR sets (pamap2/recofit/utd_mhad/wisdm are in the pretraining pool) and the deep-decoder arm-pose variant.'
   mae_mr50:
     name: MAE mask-ratio 0.50
     short: mr0.50
@@ -495,8 +496,9 @@ encoders:
     pretrain_data: 514 h leak-free diversity-balanced pool (raw cache, unit-harmonised), 30k steps
     pretrain_objective: 'mask-ratio ablation: baseline R0 recipe with objective.mask_ratio = 0.50 (mask_ratio
       0.75 arm = encoder mae_recipe_r0)'
-    normalize_method: zscore
+    normalize_method: physical
     hide_in_summary: true
+    eval_note: '⚠ NOT comparable with the paper''s rows and NOT usable as a mask-ratio ablation for it (audited 2026-09-22): pretrained on a 7-source pool (ocdetect, totalcapture, eatingspeed, motionx, sonic, capture24, nhanes) from mae_multidata_cache_raw for 30k steps with PHYSICAL input, while the reference corpus is 5 sources / 50k-160k steps; there is no matched 0.75 arm; and the landed cells were probed with z-score input because this card said zscore (fixed to physical here, so every cell must be re-run before it is read). Its task set also mixes leaked HAR sets (pamap2/recofit/utd_mhad/wisdm are in the pretraining pool) and the deep-decoder arm-pose variant.'
   mae_mr60:
     name: MAE mask-ratio 0.60
     short: mr0.60
@@ -511,8 +513,9 @@ encoders:
     pretrain_data: 514 h leak-free diversity-balanced pool (raw cache, unit-harmonised), 30k steps
     pretrain_objective: 'mask-ratio ablation: baseline R0 recipe with objective.mask_ratio = 0.60 (mask_ratio
       0.75 arm = encoder mae_recipe_r0)'
-    normalize_method: zscore
+    normalize_method: physical
     hide_in_summary: true
+    eval_note: '⚠ NOT comparable with the paper''s rows and NOT usable as a mask-ratio ablation for it (audited 2026-09-22): pretrained on a 7-source pool (ocdetect, totalcapture, eatingspeed, motionx, sonic, capture24, nhanes) from mae_multidata_cache_raw for 30k steps with PHYSICAL input, while the reference corpus is 5 sources / 50k-160k steps; there is no matched 0.75 arm; and the landed cells were probed with z-score input because this card said zscore (fixed to physical here, so every cell must be re-run before it is read). Its task set also mixes leaked HAR sets (pamap2/recofit/utd_mhad/wisdm are in the pretraining pool) and the deep-decoder arm-pose variant.'
   mae_mr85:
     name: MAE mask-ratio 0.85
     short: mr0.85
@@ -527,8 +530,9 @@ encoders:
     pretrain_data: 514 h leak-free diversity-balanced pool (raw cache, unit-harmonised), 30k steps
     pretrain_objective: 'mask-ratio ablation: baseline R0 recipe with objective.mask_ratio = 0.85 (mask_ratio
       0.75 arm = encoder mae_recipe_r0)'
-    normalize_method: zscore
+    normalize_method: physical
     hide_in_summary: true
+    eval_note: '⚠ NOT comparable with the paper''s rows and NOT usable as a mask-ratio ablation for it (audited 2026-09-22): pretrained on a 7-source pool (ocdetect, totalcapture, eatingspeed, motionx, sonic, capture24, nhanes) from mae_multidata_cache_raw for 30k steps with PHYSICAL input, while the reference corpus is 5 sources / 50k-160k steps; there is no matched 0.75 arm; and the landed cells were probed with z-score input because this card said zscore (fixed to physical here, so every cell must be re-run before it is read). Its task set also mixes leaked HAR sets (pamap2/recofit/utd_mhad/wisdm are in the pretraining pool) and the deep-decoder arm-pose variant.'
   mae_mr90:
     name: MAE mask-ratio 0.90
     short: mr0.90
@@ -543,8 +547,9 @@ encoders:
     pretrain_data: 514 h leak-free diversity-balanced pool (raw cache, unit-harmonised), 30k steps
     pretrain_objective: 'mask-ratio ablation: baseline R0 recipe with objective.mask_ratio = 0.90 (mask_ratio
       0.75 arm = encoder mae_recipe_r0)'
-    normalize_method: zscore
+    normalize_method: physical
     hide_in_summary: true
+    eval_note: '⚠ NOT comparable with the paper''s rows and NOT usable as a mask-ratio ablation for it (audited 2026-09-22): pretrained on a 7-source pool (ocdetect, totalcapture, eatingspeed, motionx, sonic, capture24, nhanes) from mae_multidata_cache_raw for 30k steps with PHYSICAL input, while the reference corpus is 5 sources / 50k-160k steps; there is no matched 0.75 arm; and the landed cells were probed with z-score input because this card said zscore (fixed to physical here, so every cell must be re-run before it is read). Its task set also mixes leaked HAR sets (pamap2/recofit/utd_mhad/wisdm are in the pretraining pool) and the deep-decoder arm-pose variant.'
   mae_recipe_r4:
     name: MAE recipe R4 (R0 + physical scaling only)
     short: recipe-R4
@@ -625,8 +630,9 @@ encoders:
     pretrain_data: 514 h leak-free diversity-balanced pool (raw cache, unit-harmonised), 30k steps
     pretrain_objective: 'mask-ratio ablation: baseline R0 recipe with objective.mask_ratio = 0.30 (added
       after 0.40/0.50/0.75 came out monotone toward low ratios)'
-    normalize_method: zscore
+    normalize_method: physical
     hide_in_summary: true
+    eval_note: '⚠ NOT comparable with the paper''s rows and NOT usable as a mask-ratio ablation for it (audited 2026-09-22): pretrained on a 7-source pool (ocdetect, totalcapture, eatingspeed, motionx, sonic, capture24, nhanes) from mae_multidata_cache_raw for 30k steps with PHYSICAL input, while the reference corpus is 5 sources / 50k-160k steps; there is no matched 0.75 arm; and the landed cells were probed with z-score input because this card said zscore (fixed to physical here, so every cell must be re-run before it is read). Its task set also mixes leaked HAR sets (pamap2/recofit/utd_mhad/wisdm are in the pretraining pool) and the deep-decoder arm-pose variant.'
   mae_recipe_rraw:
     name: MAE recipe Rraw (R0 + raw/DC-preserving input)
     short: recipe-Rraw
@@ -3675,3 +3681,91 @@ encoders:
     pretrain_data: '5-source grid cell k1000_f100 (equal-per-cluster over 1,000 k-means modes), 1,959,288 windows'
     pretrain_objective: MAE mask 0.75, z-score input, 150,000 steps (3x the grid budget)
     eval_note: data x budget cross 2026-09-18; compare with g5_k1000_f100 (50K steps)
+  # ── Native-preprocessing arms (2026-09-21) ───────────────────────────────────
+  # Each row re-runs one external objective under ITS OWN input handling instead of the
+  # benchmark's uniform per-window z-score, on the un-normalised cache twin, composition-
+  # matched to the z-score row it is paired with. See configs/nativenorm/*.yaml for the
+  # exact per-method justification and EXPERIMENTS.md for the motivation: the uniform
+  # z-score is OUR protocol choice, not something these three methods share.
+  simmtm_5src_native:
+    name: SimMTM (5-source, native normalisation)
+    short: SimMTM-5src-nat
+    group: ssl_baseline
+    order: 21.6
+    run: vit1d_ssl_simmtm_5src_native
+    ckpt: best
+    alt_attention: false
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    normalize_method_pretrain: physical
+    normalize_method_note: >-
+      SimMTM normalises inside the model, not in the dataloader: per sample and channel over
+      the VISIBLE points, de-normalising the reconstruction before the MSE (SimMTM.py:172-178,
+      205-207). The pretrain config therefore feeds physical units and the objective does the
+      rest, so the encoder saw instance-normalised input. With no mask that operation IS a
+      per-window z-score, which is why downstream probes keep zscore -- the downstream protocol
+      is identical to the simmtm_5src row and only pretraining differs.
+    preprocess_from: configs/nativenorm/simmtm_5src_native.yaml
+    pretrain_data: realdata, ocdetect, eatingspeed, motionx, sonic -- mae_multidata_cache_v3raw subset to the simmtm_5src composition (196,659 of 197,094 train windows)
+    pretrain_objective: SimMTM (Dong et al. 2023) on shared ViT1D backbone, visible-point instance norm + reconstruction of the un-masked copy in physical units
+    eval_note: paired with simmtm_5src (identical backbone/corpus/budget/patience); the only changes are the two normalisation flags and the physical-unit dataloader
+    hide_in_summary: true
+  focal_5src_native:
+    name: FOCAL (5-source, native frequency-domain input)
+    short: FOCAL-5src-nat
+    group: ssl_baseline
+    order: 20.6
+    run: vit1d_ssl_focal_5src_native
+    ckpt: best
+    alt_attention: false
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: physical
+    vit1d_overrides:
+      vit1d.input_transform: fft
+    preprocess_from: configs/nativenorm/focal_5src_native.yaml
+    pretrain_data: realdata, ocdetect, eatingspeed, motionx, sonic -- mae_multidata_cache_v3raw subset to the focal_5src composition (196,659 of 197,094 train windows)
+    pretrain_objective: FOCAL (Liu et al. 2023) on shared ViT1D backbone, per-patch FFT (real+imag) input as in Augmenter.fft_preprocess, no per-window z-score
+    eval_note: >-
+      paired with focal_5src. NOTE this arm changes the input REPRESENTATION, not just the
+      normalisation -- FOCAL's encoder natively consumes spectra. The transform is part of the
+      encoder, so every probe applies it too (vit1d_overrides); a frequency-domain encoder
+      cannot be probed on time-domain input.
+    hide_in_summary: true
+  relcon_5src_native:
+    name: RelCon (5-source, native normalisation)
+    short: RelCon-5src-nat
+    group: ssl_baseline
+    order: 22.6
+    run: vit1d_ssl_relcon_5src_native
+    ckpt: best
+    alt_attention: false
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: physical
+    preprocess_from: configs/nativenorm/relcon_5src_native.yaml
+    pretrain_data: realdata, ocdetect, eatingspeed, motionx, sonic -- mae_multidata_cache_v3raw subset to the relcon_5src composition (196,659 of 197,094 train windows)
+    pretrain_objective: RelCon (Xu et al. 2025) on shared ViT1D backbone, no input normalisation (RelCon's SSL dataset applies none; its RevIN stays inside the motif-distance net); stage 1 retrained on the same input as relcon_motifdist_5src_native
+    eval_note: paired with relcon_5src (identical backbone/corpus/budget/patience); the only changes are the physical-unit dataloader and the matching stage-1 distance network
+    hide_in_summary: true
+  txs_armpose:
+    name: Trained from scratch on arm pose (no pretraining)
+    short: txs_armpose
+    group: transfer
+    order: 4100
+    hide_in_summary: true
+    run: bench_arm_pose_nymeria__scratch__scratch__s42
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/vit1d_ssl_mae_varlen_altattn_realdata_ocdetect_eatingspeed_motionx_sonic_flu.yaml
+    pretrain_data: none -- the encoder is the benchmark's from-scratch run on arm pose (random init, the task's own training split only)
+    pretrain_objective: supervised, from scratch
+    eval_note: transfer source without pretraining; its own task is excluded as a target. Added 2026-09-22 so Figure 3 carries arm pose as both a source column and a target row.
