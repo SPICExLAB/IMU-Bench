@@ -163,7 +163,10 @@ def forward_loss(batch, encoder: nn.Module, st: DINOState, cfg: Any) -> Tuple[to
     st.teacher.eval(); st.teacher_head.eval()
     with torch.no_grad():
         t_out = torch.stack([_pooled_logits(st.teacher, st.teacher_head, v) for v in views[:2]])      # [2, B, K]
-        t_prob = F.softmax((t_out - st.center) / st.teacher_temp(), dim=-1)
+        # validation is scored at the FINAL teacher temperature: the warm-up (0.04 -> 0.07 over 16k steps) would
+        # otherwise raise the cross-entropy from one evaluation to the next and trip early stopping / best.pt
+        tau_t = st.teacher_temp() if encoder.training else st.teacher_temp_end
+        t_prob = F.softmax((t_out - st.center) / tau_t, dim=-1)
     s_logp = [F.log_softmax(_pooled_logits(encoder, st.student_head, v) / st.student_temp, dim=-1) for v in views]
 
     total, n_terms = x.new_zeros(()), 0
@@ -175,7 +178,7 @@ def forward_loss(batch, encoder: nn.Module, st: DINOState, cfg: Any) -> Tuple[to
             n_terms += 1
     loss = total / n_terms
 
-    logs = {"loss": float(loss.detach()), "teacher_temp": st.teacher_temp(), "n_views": float(len(views)),
+    logs = {"loss": float(loss.detach()), "teacher_temp": tau_t, "n_views": float(len(views)),
             "global_len": float(lens[0]), "local_len": float(lens[-1])}
     with torch.no_grad():
         avg = t_prob.mean(dim=(0, 1))

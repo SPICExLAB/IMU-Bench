@@ -3553,7 +3553,7 @@ encoders:
     params_m: 21
     normalize_method: physical
     preprocess_from: configs/design_ablation/vit1d_ssl_mae_abl_nozscore.yaml
-    pretrain_data: '5-source pool (realdata, ocdetect, eatingspeed, motionx, sonic): the SAME 197,094 windows as the reference corpus, read from the un-normalised cache twin mae_multidata_cache_v3raw'
+    pretrain_data: '5-source pool (realdata, ocdetect, eatingspeed, motionx, sonic): the reference corpus composition and per-source counts (HAR / Motion-X / SONIC in full, OCDetect 8,703, EatingSpeed 57,536) read from the un-normalised cache twin mae_multidata_cache_v3raw, rebuilt 2026-09-21 with the current loaders (HAR windows and sanitised mocap clips are not the identical rows)'
     pretrain_objective: MAE mask 0.75, physical input (acc / 9.81, gyro / 5, clip 8; gravity kept), 50,000 steps (same recipe as grid cell k1000_f10 = arm C)
     eval_note: design ablation 2026-09-21 -- compare with corpus_ref (z-score input at the same corpus and 50,000 steps); downstream input is physical too
   abl_fixedlen:

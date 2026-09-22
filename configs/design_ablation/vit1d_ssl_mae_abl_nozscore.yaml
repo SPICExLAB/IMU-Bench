@@ -1,5 +1,7 @@
-# Design ablation 'nozscore': the reference-corpus arm (configs/corpus_ablation/vit1d_ssl_mae_corpus_ref.yaml, the SAME 197,094
-# windows, 50,000 steps) with ONE change -- no per-window z-score. Input is in physical units divided by fixed constants
+# Design ablation 'nozscore': the reference-corpus arm (configs/corpus_ablation/vit1d_ssl_mae_corpus_ref.yaml, same composition
+# and per-source counts, 50,000 steps) with ONE change -- no per-window z-score. The un-normalised cache twin was
+# rebuilt with the current loaders, so the HAR-pool windows and the spike-sanitised mocap clips are not the identical rows
+# of the reference (see launch/design_ablation/make_idx_ref_v3raw.py). Input is in physical units divided by fixed constants
 # (acc / 9.81 m s^-2, gyro / 5 rad s^-1, clipped at +-8), so gravity direction and amplitude reach the encoder. Needs the
 # un-normalised cache twin (configs/design_ablation/cache_v3raw.yaml). Validation = the five sources' own val windows.
 vit1d:
