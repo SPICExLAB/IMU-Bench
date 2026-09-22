@@ -22,8 +22,10 @@ TASKS = [t for t, _, _ in COLS]
 PM = {t: T[t]["metrics"]["primary"] for t in TASKS}
 HIB = {t: T[t]["metrics"][PM[t]]["higher_is_better"] for t in TASKS}
 FMT = {t: T[t]["metrics"][PM[t]].get("fmt", "{:.3f}") for t in TASKS}
+# The fixed-length arm was dropped (user decision 2026-09-22): only 3 of its 10 probes ever ran, and a row scored on
+# three tasks cannot be compared with the others. Its pretrain and the three cells stay in bench/results.
 ARMS = [("abl_norot", "no rotation augmentation"), ("abl_so3", "$SO(3)$ rotation"),
-        ("abl_fixedlen", "fixed 10.24\\,s windows"), ("abl_nozscore", "physical units, no z-score")]
+        ("abl_nozscore", "physical units, no z-score")]
 REF = "corpus_ref"
 
 

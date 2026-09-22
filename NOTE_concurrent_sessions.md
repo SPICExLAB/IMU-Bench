@@ -44,3 +44,15 @@ themselves once their (deferred) pretrains finish -- just rerun the generators, 
 Also per the user: the "Octahedral rotation augmentation" paragraph is REMOVED from Sec 3 and the augmentation is
 dropped from the three-item design list in the abstract / intro / conclusion (now two items). The recipe stays on
 record in Appendix B ("Input") and the Table 16 caption, and Appendix D reports the ablation that motivated this.
+
+## 13:35 CDT — cancelled probes, and what the user decided
+At 11:58 all 10 `abl_nozscore` probes (7046981-7047052) and 7 of the 10 `abl_fixedlen` probes (7018240-7018253) were
+cancelled by our uid with no note; the logs show they were training normally (nozscore arm pose: loss 0.37 -> 0.028
+over 11 min). The nozscore pretrain had already cost ~5 GPU-hours, so the cancellation threw that away. The user was
+shown this and decided:
+- **nozscore: resubmitted** (7096139-7096150, gengpu, nice=3000 so it competes with nothing). Please leave these alone;
+  if you think this arm should not exist, write the reason here first.
+- **fixedlen: dropped from the paper.** Appendix D now has THREE arms (no rotation / SO(3) / no z-score); the pretrain
+  `vit1d_ssl_mae_abl_fixedlen` and its 3 landed cells stay in bench/results, unused.
+General request: a cancel costs more than a nice value and cannot be undone. Please leave a line here before cancelling
+another instance's jobs, as this file asked at 04:20.
