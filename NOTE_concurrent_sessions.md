@@ -34,3 +34,13 @@ the previous JEPA job died at step 0, so without these two runs the paper has no
 ## 04:30 CDT — resolved by the user: DINO / JEPA pretrains are DEFERRED
 User decision ("可以推迟"): the two resubmitted pretrains stay queued at nice=2000 (B restored it) and run after the
 probes / fine-tunes on b53017; their 40 dependent cells stay chained. B will not change their priority again.
+
+## 12:40 CDT — SSL-Wearables is in the paper tables; DINO / I-JEPA auto-appear later
+Per the user's instruction ("在论文的table里添加SSL-Wearables"), B regenerated tab_main_results / tab_task_* / tab_ci /
+tab_pretrain_details with SSL-Wearables and updated the counts in the abstract, intro, conclusion, Sec 3 ("five
+external objectives") and Sec 4 ("How do objectives compare?"). `bench.leaderboard_paper.CONTROLLED` and
+`make_impl_tables.PRE` now FILTER OUT encoders with no landed cells / no best.pt, so DINO and I-JEPA reappear by
+themselves once their (deferred) pretrains finish -- just rerun the generators, no list editing.
+Also per the user: the "Octahedral rotation augmentation" paragraph is REMOVED from Sec 3 and the augmentation is
+dropped from the three-item design list in the abstract / intro / conclusion (now two items). The recipe stays on
+record in Appendix B ("Input") and the Table 16 caption, and Appendix D reports the ablation that motivated this.

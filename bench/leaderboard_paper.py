@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import argparse
 import datetime
+import glob
 import html
 import json
 import os
@@ -59,6 +60,13 @@ CONTROLLED = [  # encoder id, label, group, pretrain run
     ("mae_5src_noaltattn", "MAE, plain attention", "ablation", "vit1d_ssl_mae_varlen_noaltattn_5src"),
     ("mae_5src_acconly", "MAE, accelerometer only", "ablation", "vit1d_ssl_mae_varlen_acconly_5src"),
 ]
+# An encoder whose pretraining has not finished has no cells at all; keep it out of the paper tables rather than
+# printing a row of dashes (it reappears by itself as soon as its first result lands).
+from bench.schema import RESULTS_ROOT as _RESULTS_ROOT
+_CONTROLLED_ALL = CONTROLLED
+CONTROLLED = [r for r in CONTROLLED
+              if glob.glob(os.path.join(_RESULTS_ROOT, "*", f"{r[0]}__*__s*.json"))]
+
 EXTERNAL = [("mobileposer", "MobilePoser"), ("tlio", "TLIO"), ("airio", "Air-IO"), ("mixtoken", "Mix-Token"),
             ("normwear", "NormWear"), ("unimts", "UniMTS, official checkpoint"), ("unimts_scratch", "UniMTS, from scratch"),
             ("deepconvlstm", "DeepConvLSTM")]

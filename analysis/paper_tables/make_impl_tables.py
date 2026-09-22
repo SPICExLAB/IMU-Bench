@@ -44,6 +44,10 @@ PRE = [  # label, config, run, objective description
 ]
 
 
+# An arm whose pretraining has not produced a checkpoint yet is left out of the table (it returns automatically).
+PRE = [r for r in PRE if os.path.exists(os.path.join(REPO, "runs", r[2], "checkpoints", "best.pt"))]
+
+
 def g(d, *ks, default=None):
     for k in ks:
         if not isinstance(d, dict) or k not in d:
