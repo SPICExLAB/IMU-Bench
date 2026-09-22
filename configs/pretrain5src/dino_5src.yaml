@@ -87,6 +87,7 @@ objective:
       out_dim: 4096
       hidden_dim: 2048
       bottleneck_dim: 256
+      use_bn: true
     student_temp: 0.1
     teacher_temp: 0.04
     warmup_teacher_temp: 0.04

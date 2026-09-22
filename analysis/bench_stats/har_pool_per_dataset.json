@@ -1,0 +1,23 @@
+{
+ "config": "configs/corpus_ablation/vit1d_ssl_mae_corpus_ref.yaml",
+ "hop_s": 5.12,
+ "train": {
+  "total": 93510,
+  "per_dataset": {
+   "pamap2": 1007,
+   "recofit": 23993,
+   "samosa": 2411,
+   "shoaib": 4550,
+   "ut_watch": 31763,
+   "wisdm": 29786
+  }
+ },
+ "val": {
+  "total": 4189,
+  "per_dataset": {
+   "pamap2": 215,
+   "recofit": 3362,
+   "wisdm": 612
+  }
+ }
+}

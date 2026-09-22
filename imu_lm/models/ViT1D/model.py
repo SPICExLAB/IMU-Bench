@@ -36,6 +36,20 @@ class PatchEmbed1D(nn.Module):
     "acc_gyro"  : two Conv1ds — proj_acc for ch0-2 (accelerometer),
                                 proj_gyro for ch3-5 (gyroscope)
     False       : one Conv1d(C→D) — all channels projected jointly
+
+    input_transform
+    ---------------
+    "none" (default) : each patch is the raw `patch_size` time samples.
+    "fft"            : each patch is its own complex spectrum, real and imaginary
+                       parts interleaved — FOCAL's native input representation
+                       (Liu et al. 2023, src/data_augmenter/Augmenter.py::fft_preprocess:
+                       ``torch.fft.fft(x, dim=-1)`` over the samples of one sub-interval,
+                       then ``torch.view_as_real``). Here the sub-interval IS the patch,
+                       so the projection kernel widens from patch_size to 2*patch_size
+                       and the token count is unchanged. FOCAL stacks real/imag along the
+                       channel axis of a DeepSense conv; we hand the same 2*patch_size
+                       numbers to the per-patch projection, the faithful analogue for a
+                       patch-wise linear stem.
     """
 
     def __init__(
@@ -44,27 +58,54 @@ class PatchEmbed1D(nn.Module):
         patch_size: int,
         embed_dim: int,
         shared_kernel=True,   # bool or "acc_gyro"
+        input_transform: str = "none",
     ):
         super().__init__()
         self.patch_size  = patch_size
         self.in_channels = in_channels
         self.embed_dim   = embed_dim
         self.shared_kernel = shared_kernel
+        self.input_transform = str(input_transform or "none")
+        if self.input_transform not in ("none", "fft"):
+            raise ValueError(f"PatchEmbed1D: unknown input_transform {input_transform!r}")
+        # fft widens each patch from patch_size real samples to patch_size complex bins
+        # stored as (real, imag) pairs -- 2*patch_size numbers, still exactly one token.
+        kern = patch_size * (2 if self.input_transform == "fft" else 1)
+        self.kernel_size = kern
 
         if shared_kernel == "acc_gyro":
             # Separate kernels for accelerometer (ch0-2) and gyroscope (ch3-5)
-            self.proj_acc  = nn.Conv1d(1, embed_dim, kernel_size=patch_size, stride=patch_size)
-            self.proj_gyro = nn.Conv1d(1, embed_dim, kernel_size=patch_size, stride=patch_size)
+            self.proj_acc  = nn.Conv1d(1, embed_dim, kernel_size=kern, stride=kern)
+            self.proj_gyro = nn.Conv1d(1, embed_dim, kernel_size=kern, stride=kern)
         elif shared_kernel:
             # Single Conv1d applied to each channel independently
-            self.proj = nn.Conv1d(1, embed_dim, kernel_size=patch_size, stride=patch_size)
+            self.proj = nn.Conv1d(1, embed_dim, kernel_size=kern, stride=kern)
         else:
             # All channels projected jointly
-            self.proj = nn.Conv1d(in_channels, embed_dim, kernel_size=patch_size, stride=patch_size)
+            self.proj = nn.Conv1d(in_channels, embed_dim, kernel_size=kern, stride=kern)
+
+    def _fft_expand(self, x: torch.Tensor) -> torch.Tensor:
+        """[B, C, T] → [B, C, 2T]: per-patch FFT, real/imag interleaved.
+
+        Same operation as FOCAL's fft_preprocess: FFT along the samples of one
+        sub-interval (here: one patch), then view_as_real. Patches are contiguous and
+        non-overlapping, matching the Conv1d(kernel=stride) patching of the time-domain
+        stem, so patch p of the output feeds exactly the projection position that patch p
+        of the time-domain input would.
+        """
+        B, C, T = x.shape
+        ps = self.patch_size
+        Pt = T // ps
+        xp = x[..., : Pt * ps].reshape(B, C, Pt, ps)
+        f = torch.fft.fft(xp.float(), dim=-1)          # [B, C, Pt, ps] complex
+        f = torch.view_as_real(f)                      # [B, C, Pt, ps, 2]
+        return f.reshape(B, C, Pt * 2 * ps).to(x.dtype)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """[B, C, T] → [B, C*num_patches, D]."""
         B, C, T = x.shape
+        if self.input_transform == "fft":
+            x = self._fft_expand(x)
 
         if self.shared_kernel == "acc_gyro":
             # ch0-2 → proj_acc, ch3-5 → proj_gyro
@@ -951,14 +992,21 @@ class ViT1DEncoderAltAttn(nn.Module):
         max_patches    = int(vit_cfg.get("max_patches_per_channel", 256))
         max_channels   = int(vit_cfg.get("max_channels", 32))
 
+        self.input_transform = str(vit_cfg.get("input_transform", "none") or "none")
         self.patch_embed = PatchEmbed1D(self.in_channels, self.patch_size,
-                                        self.embed_dim, shared_kernel=shared_kernel)
+                                        self.embed_dim, shared_kernel=shared_kernel,
+                                        input_transform=self.input_transform)
         self.pos_embed   = PositionalEmbedding2D(max_patches, max_channels, self.embed_dim)
 
-        # Global CLS token (global attention only) + BERT mask token
-        self.cls_token  = nn.Parameter(torch.zeros(1, 1, self.embed_dim))
+        # Global CLS token (global attention only) + BERT mask token.
+        # `use_cls: false` removes the CLS entirely: global attention then runs over
+        # the channel-time tokens alone and the pooled read-out becomes a mean over
+        # tokens. Default true, so every existing config and checkpoint is unchanged.
+        self._use_cls = bool(enc_cfg.get("use_cls", True))
+        if self._use_cls:
+            self.cls_token = nn.Parameter(torch.zeros(1, 1, self.embed_dim))
+            nn.init.trunc_normal_(self.cls_token, std=0.02)
         self.mask_token = nn.Parameter(torch.zeros(1, 1, self.embed_dim))
-        nn.init.trunc_normal_(self.cls_token,  std=0.02)
         nn.init.trunc_normal_(self.mask_token, std=0.02)
 
         # Optional per-section register token (VGGT-style): one learnable register
@@ -987,7 +1035,8 @@ class ViT1DEncoderAltAttn(nn.Module):
         self.n_pairs = n_pairs
 
         self.norm     = nn.LayerNorm(self.embed_dim)
-        self.cls_norm = nn.LayerNorm(self.embed_dim)
+        if self._use_cls:
+            self.cls_norm = nn.LayerNorm(self.embed_dim)
 
         # Flags read by the loss / run.py
         self._use_bert_mask = True
@@ -1009,7 +1058,7 @@ class ViT1DEncoderAltAttn(nn.Module):
 
         # channel-major [B, C*Pt, D] → section grid [B, Pt, C, D]
         grid = tok.reshape(B, C, Pt, D).permute(0, 2, 1, 3).contiguous()
-        cls  = self.cls_token.expand(B, -1, -1)                # [B, 1, D]
+        cls  = self.cls_token.expand(B, -1, -1) if self._use_cls else None
 
         reg = None
         if self._use_register:
@@ -1035,15 +1084,19 @@ class ViT1DEncoderAltAttn(nn.Module):
                 cls  = g[:, :1]
                 grid = g[:, 1:1 + Pt * C].reshape(B, Pt, C, D)
                 reg  = g[:, 1 + Pt * C:].reshape(B, Pt, 1, D)
-            else:
+            elif self._use_cls:
                 g    = self.global_blocks[i](torch.cat([cls, flat], dim=1))
                 cls  = g[:, :1]
                 grid = g[:, 1:].reshape(B, Pt, C, D)
+            else:
+                grid = self.global_blocks[i](flat).reshape(B, Pt, C, D)
 
         # back to channel-major [B, C*Pt, D]
         tok = grid.permute(0, 2, 1, 3).reshape(B, C * Pt, D)
         reg_out = self.register_norm(reg.reshape(B, Pt, D)) if self._use_register else None
-        return self.norm(tok), reg_out, self.cls_norm(cls.squeeze(1)), Pt
+        tok = self.norm(tok)
+        pooled = self.cls_norm(cls.squeeze(1)) if self._use_cls else tok.mean(dim=1)
+        return tok, reg_out, pooled, Pt
 
     def forward(self, x, mask=None, padding_mask=None, return_keep_padding_mask=False):
         tokens, _, cls, _ = self._backbone(x, mask=mask)
@@ -1106,12 +1159,19 @@ class ViT1DEncoder(nn.Module):
         # Pooling
         self.pooling = vit_cfg.get("pooling", "mean")
         
+        # Input representation. "none" = raw time samples per patch (every arm in the
+        # benchmark). "fft" = FOCAL's native frequency-domain input; see PatchEmbed1D.
+        # It must reach the downstream probes too, so the encoder card carries it as a
+        # vit1d_override rather than living only in the pretraining objective.
+        self.input_transform = str(vit_cfg.get("input_transform", "none") or "none")
+
         # Layers
         self.patch_embed = PatchEmbed1D(
             in_channels=self.in_channels,
             patch_size=self.patch_size,
             embed_dim=self.embed_dim,
             shared_kernel=shared_kernel,
+            input_transform=self.input_transform,
         )
         
         pos_embed_type = str(vit_cfg.get("pos_embed_type", "learned"))
@@ -1132,6 +1192,12 @@ class ViT1DEncoder(nn.Module):
         dpr = [drop_path_rate * i / max(1, num_layers - 1) for i in range(num_layers)]
         num_moe_experts  = int(enc_cfg.get("num_moe_experts",  0))
         freq_moe_experts = int(enc_cfg.get("freq_moe_experts", 0))
+
+        if freq_moe_experts > 0 and self.input_transform != "none":
+            raise ValueError(
+                "vit1d.input_transform=%r cannot be combined with freq_moe_experts>0: "
+                "FreqBandPatchProjection band-filters the raw time signal, so the two "
+                "stems would disagree about what a patch is" % self.input_transform)
 
         if freq_moe_experts > 0:
             # Frequency-aware Soft MoE: each expert receives band-filtered tokens
@@ -1441,15 +1507,22 @@ class ViT1DDINOHead(nn.Module):
         out_dim: int = 4096,
         hidden_dim: int = 2048,
         bottleneck_dim: int = 256,
+        use_bn: bool = False,
     ):
         super().__init__()
-        self.mlp = nn.Sequential(
-            nn.Linear(in_dim, hidden_dim),
-            nn.GELU(),
-            nn.Linear(hidden_dim, hidden_dim),
-            nn.GELU(),
-            nn.Linear(hidden_dim, bottleneck_dim),
-        )
+        # use_bn: DINO's head for POOLED features (its ResNet-50 variant, `use_bn_in_head=True`): BatchNorm after the
+        # first two linear layers. A mean-pooled token of a freshly initialised ViT is nearly the same vector for
+        # every input, so without BN the teacher's centred logits are ~0, its sharpened targets uniform, and the
+        # student collapses to log K within a few steps (observed 2026-09-21 on the 5-source corpus). BN standardises
+        # each hidden unit over the batch and restores the input-dependent variation the targets need.
+        layers = [nn.Linear(in_dim, hidden_dim)]
+        if use_bn:
+            layers.append(nn.BatchNorm1d(hidden_dim))
+        layers += [nn.GELU(), nn.Linear(hidden_dim, hidden_dim)]
+        if use_bn:
+            layers.append(nn.BatchNorm1d(hidden_dim))
+        layers += [nn.GELU(), nn.Linear(hidden_dim, bottleneck_dim)]
+        self.mlp = nn.Sequential(*layers)
         self.last_layer = nn.utils.weight_norm(
             nn.Linear(bottleneck_dim, out_dim, bias=False)
         )
@@ -1931,7 +2004,9 @@ class JEPA1DPredictor(nn.Module):
         ids_keep     = ids_shuffle[:, :max_keep]         # [B, max_keep]
 
         # Build full-length predictor sequence: mask tokens everywhere
-        full = self.mask_token.expand(B, N, -1).clone()  # [B, N, D_pred]
+        # same dtype as the projected context: under autocast ctx_proj is fp16 while the mask token stays fp32,
+        # and scatter_ refuses mixed dtypes (2026-09-22)
+        full = self.mask_token.expand(B, N, -1).clone().to(ctx_proj.dtype)  # [B, N, D_pred]
 
         # Scatter context projections back to their original positions
         for b in range(B):

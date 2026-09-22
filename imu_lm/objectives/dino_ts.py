@@ -44,7 +44,8 @@ class DINOState(nn.Module):
         head = obj.get("head", obj.get("dino_head", {})) or {}
         K = int(head.get("out_dim", 4096))
         kw = dict(in_dim=encoder.embed_dim, out_dim=K, hidden_dim=int(head.get("hidden_dim", 2048)),
-                  bottleneck_dim=int(head.get("bottleneck_dim", 256)))
+                  bottleneck_dim=int(head.get("bottleneck_dim", 256)), use_bn=bool(head.get("use_bn", True)))
+        self.head_bn = kw["use_bn"]
         self.teacher = copy.deepcopy(encoder)
         self.teacher.requires_grad_(False)
         self.student_head = ViT1DDINOHead(**kw)
@@ -160,7 +161,10 @@ def forward_loss(batch, encoder: nn.Module, st: DINOState, cfg: Any) -> Tuple[to
         lens += [min(ll, min(lens[:2]))] * st.n_local
     views = [make_view(x, Lc, st, gen) for Lc in lens]
 
-    st.teacher.eval(); st.teacher_head.eval()
+    st.teacher.eval()
+    # BatchNorm in the heads uses BATCH statistics on both sides, in training and in validation (DINO never puts its
+    # teacher in eval mode); the encoders have no BN, so this touches nothing else
+    st.teacher_head.train(st.head_bn); st.student_head.train(st.head_bn or encoder.training)
     with torch.no_grad():
         t_out = torch.stack([_pooled_logits(st.teacher, st.teacher_head, v) for v in views[:2]])      # [2, B, K]
         # validation is scored at the FINAL teacher temperature: the warm-up (0.04 -> 0.07 over 16k steps) would
