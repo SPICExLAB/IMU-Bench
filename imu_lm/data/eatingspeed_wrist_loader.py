@@ -22,7 +22,8 @@ participant), either already extracted as a folder or still zipped:
 
 Per subset, per participant, per hand:
     X_{L,R}.pkl : list[np.ndarray[N_samples, 6]] float64 — [ax, ay, az, gx, gy, gz]
-                  raw Shimmer3 accelerometer + gyroscope, native 64 Hz.
+                  raw Shimmer3 accelerometer + gyroscope, native 64 Hz. The gyroscope is
+                  stored in deg/s; ``load_subset`` converts it to rad/s (2026-09-17).
     Y_{L,R}.pkl : list[np.ndarray[N_samples]]    int/float — point-wise label
                   0 = other, 1 = eating gesture, 2 = drinking gesture.
 
@@ -129,6 +130,8 @@ _FOLD_DIRNAME = "FD1_7_fold_id_list"
 N_FDI_FOLDS = 7
 
 IMU_CHANNELS = ["acc_x", "acc_y", "acc_z", "gyro_x", "gyro_y", "gyro_z"]
+GYRO_DEG_TO_RAD = np.pi / 180.0   # raw pickles are deg/s; load_subset() returns rad/s (2026-09-17)
+GYRO_BIAS_MAX_RAD_S = 20.0        # a gyro axis whose recording-long median exceeds this is a biased channel (see load_subset)
 
 
 # ---------------------------------------------------------------------------
@@ -215,7 +218,28 @@ def load_subset(root: str, subset: str, hand: str = "both") -> Dict[str, List[np
             raise ValueError(
                 f"[eatingspeed] {subset}: length mismatch — X_{hands[0]} has {n}, {name} has {len(lst)}"
             )
-    logger.info("[eatingspeed] loaded subset=%s hand=%s: %d participants", subset, hand, n)
+    # The raw Shimmer3 pickles store the gyroscope in deg/s (still-block median |gyro| ~1.3-1.6, overall
+    # p99 ~204); every other source in this repo is rad/s. Convert here so every caller -- live loaders and
+    # cache builds alike -- sees rad/s. Per-window z-scoring is invariant to this constant, so z-score caches
+    # built before 2026-09-17 are unaffected; physical-units caches built before then hold deg/s.
+    for h in hands:
+        for arr in out[f"X_{h}"]:
+            arr[:, 3:6] *= GYRO_DEG_TO_RAD
+    # Sensor-bias repair (2026-09-21). Two left-wrist FD-II recordings (participants 2 and 5) carry a constant offset of
+    # about +70 rad/s (~4,000 deg/s) on gyro-x for the whole recording -- a stuck / mis-calibrated channel, not motion:
+    # the other axes and the right wrist are normal and the signal on top of the offset has the usual +-2 rad/s
+    # excursions. A per-window z-score removes such an offset, so every z-scored cache and model is unaffected; a
+    # physical-units input would see the channel pinned at the clip value. Subtract the per-recording median of any
+    # gyro axis whose |median| exceeds GYRO_BIAS_MAX_RAD_S (no real recording keeps a mean angular rate of 20 rad/s
+    # for hours) and say so in the log.
+    for h in hands:
+        for i, arr in enumerate(out[f"X_{h}"]):
+            med = np.nanmedian(arr[:, 3:6], axis=0)
+            for ax in np.nonzero(np.abs(med) > GYRO_BIAS_MAX_RAD_S)[0]:
+                arr[:, 3 + ax] -= med[ax]
+                logger.warning("[eatingspeed] %s hand %s participant %d: gyro axis %d had a constant bias of %.1f rad/s "
+                               "-- median subtracted", subset, h, i, ax, med[ax])
+    logger.info("[eatingspeed] loaded subset=%s hand=%s: %d participants (gyro deg/s -> rad/s)", subset, hand, n)
     return out
 
 
