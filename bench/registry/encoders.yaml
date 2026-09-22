@@ -3192,6 +3192,57 @@ encoders:
     pretrain_objective: LIMU-BERT (Xu et al. 2021) on shared ViT1D backbone -- 15% temporal masking, MSE reconstruction, 4-layer decoder
     eval_note: shared-backbone baseline added 2026-09-17; same trainer, cap 160k steps and ES rule as the other 5-source baselines
     hide_in_summary: true
+  sslwear_5src:
+    name: SSL-Wearables (5-source)
+    short: SSL-Wearables-5src
+    group: ssl_baseline
+    order: 24.5
+    run: vit1d_ssl_sslwear_5src
+    ckpt: best
+    alt_attention: false
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/pretrain5src/sslwear_5src.yaml
+    pretrain_data: realdata, ocdetect, eatingspeed, motionx, sonic (same 5 sources and cache as mae_5src)
+    pretrain_objective: SSL-Wearables multi-task pretext (Yuan et al. 2024) on shared ViT1D backbone -- arrow of time + permutation + time warp (each p=0.5), mean cross-entropy; the METHOD retrained here, not the released UK-Biobank model
+    eval_note: shared-backbone baseline added 2026-09-21; same trainer, cap 160k steps and ES rule as the other 5-source baselines
+    hide_in_summary: true
+  dino_5src:
+    name: DINO (5-source)
+    short: DINO-5src
+    group: ssl_baseline
+    order: 25.5
+    run: vit1d_ssl_dino_5src
+    ckpt: best
+    alt_attention: false
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/pretrain5src/dino_5src.yaml
+    pretrain_data: realdata, ocdetect, eatingspeed, motionx, sonic (same 5 sources and cache as mae_5src)
+    pretrain_objective: DINO (Caron et al. 2021) on shared ViT1D backbone -- multi-crop (2 global + 4 local time spans, octahedral rotation / gain / noise per view), EMA teacher 0.996->1, centring + sharpening, 4096 prototypes, mean-token representation; no iBOT / KoLeo
+    eval_note: shared-backbone baseline added 2026-09-21; same trainer, cap 160k steps and ES rule as the other 5-source baselines
+    hide_in_summary: true
+  jepa_5src:
+    name: I-JEPA (5-source)
+    short: JEPA-5src
+    group: ssl_baseline
+    order: 26.5
+    run: vit1d_ssl_jepa_5src
+    ckpt: best
+    alt_attention: false
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/pretrain5src/jepa_5src.yaml
+    pretrain_data: realdata, ocdetect, eatingspeed, motionx, sonic (same 5 sources and cache as mae_5src)
+    pretrain_objective: I-JEPA (Assran et al. 2023) on shared ViT1D backbone -- 4 target time blocks (15-20 %) predicted from one context span (85-100 %) in the EMA target encoder's representation space, smooth-L1, predictor 192 x 4 layers
+    eval_note: shared-backbone baseline added 2026-09-21; same trainer, cap 160k steps and ES rule as the other 5-source baselines
+    hide_in_summary: true
   # --- cross-task transfer sources: MAE-5src fine-tuned on one IMU-Bench task (paper Section 4), added 2026-09-17 ---
   tx5_prism:
     name: MAE-5src fine-tuned on PRISM activity recognition

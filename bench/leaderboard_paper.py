@@ -53,6 +53,9 @@ CONTROLLED = [  # encoder id, label, group, pretrain run
     ("simmtm_5src", "SimMTM", "ssl", "vit1d_ssl_simmtm_5src"),
     ("focal_5src", "FOCAL", "ssl", "vit1d_ssl_focal_5src"),
     ("relcon_5src", "RelCon", "ssl", "vit1d_ssl_relcon_5src"),
+    ("sslwear_5src", "SSL-Wearables", "ssl", "vit1d_ssl_sslwear_5src"),
+    ("dino_5src", "DINO", "ssl", "vit1d_ssl_dino_5src"),
+    ("jepa_5src", "I-JEPA", "ssl", "vit1d_ssl_jepa_5src"),
     ("mae_5src_noaltattn", "MAE, plain attention", "ablation", "vit1d_ssl_mae_varlen_noaltattn_5src"),
     ("mae_5src_acconly", "MAE, accelerometer only", "ablation", "vit1d_ssl_mae_varlen_acconly_5src"),
 ]

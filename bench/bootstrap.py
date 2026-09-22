@@ -89,7 +89,7 @@ PAPER_TASKS = [
     "language_humanml3d", "pd_pads", "har_hhar", "har_mhealth", "har_prism", "har_userwatch",
 ]
 PAPER_ENCODERS = ["mae_5src", "limubert_5src", "simmtm_5src", "focal_5src", "relcon_5src",
-                  "mae_5src_noaltattn", "mae_5src_acconly"]
+                  "sslwear_5src", "dino_5src", "jepa_5src", "mae_5src_noaltattn", "mae_5src_acconly"]
 REFERENCE_ENCODER = "mae_5src"
 
 # |metric_from_units - result JSON| allowed by --check. Classification / retrieval / ATE are

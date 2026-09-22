@@ -3608,7 +3608,7 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
         # pretext task on the SAME combined dataset (mirrors
         # mae_realdata_ocdetect_flu's ssl_method switch):
         #   mae (default) — masked_1d_freq_channel_mask, optionally alt-attn encoder.
-        #   simmtm / focal — baselines on the plain (non-alt-attn) ViT1DEncoder,
+        #   simmtm / focal / relcon / sslwear / dino / jepa — baselines on the plain (non-alt-attn) ViT1DEncoder,
         #     same encoder capacity as the "mae" arm, for a fair, controlled
         #     "which SSL objective is best?" comparison (identical data + backbone
         #     size; only the pretext task differs). NOTE: these vendored baseline
@@ -3626,12 +3626,35 @@ def main(cfg: Any, run_dir: str, resume_ckpt: Optional[str] = None):
         _mm_cfg = cfg_get(cfg, ["objective", "mae_multidata_varlen_altattn_flu"], {}) or {}
         _ssl_method = str(_mm_cfg.get("ssl_method", "mae")).lower()
 
-        if _ssl_method in ("simmtm", "focal", "relcon"):
+        if _ssl_method in ("simmtm", "focal", "relcon", "sslwear", "dino", "jepa"):
             from imu_lm.objectives import ssl_vit_baselines as _sslb
             obj_blk = cfg_get(cfg, ["objective"], {}) or {}
             _log.info("[mae_multidata_varlen_altattn_flu] SSL baseline on shared ViT1DEncoder: %s%s",
                       _ssl_method, " (variable length)" if _var_len else "")
-            if _ssl_method == "simmtm":
+            if _ssl_method == "sslwear":
+                # SSL-Wearables multi-task pretext (arrow of time / permutation / time warp), Yuan et al. 2024
+                from imu_lm.objectives import ssl_wearables_mtl as _sslw
+                decoder = _sslw.SSLWearablesHead(embed_dim=encoder.embed_dim,
+                                                 tasks=tuple(obj_blk.get("tasks", _sslw.TASKS)))
+                def objective_fn(batch, model, cfg):
+                    return _sslw.forward_loss(batch, encoder, decoder, cfg)
+                all_params = list(encoder.parameters()) + list(decoder.parameters())
+            elif _ssl_method == "dino":
+                # DINO self-distillation (Caron et al. 2021); `decoder` = DINOState (teacher, heads, centre, step)
+                # so the single extra-module checkpoint slot restores the whole state on --resume.
+                from imu_lm.objectives import dino_ts as _dino
+                decoder = _dino.DINOState(encoder, cfg)
+                def objective_fn(batch, model, cfg):
+                    return _dino.forward_loss(batch, encoder, decoder, cfg)
+                all_params = list(encoder.parameters()) + decoder.trainable_parameters()
+            elif _ssl_method == "jepa":
+                # I-JEPA (Assran et al. 2023); `decoder` = JEPAState (EMA target encoder, predictor, step)
+                from imu_lm.objectives import jepa_ts as _jepa
+                decoder = _jepa.JEPAState(encoder, cfg)
+                def objective_fn(batch, model, cfg):
+                    return _jepa.forward_loss(batch, encoder, decoder, cfg)
+                all_params = list(encoder.parameters()) + decoder.trainable_parameters()
+            elif _ssl_method == "simmtm":
                 decoder = _sslb.SimMTMHeadVarLen(
                     embed_dim=encoder.embed_dim, patch_size=encoder.patch_size,
                     proj_dim=int(obj_blk.get("proj_dim", 128)),
