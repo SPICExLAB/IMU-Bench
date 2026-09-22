@@ -20,7 +20,7 @@ V1 = "/projects/b53017/vbc1591/mae_multidata_cache"
 MANIFEST = "/projects/b53017/vbc1591/diversity_saturation/pool_manifest.json"
 HOP_S = 5.12
 SOURCES = [("realdata", "HAR sets$^\\dagger$", "real"), ("ocdetect", "OCDetect", "real"),
-           ("eatingspeed", "EatingSpeed", "real"), ("motionx", "Motion-X", "syn."), ("sonic", "SONIC", "syn.")]
+           ("eatingspeed", "EatingSpeed", "real"), ("motionx", "Motion-X", "syn."), ("sonic", "BONES-SEED", "syn.")]
 
 
 def n_windows(src, split):
