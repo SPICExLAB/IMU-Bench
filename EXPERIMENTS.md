@@ -5494,6 +5494,17 @@ original 3-point sweep). §11j is the causal follow-up that explains WHY the
 plateau starts so low, and the interesting power-law regime — if any — lies
 BELOW 1%, where a `data0.1pct`-style recipe point would probe it.
 
+**Confirmed independently on a leak-free pool (2026-09-10, see §17).** The plateau
+reading above rested on this one sweep, on a pool that contained the evaluation
+datasets. A four-axis factorial on the leak-free 4-source pool reproduces it with
+volume, source count and motion-type count each isolated: all three axes flat, none
+monotone, over 137x volume and 224x motion-type range. It also **narrows the
+claim** -- the comparison that survives without statistical sleight of hand is
+odometry, where recipe factors beat data axes 4-20x with a single task on both
+sides; on microgesture the source axis matches the input-scaling effect, and on arm
+pose the measured run-to-run noise band (0.108 cm) swallows everything except
+modality.
+
 Caveat at 1%: `session_fraction` floors at 1 kept session per source, so
 session-poor sources (imuposer, totalcapture) sit above a strict 1% —
 measured from job 8836196: 46,116/3,552,334 windows kept = effectively ~1.3%
@@ -5853,6 +5864,216 @@ that reason alone. It happens to be harmless for these four (all minima ≤50K),
 but the probes are **not** on the 50K equal budget the pretrains are — they run
 unbounded to walltime — so the guard should be added before the full 8-probe
 harvest is trusted: filter `cand` to `r["step"] <= MAX_STEPS`.
+
+### 11m. Volume x diversity factorial on the FULL-SIZE 4-source pool (2026-09-03, built, not yet run)
+
+**The objection this exists to answer.** The data-scaling experiment behind the
+paper's "diversity matters more than volume" claim moved five things at once --
+window count, session count, subject count, source coverage and motion-type
+coverage -- so volume and diversity were never separated. A non-monotone 5% ->
+100% curve therefore supports only the weak statement *"under this sampling
+strategy, at this fixed step budget, on this mixture, more data did not reliably
+help"*. It cannot establish that diversity is what carries the effect. The
+"1% of the data covers 99% of motion types" figure inherits a second problem: a
+motion type was a k-means cluster in **our own pretrained encoder's** embedding
+space (11j), the count was unweighted (a type touched once counts as much as the
+mode holding 10% of the pool), and no cross-dataset label alignment was ever
+defined. And if 1% really does cover 99% of types, the remaining 99% of the data
+is mostly redundant -- which means the scaling sweep never contained a diversity
+contrast at all.
+
+Fixing it needs the two contrasts the scaling curve does not contain: **vary
+diversity with N fixed, and vary N with diversity fixed.** This section builds
+exactly that, on the leak-free 4-source pool at **full size, nothing
+sub-sampled**: ocdetect 1,253,077 + eatingspeed 287,678 + sonic 146,944 +
+motionx 50,395 = **1,738,094 windows / 2,472 h**.
+
+**The design.** 4 volumes x 4 diversity levels = 16 cells, plus 2 anchors at
+N = 100%:
+
+| N (windows) | `nar` | `one` | `nat` | `bal` |
+|---|---|---|---|---|
+| 12,500 (18 h, 0.7%) | OK | OK | OK | OK |
+| 50,000 (71 h, 2.9%) | OK | OK | OK | OK |
+| 200,000 (284 h, 12%) | OK | OK | OK | OK |
+| 800,000 (1,138 h, 46%) | OK | OK | OK | OK |
+| 1,738,094 (2,472 h, 100%) | -- | -- | anchor | anchor (sampler) |
+
+- `nar` **single-source, narrow motion band** -- ocdetect only, drawn from the
+  fewest largest motion-type clusters that can supply N. The reviewer's
+  *单源重复采样*.
+- `one` **single-source, uniform random** -- ocdetect only, natural type mix.
+  Swept across the rows this is *单源规模扩展*.
+- `nat` **4-source, natural proportions** -- a uniform draw from the pool. This
+  column *is* the paper's own scaling curve, reproduced inside the controlled
+  design so the old result and the new one are on one page. Swept across rows,
+  *多源规模扩展*.
+- `bal` **4-source, source- and type-balanced** -- equal per-source water-fill
+  (deficits from the small sources redistributed), then equal-per-cluster
+  water-fill inside each source. The reviewer's *多源均衡采样*.
+
+Reading a **column** is diversity at fixed N; reading a **row** is volume at
+fixed diversity. Crucially `nar` vs `one` moves motion-type diversity with the
+source count **pinned at 1**, while `one` vs `nat`/`bal` moves source diversity
+-- so the two senses of "diversity" are not confounded with each other either.
+The two 100% anchors differ only in sampling law (natural vs the production
+`source_weights` WeightedRandomSampler): at 100% the data cannot be re-selected,
+only re-weighted, which is the only diversity intervention that still exists
+there.
+
+**What "motion type" means here, and how coverage is weighted.** Both of the
+reviewer's questions get an explicit answer, and the circularity is removed:
+
+- Types are **k-means clusters (K=1000)**, not human labels and not text
+  clusters. Human labels were rejected as the axis on purpose: the four sources
+  have non-alignable label vocabularies (ocdetect compulsive-behaviour classes,
+  eatingspeed eating episodes, motionx/sonic text-described mocap), so any
+  cross-dataset "activity" axis would be an arbitrary hand-mapping. Labels are
+  used for *validation* only (11j/`analysis/diversity_saturation/17-20`).
+- The clustering that **drives subset selection** is
+  `T-phys`: 40 **hand-specified, rotation-invariant physical features** --
+  magnitude statistics, jerk and angular-acceleration RMS, zero-crossing rates,
+  five-band spectral fractions, spectral entropy/centroid/dominant frequency,
+  gravity-direction change and instability, autocorrelation cadence -- with **no
+  learned model anywhere in the loop**. Rotation invariance matters twice:
+  pretraining applies octahedral random rotations, and the four sources do not
+  share a mounting convention, so frame-dependent features would cluster by
+  dataset rather than by motion.
+- The encoder clustering (`T-enc`, PCA-64 of frozen `mae_4src_z` CLS, the 11j/11l
+  definition) is kept **only as an independent read-out**. `03_type_definitions.py`
+  reports AMI(T-phys, T-enc) -- if the two agree, the earlier encoder-space
+  results were not an artefact of the encoder; if they disagree, that is a
+  finding about 11j, and the new claim rests on the encoder-free axis either way.
+- **Coverage is reported frequency-weighted, not as a raw count.** Every cell
+  gets: raw types present; `pool_mass_covered` (each covered type weighted by its
+  frequency **in the pool**, i.e. long-tail-weighted coverage); **effective
+  number of types** = exp(Shannon entropy) and inverse-Simpson of the subset's
+  own type histogram (a subset holding 999 types with 90% of its mass in one
+  scores ~1, not 99.9%); KL(subset || pool); plus two **cluster-free** diversity
+  statistics that cannot be gamed by the choice of K -- the participation-ratio
+  effective rank and the **Vendi score** -- and the **fill distance** (median/p90/p99
+  distance from a random pool window to its nearest neighbour in the subset),
+  which is what actually decides whether the unsampled remainder is new data or
+  repeats.
+- `AMI(type, source)` is reported so the reader can check the type axis and the
+  source axis are not collinear to begin with; `07_analyze.py` prints the
+  predictor correlation matrix and the design condition number and refuses to
+  read the two diversity coefficients apart when they are collinear.
+
+**Diversity is measured per cell, never assumed.** The x-axis of every plot is
+the realised statistic of the subset that was actually built, not the design
+label. That also exposes a real triangularity honestly: at N=800,000 even the
+narrowest feasible band inside ocdetect needs many clusters, so `nar` is much
+less narrow there than at N=12,500 -- the design labels compress at high N and
+the measured axis shows it.
+
+**Protocol.** Every cell is `configs/nhanes_scale/mae_4src_z.yaml` with exactly
+two changes: the window index file, and `max_steps: 50,000`. Same architecture,
+mask 0.60, z-score input, octahedral rotation, lr 1e-4, seed 42, and the
+**same untouched 4-source val split**, so MAE val loss is a common yardstick and
+a narrow cell is scored on the diverse val it did not train on. `early_stopping`
+stays `enabled: true` with `patience: 999999` -- on but un-triggerable (setting
+`enabled: false` silently stops `best.pt` from ever being written; see the trap
+box in 11k). Downstream is a 4-task panel run through the **existing bench
+recipe** (`arm_pose_nymeria`, `odometry_nymeria_worldframe`, `har_wisdm`,
+`microgesture_openwatch`, probe protocol, seed 42), so nothing about the
+adaptation differs from every other row in the paper.
+
+**Compute is held fixed, not epochs.** 50,000 steps x batch 128 = 6.4 M window
+presentations for every cell, so the 12,500-window cell revisits its windows
+~512 times and the full-pool cell ~3.7 times. That is the control the claim
+needs -- *at matched compute, does more distinct data help?* Matching epochs
+instead would confound volume with compute, which is what the original curve
+did. Absolute numbers are self-contained to this section (50K budget), not
+comparable to the 100K `mae_4src_z` row or the 300K recipe table.
+
+**Predictions, stated before running** (so the experiment can fail):
+
+1. At fixed N, `nar` << `one` <= `nat` <= `bal` on every panel task. If `nar` is
+   not clearly worst, motion-type diversity does not carry the effect and the
+   claim must be dropped.
+2. Along a row at fixed diversity, 12.5K -> 800K (64x) moves the metric by less
+   than the `nar` -> `bal` gap at any single N. If it does not, volume matters at
+   least as much as diversity and the claim must be rewritten as "both matter".
+3. `bal` at N=200,000 >= `nat` at N=1,738,094 (8.7x less data, more balanced).
+   This is the strong form; it is the one most likely to fail.
+4. The two 100% anchors differ: if re-weighting a fixed pool changes nothing,
+   then "diversity" is about which windows exist, not how often they are drawn.
+
+**The claim the results are allowed to support.** `07_analyze.py` fits, per task,
+`y ~ log2(N) + log2(effective types) + log2(effective sources)` over the cells,
+with a bootstrap CI on every coefficient and on `|b_types| / |b_N|`, and converts
+the fixed-N diversity gap into an **exchange rate**: how many doublings of data
+volume that gap is worth. That rate is **capped at the 7.1 doublings actually
+swept** -- when the gap exceeds what the whole volume sweep buys, the output is a
+lower bound and says so, rather than extrapolating to a headline multiplier.
+That is the difference between the claim this section can make and the one it
+replaces.
+
+**Phase 3: the subject/session ladder.** The objection names five confounded
+quantities and the factorial above controls four of them (window count, source
+coverage, motion-type coverage, and -- through `nar` vs `one` -- type diversity
+independently of source diversity). The fifth, *who wore the watch*, needs
+per-window provenance the cache does not store, so it is a separate phase:
+`08_provenance.py` rebuilds each source from raw with provenance and joins it
+onto the cache **positionally, verified by content fingerprints on 400 random
+rows, refusing the join outright if a single probe disagrees** (that join is
+false for realdata, which is why `analysis/diversity_saturation/fingerprint_join.py`
+exists). `09_subject_arms.py` then builds a 4-arm ladder at fixed N=50,000,
+fixed source (ocdetect), 1 / 3 / 10 / all wearers, with the **motion-type
+distribution held flat** by equal-per-type water-fill inside the chosen
+subjects' union -- otherwise "fewer subjects" would silently mean "fewer motion
+types" and the ladder would re-create the very confound it is testing. The
+realised effective type count is printed next to every rung as the control, and
+subjects are picked greedily to *maximise* type coverage, which works against
+the hypothesis that more wearers help. The same script back-fills subject and
+session effective counts onto all 18 factorial cells, so subject diversity is
+measured there too rather than assumed away. eatingspeed exposes no provenance
+through the cached path and is recorded as unknown, never guessed.
+
+**Known limits, stated up front.** Single seed per cell (a 2-seed replicate of
+the four corner cells is the first thing to add if any contrast is close);
+`nar`/`one` use ocdetect as *the* single source, so "single-source" also means
+"free-living hand-washing data" and a second single-source ladder on eatingspeed
+would separate those; the volume axis tops out at 46% for the low-diversity arms
+by construction; the subject ladder lives inside one dataset, so it speaks to
+within-source wearer diversity, not to cross-dataset population diversity; and
+matched-compute is a choice, not a neutral default -- an equal-epoch version
+would answer a different (also legitimate) question.
+
+**Files.**
+`analysis/volume_diversity/` --
+`arms.py` (pool geometry + the arm table, single source of truth) ->
+`01_embed_pool.py` (frozen-encoder read-out embedding, asserts the concat index
+space) -> `02_physical_features.py` (the 40 encoder-free features) ->
+`03_type_definitions.py` (both clusterings + agreement/stability/null
+diagnostics) -> `04_build_arms.py` (index files + measured diversity per cell) ->
+`05_gen_configs.py` (`configs/voldiv/*.yaml`, `launch/voldiv/*.sh`, bench encoder
+entries) -> `06_harvest.py` -> `07_analyze.py` (contrasts, joint model, exchange
+rate, subject-ladder table, figure). Phase 3: `08_provenance.py` ->
+`09_subject_arms.py`, which append their arms to `out/arms.json`; 05/06/07 read
+the manifest, so re-running `05_gen_configs.py` picks the new arms up with no
+edits. `diversity_stats.py` holds the statistics and documents which objection
+each one answers.
+
+**Running it.**
+```bash
+sbatch launch/voldiv/prepare.sh            # phase 0: no pretraining at all
+                                           #   -> out/type_definitions.json, out/arms.json
+python analysis/volume_diversity/05_gen_configs.py --write-registry
+./launch/voldiv/submit.sh                  # 18 pretrains + 72 chained bench probes
+python analysis/volume_diversity/06_harvest.py && python analysis/volume_diversity/07_analyze.py
+
+# phase 3, the subject/session ladder (needs a large-memory node, rebuilds from raw)
+python analysis/volume_diversity/08_provenance.py && python analysis/volume_diversity/09_subject_arms.py
+python analysis/volume_diversity/05_gen_configs.py --write-registry
+./launch/voldiv/submit.sh --arms vd_sub1_n50k,vd_sub3_n50k,vd_sub10_n50k,vd_suball_n50k
+```
+Phase 0 answers the *definitional* half of the objection on its own -- what a
+motion type is, how coverage is weighted, whether the encoder-free and
+encoder-based definitions agree, and how much diversity each cell actually has --
+before a single GPU-hour of pretraining is spent. Cost of the rest: 18 x ~3.5 h
+pretrain + 72 probes.
 
 ## 12. UniMTS_data retrain arc: user-provided pre-synthesized dataset, and four bugs found in the process (2026-07-28)
 
@@ -7365,3 +7586,302 @@ and PADS finetune — mirroring their Table 3 vs Table 5 split (PatchTST best on
 Bench/leaderboard cells: 20/24 done at time of writing; the 4 `bench_language_humanml3d__inertia1_*` cells
 failed on the missing `HF_HOME` in the bench header (same failure as every other bench language cell that day),
 resubmitted after the header fix as jobs 9690218–9690221; 2 full-body PatchTST cells still running.
+
+
+## 17. Volume × diversity × source × type factorial on the leak-free 4-source pool (2026-09-03/10)
+
+Full write-up, every number and every caveat: **`analysis/scaling_summary.md`**.
+Status doc: **`PROGRESS.md`**. This section is the EXPERIMENTS.md entry point.
+
+**What §11i-§11l could not settle.** The 5-point recipe sweep (§11i) moved window
+count, session count, subject count, source coverage and motion-type coverage
+together, so a flat curve could not tell volume from diversity. §11j showed
+motion-mode coverage saturates below 1 % of the pool, which explains the plateau
+but cannot show diversity is what carries the effect. §11l varied types and volume
+on the 5-source pool but at a 50k budget with `realdata` still in the pool.
+
+**This factorial** runs on the **leak-free 4-source pool at full size** (1,738,094
+windows / 2,472 h; ocdetect + eatingspeed + sonic + motionx, sanitised) and
+isolates four axes one at a time, everything else pinned — same encoder, same
+z-score input, same 50,000-step budget, same frozen-probe protocol on the same
+4-task panel (arm pose, world-frame odometry, HAR-WISDM, microgesture).
+
+| Axis | Range | Arms | Status |
+|---|---|---|---|
+| Volume | 12,500 → 1,738,094 windows (18 h → 2,472 h, **137×**) | `vd_{nar,one,nat,bal}_n{12k,50k,200k,800k}` + 2 anchors | ✅ 18/18 |
+| Source count | 1 → 4 datasets, types 158 → 1000 | `vd_src{1,2,3,4}_n50k` | ✅ 4/4 |
+| Motion types | 3 → 673 effective types (**224×**) | `vd_typ{3,30,300,all}_n12k` | 🔄 3.25/4 |
+| Wearers | 1 / 3 / 10 / all | `vd_sub{1,3,10,all}_n50k` | ⏳ built, not run |
+
+Design choices that work *against* the hypothesis, stated up front: the source
+ladder adds datasets **smallest-first** (motionx → sonic → eatingspeed → ocdetect),
+so `src1` is not "the big dataset again"; subjects in the wearer ladder are picked
+greedily to *maximise* type coverage; and compute is held fixed rather than epochs,
+so a small arm simply revisits its windows more often.
+
+### Result — every data axis is flat
+
+Spread = max − min over the arms of one axis; frozen probe, seed 42.
+
+| Axis | arm pose (cm ↓) | odometry ATE (↓) | HAR-WISDM F1 (↑) | microgesture F1 (↑) |
+|---|---|---|---|---|
+| Volume (137×) | 0.130 | 0.0025 | 0.054 | 0.078 |
+| Source count (1→4) | 0.085 | 0.0067 | 0.035 | 0.136 |
+| Motion types (224×) | 0.073 | 0.0032 | 0.037 | 0.034 |
+
+No axis is monotone, and each optimum sits at a different arbitrary position —
+volume best at **18 h** (arm pose, WISDM, microgesture), sources best at **1–3**,
+types best at **300**. Concretely: microgesture along the `nat` volume column runs
+0.568 (18 h) → 0.522 → 0.549 → 0.531 → **0.490** (2,472 h), i.e. 137× the data and
+8 F1 points *worse*; the 4-source arm is worse than the 3-source arm (0.474 vs
+0.590); `typ3` beats `typall` on arm pose (8.109 vs 8.168) with 224× fewer types.
+
+### Against the recipe factors — and the caveat that matters
+
+Same corpus, same protocol, only the recipe changes. **HAR mean over 7 datasets**
+(noise-averaged, the reliable statistic):
+
+| Factor | spread | best → worst |
+|---|---|---|
+| Pretraining objective | **0.157** | MAE 0.656 › RelCon 0.627 › SimMTM 0.593 › FOCAL 0.499 |
+| Input scaling | **0.121** | z-score 0.656 › physical 0.589 › phys+patchnorm 0.582 › raw/DC 0.535 |
+| Modality (acc+gyro vs acc-only) | 0.024 | 0.656 vs 0.632 |
+
+⚠ **Not like-for-like.** The recipe factors are a 7-dataset mean; the data axes are
+single tasks. Comparing 0.157 against 0.054 overstates the gap, and the voldiv arms
+ran only a 4-task panel so no 7-dataset mean exists for them.
+
+**The clean single-task-on-both-sides comparison is odometry:**
+
+| | odometry ATE spread |
+|---|---|
+| Volume (137×) / Types (224×) / Sources (1→4) | 0.0025 / 0.0032 / 0.0067 |
+| Modality / Input scaling / Objective | 0.0261 / 0.0506 / 0.0523 |
+
+Recipe beats data **4–20×** with no statistical sleight of hand. Where it does not
+hold: on **microgesture** the source axis (0.136) matches input scaling (0.142);
+on **arm pose** the measured run-to-run noise band is **0.108 cm** (three runs of a
+byte-identical config: 8.054 / 8.136 / 8.162) and swallows every factor except
+modality (0.325) — nothing is resolved there, recipe included.
+
+### What this supports, and what it does not
+
+Supported: *over the range this corpus spans — 18 h to 2,472 h, 1 to 4 sources,
+3 to 673 motion types — corpus scale does not drive downstream performance, and on
+odometry the objective and the input representation each move the metric 4–20×
+further than any data axis.*
+
+**Not** supported: "recipe beats data by an order of magnitude" as a general claim
+(§11's earlier framing — true on odometry, false on microgesture, unresolvable on
+arm pose); "less data is better" (the 18 h arm's wins are inside the noise band and
+single-seed); anything about corpora >2,472 h or acc-only corpora (NHANES 4,000 h
+and Capture24 3,122 h are on disk, untested here).
+
+Corroborated independently by §11j (a deliberately-redundant subset collapses,
+WISDM 61.7 → 35.3, while random ≈ diverse at 61.7 vs 61.5 — diversity matters only
+at the pathological end) and by §11i (the smallest fraction wins 11 of 16 downstream
+cells while the pretraining reconstruction loss improves monotonically).
+
+### Reliability
+
+Single seed (42) throughout. Spread is a crude two-point statistic that grows with
+arm count — both sides use 4–5 arms so the comparison is fair, but these are not
+formal effect sizes; a two-way variance decomposition needs replicate seeds.
+Motion types are k-means clusters (K=1000) in an **encoder-free** 40-dimensional
+rotation-invariant physical feature space, not human labels — the four sources have
+non-alignable label vocabularies; an encoder-space clustering is reported alongside
+as an independent read-out. The **wearer axis is still missing**, and it is the one
+that maps onto how every downstream task is split (subject-disjoint).
+
+Pipeline: `analysis/volume_diversity/` (`arms.py` → `01`-`05` → `06_harvest.py` →
+`07_analyze.py`; `08_provenance.py` → `09_subject_arms.py` for the wearer ladder;
+`10_axis_arms.py` for the source/type ladders). Configs `configs/voldiv/`,
+launchers `launch/voldiv/`.
+
+### Two controls that could not be built, and why
+
+1. **`vd_dup` redundancy arm.** Selecting the N nearest neighbours to a seed window
+   in encoder space produced `nn_self_median` 2.474 vs 2.473 for the uniform arm —
+   no redundancy created, and the "ball" spanned 424 of 1000 types. Local density in
+   the encoder embedding is too uniform for ball selection to concentrate anything.
+   Dropped rather than shipped as a control that controls nothing.
+2. **A clean reproduction of §11j's collapse.** `vd_nar_n12k` and `vd_typ3_n12k` are
+   the same thing (3 types present, effective 2.8 vs 3.0, vendi 8.92 vs 8.74) and
+   **neither collapses** — `nar` posts the best arm-pose score of any arm (8.003).
+   §11j's redundant arm was built on the **11-source** pool, whose largest clusters
+   are NHANES/Capture24 free-living sedentary data; the 4-source pool contains no
+   such degenerate mode. The two results do not contradict — they are about
+   different pools. No new experiment needed.
+
+## 18. Native preprocessing for the external objectives: SimMTM / FOCAL / RelCon under their own input handling (2026-09-21, in flight)
+
+### The objection
+
+A reviewer checked the three external SSL baselines against their published code and
+pointed out that we cannot describe our uniform per-window z-score as "following these
+methods' original preprocessing" — the three do not share one convention, and two of
+them do not use per-window z-norm at all. Verified line by line, they are right:
+
+| method | what its own code feeds the encoder | source |
+| --- | --- | --- |
+| SimMTM | normalises **inside the model**: per sample and channel over the **visible** points, de-normalising the reconstruction before the MSE | `SimMTM_Forecasting/models/SimMTM.py:172-178, 205-207` |
+| FOCAL | **frequency domain** — each sub-interval is FFT'd and real/imag become channels; no z-norm anywhere on the main path | `focal/src/data_augmenter/Augmenter.py:141-157` |
+| RelCon | SSL pretraining reads raw `.npy` with **no input normalisation**; RevIN lives only in the motif-distance net | `relcon/data/Base_Dataset.py:50`, `nets/CrossAttn/CrossAttn_Net.py:34` |
+
+Two clarifications worth recording, because both are easy to get wrong:
+
+* SimMTM's **classification** dataloader reads pre-processed `.pt` tensors and does not
+  re-normalise, so the forecasting branch's instance norm cannot be generalised to all
+  SimMTM experiments. We implement the **pretraining** branch, which does normalise.
+* The `StandardScaler` in `relcon/eval/Classify/linear_probe.py:53` is fit on the
+  **encoder's embeddings**, not on the input signal. It is not an input convention. The
+  train-set `StandardScaler` the reviewer saw is in the HAR preprocessing script
+  (`data/process/comparesslbench/pamap.py:380`), a different code path.
+
+Our three objectives in `imu_lm/objectives/ssl_vit_baselines.py` and
+`relcon_ssl.py` apply **no** normalisation of their own — they consume whatever the
+shared loader produces, which is per-window z-scored. So the uniform z-score is our
+protocol choice. That is defensible and the paper already says so
+(`Sections/A_MethodDetails.tex:249`, `Sections/8_Appendix.tex:9`); what it did not have
+is a measurement of what the choice costs each method.
+
+### What the z-score actually removes
+
+Measured on a real validation batch from the five-source pool, same windows both ways:
+
+```
+z-score row   : per-window |acc mean| 0.0000   per-window acc std 1.0010
+native arms   : per-window |acc mean| 0.4205   per-window acc std 0.1139   (units of g)
+```
+
+Gravity direction and motion amplitude are exactly annihilated by the z-score, which is
+the mechanism behind the pose/odometry concern and behind §(HAR) `lying_down` recall 0 %.
+
+### Design: three paired native arms
+
+Each arm re-pretrains one objective under its own input handling and is paired with the
+existing `*_5src` row — same backbone, same corpus composition, same 160k cap, same
+patience 10, same lr/augmentation/window length. Generated key-for-key from the z-score
+twin by `launch/nativenorm/gen_native_cfgs.py`, so the diff is provably only:
+
+| arm | dataloader | inside the method | downstream probe input |
+| --- | --- | --- | --- |
+| `simmtm_5src_native` | physical | visible-point instance norm + reconstruction of the un-masked copy in physical units | z-score (SimMTM's own instance norm on an unmasked window **is** a per-window z-score, so the downstream protocol is byte-identical to `simmtm_5src` and only pretraining differs) |
+| `focal_5src_native` | physical | per-patch FFT (real+imag) input stem | physical + the same FFT stem |
+| `relcon_5src_native` | physical | nothing new (RevIN already in the distance net); stage 1 retrained on the same input | physical |
+
+Two flags were added to the SimMTM objective, both defaulting to the behaviour every
+existing SimMTM row was trained with: `visible_point_instance_norm` and
+`recon_on_original_only`. The second restores `pred_batch_x = dec_out[:batch_x.shape[0]]`
+(SimMTM.py:208-211) — this port took the MSE over every masked copy against a target that
+is zero at the masked points, which is harmless under z-score but an amplitude-weighted
+artefact in physical units. The SimMTM arm therefore differs from its twin in **two**
+respects, not one; they are one mechanism in SimMTM's code and are documented as such.
+
+⚠ **FOCAL's arm changes the input REPRESENTATION, not just the normalisation.** A
+frequency-domain encoder cannot be probed on time-domain input, so `input_transform: fft`
+rides on the encoder card as a `vit1d_override` and reaches all ten probes. Read that row
+as "what FOCAL does natively", not as "what dropping z-norm does".
+
+### Corpus and validation caveats
+
+* Trains on `mae_multidata_cache_v3raw` (the un-normalised twin the nozscore design
+  ablation rebuilt) subset by `idx_ref_v3raw.npy` to the composition of the production
+  5-source pool: 196,659 of 197,094 windows. The 0.22 % gap is the mocap spike sanitiser
+  and the re-windowed HAR pool; the arms are composition-matched, not row-identical.
+* ⚠ The raw twin was built **without the production cache's per-source val caps** — its
+  val pool is 290,638 windows, 64 % OCDetect, against production's 27,463 at 4 %. Since
+  `val_loss` is both the early-stopping monitor and the `best.pt` selector, an arm
+  validated on that mixture is not selecting a comparable checkpoint.
+  `launch/nativenorm/make_val_idx.py` writes per-source val indices restoring the
+  production count (27,433 windows). **The `abl_nozscore` design-ablation arm does not
+  have this fix and validates on all 290,638 windows** — flagged to the session that owns it.
+
+### Files
+
+* configs: `configs/nativenorm/{simmtm,focal,relcon}_5src_native.yaml`, `relcon_motifdist_5src_native.yaml`
+* generator / index / preflight: `launch/nativenorm/{gen_native_cfgs,make_val_idx,preflight}.py`
+* launch + submit: `launch/nativenorm/*.sh`, driver `submit_nativenorm.sh` (idempotent, `--dry-run`)
+* code: `PatchEmbed1D.input_transform` (`imu_lm/models/ViT1D/model.py`), the two SimMTM flags
+  (`imu_lm/objectives/ssl_vit_baselines.py`), and a documented pretrain/encoder normalisation
+  split in the encoder card (`normalize_method_pretrain` + `normalize_method_note`, `bench/make_config.py`)
+* cells: 30 = 3 arms × the 10 core tasks, frozen probe, seed 42
+
+### Harvest
+
+`python -m bench.leaderboard` after the 30 cells land; compare each `*_native` row against
+its `*_5src` twin task by task. The question the table answers is **not** "which objective
+is best" — it is "does the benchmark's uniform z-score change the ranking of these three
+objectives, and by how much for each". Pose and odometry are where a change is expected.
+
+---
+
+## 19. Multi-task joint fine-tuning of one shared encoder (2026-09-22/23, ✅ both runs complete, ❌ NOT in the paper)
+
+**Decision 2026-09-23: this study does not enter the ICLR submission.** It is archived here in
+full so the result is not lost and so the design error below is not repeated.
+
+**Question.** Section 5's transfer figure shows that adapting the MAE encoder to one task
+specialises it: it helps a related task and hurts a distant one (microgesture loses 11-45 %
+from every source). Is that a property of the *tasks* — they need incompatible features — or
+of *single-task adaptation*? Joint training asks the same encoder to serve two tasks at once.
+
+**Method.** `scripts/train_multitask_joint.py`: ONE shared encoder warm-started from the
+reference 5-source MAE; every task keeps the benchmark's own loader, decoder and loss
+(`bench/generated/configs/bench_<task>__mae_5src__finetune__s42.yaml`, built exactly as
+`imu_lm/models/ViT1D/run.py` builds them). One task per optimiser step in a fixed cycle given
+by `--ratio`. AdamW: encoder at `--enc-lr` 3e-4, each decoder at its own single-task learning
+rate (pose 1e-3, odometry 1e-4, gesture 1e-5 — they differ 100x). Warm-up then cosine, AMP.
+Checkpoints are written per task in the single-task key layout so bench scorers read them
+unchanged. Smoke test: 7023958 OOM-killed at 40 G, 7031122 completed at 120 G (peak 64.5 G).
+
+### 19a. `mt_body_odom` — full-body pose + wrist-frame odometry, 1:1, 40k steps (job 7101347)
+
+The one mutually helpful pair in the transfer figure. 73 min at 9.2 steps/s. Validation loss:
+
+| step | full-body | odometry |
+|---|---|---|
+| 2,000 | 0.02100 | 0.02680 |
+| 18,000 | **0.01864** | 0.02162 |
+| 24,000 | 0.01889 | **0.02036** |
+| 40,000 (final) | 0.01961 | 0.02056 |
+
+Both tasks converge and only drift up slightly at the end. Nothing pathological: one encoder
+can serve both kinematic tasks. **No frozen probes were run on this pair** (see the decision
+above), so there is no transfer column for it.
+
+### 19b. `mt_body_gesture` — full-body pose + microgesture, 10:1, 22k steps (job 7101356)
+
+The most antagonistic pair when frozen. 56 min. Validation loss:
+
+| step | full-body | microgesture |
+|---|---|---|
+| 2,000 | 0.02084 | **0.77879** |
+| 10,000 | **0.01906** | 1.21662 |
+| 22,000 (final) | 0.01975 | 1.49926 |
+
+**The gesture head peaks at the very first checkpoint and then decays monotonically to near
+chance** (uniform 6-class guess ≈ 1.79) with a training loss of 0.00001. Full-body is
+unharmed — 0.01906 here against 0.01864 in the odometry run.
+
+**This is a budget/learning-rate error of ours, not evidence of task conflict.** Two causes:
+(i) the total budget was never shortened for the small task — OpenWatch train is 3,174 windows
+(13 batches), so 2,000 gesture steps is ~154 epochs against a single-task optimum of 1,400
+steps; (ii) the shared encoder runs at 3e-4 while the single-task gesture fine-tune uses 1e-5,
+a factor of 30, which is why gesture peaks after ~182 of its own steps rather than 1,400.
+**Do not quote a gesture clip-F1 from this run.**
+
+### 19c. What was fixed, and what a rerun should do
+
+`best.pt` is now selected **per task**, at that task's own lowest validation loss (commit
+a4cfd54), because the single-task fine-tunes this is compared against all early-stop on their
+own validation split — taking the final step for every task compares a selected model against
+an unselected one. The runs above predate this and their `best.pt` IS the final step; their
+`latest.pt` is the last validation step. A rerun (names `mt2_*` were prepared, never submitted)
+should use per-task selection, `--val-every 500` so the small task's optimum is actually
+measured, and a lower encoder learning rate for any pairing with a small task.
+
+**Caveat on the cells that do exist.** Frozen probes for `mt_body_gesture` were submitted
+(7115255-7115406) and read the ENCODER only, where the final step is close to optimal
+(full-body 0.01975 at 22k against 0.01906 at 10k). Those cells are usable but measure the
+22,000-step joint encoder with no checkpoint selection, and must say so if ever reported.
