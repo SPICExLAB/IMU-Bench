@@ -15,8 +15,14 @@ finetune__s42.yaml), built exactly as imu_lm/models/ViT1D/run.py builds them.
 
 Optimisation: AdamW; the shared encoder gets --enc-lr, every decoder keeps the learning rate and weight decay of
 its task's single-task fine-tune (they differ by 100x across tasks: pose 1e-3, odometry 1e-4, gesture 1e-5).
-Linear warm-up, then cosine to 1 % of the peak. AMP as in the single-task runs. Fixed budget, no checkpoint
-selection: the FINAL encoder is what gets evaluated.
+Linear warm-up, then cosine to 1 % of the peak. AMP as in the single-task runs.
+
+Checkpoint selection is PER TASK: `best.pt` under runs/<name>__<task>/ is the encoder and decoder at that task's
+own lowest validation loss, and `latest.pt` is the most recent validation step. This matters because the
+single-task fine-tunes these runs are compared against all early-stop on their own validation split; taking the
+final step for every task would compare a selected model against an unselected one. It also matters because the
+tasks do not peak together -- in the first pair of runs full-body pose was best at 18k steps while microgesture,
+whose training set is 13 batches, was already past its best at the 2k checkpoint.
 
 Outputs, per task, a checkpoint in the single-task format so that the benchmark's scorers and frozen probes read it
 unchanged:   runs/<name>__<task>/checkpoints/{best,latest}.pt   with keys model / <decoder key> / cfg / step.
@@ -210,12 +216,15 @@ def main():
     cycle = list(itertools.chain.from_iterable([i] * r for i, r in enumerate(ratio)))
     log.info("tasks %s | cycle %s | %d steps | encoder lr %g", a.tasks, cycle, a.steps, a.enc_lr)
 
+    def save_task(t, step, tag):
+        d = os.path.join(REPO, "runs", f"{a.name}__{t.name}", "checkpoints"); os.makedirs(d, exist_ok=True)
+        torch.save({"model": encoder.state_dict(), t.key: t.decoder.state_dict(), "cfg": t.cfg, "step": step,
+                    "multitask": {"name": a.name, "tasks": a.tasks, "ratio": ratio, "enc_lr": a.enc_lr, "steps": a.steps}},
+                   os.path.join(d, f"{tag}.pt"))
+
     def save(step, tag):
         for t in tasks:
-            d = os.path.join(REPO, "runs", f"{a.name}__{t.name}", "checkpoints"); os.makedirs(d, exist_ok=True)
-            torch.save({"model": encoder.state_dict(), t.key: t.decoder.state_dict(), "cfg": t.cfg, "step": step,
-                        "multitask": {"name": a.name, "tasks": a.tasks, "ratio": ratio, "enc_lr": a.enc_lr, "steps": a.steps}},
-                       os.path.join(d, f"{tag}.pt"))
+            save_task(t, step, tag)
 
     @torch.no_grad()
     def validate(step):
@@ -236,7 +245,7 @@ def main():
         log.info("step=%d split=val %s", step, " ".join(f"{k}={v:.5f}" for k, v in out.items()))
         return out
 
-    hist, t0 = [], time.time()
+    hist, best_val, best_step, t0 = [], {}, {}, time.time()
     encoder.train()
     for step in range(1, a.steps + 1):
         f = step / a.warmup if step <= a.warmup else 0.01 + 0.99 * 0.5 * (1 + math.cos(math.pi * (step - a.warmup) / max(1, a.steps - a.warmup)))
@@ -255,10 +264,22 @@ def main():
             log.info("step=%d split=train task=%s loss=%.5f lr_enc=%.2e (%.1f steps/s)", step, t.name, float(loss),
                      opt.param_groups[0]["lr"], step / (time.time() - t0))
         if step % a.val_every == 0 or step == a.steps:
-            hist.append({"step": step, **validate(step)}); save(step, "latest")
-    save(a.steps, "best")                # fixed budget: the final encoder is the one that is evaluated
+            out = validate(step)
+            hist.append({"step": step, **out})
+            save(step, "latest")
+            # Per-task checkpoint selection. The single-task fine-tunes this is compared against
+            # all use early stopping on their own validation split, so taking the final step here
+            # would compare a selected model against an unselected one. Tasks reach their optimum
+            # at very different steps -- on the first run full-body pose was best at 18k while
+            # microgesture, whose training set is 13 batches, was already past its best at 2k.
+            for t in tasks:
+                if out[t.name] < best_val.get(t.name, float("inf")):
+                    best_val[t.name], best_step[t.name] = out[t.name], step
+                    save_task(t, step, "best")
+    log.info("best per task: %s", " ".join(f"{k}={best_val[k]:.5f}@{best_step[k]}" for k in best_val))
     for t in tasks:
-        json.dump({"name": a.name, "tasks": a.tasks, "ratio": ratio, "steps": a.steps, "enc_lr": a.enc_lr, "val_history": hist},
+        json.dump({"name": a.name, "tasks": a.tasks, "ratio": ratio, "steps": a.steps, "enc_lr": a.enc_lr,
+                   "best_val": best_val, "best_step": best_step, "val_history": hist},
                   open(os.path.join(REPO, "runs", f"{a.name}__{t.name}", "multitask_summary.json"), "w"), indent=1)
     log.info("finished %s in %.0f min", a.name, (time.time() - t0) / 60)
 
