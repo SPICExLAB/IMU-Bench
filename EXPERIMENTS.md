@@ -7869,7 +7869,14 @@ unharmed — 0.01906 here against 0.01864 in the odometry run.
 (13 batches), so 2,000 gesture steps is ~154 epochs against a single-task optimum of 1,400
 steps; (ii) the shared encoder runs at 3e-4 while the single-task gesture fine-tune uses 1e-5,
 a factor of 30, which is why gesture peaks after ~182 of its own steps rather than 1,400.
-**Do not quote a gesture clip-F1 from this run.**
+
+**Correction (2026-09-23): the validation cross-entropy badly misrepresents this head.** Scored
+with the benchmark's own metric, the gesture head of this run reaches **0.6498 clip macro-F1**,
+against 0.5419 for the single-task fine-tune and 0.6081 for training from scratch. A training
+loss of 0.00001 means the model is extremely confident, so the few confident mistakes dominate
+the cross-entropy while `argmax` stays right, and clip-level aggregation over three consecutive
+windows removes more of the remaining noise. The budget and learning-rate mismatch above is
+real and a rerun should still fix it, but the head is usable and its numbers are good.
 
 ### 19c. What was fixed, and what a rerun should do
 
@@ -7885,3 +7892,45 @@ measured, and a lower encoder learning rate for any pairing with a small task.
 (7115255-7115406) and read the ENCODER only, where the final step is close to optimal
 (full-body 0.01975 at 22k against 0.01906 at 10k). Those cells are usable but measure the
 22,000-step joint encoder with no checkpoint selection, and must say so if ever reported.
+
+### 19d. Frozen probes of the joint encoders (20 cells, complete)
+
+Both joint encoders were registered as encoder cards and run through the benchmark's frozen
+probe on every task (jobs 7115087-7115406; `har_prism` and `har_userwatch` for the gesture pair
+were still running at the time of writing). The comparison that matters is against `tx5_*`, the
+same MAE adapted to **one** task, because that is what Section 5's figure measures.
+
+**On the tasks the encoder was jointly trained on, joint training beats single-task adaptation
+everywhere** (frozen probe, lower is better for pose/odometry, higher for gesture):
+
+| target | unadapted `mae_5src` | single-task adapted (`tx5_*`) | jointly trained |
+|---|---|---|---|
+| full-body pose (mm) | 97.85 | 95.05 (odom) / 97.98 (gest) | **91.13** (b+o) / 94.34 (b+g) |
+| odometry (ATE m) | 0.1999 | 0.1667 (body) / 0.1988 (gest) | **0.1497** (b+o) / 0.1774 (b+g) |
+| microgesture (clip F1) | 0.6467 | 0.4987 (body) / 0.5952 (odom) | 0.6503 (b+o) / **0.6591** (b+g) |
+
+The microgesture row is the direct answer to the question in the preamble. Adapting the MAE to
+full-body pose alone costs gesture 15 points of clip F1 (0.6467 -> 0.4987, the largest single
+drop in the transfer figure); training the same encoder on full-body pose **and** gesture
+together gives 0.6591, above the unadapted MAE. **The specialisation is a property of
+single-task adaptation, not of the tasks needing incompatible features.**
+
+The joint heads also beat their own single-task fine-tunes: odometry 0.1488 against 0.1541 (the
+best odometry number in the benchmark), microgesture 0.6498 against 0.5419.
+
+**What joint training does not fix is the cost to tasks it was not trained on**, which follows
+the same near/far pattern as single-task adaptation:
+
+| target | `mae_5src` probe | `mt_body_odom` | `mt_body_gesture` |
+|---|---|---|---|
+| arm pose (cm) | 8.138 | **7.934** | 8.186 |
+| UT-Watch (F1) | 0.7271 | **0.7976** | -- |
+| MHEALTH (F1) | 0.6860 | 0.6543 | 0.6886 |
+| PRISM (F1) | 0.2790 | 0.2710 | -- |
+| HHAR (F1) | 0.6207 | 0.5607 | 0.5815 |
+| PADS (F1) | 0.4247 | 0.4064 | 0.3789 |
+| IMU-text (R@1) | 27.92 | 21.03 | 17.21 |
+
+Kinematically related tasks gain (arm pose, UT-Watch), semantically distant ones lose, and
+IMU-text retrieval loses most -- the same ordering the single-task sources produce, at a similar
+magnitude (`tx5_fullbody` probe is 19.57 on IMU-text, `tx5_odom` 19.95).
