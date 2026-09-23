@@ -7,7 +7,9 @@ model (k1000_f100), signed so that positive = better, then averaged over the eig
 MAE validation loss is a pretraining quantity and is not in the average.
 
   (a) data amount      the uniform draws (all 1,000 modes available) at 0.1 / 1 / 10 / 100 % of the pool
-  (b) motion diversity  motion modes 1 -> 1000, one line per volume that has the full ladder (0.01, 0.1, 1 %)
+  (b) motion diversity  motion modes 1 -> 1000, one line per volume. 0.01, 0.1 and 1 % have the full ladder;
+                        10 % exists only at 100 and 1,000 modes and 100 % only at 1,000 modes, where it is the
+                        reference every value is expressed against, so it sits on the zero line by construction
 
 Writes <paper>/Pictures/scaling_avg_5src.{png,pdf} and paper_results/fig3_scaling_grid/scaling_avg.csv
 """
@@ -32,7 +34,11 @@ th = dict(surface="#ffffff", ink="#0b0b0b", ink2="#52514e", muted="#898781", gri
           ramp=["#86b6ef", "#5598e7", "#2a78d6", "#1c5cab", "#0d366b"],
           # panel (b): one categorical hue per volume (validated: CVD dE 9.2, normal-vision dE 27.6), plus a
           # distinct marker per line so identity is not colour alone
-          series=["#2a78d6", "#eb6834", "#1baf7a"], markers=["o", "s", "^"])
+          series=["#2a78d6", "#eb6834", "#1baf7a"], markers=["o", "s", "^"],
+          # the two volumes that do NOT have the full mode ladder (10 % has 100 and 1,000 modes, 100 % only
+          # 1,000, where it is the reference) are drawn in neutral ink so they read as different in kind and
+          # the three validated hues keep their meaning
+          sparse="#6f6e69", ref_ink="#0b0b0b")
 REF = "k1000_f100"
 FRACS = [("0p01", 0.01), ("0p1", 0.1), ("1", 1.0), ("10", 10.0), ("100", 100.0)]
 K_TYPES = [1, 5, 10, 25, 50, 100, 1000]
@@ -70,17 +76,29 @@ ax_v.set_xlabel("pretraining data (fraction of pool / windows)", fontsize=9.5, c
 ax_v.set_title("(a) Data amount (all 1,000 modes)", fontsize=10.5, color=th["ink"], fontweight="bold",
                loc="left", pad=6)
 
-# (b) motion diversity, one line per volume with the full ladder
+# (b) motion diversity, one line per volume
 for fi, (tag, pct) in enumerate(FRACS[:3]):
     pts = [(K, avg[f"k{K}_f{tag}"]) for K in K_TYPES if f"k{K}_f{tag}" in avg]
     ax_d.plot([p[0] for p in pts], [p[1] for p in pts], marker=th["markers"][fi], ms=5.5, lw=2, color=th["series"][fi],
               markeredgecolor=th["surface"], markeredgewidth=1.1, zorder=3, label=f"{pct:g}% of pool")
+# the two larger volumes, at the mode counts the triangular grid reaches: 10 % at 100 and 1,000 modes, and
+# 100 % at 1,000 modes only, which is the reference and therefore lies on the dashed line by construction
+pts = [(K, avg[f"k{K}_f10"]) for K in K_TYPES if f"k{K}_f10" in avg]
+ax_d.plot([p[0] for p in pts], [p[1] for p in pts], marker="D", ms=5.5, lw=1.8, ls=(0, (4, 2)),
+          color=th["sparse"], markeredgecolor=th["surface"], markeredgewidth=1.1, zorder=4,
+          label="10% of pool")
+# 100 % is a single cell (all 1,000 modes) and it is the reference, so it lies on the dashed line at
+# exactly 0 by construction: drawn as a point, with no line, so it is not read as a trend
+ax_d.plot([1000], [avg["k1000_f100"]], marker="*", ms=15, lw=0, color=th["ref_ink"],
+          markeredgecolor=th["surface"], markeredgewidth=1.3, zorder=6,
+          label="100% of pool (reference)")
 ax_d.set_xscale("log")
 ax_d.set_xticks(K_TYPES)
 ax_d.set_xticklabels([str(k) for k in K_TYPES])
+ax_d.set_xlim(0.8, 1000 * 1.45)          # room for the reference star, which sits on the last tick
 ax_d.set_xlabel("motion modes in the pretraining set", fontsize=9.5, color=th["ink2"])
 ax_d.set_title("(b) Motion diversity", fontsize=10.5, color=th["ink"], fontweight="bold", loc="left", pad=6)
-leg = ax_d.legend(frameon=False, fontsize=8.8, loc="lower right")
+leg = ax_d.legend(frameon=False, fontsize=8.2, loc="lower right", labelspacing=0.35, handlelength=2.0)
 for t in leg.get_texts():
     t.set_color(th["ink"])
 
