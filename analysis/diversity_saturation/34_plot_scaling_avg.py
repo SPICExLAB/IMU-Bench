@@ -29,7 +29,10 @@ sys.path.insert(0, os.path.join(REPO, "paper_results"))
 from paper_io import write_csv  # noqa: E402
 
 th = dict(surface="#ffffff", ink="#0b0b0b", ink2="#52514e", muted="#898781", grid="#e1e0d9", axis="#c3c2b7",
-          ramp=["#86b6ef", "#5598e7", "#2a78d6", "#1c5cab", "#0d366b"])
+          ramp=["#86b6ef", "#5598e7", "#2a78d6", "#1c5cab", "#0d366b"],
+          # panel (b): one categorical hue per volume (validated: CVD dE 9.2, normal-vision dE 27.6), plus a
+          # distinct marker per line so identity is not colour alone
+          series=["#2a78d6", "#eb6834", "#1baf7a"], markers=["o", "s", "^"])
 REF = "k1000_f100"
 FRACS = [("0p01", 0.01), ("0p1", 0.1), ("1", 1.0), ("10", 10.0), ("100", 100.0)]
 K_TYPES = [1, 5, 10, 25, 50, 100, 1000]
@@ -70,7 +73,7 @@ ax_v.set_title("(a) Data amount (all 1,000 modes)", fontsize=10.5, color=th["ink
 # (b) motion diversity, one line per volume with the full ladder
 for fi, (tag, pct) in enumerate(FRACS[:3]):
     pts = [(K, avg[f"k{K}_f{tag}"]) for K in K_TYPES if f"k{K}_f{tag}" in avg]
-    ax_d.plot([p[0] for p in pts], [p[1] for p in pts], marker="o", ms=5.5, lw=2, color=th["ramp"][fi + 1],
+    ax_d.plot([p[0] for p in pts], [p[1] for p in pts], marker=th["markers"][fi], ms=5.5, lw=2, color=th["series"][fi],
               markeredgecolor=th["surface"], markeredgewidth=1.1, zorder=3, label=f"{pct:g}% of pool")
 ax_d.set_xscale("log")
 ax_d.set_xticks(K_TYPES)
@@ -82,9 +85,13 @@ for t in leg.get_texts():
     t.set_color(th["ink"])
 
 lo = min(avg.values())
+ax_d.set_ylim(lo - 1.5, 4.0)
+# (a): same y span as (b), centred on its own line so the line sits in the middle of the panel
+ya = [avg[f"k1000_f{tag}"] for tag, _ in FRACS if f"k1000_f{tag}" in avg]
+mid, half = (min(ya) + max(ya)) / 2, (4.0 - (lo - 1.5)) / 2
+ax_v.set_ylim(mid - half, mid + half)
 for ax in (ax_v, ax_d):
     ax.axhline(0, color=th["muted"], lw=1.0, ls="--", zorder=2)
-    ax.set_ylim(lo - 1.5, 4.0)
     ax.set_facecolor(th["surface"])
     ax.minorticks_off()
     for s in ("top", "right"):
