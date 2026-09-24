@@ -1,62 +1,62 @@
 {
-  "task": "pd_pads",
-  "encoder": "simmtm",
-  "protocol": "legacy_valloss",
-  "seed": 42,
-  "metrics": {
-    "subject_bal_acc": 0.3333333333333333,
-    "subject_macro_f1": 0.2543859649122807,
-    "subject_acc": 0.6170212765957447,
-    "subject_vote_bal_acc": 0.3333333333333333,
-    "window_bal_acc": 0.355761639382329,
-    "window_macro_f1": 0.3041785357237255,
-    "window_acc": 0.627127659574468,
-    "n_classes_predicted": 1.0
-  },
-  "primary_metric": "subject_macro_f1",
-  "eval_split": "val",
-  "run": "vit1d_pd_probe_pads_simmtm",
-  "checkpoint": "best.pt",
-  "checkpoint_step": 10800,
-  "selection": {
-    "split": "val",
-    "monitor": "bal_acc",
-    "mode": "max",
-    "note": "window-level val balanced accuracy"
-  },
-  "job_ids": {
-    "train": 8321806,
-    "score": "9562177"
-  },
-  "provenance": {
-    "source": "scorer:bench.score.pd",
-    "date": "2026-08-17T02:10:46-05:00",
-    "git": "unknown",
-    "legacy_run": true,
-    "info": {
-      "n_windows": 16920,
-      "n_subjects": 94,
-      "subject_confusion_mean_prob": [
-        [
-          0,
-          14,
-          0
-        ],
-        [
-          0,
-          58,
-          0
-        ],
-        [
-          0,
-          22,
-          0
-        ]
-      ],
-      "train_end": "early stopping at step=14800 epoch=57"
-    }
-  },
-  "status": "partial",
-  "notes": "harvested from a pre-harness run with a recipe-equivalent config. LEGACY val_loss-selected checkpoint (bench recipe selects on val bal_acc); shown for reference only. [protocol tag legacy_valloss: legacy val_loss-selected run, reference only] \u26a0 degenerate: predicts only 1 of 3 classes at the selected checkpoint.",
-  "schema_version": 1
+ "task": "pd_pads",
+ "encoder": "simmtm",
+ "protocol": "legacy_valloss",
+ "seed": 42,
+ "metrics": {
+  "subject_bal_acc": 0.3333333333333333,
+  "subject_macro_f1": 0.2543859649122807,
+  "subject_acc": 0.6170212765957447,
+  "subject_vote_bal_acc": 0.3333333333333333,
+  "window_bal_acc": 0.355761639382329,
+  "window_macro_f1": 0.3041785357237255,
+  "window_acc": 0.627127659574468,
+  "n_classes_predicted": 1.0
+ },
+ "primary_metric": "subject_macro_f1",
+ "eval_split": "val",
+ "run": "vit1d_pd_probe_pads_simmtm",
+ "checkpoint": "best.pt",
+ "checkpoint_step": 10800,
+ "selection": {
+  "split": "val",
+  "monitor": "bal_acc",
+  "mode": "max",
+  "note": "window-level val balanced accuracy"
+ },
+ "job_ids": {
+  "train": 8321806,
+  "score": "9562177"
+ },
+ "provenance": {
+  "source": "scorer:bench.score.pd",
+  "date": "2026-08-17T02:10:46-05:00",
+  "git": "unknown",
+  "legacy_run": true,
+  "info": {
+   "n_windows": 16920,
+   "n_subjects": 94,
+   "subject_confusion_mean_prob": [
+    [
+     0,
+     14,
+     0
+    ],
+    [
+     0,
+     58,
+     0
+    ],
+    [
+     0,
+     22,
+     0
+    ]
+   ],
+   "train_end": "early stopping at step=14800 epoch=57"
+  }
+ },
+ "status": "partial",
+ "notes": "harvested from a pre-harness run with a recipe-equivalent config. LEGACY val_loss-selected checkpoint (bench recipe selects on val bal_acc); shown for reference only. [protocol tag legacy_valloss: legacy val_loss-selected run, reference only] \u26a0 degenerate: predicts only 1 of 3 classes at the selected checkpoint.",
+ "schema_version": 1
 }

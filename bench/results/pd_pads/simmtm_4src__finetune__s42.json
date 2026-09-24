@@ -1,62 +1,62 @@
 {
-  "task": "pd_pads",
-  "encoder": "simmtm_4src",
-  "protocol": "finetune",
-  "seed": 42,
-  "metrics": {
-    "subject_bal_acc": 0.5194805194805194,
-    "subject_macro_f1": 0.563305760488859,
-    "subject_acc": 0.723404255319149,
-    "subject_vote_bal_acc": 0.4567099567099567,
-    "window_bal_acc": 0.44898782571196366,
-    "window_macro_f1": 0.4527655621469923,
-    "window_acc": 0.5703900709219858,
-    "n_classes_predicted": 3.0
-  },
-  "primary_metric": "subject_macro_f1",
-  "eval_split": "val",
-  "run": "bench_pd_pads__simmtm_4src__finetune__s42",
-  "checkpoint": "best.pt",
-  "checkpoint_step": 5200,
-  "selection": {
-    "split": "val",
-    "monitor": "bal_acc",
-    "mode": "max",
-    "note": "window-level val balanced accuracy"
-  },
-  "job_ids": {
-    "train": null,
-    "score": "4895769"
-  },
-  "provenance": {
-    "source": "scorer:bench.score.pd",
-    "date": "2026-08-27T21:20:55-05:00",
-    "git": "unknown",
-    "legacy_run": false,
-    "info": {
-      "n_windows": 16920,
-      "n_subjects": 94,
-      "subject_confusion_mean_prob": [
-        [
-          4,
-          10,
-          0
-        ],
-        [
-          0,
-          58,
-          0
-        ],
-        [
-          0,
-          16,
-          6
-        ]
-      ],
-      "train_end": "unknown/incomplete"
-    }
-  },
-  "status": "ok",
-  "notes": "",
-  "schema_version": 1
+ "task": "pd_pads",
+ "encoder": "simmtm_4src",
+ "protocol": "finetune",
+ "seed": 42,
+ "metrics": {
+  "subject_bal_acc": 0.5194805194805194,
+  "subject_macro_f1": 0.563305760488859,
+  "subject_acc": 0.723404255319149,
+  "subject_vote_bal_acc": 0.4567099567099567,
+  "window_bal_acc": 0.44898782571196366,
+  "window_macro_f1": 0.4527655621469923,
+  "window_acc": 0.5703900709219858,
+  "n_classes_predicted": 3.0
+ },
+ "primary_metric": "subject_macro_f1",
+ "eval_split": "val",
+ "run": "bench_pd_pads__simmtm_4src__finetune__s42",
+ "checkpoint": "best.pt",
+ "checkpoint_step": 5200,
+ "selection": {
+  "split": "val",
+  "monitor": "bal_acc",
+  "mode": "max",
+  "note": "window-level val balanced accuracy"
+ },
+ "job_ids": {
+  "train": null,
+  "score": "4895769"
+ },
+ "provenance": {
+  "source": "scorer:bench.score.pd",
+  "date": "2026-08-27T21:20:55-05:00",
+  "git": "unknown",
+  "legacy_run": false,
+  "info": {
+   "n_windows": 16920,
+   "n_subjects": 94,
+   "subject_confusion_mean_prob": [
+    [
+     4,
+     10,
+     0
+    ],
+    [
+     0,
+     58,
+     0
+    ],
+    [
+     0,
+     16,
+     6
+    ]
+   ],
+   "train_end": "unknown/incomplete"
+  }
+ },
+ "status": "ok",
+ "notes": "",
+ "schema_version": 1
 }

@@ -39,7 +39,7 @@ def f(task, x):
 DECS = [("full_body_pose_nymeria_dec0x0", "linear"), ("full_body_pose_nymeria", "1+0, 192 (benchmark)"),
         ("full_body_pose_nymeria_dec1x0", "1+0"), ("full_body_pose_nymeria_dec1x4", "1+4"),
         ("full_body_pose_nymeria_deepdec", "4+8")]
-ENCS = [("mae_5src", "WristMAE"), ("focal_5src", "FOCAL"), ("control_random", "Random frozen encoder")]
+ENCS = [("mae_5src", "WristMAE (Ours)"), ("focal_5src", "FOCAL"), ("control_random", "Random frozen encoder")]
 rows = []
 for enc, lab in ENCS:
     rows.append(lab + " & " + " & ".join(f("full_body_pose_nymeria", v(t, enc)) for t, _ in DECS) + r" \\")

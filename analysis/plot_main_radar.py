@@ -52,7 +52,7 @@ th = dict(surface="#fcfcfb", ink="#0b0b0b", ink2="#52514e", muted="#898781", gri
 # band that is legal only with secondary encoding -- hence a line style and a marker shape per series.
 # Aqua and yellow sit below 3:1 on this surface; the relief is Table 2 itself and radar_normalized.csv.
 SERIES = [  # (encoder id, label, colour, line style, marker, line width pt, fill?)
-    ("mae_5src", "WristMAE (ours)", "#2a78d6", "-", "o", 1.7, True),
+    ("mae_5src", "WristMAE (Ours)", "#2a78d6", "-", "o", 1.7, True),
     ("limubert_5src", "LIMU-BERT", "#1baf7a", "-", "s", 1.0, False),
     ("simmtm_5src", "SimMTM", "#eda100", (0, (5, 2)), "^", 1.0, False),
     ("focal_5src", "FOCAL", "#4a3aa7", (0, (6, 2, 1, 2)), "D", 1.0, False),

@@ -19,8 +19,9 @@ whenever jobs land.
 | Figure 1, IMU-Bench overview | `fig:teaser` | `fig1_overview/` | `content.yaml` (what the figure must say), `current_fig_overview.tex` (TikZ) | hand-drawn |
 | Table 1, task list | `tab:imubench_tasks` | `tab1_tasks/` | `tasks.csv` | `analysis/bench_stats/make_task_table.py` |
 | Table 2, main results | `tab:main_results` | `tab2_main_results/` | `main_results_long.csv` (one row per cell, with source file), `main_results_{probe,finetune,scratch}_wide.csv` | `analysis/paper_tables/make_main_table.py` |
-| Figure 2, cross-task transfer | `fig:transferability_comparison` | `fig2_transfer/` | `transfer_long.csv`, `current_transfer5_{frozen,trainable}.png` | `analysis/plot_transferability_5src.py` |
-| Figure 3, motion types x volume grid | `fig:grid_clean` | `fig3_scaling_grid/` | `grid_long.csv`, `current_grid_5src_nonleaky.{png,pdf}` | `analysis/diversity_saturation/33_plot_grid_nonleaky.py` |
+| Figure 2, Table 2 as a radar | `fig:main_radar` | `tab2_main_results/` | `radar_normalized.csv` (raw value, panel best and relative score per cell), `current_main_radar.{png,pdf}` | `analysis/plot_main_radar.py` |
+| Figure 3, cross-task transfer | `fig:transferability_comparison` | `fig2_transfer/` | `transfer_long.csv`, `current_transfer5_{frozen,trainable}.png` | `analysis/plot_transferability_5src.py` |
+| Figure 4, motion types x volume grid | `fig:grid_clean` | `fig3_scaling_grid/` | `grid_long.csv`, `current_grid_5src_nonleaky.{png,pdf}` | `analysis/diversity_saturation/33_plot_grid_nonleaky.py` |
 | App. Table, pretraining details | `tab:pretrain_details` | `appendix_pretrain_details/` | `pretrain_details.csv` | `analysis/paper_tables/make_impl_tables.py` |
 | App. Table, downstream protocols | `tab:downstream_protocols` | `appendix_downstream_protocols/` | `downstream_protocols.csv` | same |
 | App. Table, OpenWatch audit | `tab:audit_openwatch` | `appendix_audit_openwatch/` | `audit_facts.csv`, `release_vs_canonical_split.csv` | `analysis/paper_tables/make_audit_table.py` |
@@ -30,7 +31,6 @@ whenever jobs land.
 | App. Table, corpus construction x budget | `tab:corpus_budget` | `appendix_corpus_budget/` | `corpus_budget_long.csv` | same |
 | App. Figure, volume at full diversity | `fig:volume_scaling` | `appendix_volume_scaling/` | `volume_k1000.csv`, `motion_mode_coverage.csv`, `current_volume_scaling_5src.{png,pdf}` | `analysis/diversity_saturation/31_plot_volume_5src.py` |
 | App. Table, pretraining corpus | `tab:pretraining_data_composition` | `appendix_pretrain_corpus/` | `pretrain_corpus.csv` | `analysis/bench_stats/make_pretrain_table.py` |
-| App. confidence intervals | `app:ci` | `appendix_confidence_intervals/` | `ci_summary.csv` (appears once `bench/bootstrap.py` has run) | `bench/bootstrap.py` |
 
 ## Reading the CSVs
 

@@ -1,56 +1,56 @@
 {
-  "task": "pd_pads",
-  "encoder": "pads_features",
-  "protocol": "external",
-  "seed": 0,
-  "metrics": {
-    "subject_macro_f1": 0.6181616832779624,
-    "subject_bal_acc": 0.6678608747574265,
-    "subject_acc": 0.6595744680851063,
-    "subject_vote_bal_acc": 0.6916703985669503,
-    "window_bal_acc": 0.4906059776749432,
-    "window_macro_f1": 0.44645769151340603,
-    "window_acc": 0.48469267139479905
-  },
-  "primary_metric": "subject_macro_f1",
-  "eval_split": "val",
-  "run": null,
-  "checkpoint": null,
-  "checkpoint_step": null,
-  "selection": {
-    "split": "train (5-fold GroupKFold by participant)",
-    "monitor": "window bal_acc",
-    "mode": "max"
-  },
-  "job_ids": {
-    "score": "6968021"
-  },
-  "provenance": {
-    "source": "scorer:baselines/pd/pads_pipeline.py",
-    "date": "2026-09-20T16:28:01-05:00",
-    "git": "unknown",
-    "info": {
-      "n_train_windows": 67500,
-      "n_val_windows": 16920,
-      "n_train_subjects": 375,
-      "n_val_subjects": 94,
-      "window_seconds": 2.56,
-      "hz": 50,
-      "deviations": "50 Hz cache (original 100 Hz); 2.56 s windows (original 10 s assessment steps); grid by GroupKFold on training participants; SVM on a <= svm-cap participant-stratified subsample",
-      "features": "spectral+statistical (experiment a)",
-      "classifier": "CatBoostClassifier",
-      "chosen_params": {
-        "depth": 5
-      },
-      "inner_bal_acc": 0.4730115633167412,
-      "subject_pred_class_counts": [
-        29,
-        47,
-        18
-      ]
-    }
-  },
-  "status": "ok",
-  "notes": "PADS authors' pipeline (Varghese et al. 2024) under the IMU-Bench protocol. Band power 1-19 Hz and windowed std / abs-energy / abs-max per channel, CatBoost.",
-  "schema_version": 1
+ "task": "pd_pads",
+ "encoder": "pads_features",
+ "protocol": "external",
+ "seed": 0,
+ "metrics": {
+  "subject_macro_f1": 0.6181616832779624,
+  "subject_bal_acc": 0.6678608747574265,
+  "subject_acc": 0.6595744680851063,
+  "subject_vote_bal_acc": 0.6916703985669503,
+  "window_bal_acc": 0.4906059776749432,
+  "window_macro_f1": 0.44645769151340603,
+  "window_acc": 0.48469267139479905
+ },
+ "primary_metric": "subject_macro_f1",
+ "eval_split": "val",
+ "run": null,
+ "checkpoint": null,
+ "checkpoint_step": null,
+ "selection": {
+  "split": "train (5-fold GroupKFold by participant)",
+  "monitor": "window bal_acc",
+  "mode": "max"
+ },
+ "job_ids": {
+  "score": "6968021"
+ },
+ "provenance": {
+  "source": "scorer:baselines/pd/pads_pipeline.py",
+  "date": "2026-09-20T16:28:01-05:00",
+  "git": "unknown",
+  "info": {
+   "n_train_windows": 67500,
+   "n_val_windows": 16920,
+   "n_train_subjects": 375,
+   "n_val_subjects": 94,
+   "window_seconds": 2.56,
+   "hz": 50,
+   "deviations": "50 Hz cache (original 100 Hz); 2.56 s windows (original 10 s assessment steps); grid by GroupKFold on training participants; SVM on a <= svm-cap participant-stratified subsample",
+   "features": "spectral+statistical (experiment a)",
+   "classifier": "CatBoostClassifier",
+   "chosen_params": {
+    "depth": 5
+   },
+   "inner_bal_acc": 0.4730115633167412,
+   "subject_pred_class_counts": [
+    29,
+    47,
+    18
+   ]
+  }
+ },
+ "status": "ok",
+ "notes": "PADS authors' pipeline (Varghese et al. 2024) under the IMU-Bench protocol. Band power 1-19 Hz and windowed std / abs-energy / abs-max per channel, CatBoost.",
+ "schema_version": 1
 }

@@ -1,62 +1,62 @@
 {
-  "task": "pd_pads",
-  "encoder": "scratch",
-  "protocol": "scratch",
-  "seed": 42,
-  "metrics": {
-    "subject_bal_acc": 0.37878787878787873,
-    "subject_macro_f1": 0.33950782997762863,
-    "subject_acc": 0.648936170212766,
-    "subject_vote_bal_acc": 0.37878787878787873,
-    "window_bal_acc": 0.41562297855401303,
-    "window_macro_f1": 0.4210388542754444,
-    "window_acc": 0.581855791962175,
-    "n_classes_predicted": 2.0
-  },
-  "primary_metric": "subject_macro_f1",
-  "eval_split": "val",
-  "run": "bench_pd_pads__scratch__scratch__s42",
-  "checkpoint": "best.pt",
-  "checkpoint_step": 2600,
-  "selection": {
-    "split": "val",
-    "monitor": "bal_acc",
-    "mode": "max",
-    "note": "window-level val balanced accuracy"
-  },
-  "job_ids": {
-    "train": 9560903,
-    "score": "9560903"
-  },
-  "provenance": {
-    "source": "scorer:bench.score.pd",
-    "date": "2026-08-17T02:27:06-05:00",
-    "git": "unknown",
-    "legacy_run": false,
-    "info": {
-      "n_windows": 16920,
-      "n_subjects": 94,
-      "subject_confusion_mean_prob": [
-        [
-          0,
-          14,
-          0
-        ],
-        [
-          0,
-          58,
-          0
-        ],
-        [
-          0,
-          19,
-          3
-        ]
-      ],
-      "train_end": "early stopping at step=6600 epoch=25"
-    }
-  },
-  "status": "ok",
-  "notes": "\u26a0 degenerate: predicts only 2 of 3 classes at the selected checkpoint.",
-  "schema_version": 1
+ "task": "pd_pads",
+ "encoder": "scratch",
+ "protocol": "scratch",
+ "seed": 42,
+ "metrics": {
+  "subject_bal_acc": 0.455067920585162,
+  "subject_macro_f1": 0.2989417989417989,
+  "subject_acc": 0.2872340425531915,
+  "subject_vote_bal_acc": 0.43573667711598746,
+  "window_bal_acc": 0.438990894163308,
+  "window_macro_f1": 0.3179208097296045,
+  "window_acc": 0.31879432624113474,
+  "n_classes_predicted": 3.0
+ },
+ "primary_metric": "subject_macro_f1",
+ "eval_split": "val",
+ "run": "bench_pd_pads__scratch__scratch__s42",
+ "checkpoint": "best.pt",
+ "checkpoint_step": 3400,
+ "selection": {
+  "split": "val",
+  "monitor": "bal_acc",
+  "mode": "max",
+  "note": "window-level val balanced accuracy"
+ },
+ "job_ids": {
+  "train": 7217068,
+  "score": "7217068"
+ },
+ "provenance": {
+  "source": "scorer:bench.score.pd",
+  "date": "2026-09-24T04:10:21-05:00",
+  "git": "unknown",
+  "legacy_run": false,
+  "info": {
+   "n_windows": 16920,
+   "n_subjects": 94,
+   "subject_confusion_mean_prob": [
+    [
+     14,
+     0,
+     0
+    ],
+    [
+     49,
+     8,
+     1
+    ],
+    [
+     13,
+     4,
+     5
+    ]
+   ],
+   "train_end": "early stopping at step=7400 epoch=29"
+  }
+ },
+ "status": "ok",
+ "notes": "",
+ "schema_version": 1
 }

@@ -119,7 +119,7 @@ SHORT_SRC = {"PRISM": "HAR", "Full-body": "Body", "Gesture": "Gest.", "Odometry"
 SHORT_TGT = {"PRISM activity": ("HAR", "F1 %"), "Nymeria full-body pose": ("Body", "mm"),
              "Nymeria arm pose": ("Arm", "cm"),
              "OpenWatch gesture": ("Gesture", "F1 %"), "Nymeria odometry": ("Odom.", "ATE m"),
-             "PADS Parkinson's": ("PD", "F1 %"), "HumanML3D IMU–text": ("Text", "R@1 %"), "HumanML3D IMU-text": ("Text", "R@1 %"),
+             "PADS Parkinson's": ("PD", "subj F1 %"), "HumanML3D IMU–text": ("Text", "R@1 %"), "HumanML3D IMU-text": ("Text", "R@1 %"),
              "Masked reconstruction": ("WristMAE", "val loss")}
 
 
@@ -207,11 +207,14 @@ def render_compact(spec, outdir, dpi, vmax, title, ref="scratch"):
             mag = min(abs(g), GAIN_SAT) / GAIN_SAT
             fill = (cm_neg if g < 0 else cm_pos)(mag)
             cell(x, y, CW, CH, facecolor=fill, edgecolor="none", linewidth=0)
-            # One ink for every cell, value and gain alike: the ramps above are capped so black clears
-            # WCAG AA on the darkest fill of either sign, so nothing has to switch per cell.
-            ax.text(x + CW / 2, y + CH * 0.36, short(t["fmt"], v), ha="center", va="center", fontsize=9.5,
+            # One ink for every cell: the ramps above are capped so black clears WCAG AA on the
+            # darkest fill of either sign, so nothing has to switch per cell.
+            # The signed gain used to print under the value; it was removed on 2026-09-24 (user
+            # decision), so the cell carries the metric and the gain is colour only. `g` still
+            # drives the fill above. Note this costs the red-green colour-deficiency fallback:
+            # without the printed sign, two light tints of opposite sign are hard to tell apart.
+            ax.text(x + CW / 2, y + CH * 0.5, short(t["fmt"], v), ha="center", va="center", fontsize=9.5,
                     fontweight="bold", color=pt.INK)
-            ax.text(x + CW / 2, y + CH * 0.74, f"{g:+.0f}%", ha="center", va="center", fontsize=7, color=pt.INK)
     out = Path(outdir) / spec["out"].replace(".png", "_vsmae_compact.png" if vs_mae else "_compact.png")
     fig.savefig(out, dpi=dpi, facecolor="white"); fig.savefig(str(out).replace(".png", ".pdf"), facecolor="white"); plt.close(fig)
     print(f"wrote {out}  ({fw:.2f} x {fh:.2f} in; prints at half size)")

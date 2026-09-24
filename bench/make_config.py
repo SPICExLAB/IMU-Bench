@@ -132,6 +132,14 @@ def build_config(task_id: str, encoder_id: str, protocol: str, seed: int = 42,
             dset(cfg, dotted, v)
     for dotted, v in ((task.get("recipe_by_protocol") or {}).get(protocol) or {}).items():
         dset(cfg, dotted, v)
+    # BENCH_MAX_STEPS caps trainer.max_steps for ONE submission, for an encoder that is far slower
+    # per step than the controlled 21 M ones (NormWear is 136 M and runs ~1.6 s/step on PADS, where
+    # the controlled encoders run in minutes). It is a deliberate protocol difference: the cap must
+    # sit above where that encoder's best checkpoint falls, and it has to be disclosed wherever the
+    # cell is reported. Set it on the launch command, never in the registry, so it cannot leak into
+    # a later regeneration of some other cell.
+    if os.environ.get("BENCH_MAX_STEPS"):
+        dset(cfg, "trainer.max_steps", int(os.environ["BENCH_MAX_STEPS"]))
     # ---- input normalisation --------------------------------------------------
     # A frozen or warm-started encoder must see downstream input preprocessed the way it was
     # pretrained. The encoder card's `normalize_method` (zscore | physical | raw) is authoritative
@@ -148,6 +156,12 @@ def build_config(task_id: str, encoder_id: str, protocol: str, seed: int = 42,
     #                     e.g. to resubmit a cell of a grid that was scored under it)
     # Encoders with no declared method (legacy rows, external adapters) and the scratch protocol
     # keep the previous default: physical unless BENCH_ZSCORE=1.
+    # BENCH_MAX_STEPS caps the optimiser budget of the generated cell. Used for encoders whose step cost makes the
+    # benchmark's own early-stopping budget unaffordable (NormWear on the kinematic tasks, 2026-09-23); a capped cell
+    # must say so in its note, because the controlled rows run to early stopping.
+    _cap = os.environ.get("BENCH_MAX_STEPS", "")
+    if _cap:
+        cfg.setdefault("trainer", {})["max_steps"] = int(_cap)
     force_z = os.environ.get("BENCH_ZSCORE", "") == "1"
     force_phys = os.environ.get("BENCH_PHYSICAL", "") == "1"
     if force_z and force_phys:
@@ -163,9 +177,19 @@ def build_config(task_id: str, encoder_id: str, protocol: str, seed: int = 42,
         _pre = (_yaml.safe_load(open(os.path.join(REPO, enc["preprocess_from"]))).get("preprocess") or {})
         _n = _pre.get("normalize") or {}
         _pre_method = str(_n.get("method", "zscore")) if _n.get("enabled", True) else "raw"
-        if _pre_method != declared:
-            raise ValueError(f"encoder {encoder_id}: registry normalize_method={declared!r} but its "
-                             f"pretrain config {enc['preprocess_from']} uses {_pre_method!r}")
+        # `normalize_method` is what the ENCODER saw, which is normally what the pretrain
+        # config's dataloader produced. An objective that normalises the encoder input ITSELF
+        # breaks that identity -- SimMTM's native arm feeds physical units and applies its own
+        # visible-point instance norm inside the objective, so the encoder saw ~z-scored input
+        # while the pretrain config says `physical`. Such a card states both, and must say why.
+        _expect = str(enc.get("normalize_method_pretrain") or declared)
+        if enc.get("normalize_method_pretrain") and not enc.get("normalize_method_note"):
+            raise ValueError(f"encoder {encoder_id}: normalize_method_pretrain needs "
+                             f"normalize_method_note explaining what normalises the input instead")
+        if _pre_method != _expect:
+            raise ValueError(f"encoder {encoder_id}: registry "
+                             f"{'normalize_method_pretrain' if enc.get('normalize_method_pretrain') else 'normalize_method'}"
+                             f"={_expect!r} but its pretrain config {enc['preprocess_from']} uses {_pre_method!r}")
     if dget(cfg, "preprocess.normalize") is None:
         dset(cfg, "preprocess.normalize", {"enabled": True})
     if declared == "raw":

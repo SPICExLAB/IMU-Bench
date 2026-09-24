@@ -1,0 +1,61 @@
+{
+ "task": "pd_pads",
+ "encoder": "mae_5src_acconly",
+ "protocol": "probe",
+ "seed": 42,
+ "metrics": {
+  "subject_bal_acc": 0.34848484848484845,
+  "subject_macro_f1": 0.2850561474229773,
+  "subject_acc": 0.6276595744680851,
+  "subject_vote_bal_acc": 0.34848484848484845,
+  "window_bal_acc": 0.35463419084108744,
+  "window_macro_f1": 0.3047364702049275,
+  "window_acc": 0.6230496453900709,
+  "n_classes_predicted": 2.0
+ },
+ "primary_metric": "subject_macro_f1",
+ "eval_split": "val",
+ "run": "bench_pd_pads__mae_5src_acconly__probe__s42",
+ "checkpoint": "latest.pt",
+ "checkpoint_step": 4600,
+ "selection": {
+  "split": "none",
+  "monitor": "fixed_budget",
+  "mode": "latest"
+ },
+ "job_ids": {
+  "train": 6561505,
+  "score": "6847260"
+ },
+ "provenance": {
+  "source": "scorer:bench.score.pd",
+  "date": "2026-09-19T19:18:39-05:00",
+  "git": "unknown",
+  "legacy_run": false,
+  "info": {
+   "n_windows": 16920,
+   "n_subjects": 94,
+   "subject_confusion_mean_prob": [
+    [
+     0,
+     14,
+     0
+    ],
+    [
+     0,
+     58,
+     0
+    ],
+    [
+     0,
+     21,
+     1
+    ]
+   ],
+   "train_end": "early stopping at step=4600 epoch=18"
+  }
+ },
+ "status": "ok",
+ "notes": "selection-free control: final checkpoint, no best-of-N selection (bench/rescore_noselection.py)",
+ "schema_version": 1
+}

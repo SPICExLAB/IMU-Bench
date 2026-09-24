@@ -21,8 +21,8 @@ STEPS = [  # (paper element folder, command, cwd)
     ("appendix_pretrain_corpus", ["analysis/bench_stats/make_pretrain_table.py"], REPO),
     ("tab2_main_results", ["analysis/paper_tables/make_main_table.py"], REPO),
     ("tab2_main_results/per_task", ["analysis/paper_tables/make_task_tables.py"], REPO),
+    ("tab2_main_results (radar)", ["analysis/plot_main_radar.py"], REPO),
     ("appendix_selection", ["analysis/paper_tables/make_selection_table.py"], REPO),
-    ("appendix_confidence_intervals", ["analysis/paper_tables/make_ci_table.py"], REPO),
     ("tab3_task_similarity", ["analysis/paper_tables/make_task_similarity.py"], REPO),
     ("tab3_task_similarity (figure)", ["analysis/plot_task_similarity.py"], REPO),
     ("appendix_pretrain_details + appendix_downstream_protocols", ["analysis/paper_tables/make_impl_tables.py"], REPO),
@@ -34,6 +34,8 @@ STEPS = [  # (paper element folder, command, cwd)
 ]
 COPIES = [  # rendered figures copied next to their data (reference only; the paper reads Pictures/)
     ("fig1_overview", os.path.join(PAPER, "Sections/fig_overview.tex")),
+    ("tab2_main_results", os.path.join(PAPER, "Pictures/main_radar.png")),
+    ("tab2_main_results", os.path.join(PAPER, "Pictures/main_radar.pdf")),
     ("fig2_transfer", os.path.join(PAPER, "Pictures/transfer5_frozen.png")),
     ("fig2_transfer", os.path.join(PAPER, "Pictures/transfer5_trainable.png")),
     ("tab3_task_similarity", os.path.join(PAPER, "Pictures/task_similarity.png")),
@@ -57,19 +59,6 @@ def main():
         if os.path.exists(src):
             os.makedirs(os.path.join(HERE, folder), exist_ok=True)
             shutil.copy2(src, os.path.join(HERE, folder, "current_" + os.path.basename(src)))
-    boot = os.path.join(REPO, "bench/results/_bootstrap/summary.json")
-    if os.path.exists(boot):
-        sys.path.insert(0, HERE)
-        from paper_io import write_csv
-        d = json.load(open(boot))
-        items = d.items() if isinstance(d, dict) else enumerate(d)
-        rows = [[k] + [v.get(c) for c in ("point", "lo", "hi", "n_units", "n_groups", "resample_level")]
-                for k, v in items if isinstance(v, dict)]
-        write_csv("appendix_confidence_intervals", "ci_summary.csv",
-                  ["cell", "point", "lo", "hi", "n_units", "n_groups", "resample_level"], rows)
-        print(f"[{'ok':>10}] appendix_confidence_intervals{'':30s} <- bench/results/_bootstrap/summary.json")
-    else:
-        print(f"[{'pending':>10}] appendix_confidence_intervals (bench/results/_bootstrap/summary.json not written yet)")
     return 0 if ok else 1
 
 

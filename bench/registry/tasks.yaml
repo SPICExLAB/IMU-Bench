@@ -655,13 +655,17 @@ tasks:
       note: window-level val balanced accuracy
     eval_split: val
     metrics:
-      # Switched from subject_macro_f1 on 2026-09-22. The subject metric is argmax-of-mean-posterior
-      # over 94 participants and is quantised: across 116 scored PD cells it takes only 72 distinct
-      # values (0.2544 alone is shared by 18 unrelated cells), so differences between encoders fall
-      # inside one aggregation step and the ranking it produces is not about the encoders. The window
-      # metric takes 115 distinct values over the same 116 cells. subject_macro_f1 is still scored and
-      # reported beside it -- it is the clinically meaningful unit -- it is just not what the tables rank on.
-      primary: window_macro_f1
+      # History. Until 2026-09-22 this was subject_macro_f1. It was switched to window_macro_f1
+      # because the subject metric was quantised -- 116 scored cells took only 72 distinct values and
+      # 0.2544 alone was shared by 18 of them. That quantisation was an artefact of training this head
+      # without class weighting (see recipe_by_protocol below): with weighting the 45 re-scored cells
+      # take 45 distinct values, so the reason for the switch no longer holds and the clinically
+      # meaningful unit is back as the primary (user decision 2026-09-24).
+      # What it costs, stated so it is not rediscovered as a surprise: the subject metric still does
+      # not order the encoders. The never-trained control reaches 51.7 on it, above five of the nine
+      # pretrained encoders, where on the window metric it sits at 38.4 against 44.1 for the MAE.
+      # window_macro_f1 is still scored and reported beside it.
+      primary: subject_macro_f1
       subject_macro_f1:
         higher_is_better: true
         fmt: '{:.3f}'
