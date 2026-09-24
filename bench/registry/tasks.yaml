@@ -3119,6 +3119,288 @@ tasks:
       mem: 64G
       cpus: 8
 
+  arm_pose_nymeria_p3a:
+    name: Arm pose (participant third A)
+    subtitle: Nymeria real right-wrist IMU → 5-joint right-arm chain rotations
+    family: pose
+    order: 1.5
+    dataset:
+      name: Nymeria (real wrist IMU + Project-Aria mocap)
+      train: /projects/b53017/vbc1591/processed_data_body_Ty_rwrist_p3a
+      val: /projects/b53017/vbc1591/processed_data_test_body_Ty_rwrist
+      test: null
+      split_rule: train = participant third A of the Nymeria train sessions (bench/registry/splits/nymeria_participant_thirds.json;
+        78 participants, participant-disjoint from the other two thirds); eval dir unchanged
+    input:
+      channels: 6
+      hz: 50
+      window_seconds: 10.24
+      T: 512
+      frame: FLU
+      gravity: included
+    output:
+      shape: '[P_t=32, J=5, 6]'
+      desc: 6D-continuous local rotations of SMPL joints [14,17,19,21,23] (collar, shoulder, elbow, wrist, hand), one per 0.32
+        s patch
+      head: ViT1DPoseDecoder (2 layers, hidden 192)
+    selection:
+      split: val
+      monitor: val_loss
+      mode: min
+    eval_split: val
+    metrics:
+      primary: pos_err_cm
+      pos_err_cm:
+        higher_is_better: false
+        fmt: '{:.2f}'
+        label: pos err (cm)
+        desc: FK joint-position error at the 5 arm joints with GT ancestors (scripts/eval_arm_pose_position_error.py)
+      ang_err_deg:
+        higher_is_better: false
+        fmt: '{:.2f}'
+        label: ang err (°)
+      val_pose_mse:
+        higher_is_better: false
+        fmt: '{:.5f}'
+        label: val 6D-MSE
+    scorer: bench.score.arm_pose
+    templates:
+      probe:
+        config: configs/vit1d_arm_pose_probe_nymeria_mae_multidata_flu.yaml
+        objective_type: pose_probe
+      finetune:
+        config: configs/vit1d_arm_pose_finetune_nymeria_mae_multidata_flu.yaml
+        objective_type: pose
+      scratch:
+        config: configs/vit1d_arm_pose_supervised_nymeria_altattn_scratch.yaml
+        objective_type: pose
+    recipe:
+      trainer.early_stopping:
+        enabled: true
+        monitor: val_loss
+        patience: 20
+      logging.save_step_checkpoints: false
+    slurm:
+      time: 06:00:00
+      gres: gpu:1
+      mem: 64G
+      cpus: 8
+    legacy_runs:
+      mae_11src/probe: vit1d_arm_pose_probe_nymeria_mae_multidata
+      mae_11src/finetune: vit1d_arm_pose_finetune_nymeria_mae_multidata
+      mae_5src/probe: vit1d_arm_pose_probe_nymeria_mae_realdata_ocdetect_eatingspeed_motionx_sonic
+      mae_5src/finetune: vit1d_arm_pose_finetune_nymeria_mae_realdata_ocdetect_eatingspeed_motionx_sonic
+      mae_noaltattn/probe: vit1d_arm_pose_probe_nymeria_mae_noaltattn_multidata
+      mae_acconly/probe: vit1d_arm_pose_probe_nymeria_mae_acconly_multidata
+      focal/probe: vit1d_arm_pose_probe_nymeria_focal_multidata
+      simmtm/probe: vit1d_arm_pose_probe_nymeria_simmtm_multidata
+      relcon/probe: vit1d_arm_pose_probe_nymeria_relcon_multidata
+      scratch/scratch: vit1d_arm_pose_supervised_nymeria_altattn_scratch
+    external:
+      mobileposer:
+        metrics:
+          pos_err_cm: 9.74
+          ang_err_deg: 24.28
+        source: Experiments_table.md §1 / baselines/full_body_pose/SimplePoser
+        notes: MobilePoser predicts the torso chain too (compounding); our metric holds ancestors at GT.
+    _decoder_note: 'probe decoder promoted to arm d12w on 2026-08-27: chosen by the task''s primary metric over three ~12-layer
+      variants, then applied to every encoder'
+    _probe_decoder_2026_09_19: 'frozen-probe decoder reverted on 2026-09-19 (user decision) to the task template''s original
+      decoder (arm: 2 layers, full body: 1 layer, odometry: 1 layer; width 192): with the deep decoder used from 2026-08-27
+      a never-trained frozen encoder matched the pretrained ones; those results live in arm_pose_nymeria_deepdec (appendix)'
+    enabled: false
+    note_p3: 'Nymeria participant-split transfer control (2026-09-24): arm pose, full-body pose and odometry each train on a
+      disjoint third, so a source encoder never saw the target task''s training windows or participants.'
+    recipe_by_protocol:
+      probe:
+        objective.pose_probe.train_pkl_root: /projects/b53017/vbc1591/processed_data_body_Ty_rwrist_p3a
+      finetune:
+        objective.pose.train_pkl_root: /projects/b53017/vbc1591/processed_data_body_Ty_rwrist_p3a
+      scratch:
+        objective.pose.train_pkl_root: /projects/b53017/vbc1591/processed_data_body_Ty_rwrist_p3a
+  full_body_pose_nymeria_p3b:
+    name: Full-body pose (participant third B)
+    subtitle: Nymeria real right-wrist IMU → 23-joint SMPL body (root excluded)
+    family: pose
+    order: 2.5
+    dataset:
+      name: Nymeria (real wrist IMU + Project-Aria mocap)
+      train: /projects/b53017/vbc1591/processed_data_body_Ty_rwrist_p3b
+      val: /projects/b53017/vbc1591/processed_data_test_body_Ty_rwrist
+      test: null
+      split_rule: train = participant third B of the Nymeria train sessions (bench/registry/splits/nymeria_participant_thirds.json;
+        78 participants, participant-disjoint from the other two thirds); eval dir unchanged
+    input:
+      channels: 6
+      hz: 50
+      window_seconds: 10.24
+      T: 512
+      frame: FLU
+      gravity: included
+    output:
+      shape: '[P_t=32, J=23, 6]'
+      desc: 6D local rotations for SMPL joints 1..23, one per 0.32 s patch (sub_patches=1)
+      head: ViT1DPoseDecoder
+    selection:
+      split: val
+      monitor: mpjpe_mm
+      mode: min
+    eval_split: val
+    metrics:
+      primary: mpjpe_mm
+      mpjpe_mm:
+        higher_is_better: false
+        fmt: '{:.2f}'
+        label: MPJPE (mm)
+        desc: root-relative FK joint position error, joints 1-23 (imu_lm/objectives/pose_1d.py::_compute_val_mpjpe), at the
+          selected checkpoint
+      val_pose_mse:
+        higher_is_better: false
+        fmt: '{:.5f}'
+        label: val 6D-MSE
+    scorer: bench.score.full_body_pose
+    templates:
+      probe:
+        config: configs/vit1d_full_body_pose_probe_nymeria_mae_multidata_flu.yaml
+        objective_type: pose_probe
+      finetune:
+        config: configs/vit1d_full_body_pose_finetune_nymeria_mae_multidata_flu.yaml
+        objective_type: pose
+      scratch:
+        config: configs/vit1d_full_body_pose_supervised_nymeria_altattn_scratch.yaml
+        objective_type: pose
+    recipe:
+      trainer.early_stopping:
+        enabled: true
+        monitor: mpjpe_mm
+        mode: min
+        patience: 20
+      logging.save_step_checkpoints: false
+    recipe_by_protocol:
+      finetune:
+        trainer.optim.lr: 0.001
+        objective.pose.train_pkl_root: /projects/b53017/vbc1591/processed_data_body_Ty_rwrist_p3b
+      probe:
+        objective.pose_probe.train_pkl_root: /projects/b53017/vbc1591/processed_data_body_Ty_rwrist_p3b
+      scratch:
+        objective.pose.train_pkl_root: /projects/b53017/vbc1591/processed_data_body_Ty_rwrist_p3b
+    checkpoint: best_mpjpe
+    slurm:
+      time: '12:00:00'
+      gres: gpu:1
+      mem: 96G
+      cpus: 8
+    legacy_runs:
+      mae_11src/probe: vit1d_full_body_pose_probe_nymeria_mae_multidata
+      mae_11src/finetune: vit1d_full_body_pose_finetune_nymeria_mae_multidata_lr1e-3
+      mae_5src/probe: vit1d_full_body_pose_probe_nymeria_mae_realdata_ocdetect_eatingspeed_motionx_sonic
+      mae_noaltattn/probe: vit1d_full_body_pose_probe_nymeria_mae_noaltattn_multidata
+      mae_acconly/probe: vit1d_full_body_pose_probe_nymeria_mae_acconly_multidata
+      focal/probe: vit1d_full_body_pose_probe_nymeria_focal_multidata
+      simmtm/probe: vit1d_full_body_pose_probe_nymeria_simmtm_multidata
+      relcon/probe: vit1d_full_body_pose_probe_nymeria_relcon_multidata
+      scratch/scratch: vit1d_full_body_pose_supervised_nymeria_altattn_scratch
+    external:
+      mobileposer:
+        metrics:
+          mpjpe_mm: 91.88
+        source: Experiments_table.md §2 / baselines/full_body_pose/SimplePoser
+    _decoder_note: 'probe decoder promoted to arm d12w on 2026-08-27: chosen by the task''s primary metric over three ~12-layer
+      variants, then applied to every encoder'
+    _probe_decoder_2026_09_19: 'frozen-probe decoder reverted on 2026-09-19 (user decision) to the task template''s original
+      decoder (arm: 2 layers, full body: 1 layer, odometry: 1 layer; width 192): with the deep decoder used from 2026-08-27
+      a never-trained frozen encoder matched the pretrained ones; those results live in full_body_pose_nymeria_deepdec (appendix)'
+    enabled: false
+    note_p3: 'Nymeria participant-split transfer control (2026-09-24): arm pose, full-body pose and odometry each train on a
+      disjoint third, so a source encoder never saw the target task''s training windows or participants.'
+  odometry_nymeria_local_p3c:
+    name: Odometry (participant third C)
+    subtitle: Nymeria real right-wrist IMU → pelvis velocity in the wrist (FLU) frame
+    family: odometry
+    order: 3.5
+    dataset:
+      name: Nymeria (real wrist IMU + Project-Aria pelvis trajectory)
+      train: /projects/b53017/vbc1591/processed_data_body_Ty_rwrist_p3c
+      val: /projects/b53017/vbc1591/processed_data_test_body_Ty_rwrist
+      test: null
+      split_rule: train = participant third C of the Nymeria train sessions (bench/registry/splits/nymeria_participant_thirds.json;
+        78 participants, participant-disjoint from the other two thirds); eval dir unchanged
+    input:
+      channels: 6
+      hz: 50
+      window_seconds: 2.56
+      T: 128
+      frame: FLU
+      gravity: included
+    output:
+      shape: '[P_t=8, K=4, 3]'
+      desc: 3-D pelvis velocity (m/s) expressed in the wrist FLU frame at each sub-patch midpoint (imu_lm/data/nymeria_real_wrist_odom_loader_FLU.py),
+        4 sub-patches per 0.32 s patch (0.08 s resolution)
+      head: ViT1DOdomDecoder (1 layer, hidden 192; 12 layers for the frozen probe)
+    selection:
+      split: val
+      monitor: val_loss
+      mode: min
+    eval_split: val
+    metrics:
+      primary: ate_m
+      ate_m:
+        higher_is_better: false
+        fmt: '{:.4f}'
+        label: ATE (m)
+        desc: mean absolute trajectory error over all val windows; predicted FLU velocities are rotated to the world frame with
+          the ground-truth start orientation propagated by raw-gyro integration, then summed (bench/score/odometry_local.py,
+          = scripts/eval_odom_nymeria_altattn.py::reconstruct_and_score)
+      drift_pct:
+        higher_is_better: false
+        fmt: '{:.2f}'
+        label: drift (%)
+        desc: final-position error / path length over windows with path > 0.1 m
+      vel_mse:
+        higher_is_better: false
+        fmt: '{:.5f}'
+        label: vel MSE
+    scorer: bench.score.odometry_local
+    templates:
+      probe:
+        config: configs/vit1d_odom_finetune_nymeria_mae_multidata_flu.yaml
+        objective_type: odom_finetune_nymeria_real_wrist_flu
+        extra:
+          freeze_encoder: true
+      finetune:
+        config: configs/vit1d_odom_finetune_nymeria_mae_multidata_flu.yaml
+        objective_type: odom_finetune_nymeria_real_wrist_flu
+      scratch:
+        config: configs/vit1d_odom_supervised_nymeria_altattn_scratch.yaml
+        objective_type: odom_nymeria_real_wrist_flu
+    recipe:
+      trainer.early_stopping:
+        enabled: true
+        monitor: val_loss
+        patience: 20
+        min_delta: 0.0001
+      logging.save_step_checkpoints: false
+    slurm:
+      time: 08:00:00
+      gres: gpu:1
+      mem: 64G
+      cpus: 8
+    _note: 'replaces odometry_nymeria_worldframe on 2026-09-18 (user decision): same data, windows, decoders, recipe and budgets;
+      only the label frame (wrist FLU instead of per-window heading-canonical world frame) and the matching ATE reconstruction
+      change. World-frame results are void.'
+    _probe_decoder_2026_09_19: 'frozen-probe decoder reverted on 2026-09-19 (user decision) to the task template''s original
+      decoder (arm: 2 layers, full body: 1 layer, odometry: 1 layer; width 192): with the deep decoder used from 2026-08-27
+      a never-trained frozen encoder matched the pretrained ones; those results live in odometry_nymeria_local_deepdec (appendix)'
+    enabled: false
+    note_p3: 'Nymeria participant-split transfer control (2026-09-24): arm pose, full-body pose and odometry each train on a
+      disjoint third, so a source encoder never saw the target task''s training windows or participants.'
+    recipe_by_protocol:
+      probe:
+        objective.odom_finetune_nymeria_real_wrist_flu.train_pkl_root: /projects/b53017/vbc1591/processed_data_body_Ty_rwrist_p3c
+      finetune:
+        objective.odom_finetune_nymeria_real_wrist_flu.train_pkl_root: /projects/b53017/vbc1591/processed_data_body_Ty_rwrist_p3c
+      scratch:
+        objective.odom_nymeria_real_wrist_flu.train_pkl_root: /projects/b53017/vbc1591/processed_data_body_Ty_rwrist_p3c
 aggregates:
   har_mean:
     name: HAR (4 datasets)

@@ -56,3 +56,18 @@ shown this and decided:
   `vit1d_ssl_mae_abl_fixedlen` and its 3 landed cells stay in bench/results, unused.
 General request: a cancel costs more than a nice value and cannot be undone. Please leave a line here before cancelling
 another instance's jobs, as this file asked at 04:20.
+
+## 2026-09-24 02:40 CDT — Nymeria participant-split transfer control (24 jobs on b53017), please do not cancel
+User decision: answer the "arm / body / odometry all come from Nymeria" objection to Figure 3 with a participant-split
+control. The 867 Nymeria train sessions are split into three participant-disjoint thirds (78 participants each,
+`bench/registry/splits/nymeria_participant_thirds.json`, symlink dirs `processed_data_body_Ty_rwrist_p3{a,b,c}`);
+arm trains on A, body on B, odometry on C; the eval dir is unchanged. New task cards `*_p3a/_p3b/_p3c`
+(`enabled: false`, so no table or fill-missing picks them up) and encoder cards `txs3_*`. Generated with BENCH_ZSCORE=1
+(the paper's scratch cells are z-score; without it scratch defaults to physical).
+- sources (scratch): 7224748 arm-A, 7224749 body-B, 7224750 odom-C
+- references: 7224751/54/57 control_random probe; WristMAE column 7224752-53/55-56/58-59 (nice=500)
+- transfer cells: 7224786-7224795, 7224814-15, each afterok on its source
+Your PD reruns are older and run first; I have not touched them.
+FYI: 27 of my native-preprocessing fine-tunes (7212525-7212912) were cancelled by our uid at 00:46 with no note here.
+The user had asked for them; the 10 remaining `mae_5src_physin` cells are now HELD by me (user decision), not cancelled.
+Before cancelling any of the jobs above, write the reason here first.

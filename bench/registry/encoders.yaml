@@ -3849,3 +3849,60 @@ encoders:
     pretrain_data: mae_5src corpus for the warm start, then joint supervision on Nymeria full-body pose and OpenWatch microgesture
     pretrain_objective: MAE warm start, then joint supervised adaptation on a kinematic and a semantic task, 40,000 steps, 10:1 sampling (OpenWatch is far smaller)
     eval_note: final encoder, no checkpoint selection; the 10:1 ratio pairs a large kinematic set with a small gesture set, so it tests joint adaptation across task types rather than within one
+  txs3_armpose:
+    name: Trained from scratch on arm pose (no pretraining, participant third A)
+    short: txs3_armpose
+    group: transfer
+    order: 4150
+    hide_in_summary: true
+    run: bench_arm_pose_nymeria_p3a__scratch__scratch__s42
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/vit1d_ssl_mae_varlen_altattn_realdata_ocdetect_eatingspeed_motionx_sonic_flu.yaml
+    pretrain_data: 'none -- from-scratch run on arm_pose_nymeria_p3a: participant third A of the Nymeria train sessions only
+      (bench/registry/splits/nymeria_participant_thirds.json)'
+    pretrain_objective: supervised, from scratch
+    eval_note: 'participant-split transfer control (2026-09-24): evaluated only on the OTHER two thirds'' task variants, so
+      source and target never share training windows or participants.'
+  txs3_fullbody:
+    name: Trained from scratch on full-body pose (no pretraining, participant third B)
+    short: txs3_fullbody
+    group: transfer
+    order: 4150
+    hide_in_summary: true
+    run: bench_full_body_pose_nymeria_p3b__scratch__scratch__s42
+    ckpt: /gpfs/home/vbc1591/IMU-SSL/runs/bench_full_body_pose_nymeria_p3b__scratch__scratch__s42/checkpoints/best_mpjpe.pt
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/vit1d_ssl_mae_varlen_altattn_realdata_ocdetect_eatingspeed_motionx_sonic_flu.yaml
+    pretrain_data: 'none -- from-scratch run on full_body_pose_nymeria_p3b: participant third B of the Nymeria train sessions
+      only (bench/registry/splits/nymeria_participant_thirds.json)'
+    pretrain_objective: supervised, from scratch
+    eval_note: 'participant-split transfer control (2026-09-24): evaluated only on the OTHER two thirds'' task variants, so
+      source and target never share training windows or participants.'
+  txs3_odom:
+    name: Trained from scratch on odometry (wrist-frame velocity, participant third C) (no pretraining, participant third C)
+    short: txs3_odom
+    group: transfer
+    order: 4150
+    hide_in_summary: true
+    run: bench_odometry_nymeria_local_p3c__scratch__scratch__s42
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/vit1d_ssl_mae_varlen_altattn_realdata_ocdetect_eatingspeed_motionx_sonic_flu.yaml
+    pretrain_data: 'none -- from-scratch run on odometry_nymeria_local_p3c: participant third C of the Nymeria train sessions
+      only (bench/registry/splits/nymeria_participant_thirds.json)'
+    pretrain_objective: supervised, from scratch
+    eval_note: 'participant-split transfer control (2026-09-24): evaluated only on the OTHER two thirds'' task variants, so
+      source and target never share training windows or participants.'
