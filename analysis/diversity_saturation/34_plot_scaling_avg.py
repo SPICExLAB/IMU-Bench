@@ -45,7 +45,7 @@ K_TYPES = [1, 5, 10, 25, 50, 100, 1000]
 
 per_task, hib = collections.defaultdict(dict), {}
 for r in csv.DictReader(open(os.path.join(REPO, "paper_results", "fig3_scaling_grid", "grid_long.csv"))):
-    if r["panel"].startswith("MAE"):
+    if r["panel"].startswith(("WristMAE", "MAE")):
         continue
     per_task[r["panel"]][r["cell"]] = float(r["value"])
     hib[r["panel"]] = r["higher_is_better"] == "1"

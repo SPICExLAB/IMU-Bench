@@ -5,7 +5,7 @@
 
 Writes <paper>/Sections/tab_task_<id>.tex and the numbers behind them to
 paper_results/tab2_main_results/per_task_all_metrics.csv. Rows: the self-supervised encoders and the
-MAE ablations under both protocols, the two decoder controls (frozen probe) and training from
+WristMAE ablations under both protocols, the two decoder controls (frozen probe) and training from
 scratch. Columns: the task card's metrics, primary first. Pending cells print "--".
 
 The four activity-recognition sets share one metric set, so they share one table (tab:task_har) with
@@ -182,9 +182,13 @@ OURS = "mae_5src"
 
 def write_table(table_id, columns, header_lines, caption, wide):
     ssl = {e for e, _, g, _ in CONTROLLED if g == "ssl"}
-    probe = [(e, lab, "probe") for e, lab, _, _ in CONTROLLED if e == OURS]
-    ft = [(e, lab, "finetune") for e, lab, _, _ in CONTROLLED if e == OURS]
-    ctrl = []
+    # Full comparison restored 2026-09-23 (user decision): these tables now live in the appendix,
+    # where they cost no main-text page, so the per-task view carries every controlled encoder again
+    # instead of only ours. Table~\ref{tab:main_results} keeps the same rows across all ten tasks;
+    # here the reader sees them one task at a time, next to that task's specialist systems.
+    probe = [(e, lab, "probe") for e, lab, _, _ in CONTROLLED]
+    ft = [(e, lab, "finetune") for e, lab, _, _ in CONTROLLED]
+    ctrl = [(e, lab, "probe") for e, lab in CONTROLS]
     n = len(columns)
     env, size = ("table*", r"\scriptsize") if wide else ("table", r"\small")
     # Shrink-only-if-needed on every table, not just the wide ones: a long row label (a published
@@ -297,7 +301,7 @@ KIN_CAPTION = {"arm_pose_nymeria": "Arm pose: right-arm chain, five joints.",
                "full_body_pose_nymeria": "Full-body pose: 23 SMPL joints.",
                "odometry_nymeria_local": "Odometry: pelvis velocity, wrist frame."}
 KIN_ROW = ["arm_pose_nymeria", "full_body_pose_nymeria", "odometry_nymeria_local"]
-KIN_SHORT_LABELS = [("MAE, plain attention", "MAE, plain attn."), ("MAE, accelerometer only", "MAE, acc.\\ only"),
+KIN_SHORT_LABELS = [("WristMAE, plain attention", "WristMAE, plain attn."), ("WristMAE, accelerometer only", "WristMAE, acc.\\ only"),
                     ("Random frozen encoder", "Random encoder"), ("Raw input, 0 layers", "Raw input"),
                     ("MobilePoser (Xu et al.)", "MobilePoser"), ("IMUPoser (Mollyn et al.)", "IMUPoser"),
                     (r"\emph{Task-specific systems} (not ranked)", r"\emph{Task-specific}"),

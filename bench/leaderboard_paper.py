@@ -46,10 +46,14 @@ COLS = [  # task id, short label, metric label
 # A task whose primary metric alone would misrepresent it gets a second column in the wide tables.
 # Parkinson's subject-level aggregation is near-degenerate (most models label every participant with
 # the majority class), so the window-level macro-F1 is reported beside the subject one.
-EXTRA_COLS = {"pd_pads": ("window_macro_f1", "PD", "win F1")}
+# No extra columns. The PD subject metric was one until 2026-09-22; it is quantised (72 distinct
+# values over 116 scored cells against 115 for the window metric) and carrying it in the main table
+# invited readers to rank on it. It is still scored, and the per-task Parkinson's table and the
+# appendix discussion report it; the main table does not.
+EXTRA_COLS = {}
 HAR3 = ["har_hhar", "har_mhealth", "har_prism", "har_userwatch"]
 CONTROLLED = [  # encoder id, label, group, pretrain run
-    ("mae_5src", "MAE", "ssl", "vit1d_ssl_mae_varlen_altattn_realdata_ocdetect_eatingspeed_motionx_sonic"),
+    ("mae_5src", "WristMAE", "ssl", "vit1d_ssl_mae_varlen_altattn_realdata_ocdetect_eatingspeed_motionx_sonic"),
     ("limubert_5src", "LIMU-BERT", "ssl", "vit1d_ssl_limubert_5src"),
     ("simmtm_5src", "SimMTM", "ssl", "vit1d_ssl_simmtm_5src"),
     ("focal_5src", "FOCAL", "ssl", "vit1d_ssl_focal_5src"),
@@ -57,15 +61,31 @@ CONTROLLED = [  # encoder id, label, group, pretrain run
     ("sslwear_5src", "SSL-Wearables", "ssl", "vit1d_ssl_sslwear_5src"),
     ("dino_5src", "DINO", "ssl", "vit1d_ssl_dino_5src"),
     ("jepa_5src", "I-JEPA", "ssl", "vit1d_ssl_jepa_5src"),
-    ("mae_5src_noaltattn", "MAE, plain attention", "ablation", "vit1d_ssl_mae_varlen_noaltattn_5src"),
-    ("mae_5src_acconly", "MAE, accelerometer only", "ablation", "vit1d_ssl_mae_varlen_acconly_5src"),
+    ("mae_5src_noaltattn", "WristMAE, plain attention", "ablation", "vit1d_ssl_mae_varlen_noaltattn_5src"),
+    ("mae_5src_acconly", "WristMAE, accelerometer only", "ablation", "vit1d_ssl_mae_varlen_acconly_5src"),
 ]
-# An encoder whose pretraining has not finished has no cells at all; keep it out of the paper tables rather than
-# printing a row of dashes (it reappears by itself as soon as its first result lands).
+# A controlled row is a claim about one objective under a fixed protocol, so it enters the paper tables
+# only once every task has been scored under both protocols; until then it would print a row that is
+# mostly dashes and invite comparisons across different subsets of the benchmark (user decision
+# 2026-09-23, on DINO at 9/20 cells and I-JEPA at 4/20). The gate clears itself: the row reappears on
+# the next regeneration after its last cell lands, with no edit here.
 from bench.schema import RESULTS_ROOT as _RESULTS_ROOT
+
+
+def _complete(enc: str) -> bool:
+    for task, _, _ in COLS:
+        for proto in ("probe", "finetune"):
+            f = os.path.join(_RESULTS_ROOT, task, f"{enc}__{proto}__s42.json")
+            try:
+                if json.load(open(f)).get("status") != "ok":
+                    return False
+            except (OSError, ValueError):
+                return False
+    return True
+
+
 _CONTROLLED_ALL = CONTROLLED
-CONTROLLED = [r for r in CONTROLLED
-              if glob.glob(os.path.join(_RESULTS_ROOT, "*", f"{r[0]}__*__s*.json"))]
+CONTROLLED = [r for r in CONTROLLED if _complete(r[0])]
 
 EXTERNAL = [("mobileposer", "MobilePoser"), ("tlio", "TLIO"), ("airio", "Air-IO"), ("mixtoken", "Mix-Token"),
             ("normwear", "NormWear"), ("unimts", "UniMTS, official checkpoint"), ("unimts_scratch", "UniMTS, from scratch"),

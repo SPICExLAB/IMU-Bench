@@ -170,7 +170,7 @@ for fam, task, ds, subj, hrs, out, met, split in rows:
     prev = fam
 lines.append(r"\midrule")
 for i, (name, wins, hrs) in enumerate(pre_rows):
-    lines.append(f"{'MAE pretraining' if i == 0 else ''} & {name} & {fmt_h(hrs)} \\\\")
+    lines.append(f"{'WristMAE pretraining' if i == 0 else ''} & {name} & {fmt_h(hrs)} \\\\")
 # no total row: the hour column is each dataset's RELEASED size, and summing sizes of sources we only partly use is meaningless
 lines += [r"\bottomrule", r"\end{tabular}", "}", r"\vspace{-3mm}", r"\end{wraptable}", ""]
 open(OUT, "w").write("\n".join(lines))

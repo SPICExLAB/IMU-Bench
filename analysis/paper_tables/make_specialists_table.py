@@ -5,7 +5,7 @@
 
 Writes <paper>/Sections/tab_specialists.tex. Tasks run across the columns, as in
 Table~\\ref{tab:main_results}, with the same short names, units and rounding. Rows: training from
-scratch, Omni-IMU frozen and fine-tuned, and the best-scoring published system for each task
+scratch, WristMAE frozen and fine-tuned, and the best-scoring published system for each task
 retrained under the benchmark's protocol, with a name row underneath that spans the tasks a system
 covers. The full per-task tables (every metric, every system) are in the appendix; this table exists
 so the body can make the comparison without them.
@@ -67,8 +67,8 @@ def fmt(task, v):
 TASKS = [t for t, _, _ in COLS]
 n = len(TASKS)
 rows = [("Trained from scratch", [value(t, "scratch", "scratch") for t in TASKS], True),
-        ("Omni-IMU, frozen probe", [value(t, OURS, "probe") for t in TASKS], True),
-        ("Omni-IMU, fine-tuned", [value(t, OURS, "finetune") for t in TASKS], True)]
+        ("WristMAE, frozen probe", [value(t, OURS, "probe") for t in TASKS], True),
+        ("WristMAE, fine-tuned", [value(t, OURS, "finetune") for t in TASKS], True)]
 expert = [best_expert(t) for t in TASKS]
 rows.append(("Task-specific system", [v for v, _ in expert], False))
 missing = [t for t, (v, _) in zip(TASKS, expert) if v is None]
@@ -110,7 +110,7 @@ for title, k in GROUPS:
 assert sum(k for _, k in GROUPS) == n, "GROUPS must cover every column"
 
 caption = (
-    r"\textbf{Omni-IMU against the system built for each task.} Every row is scored on the task's primary metric "
+    r"\textbf{WristMAE against the system built for each task.} Every row is scored on the task's primary metric "
     r"under this benchmark's protocol, with the same short names, units and rounding as Table~\ref{tab:main_results}; "
     r"bold marks the best of the three controlled rows. The task-specific row is the better of the published systems "
     r"available for that task, retrained on our splits: MobilePoser and IMUPoser~\citep{mollyn2023imuposer} for pose, "

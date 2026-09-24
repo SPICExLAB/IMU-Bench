@@ -96,11 +96,17 @@ def train_script(task_id, enc, proto, seed, tasks, encoders) -> Tuple[str, str]:
     body = _HEADER.format(account=ACCOUNT, partition=PARTITION, gres=sl.get("gres", "gpu:1"),
                           time=os.environ.get("BENCH_TIME") or sl.get("time", "06:00:00"), cpus=sl.get("cpus", 8), mem=sl.get("mem", "64G"),
                           job=name, repo=REPO, venv=VENV)
+    _over_guard = "" if os.environ.get("BENCH_RESCORE_OVER") else (
+        f'if [ -f "{RESULTS_ROOT}/{task_id}/{enc}__{proto}__s{seed}.json" ]; '
+        f'then echo "[bench] result exists -> skip"; exit 0; fi\n')
     body += f"""
 # ---- train ----------------------------------------------------------------
 # twin guard: the same cell may be queued on two partitions; the second copy exits if the
-# first already produced the result or is RUNNING right now.
-if [ -f "{RESULTS_ROOT}/{task_id}/{enc}__{proto}__s{seed}.json" ]; then echo "[bench] result exists -> skip"; exit 0; fi
+# first already produced the result or is RUNNING right now. BENCH_RESCORE_OVER=1 at SUBMIT time
+# bakes out the first check, for a deliberate rerun of cells that are already scored (a protocol
+# change): the old result then stays readable until the new one overwrites it, so the paper tables
+# never go blank mid-flight. It never disables the RUNNING check.
+{_over_guard}if squeue -u "$USER" -h -n "$SLURM_JOB_NAME" -t RUNNING -o "%i" | grep -qv "^$SLURM_JOB_ID$"; then echo "[bench] twin RUNNING elsewhere -> skip"; exit 0; fi
 if squeue -u "$USER" -h -n "$SLURM_JOB_NAME" -t RUNNING -o "%i" | grep -qv "^$SLURM_JOB_ID$"; then echo "[bench] twin RUNNING elsewhere -> skip"; exit 0; fi
 CUDA_VISIBLE_DEVICES=0 python scripts/run_pretrain.py \\
     --config configs/base.yaml \\

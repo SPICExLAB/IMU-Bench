@@ -16,8 +16,8 @@ encoders:
     _hidden_note: pretrained on a pool that overlaps the evaluation sets; kept in the coverage grid and
       per-task detail, out of the headline tables
   mae_5src:
-    name: "Ours (MAE, 5-source) \u26A0 eval-overlap pool"
-    short: MAE-5src
+    name: "WristMAE (5-source) \u26A0 eval-overlap pool"
+    short: WristMAE-5src
     group: ours
     order: 1
     run: vit1d_ssl_mae_varlen_altattn_realdata_ocdetect_eatingspeed_motionx_sonic
@@ -3148,8 +3148,8 @@ encoders:
     eval_note: same config as the 11-source row with the other sources disabled; early stopping (patience 10) capped at 160k steps; mae_5src stopped at 154k
     hide_in_summary: true
   mae_5src_noaltattn:
-    name: Ours (MAE, 5-source, no alt-attn)
-    short: MAE-5src-noAA
+    name: WristMAE (5-source, no alt-attn)
+    short: WristMAE-5src-noAA
     group: ablation
     order: 10.5
     run: vit1d_ssl_mae_varlen_noaltattn_5src
@@ -3165,8 +3165,8 @@ encoders:
     eval_note: same config as the 11-source row with the other sources disabled; early stopping (patience 10) capped at 160k steps; mae_5src stopped at 154k
     hide_in_summary: true
   mae_5src_acconly:
-    name: Ours (MAE, 5-source, acc-only)
-    short: MAE-5src-acc
+    name: WristMAE (5-source, acc-only)
+    short: WristMAE-5src-acc
     group: ablation
     order: 11.5
     run: vit1d_ssl_mae_varlen_acconly_5src
@@ -3249,6 +3249,42 @@ encoders:
     pretrain_objective: I-JEPA (Assran et al. 2023) on shared ViT1D backbone -- 4 target time blocks (15-20 %) predicted from one context span (85-100 %) in the EMA target encoder's representation space, smooth-L1, predictor 192 x 4 layers
     eval_note: shared-backbone baseline added 2026-09-21; same trainer, cap 160k steps and ES rule as the other 5-source baselines
     hide_in_summary: true
+  mt_body_odom:
+    name: Multi-task joint fine-tune (full-body pose + odometry, 1:1, 40k steps)
+    short: mt_body_odom
+    group: multitask
+    order: 3200
+    hide_in_summary: true
+    run: mt_body_odom
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    pretrain_data: identical to mae_5src (the joint run starts from that checkpoint)
+    pretrain_objective: 'MAE-5src initialisation, then ONE shared encoder fine-tuned jointly on full-body pose and wrist-frame odometry
+      (scripts/train_multitask_joint.py): one task per step in a fixed ratio cycle, per-task decoders, encoder lr 3e-4'
+    eval_note: 'multi-task experiment 2026-09-22 -- each cell is scored from the joint run''s own head, so it is
+      comparable with that task''s single-task fine-tune row; score with `--run mt_body_odom__<task>`'
+  mt_body_gesture:
+    name: Multi-task joint fine-tune (full-body pose + microgesture, 10:1, 22k steps)
+    short: mt_body_gesture
+    group: multitask
+    order: 3200
+    hide_in_summary: true
+    run: mt_body_gesture
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    pretrain_data: identical to mae_5src (the joint run starts from that checkpoint)
+    pretrain_objective: 'MAE-5src initialisation, then ONE shared encoder fine-tuned jointly on full-body pose and microgesture
+      (scripts/train_multitask_joint.py): one task per step in a fixed ratio cycle, per-task decoders, encoder lr 3e-4'
+    eval_note: 'multi-task experiment 2026-09-22 -- each cell is scored from the joint run''s own head, so it is
+      comparable with that task''s single-task fine-tune row; score with `--run mt_body_gesture__<task>`'
   # --- cross-task transfer sources: MAE-5src fine-tuned on one IMU-Bench task (paper Section 4), added 2026-09-17 ---
   tx5_prism:
     name: MAE-5src fine-tuned on PRISM activity recognition
@@ -3769,3 +3805,47 @@ encoders:
     pretrain_data: none -- the encoder is the benchmark's from-scratch run on arm pose (random init, the task's own training split only)
     pretrain_objective: supervised, from scratch
     eval_note: transfer source without pretraining; its own task is excluded as a target. Added 2026-09-22 so Figure 3 carries arm pose as both a source column and a target row.
+  # ── Multi-task joint adaptation (2026-09-22) ─────────────────────────────────
+  # One shared encoder, warm-started from mae_5src, updated by several IMU-Bench tasks at once
+  # (scripts/train_multitask_joint.py). The question is whether joint adaptation keeps the
+  # generality that single-task fine-tuning spends: the txs_*/tx5_* columns show that adapting to
+  # one task specialises the encoder, so these rows ask what happens when two pull at once.
+  # ⚠ `ckpt: best` here is NOT a selected checkpoint. The script runs a fixed budget and saves the
+  # FINAL encoder under that name (train_multitask_joint.py:259) so the harness reads it unchanged,
+  # so these rows carry no checkpoint-selection advantage -- unlike every other row in the table.
+  # The encoder is byte-identical across the run's per-task directories (verified: 156 tensors);
+  # the card names the first task's directory by convention.
+  mt_body_odom:
+    name: Multi-task (full-body pose + odometry, 1:1)
+    short: MT-body+odom
+    group: transfer
+    order: 4200
+    hide_in_summary: true
+    run: mt_body_odom__full_body_pose_nymeria
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/vit1d_ssl_mae_varlen_altattn_realdata_ocdetect_eatingspeed_motionx_sonic_flu.yaml
+    pretrain_data: mae_5src corpus for the warm start, then joint supervision on Nymeria full-body pose and wrist-frame odometry
+    pretrain_objective: MAE warm start, then joint supervised adaptation on two kinematic tasks, 40,000 steps, 1:1 sampling
+    eval_note: final encoder, no checkpoint selection; compare against tx5_fullbody and tx5_odom, the single-task adaptations of the same MAE
+  mt_body_gesture:
+    name: Multi-task (full-body pose + microgesture, 10:1)
+    short: MT-body+gest
+    group: transfer
+    order: 4201
+    hide_in_summary: true
+    run: mt_body_gesture__full_body_pose_nymeria
+    ckpt: best
+    alt_attention: true
+    channels: 6
+    shared_kernel: acc_gyro
+    params_m: 21
+    normalize_method: zscore
+    preprocess_from: configs/vit1d_ssl_mae_varlen_altattn_realdata_ocdetect_eatingspeed_motionx_sonic_flu.yaml
+    pretrain_data: mae_5src corpus for the warm start, then joint supervision on Nymeria full-body pose and OpenWatch microgesture
+    pretrain_objective: MAE warm start, then joint supervised adaptation on a kinematic and a semantic task, 40,000 steps, 10:1 sampling (OpenWatch is far smaller)
+    eval_note: final encoder, no checkpoint selection; the 10:1 ratio pairs a large kinematic set with a small gesture set, so it tests joint adaptation across task types rather than within one

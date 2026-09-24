@@ -1,0 +1,62 @@
+{
+ "task": "pd_pads",
+ "encoder": "limubert_5src",
+ "protocol": "probe",
+ "seed": 42,
+ "metrics": {
+  "subject_bal_acc": 0.37878787878787873,
+  "subject_macro_f1": 0.33950782997762863,
+  "subject_acc": 0.648936170212766,
+  "subject_vote_bal_acc": 0.37878787878787873,
+  "window_bal_acc": 0.4032969265727886,
+  "window_macro_f1": 0.40261012289233067,
+  "window_acc": 0.6043144208037825,
+  "n_classes_predicted": 2.0
+ },
+ "primary_metric": "window_macro_f1",
+ "eval_split": "val",
+ "run": "bench_pd_pads__limubert_5src__probe__s42",
+ "checkpoint": "best.pt",
+ "checkpoint_step": 600,
+ "selection": {
+  "split": "val",
+  "monitor": "bal_acc",
+  "mode": "max",
+  "note": "window-level val balanced accuracy"
+ },
+ "job_ids": {
+  "train": 6563351,
+  "score": "6563351"
+ },
+ "provenance": {
+  "source": "scorer:bench.score.pd",
+  "date": "2026-09-18T20:05:09-05:00",
+  "git": "unknown",
+  "legacy_run": false,
+  "info": {
+   "n_windows": 16920,
+   "n_subjects": 94,
+   "subject_confusion_mean_prob": [
+    [
+     0,
+     14,
+     0
+    ],
+    [
+     0,
+     58,
+     0
+    ],
+    [
+     0,
+     19,
+     3
+    ]
+   ],
+   "train_end": "early stopping at step=4600 epoch=18"
+  }
+ },
+ "status": "ok",
+ "notes": "",
+ "schema_version": 1
+}

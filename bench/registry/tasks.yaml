@@ -655,7 +655,13 @@ tasks:
       note: window-level val balanced accuracy
     eval_split: val
     metrics:
-      primary: subject_macro_f1
+      # Switched from subject_macro_f1 on 2026-09-22. The subject metric is argmax-of-mean-posterior
+      # over 94 participants and is quantised: across 116 scored PD cells it takes only 72 distinct
+      # values (0.2544 alone is shared by 18 unrelated cells), so differences between encoders fall
+      # inside one aggregation step and the ranking it produces is not about the encoders. The window
+      # metric takes 115 distinct values over the same 116 cells. subject_macro_f1 is still scored and
+      # reported beside it -- it is the clinically meaningful unit -- it is just not what the tables rank on.
+      primary: window_macro_f1
       subject_macro_f1:
         higher_is_better: true
         fmt: '{:.3f}'
@@ -706,6 +712,23 @@ tasks:
         mode: max
         patience: 20
       logging.save_step_checkpoints: false
+    recipe_by_protocol:
+      # PADS is 17 % HC / 58 % PD / 24 % DD (train class_counts 11700/39240/16560). Under
+      # unweighted CE the head's posteriors carry that prior, and the subject metric averages
+      # ~180 windows per subject, which removes the per-window noise and leaves the prior: on
+      # 2026-09-23, 73 of 118 scored cells never predicted all three classes at subject level and
+      # 15 predicted PD for all 94 subjects (subject macro-F1 exactly 0.2544). The window
+      # classifier is not collapsed in those cells -- mae_4src_physnp finetune reads 0.412 window
+      # bal-acc while predicting PD for every subject -- so the fault is prior miscalibration,
+      # which is what the weighted loss removes. Every other classification task in the benchmark
+      # already trains with it. Enabled 2026-09-24; cells scored before that date are NOT
+      # comparable with cells scored after.
+      probe:
+        objective.utd_mhad_probe.class_weighted_ce: true
+      finetune:
+        objective.utd_mhad_finetune.class_weighted_ce: true
+      scratch:
+        objective.supervised.class_weighted_ce: true
     slurm:
       time: 03:00:00
       gres: gpu:1
