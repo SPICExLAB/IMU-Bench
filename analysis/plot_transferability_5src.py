@@ -115,12 +115,12 @@ def build(proto, mae_label, mae_sub, out, prefix="tx5_", ref=REF_SCRATCH, with_m
 # for 2.7 x 1.75 in on the page), so a 10-pt value prints at 5 pt. Same colour ramp and ink as the full
 # renderer; short labels, integer gains and no colour bar (every cell prints its gain).
 SHORT_SRC = {"PRISM": "HAR", "Full-body": "Body", "Gesture": "Gest.", "Odometry": "Odom.", "Parkinson's": "PD",
-             "IMU-text": "Text", "IMU–text": "Text", "inrtlWrist probe": "inrtlWrist", "inrtlWrist finetune": "inrtlWrist"}
+             "IMU-text": "Text", "IMU–text": "Text", "InrtlWrist probe": "InrtlWrist", "InrtlWrist finetune": "InrtlWrist"}
 SHORT_TGT = {"PRISM activity": ("HAR", "F1 %"), "Nymeria full-body pose": ("Body", "mm"),
              "Nymeria arm pose": ("Arm", "cm"),
              "OpenWatch gesture": ("Gesture", "F1 %"), "Nymeria odometry": ("Odom.", "ATE m"),
              "PADS Parkinson's": ("PD", "subj F1 %"), "HumanML3D IMU–text": ("Text", "R@1 %"), "HumanML3D IMU-text": ("Text", "R@1 %"),
-             "Masked reconstruction": ("inrtlWrist", "val loss")}
+             "Masked reconstruction": ("InrtlWrist", "val loss")}
 
 
 # Diverging encoding of the gain over training from scratch: green = benefit, orange-pink = harm, neutral grey at
@@ -174,7 +174,7 @@ def render_compact(spec, outdir, dpi, vmax, title, ref="scratch"):
         ax.text(PAD, PAD + 0.02, title, ha="left", va="top", fontsize=9.5, fontweight="bold", color=pt.INK)
     ax.text(x_ref + REF / 2, y0 - 0.05, spec.get("ref_short", "Scratch"), ha="center", va="bottom", fontsize=8.5, fontweight="bold", color=pt.INK_2)
     if vs_mae:
-        ax.text(x_ref + 1.5 * REF, y0 - 0.05, "inrtlWrist", ha="center", va="bottom", fontsize=8.5, fontweight="bold", color=pt.INK)
+        ax.text(x_ref + 1.5 * REF, y0 - 0.05, "InrtlWrist", ha="center", va="bottom", fontsize=8.5, fontweight="bold", color=pt.INK)
     for j, (_, lab, _) in enumerate(sources):
         ax.text(x0 + (j + 0.5) * CW, y0 - 0.05, SHORT_SRC.get(lab, lab), ha="center", va="bottom", fontsize=8.5,
                 fontweight="bold", color=pt.INK)
@@ -224,16 +224,16 @@ def main():
     ap.add_argument("--outdir", default="/gpfs/home/vbc1591/paper_iclr/Pictures")
     ap.add_argument("--dpi", type=int, default=400)
     a = ap.parse_args()
-    pt.TABLES = {"scratch": build("probe", "inrtlWrist probe", "self-supervised", "transfer5_frozen.png"),
-                 "finetune": build("finetune", "inrtlWrist finetune", "direct", "transfer5_trainable.png"),
+    pt.TABLES = {"scratch": build("probe", "InrtlWrist probe", "self-supervised", "transfer5_frozen.png"),
+                 "finetune": build("finetune", "InrtlWrist finetune", "direct", "transfer5_trainable.png"),
                  # sources trained from scratch per task: does supervision transfer without pretraining?
                  # frozen from-scratch sources are measured against the never-trained frozen encoder, the same
                  # protocol without a source task (trainable: that reference IS the from-scratch run)
                  # with_mae_row is off (user decision 2026-09-23): the masked-reconstruction row is a differently
                  # trained source and reads as one of the six task sources, which it is not.
-                 "scratch_src_probe": build("probe", "inrtlWrist probe", "self-supervised",
+                 "scratch_src_probe": build("probe", "InrtlWrist probe", "self-supervised",
                                             "transfer_scratchsrc_frozen.png", prefix="txs_", ref=REF_RANDOM),
-                 "scratch_src_finetune": build("finetune", "inrtlWrist finetune", "direct",
+                 "scratch_src_finetune": build("finetune", "InrtlWrist finetune", "direct",
                                                "transfer_scratchsrc_trainable.png", prefix="txs_")}
     export_csv()
     def complete(spec):
@@ -264,7 +264,7 @@ def export_csv():
         for own, task, name, metric, scale, fmt in TARGETS:
             m = TASKS[task]["metrics"]
             ref = value(task, "scratch", "scratch", 1)
-            for key, lab in [("mae", "inrtlWrist (no source task)")] + [(k, l) for k, l, _ in SOURCES]:
+            for key, lab in [("mae", "InrtlWrist (no source task)")] + [(k, l) for k, l, _ in SOURCES]:
                 if key == own:
                     continue
                 enc = "mae_5src" if key == "mae" else f"tx5_{key}"

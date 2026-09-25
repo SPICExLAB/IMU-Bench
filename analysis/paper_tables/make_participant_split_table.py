@@ -47,7 +47,7 @@ rows = []
 for label, unit, t_full, t_p3, dig, srcs in BLOCK:
     r_full, r_p3 = val(t_full, "control_random", "probe"), val(t_p3, "control_random", "probe")
     block = [("never-trained encoder", r_full, None, r_p3, None),
-             ("inrtlWrist", val(t_full, "mae_5src", "probe"), r_full, val(t_p3, "mae_5src", "probe"), r_p3)]
+             ("InrtlWrist", val(t_full, "mae_5src", "probe"), r_full, val(t_p3, "mae_5src", "probe"), r_p3)]
     for key, sl in srcs:
         block.append((f"source: {sl}", val(t_full, f"txs_{key}", "probe"), r_full,
                       val(t_p3, f"txs3_{key}", "probe"), r_p3))

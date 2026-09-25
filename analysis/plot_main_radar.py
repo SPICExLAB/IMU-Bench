@@ -53,7 +53,7 @@ th = dict(surface="#fcfcfb", ink="#0b0b0b", ink2="#52514e", muted="#898781", gri
 # band that is legal only with secondary encoding -- hence a line style and a marker shape per series.
 # Aqua and yellow sit below 3:1 on this surface; the relief is Table 2 itself and radar_normalized.csv.
 SERIES = [  # (encoder id, label, colour, line style, marker, line width pt, fill?)
-    ("mae_5src", "inrtlWrist (Ours)", "#2a78d6", "-", "o", 1.7, True),
+    ("mae_5src", "InrtlWrist (Ours)", "#2a78d6", "-", "o", 1.7, True),
     ("limubert_5src", "LIMU-BERT", "#1baf7a", "-", "s", 1.0, False),
     ("simmtm_5src", "SimMTM", "#eda100", (0, (5, 2)), "^", 1.0, False),
     ("focal_5src", "FOCAL", "#4a3aa7", (0, (6, 2, 1, 2)), "D", 1.0, False),
@@ -66,8 +66,8 @@ SERIES = [  # (encoder id, label, colour, line style, marker, line width pt, fil
     ("sslwear_5src", "SSL-Wearables", "#008300", (0, (5, 1.5, 1, 1.5, 1, 1.5)), "P", 1.0, False),
 ]
 ABLATIONS = [
-    ("mae_5src_noaltattn", "inrtlWrist, plain attn.", "#2a78d6", (0, (5, 2)), "o", 0.9, False),
-    ("mae_5src_acconly", "inrtlWrist, acc. only", "#2a78d6", (0, (1.6, 1.6)), "o", 0.9, False),
+    ("mae_5src_noaltattn", "InrtlWrist, plain attn.", "#2a78d6", (0, (5, 2)), "o", 0.9, False),
+    ("mae_5src_acconly", "InrtlWrist, acc. only", "#2a78d6", (0, (1.6, 1.6)), "o", 0.9, False),
 ]
 REFERENCE = ("scratch", "Scratch", th["muted"], (0, (3, 2.5)), None, 0.9, False)
 HAR = ["har_hhar", "har_mhealth", "har_prism", "har_userwatch"]
@@ -185,7 +185,7 @@ def build(d, series, ncol, rows, shared=True, rmin=RMIN):
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--outdir", default=OUT_DIR)
-    p.add_argument("--with-ablations", action="store_true", help="add the two inrtlWrist ablation rows of Table 2")
+    p.add_argument("--with-ablations", action="store_true", help="add the two InrtlWrist ablation rows of Table 2")
     p.add_argument("--per-panel", action="store_true", help="scale each panel to its own best (the pre-2026-09-25 figure)")
     a = p.parse_args()
     if not os.path.exists(SRC):

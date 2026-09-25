@@ -53,7 +53,7 @@ COLS = [  # task id, short label, metric label
 EXTRA_COLS = {}
 HAR3 = ["har_hhar", "har_mhealth", "har_prism", "har_userwatch"]
 CONTROLLED = [  # encoder id, label, group, pretrain run
-    ("mae_5src", "inrtlWrist (Ours)", "ssl", "vit1d_ssl_mae_varlen_altattn_realdata_ocdetect_eatingspeed_motionx_sonic"),
+    ("mae_5src", "InrtlWrist (Ours)", "ssl", "vit1d_ssl_mae_varlen_altattn_realdata_ocdetect_eatingspeed_motionx_sonic"),
     ("limubert_5src", "LIMU-BERT", "ssl", "vit1d_ssl_limubert_5src"),
     ("simmtm_5src", "SimMTM", "ssl", "vit1d_ssl_simmtm_5src"),
     ("focal_5src", "FOCAL", "ssl", "vit1d_ssl_focal_5src"),
@@ -61,8 +61,8 @@ CONTROLLED = [  # encoder id, label, group, pretrain run
     ("sslwear_5src", "SSL-Wearables", "ssl", "vit1d_ssl_sslwear_5src"),
     ("dino_5src", "DINO", "ssl", "vit1d_ssl_dino_5src"),
     ("jepa_5src", "I-JEPA", "ssl", "vit1d_ssl_jepa_5src"),
-    ("mae_5src_noaltattn", "inrtlWrist, plain attention", "ablation", "vit1d_ssl_mae_varlen_noaltattn_5src"),
-    ("mae_5src_acconly", "inrtlWrist, accelerometer only", "ablation", "vit1d_ssl_mae_varlen_acconly_5src"),
+    ("mae_5src_noaltattn", "InrtlWrist, plain attention", "ablation", "vit1d_ssl_mae_varlen_noaltattn_5src"),
+    ("mae_5src_acconly", "InrtlWrist, accelerometer only", "ablation", "vit1d_ssl_mae_varlen_acconly_5src"),
 ]
 # A controlled row is a claim about one objective under a fixed protocol, so it enters the paper tables
 # only once every task has been scored under both protocols; until then it would print a row that is

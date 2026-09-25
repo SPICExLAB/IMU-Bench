@@ -4,7 +4,7 @@
 Figure 4 expresses every probe as a share of the full-pool model's gain over a never-trained encoder under
 the same probe (34_plot_scaling_avg.py). The benchmark probes already have that encoder scored
 (bench/results/<task>/control_random__probe__s42.json); the grid's arm, full-body and odometry probes did
-not, so it is run through them unchanged: bench's `control_random_frozen_5src` checkpoint (the inrtlWrist
+not, so it is run through them unchanged: bench's `control_random_frozen_5src` checkpoint (the InrtlWrist
 architecture, never trained) in place of `vit1d_ssl_mae_grid_k1000_f100`, every other setting identical
 (configs/grid5src/*_control_random_*, launch/grid5src/launch_*control_random.sh, jobs 7318003/05/07).
 

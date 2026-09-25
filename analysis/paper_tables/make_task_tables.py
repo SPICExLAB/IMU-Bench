@@ -5,7 +5,7 @@
 
 Writes <paper>/Sections/tab_task_<id>.tex and the numbers behind them to
 paper_results/tab2_main_results/per_task_all_metrics.csv. Rows: the self-supervised encoders and the
-inrtlWrist ablations under both protocols, the two decoder controls (frozen probe) and training from
+InrtlWrist ablations under both protocols, the two decoder controls (frozen probe) and training from
 scratch. Columns: the task card's metrics, primary first. Pending cells print "--".
 
 The four activity-recognition sets share one metric set, so they share one table (tab:task_har) with
@@ -235,7 +235,7 @@ def write_table(table_id, columns, header_lines, caption, wide):
     return probe + ctrl + ft + [("scratch", "Scratch", "scratch")] + expert
 
 
-COMMON = (r"Bold: best self-supervised value per metric and protocol; one training seed per cell. Task-specific "
+COMMON = (r"One training seed per cell. Task-specific "
           r"systems are listed for orientation and are not ranked (Appendix~\ref{app:tasks}).")
 csv_rows, written = [], []
 
@@ -301,7 +301,7 @@ KIN_CAPTION = {"arm_pose_nymeria": "Arm pose: right-arm chain, five joints.",
                "full_body_pose_nymeria": "Full-body pose: 23 SMPL joints.",
                "odometry_nymeria_local": "Odometry: pelvis velocity, wrist frame."}
 KIN_ROW = ["arm_pose_nymeria", "full_body_pose_nymeria", "odometry_nymeria_local"]
-KIN_SHORT_LABELS = [("inrtlWrist, plain attention", "inrtlWrist, plain attn."), ("inrtlWrist, accelerometer only", "inrtlWrist, acc.\\ only"),
+KIN_SHORT_LABELS = [("InrtlWrist, plain attention", "InrtlWrist, plain attn."), ("InrtlWrist, accelerometer only", "InrtlWrist, acc.\\ only"),
                     ("Random frozen encoder", "Random encoder"), ("Raw input, 0 layers", "Raw input"),
                     ("MobilePoser (Xu et al.)", "MobilePoser"), ("IMUPoser (Mollyn et al.)", "IMUPoser"),
                     (r"\emph{Task-specific systems} (not ranked)", r"\emph{Task-specific}"),

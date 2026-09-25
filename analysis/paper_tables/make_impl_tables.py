@@ -4,7 +4,7 @@
     python analysis/paper_tables/make_impl_tables.py
 
        <paper>/Sections/tab_downstream_protocols.tex (one row per task: window, decoders, LR, selection)
-Downstream settings are read from the generated bench configs of the inrtlWrist cells (identical for every
+Downstream settings are read from the generated bench configs of the InrtlWrist cells (identical for every
 encoder of a task apart from the encoder block).
 """
 import os
@@ -20,7 +20,7 @@ sys.path.insert(0, REPO)
 from bench.leaderboard_paper import COLS  # noqa: E402
 
 PRE = [  # label, config, run, objective description
-    ("inrtlWrist (Ours)", "configs/vit1d_ssl_mae_varlen_altattn_realdata_ocdetect_eatingspeed_motionx_sonic_flu.yaml",
+    ("InrtlWrist (Ours)", "configs/vit1d_ssl_mae_varlen_altattn_realdata_ocdetect_eatingspeed_motionx_sonic_flu.yaml",
      "vit1d_ssl_mae_varlen_altattn_realdata_ocdetect_eatingspeed_motionx_sonic", "masked patch reconstruction, 75\\,\\% mask"),
     ("LIMU-BERT", "configs/pretrain5src/limubert_5src.yaml", "vit1d_ssl_limubert_5src",
      "15\\,\\% temporal span mask, MSE, 4$\\times$192 decoder"),
@@ -36,10 +36,10 @@ PRE = [  # label, config, run, objective description
      "2 global + 4 local crops, EMA teacher, 4,096 prototypes"),
     ("I-JEPA", "configs/pretrain5src/jepa_5src.yaml", "vit1d_ssl_jepa_5src",
      "4 target blocks, EMA target encoder, 4$\\times$192 predictor"),
-    ("inrtlWrist, plain attention", "configs/pretrain5src/mae_noaltattn_5src.yaml", "vit1d_ssl_mae_varlen_noaltattn_5src",
-     "as inrtlWrist"),
-    ("inrtlWrist, accelerometer only", "configs/pretrain5src/mae_acconly_5src.yaml", "vit1d_ssl_mae_varlen_acconly_5src",
-     "as inrtlWrist, 3 input channels"),
+    ("InrtlWrist, plain attention", "configs/pretrain5src/mae_noaltattn_5src.yaml", "vit1d_ssl_mae_varlen_noaltattn_5src",
+     "as InrtlWrist"),
+    ("InrtlWrist, accelerometer only", "configs/pretrain5src/mae_acconly_5src.yaml", "vit1d_ssl_mae_varlen_acconly_5src",
+     "as InrtlWrist, 3 input channels"),
 ]
 
 

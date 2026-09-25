@@ -71,3 +71,42 @@ Your PD reruns are older and run first; I have not touched them.
 FYI: 27 of my native-preprocessing fine-tunes (7212525-7212912) were cancelled by our uid at 00:46 with no note here.
 The user had asked for them; the 10 remaining `mae_5src_physin` cells are now HELD by me (user decision), not cancelled.
 Before cancelling any of the jobs above, write the reason here first.
+
+## 2026-09-24 20:40 CDT — Nymeria p3 cells unblocked; 7 grid jobs moved to b53017 (user decision)
+The 8 txs3_armpose/txs3_fullbody transfer cells (7224786-87/90-91/94-95/7224814-15) were stuck in
+DependencyNeverSatisfied: they were `afterok` on the ORIGINAL sources 7224748/49, which were cancelled at ~08:50,
+and the resubmitted sources 7283097/7283107 COMPLETED at ~18:00 without the dependents being re-pointed. Their configs
+read runs/bench_{arm_pose_nymeria_p3a,full_body_pose_nymeria_p3b}__scratch__scratch__s42 checkpoints, which the
+resubmits rewrote (best.pt 16:57, best_mpjpe.pt 17:09), so the dependency was simply cleared (`scontrol update
+Dependency=`). Nothing was cancelled.
+Also moved from gengpu (a MOVE, not a dual-submit) with nice=1000 so they run AFTER the Nymeria cells: the Figure 4
+grid jobs 7318003/05/07 (never-trained anchors for the grid's own kinematic probes) and 7324287/90/93/94 (reruns of
+4 grid full-body probes that were cancelled at 1k-10k steps in August and never rerun). Please leave these alone.
+
+## 2026-09-24 22:45 CDT — p3 sources were retrained under PHYSICAL input; 4 odom cells cancelled (user decision)
+The 16:50 resubmits of the participant-split sources (7283097 arm-A, 7283107 body-B) were generated WITHOUT
+BENCH_ZSCORE=1: their checkpoints say preprocess.normalize.method=physical, while every probe/finetune that reads them
+feeds z-scored input (and the paper's scratch cells are z-score). Symptom: full-body->arm frozen came out 3.4 % WORSE
+than a never-trained encoder. Only these two runs are physical; every other p3 run is z-score (checked checkpoint cfgs).
+Invalid: the two sources (also the trainable references for arm/body targets) and all 8 txs3_armpose/txs3_fullbody cells.
+Cancelled (user): 7224794 7224795 7224814 7224815 (odom targets reading those sources). The 4 finished invalid cells and
+both sources are moved to bench/results/_superseded_physical_src_20260924/ and runs/_superseded_physical_src_20260924/.
+Rerun with BENCH_ZSCORE=1 follows; grid jobs 7318003.. keep waiting behind it.
+
+## 2026-09-25 15:01 CDT — paper: NormWear PADS BA cells filled and pushed (0a86615); shared paper_iclr tree NOT rebased
+The two "--" cells in the recognition table (results2.tex, NormWear‡ PADS balanced accuracy) are now 59.7 (probe) and
+53.3 (fine-tune), from bench/results/_raw/pd_pads/bench_pd_pads__normwear_base__{probe,finetune}__s42__best.json
+(subject_mean_prob.bal_acc, class-weighted rerun of 2026-09-24). Pushed to Overleaf as 0a86615 by cherry-picking in a
+temporary worktree, because paper_iclr's working tree carries the uncommitted WristMAE->inrtlWrist rename (49 files).
+Local paper_iclr HEAD ca5309e is the same patch as 0a86615 and will be dropped by the next `git pull --rebase`.
+Heads-up: Jesse's 7f5d907 (on Overleaf) deletes the \restructure notes in main.tex, 3_Method, 5_Transfer, 7_Conclusion and
+8_Appendix; the uncommitted rename WIP also edits those files (main.tex line 93 sits inside the deleted block), so an
+autostash pop after pulling can conflict there. Nothing in the shared tree was touched by me.
+
+## 2026-09-25 15:15 CDT — model renamed to InrtlWrist in the paper AND the generators (user decision)
+User asked: WristMAE -> inrtlWrist (Overleaf 369ab9c), then inrtlWrist -> InrtlWrist, capital I (Overleaf d93603c).
+Every .tex occurrence (193) plus the radar, both Figure 3 transfer panels and the appendix grid figure were
+regenerated. Generators in IMU-SSL print "InrtlWrist" (this commit). The paper_iclr checkout here has a local commit
+b3e93f6 ("The radar opens the Results ...") that is not on Overleaf yet: rebase it onto d93603c before pushing
+(its results2.tex lines may still say WristMAE/inrtlWrist). Its two uncommitted caption edits in
+make_ablation_tables.py / make_task_tables.py are included in this commit unchanged.

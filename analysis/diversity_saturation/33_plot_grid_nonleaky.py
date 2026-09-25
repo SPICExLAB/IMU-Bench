@@ -53,7 +53,7 @@ else:
     gesture = ("Gesture (bal acc %, old split: re-run pending)", from_grid("Gesture (bal acc %)"), True)
 
 PANELS = [
-    ("inrtlWrist val loss (pretrain)", {c: v["final_val_loss"] for c, v in cells.items() if v.get("final_step") == 50000}, False),
+    ("InrtlWrist val loss (pretrain)", {c: v["final_val_loss"] for c, v in cells.items() if v.get("final_step") == 50000}, False),
     ("HHAR (macro-F1)", from_bench("har_hhar", "macro_f1"), True),
     ("MHEALTH (macro-F1)", from_bench("har_mhealth", "macro_f1"), True),
     ("PRISM (macro-F1)", from_bench("har_prism", "macro_f1"), True),
@@ -77,7 +77,7 @@ _rows = []
 for _label, _blk, _hib in PANELS:
     _src = next((f"bench probe: {v}" for k, v in _BENCH.items() if _label.startswith(k)), None)
     if _src is None:
-        _src = "pretraining (grid validation set)" if _label.startswith(("inrtlWrist", "WristMAE", "MAE")) else "legacy grid probe (lighter decoder)"
+        _src = "pretraining (grid validation set)" if _label.startswith(("InrtlWrist", "WristMAE", "MAE")) else "legacy grid probe (lighter decoder)"
     for _c, _v in sorted(_blk.items()):
         _cell = cells.get(_c, {})
         _rows.append([_c, _cell.get("K"), _cell.get("fraction"), _cell.get("n_windows"), _label, _v, int(_hib), _src])

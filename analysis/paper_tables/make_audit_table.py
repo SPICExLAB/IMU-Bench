@@ -48,7 +48,7 @@ def f(x):
 
 
 score_rows = []
-for enc, proto, lab in [("mae_5src", "probe", "inrtlWrist, frozen probe"), ("mae_5src", "finetune", "inrtlWrist, fine-tune"),
+for enc, proto, lab in [("mae_5src", "probe", "InrtlWrist, frozen probe"), ("mae_5src", "finetune", "InrtlWrist, fine-tune"),
                         ("scratch", "scratch", "Scratch")]:
     a, b = res("microgesture_openwatch_releasesplit", enc, proto), res("microgesture_openwatch", enc, proto)
     score_rows.append(f"{lab} & {f(a)} & {f(b)} \\\\")
