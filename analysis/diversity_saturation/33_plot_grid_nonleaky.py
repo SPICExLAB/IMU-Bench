@@ -4,7 +4,7 @@
 Identical to 11_plot_grid.py in layout, styling and x-axis (motion types, largest-first), with the four
 activity-recognition panels that sit inside the pretraining pool (WISDM, UTD-MHAD, PAMAP2, RecoFit)
 replaced by leak-free probes from the bench, run on the same 22 grid checkpoints (g5_k{K}_f{tag}):
-HHAR, MHEALTH, PRISM (macro-F1) and PADS Parkinson's (subject macro-F1).
+HHAR, MHEALTH, PRISM (macro-F1) and PADS Parkinson's (window macro-F1; see PANELS).
 Gesture: the grid's original OpenWatch probe predates the de-duplicated subject split. It is replaced by
 the IMU-Bench protocol probe (clip F1) once all 22 cells have landed; until then the old probe is drawn
 and its title says so.
@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
-OUT_DIR = "/gpfs/home/vbc1591/paper_iclr/Pictures"
+OUT_DIR = os.environ.get("PAPER_PICTURES", "/gpfs/home/vbc1591/paper_iclr/Pictures")  # override: write into a worktree
 th = dict(surface="#ffffff", ink="#0b0b0b", ink2="#52514e", muted="#898781", grid="#e1e0d9", axis="#c3c2b7",
           ramp=["#86b6ef", "#5598e7", "#2a78d6", "#1c5cab", "#0d366b"])
 FRACS = [("0p01", "0.01%"), ("0p1", "0.1%"), ("1", "1%"), ("10", "10%"), ("100", "100%")]
@@ -53,11 +53,14 @@ else:
     gesture = ("Gesture (bal acc %, old split: re-run pending)", from_grid("Gesture (bal acc %)"), True)
 
 PANELS = [
-    ("WristMAE val loss (pretrain)", {c: v["final_val_loss"] for c, v in cells.items() if v.get("final_step") == 50000}, False),
+    ("inrtlWrist val loss (pretrain)", {c: v["final_val_loss"] for c, v in cells.items() if v.get("final_step") == 50000}, False),
     ("HHAR (macro-F1)", from_bench("har_hhar", "macro_f1"), True),
     ("MHEALTH (macro-F1)", from_bench("har_mhealth", "macro_f1"), True),
     ("PRISM (macro-F1)", from_bench("har_prism", "macro_f1"), True),
-    ("Parkinson's (subject F1)", from_bench("pd_pads", "subject_macro_f1"), True),
+    # window, not subject, macro-F1 (2026-09-24): Table 2 ranks PD on subject F1, but over 94 participants it moves in
+    # steps of a few points and put the single-mode 0.01 % cell (56.5) above the full pool (45.4); the grid and its
+    # average compare cells a few percent apart, so they use the per-window metric. Variants: fig4_variants/.
+    ("Parkinson's (window F1)", from_bench("pd_pads", "window_macro_f1"), True),
     gesture,
     ("Arm pose (val loss)", from_grid("Arm pose (val loss)"), False),
     ("Full-body (mpjpe mm)", from_grid("Full-body (mpjpe mm)"), False),
@@ -69,12 +72,12 @@ import sys as _sys
 _sys.path.insert(0, os.path.join(REPO, "paper_results"))
 from paper_io import write_csv  # noqa: E402
 _BENCH = {"HHAR": "har_hhar macro_f1", "MHEALTH": "har_mhealth macro_f1", "PRISM": "har_prism macro_f1",
-          "Parkinson": "pd_pads subject_macro_f1", "Gesture (clip": "microgesture_openwatch clip_macro_f1"}
+          "Parkinson": "pd_pads window_macro_f1", "Gesture (clip": "microgesture_openwatch clip_macro_f1"}
 _rows = []
 for _label, _blk, _hib in PANELS:
     _src = next((f"bench probe: {v}" for k, v in _BENCH.items() if _label.startswith(k)), None)
     if _src is None:
-        _src = "pretraining (grid validation set)" if _label.startswith(("WristMAE", "MAE")) else "legacy grid probe (lighter decoder)"
+        _src = "pretraining (grid validation set)" if _label.startswith(("inrtlWrist", "WristMAE", "MAE")) else "legacy grid probe (lighter decoder)"
     for _c, _v in sorted(_blk.items()):
         _cell = cells.get(_c, {})
         _rows.append([_c, _cell.get("K"), _cell.get("fraction"), _cell.get("n_windows"), _label, _v, int(_hib), _src])

@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""One results table per IMU-Bench task, with every metric that task reports.
+"""One results table per OmniIMU-Bench task, with every metric that task reports.
 
     python analysis/paper_tables/make_task_tables.py
 
 Writes <paper>/Sections/tab_task_<id>.tex and the numbers behind them to
 paper_results/tab2_main_results/per_task_all_metrics.csv. Rows: the self-supervised encoders and the
-WristMAE ablations under both protocols, the two decoder controls (frozen probe) and training from
+inrtlWrist ablations under both protocols, the two decoder controls (frozen probe) and training from
 scratch. Columns: the task card's metrics, primary first. Pending cells print "--".
 
 The four activity-recognition sets share one metric set, so they share one table (tab:task_har) with
@@ -301,7 +301,7 @@ KIN_CAPTION = {"arm_pose_nymeria": "Arm pose: right-arm chain, five joints.",
                "full_body_pose_nymeria": "Full-body pose: 23 SMPL joints.",
                "odometry_nymeria_local": "Odometry: pelvis velocity, wrist frame."}
 KIN_ROW = ["arm_pose_nymeria", "full_body_pose_nymeria", "odometry_nymeria_local"]
-KIN_SHORT_LABELS = [("WristMAE, plain attention", "WristMAE, plain attn."), ("WristMAE, accelerometer only", "WristMAE, acc.\\ only"),
+KIN_SHORT_LABELS = [("inrtlWrist, plain attention", "inrtlWrist, plain attn."), ("inrtlWrist, accelerometer only", "inrtlWrist, acc.\\ only"),
                     ("Random frozen encoder", "Random encoder"), ("Raw input, 0 layers", "Raw input"),
                     ("MobilePoser (Xu et al.)", "MobilePoser"), ("IMUPoser (Mollyn et al.)", "IMUPoser"),
                     (r"\emph{Task-specific systems} (not ranked)", r"\emph{Task-specific}"),

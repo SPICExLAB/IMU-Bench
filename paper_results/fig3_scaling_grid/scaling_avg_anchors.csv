@@ -1,0 +1,9 @@
+panel,source,higher_is_better,full_pool,never_trained,gain,clip
+Arm pose (val loss),legacy grid probe (lighter decoder),0,0.017482,0.017674,0.00019199999999999773,100.0
+Full-body (mpjpe mm),legacy grid probe (lighter decoder),0,100.335811,104.425574,4.089762999999991,100.0
+Gesture (clip F1),bench probe: microgesture_openwatch clip_macro_f1,1,0.5863187380215243,0.3644942576449426,0.22182448037658176,100.0
+HHAR (macro-F1),bench probe: har_hhar macro_f1,1,0.5602998599193366,0.32376438427956883,0.2365354756397678,100.0
+MHEALTH (macro-F1),bench probe: har_mhealth macro_f1,1,0.6702674972033242,0.4657505822873323,0.20451691491599194,100.0
+Odometry (vel MSE),legacy grid probe (lighter decoder),0,0.02854,0.03148,0.0029400000000000016,100.0
+PRISM (macro-F1),bench probe: har_prism macro_f1,1,0.24637125198974444,0.16064712007024706,0.08572413191949738,100.0
+Parkinson's (window F1),bench probe: pd_pads window_macro_f1,1,0.3954793146012616,0.3835802804907575,0.011899034110504136,100.0

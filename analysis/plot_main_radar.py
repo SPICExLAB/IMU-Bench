@@ -12,8 +12,9 @@ Normalisation. The axes carry cm, mm, m, F1 and R@1, so each is mapped to a rela
 
     higher-is-better   s = v / v_best          lower-is-better   s = v_best / v
 
-where v_best is the best value on that axis among the encoders drawn in that panel, Scratch included.
-1.0 is therefore the best cell of the panel and the outer ring, and the score keeps the *ratio* between
+where v_best is the best value on that axis among the encoders drawn in EITHER panel, Scratch included
+(shared scale, default since 2026-09-25 so the frozen and fine-tuned polygons are directly comparable;
+--per-panel restores the earlier per-panel best). 1.0 is therefore the best cell on that axis and the outer ring, and the score keeps the *ratio* between
 methods: a 7 % spread on arm pose draws as a 7 % ring, not as a full sweep of the axis the way a
 per-axis min-max would. Scores are written to paper_results/tab2_main_results/radar_normalized.csv.
 
@@ -43,7 +44,7 @@ NAME = "main_radar"
 # canvas, no tight crop, so \includegraphics[width=\textwidth] scales it by exactly 1 and every font size
 # below is the size it has on the page, in points. Keep the margins wide enough that nothing is clipped.
 PRINT_IN = 5.5
-RMIN = 0.30             # radial floor: the axis runs RMIN..1.00, not 0..1.00 (declared in the caption)
+RMIN = 0.20             # radial floor: the axis runs RMIN..1.00, not 0..1.00 (declared in the caption); 0.30 with --per-panel
 
 # house theme, shared with the other paper figures
 th = dict(surface="#fcfcfb", ink="#0b0b0b", ink2="#52514e", muted="#898781", grid="#e1e0d9", axis="#c3c2b7")
@@ -52,7 +53,7 @@ th = dict(surface="#fcfcfb", ink="#0b0b0b", ink2="#52514e", muted="#898781", gri
 # band that is legal only with secondary encoding -- hence a line style and a marker shape per series.
 # Aqua and yellow sit below 3:1 on this surface; the relief is Table 2 itself and radar_normalized.csv.
 SERIES = [  # (encoder id, label, colour, line style, marker, line width pt, fill?)
-    ("mae_5src", "WristMAE (Ours)", "#2a78d6", "-", "o", 1.7, True),
+    ("mae_5src", "inrtlWrist (Ours)", "#2a78d6", "-", "o", 1.7, True),
     ("limubert_5src", "LIMU-BERT", "#1baf7a", "-", "s", 1.0, False),
     ("simmtm_5src", "SimMTM", "#eda100", (0, (5, 2)), "^", 1.0, False),
     ("focal_5src", "FOCAL", "#4a3aa7", (0, (6, 2, 1, 2)), "D", 1.0, False),
@@ -65,8 +66,8 @@ SERIES = [  # (encoder id, label, colour, line style, marker, line width pt, fil
     ("sslwear_5src", "SSL-Wearables", "#008300", (0, (5, 1.5, 1, 1.5, 1, 1.5)), "P", 1.0, False),
 ]
 ABLATIONS = [
-    ("mae_5src_noaltattn", "WristMAE, plain attn.", "#2a78d6", (0, (5, 2)), "o", 0.9, False),
-    ("mae_5src_acconly", "WristMAE, acc. only", "#2a78d6", (0, (1.6, 1.6)), "o", 0.9, False),
+    ("mae_5src_noaltattn", "inrtlWrist, plain attn.", "#2a78d6", (0, (5, 2)), "o", 0.9, False),
+    ("mae_5src_acconly", "inrtlWrist, acc. only", "#2a78d6", (0, (1.6, 1.6)), "o", 0.9, False),
 ]
 REFERENCE = ("scratch", "Scratch", th["muted"], (0, (3, 2.5)), None, 0.9, False)
 HAR = ["har_hhar", "har_mhealth", "har_prism", "har_userwatch"]
@@ -91,16 +92,23 @@ def raw_value(d, enc, protocol, axis):
     return float(np.mean([v[0] for v in vals]))
 
 
-def panel_scores(d, protocol, series):
-    """rows x axes of relative scores in [0, 1], and the best raw value per axis."""
-    raw = np.array([[raw_value(d, e, protocol, ax) for ax, *_ in AXES] for e, *_ in series])
-    best, scores = [], np.full_like(raw, np.nan)
+def panel_raw(d, protocol, series):
+    return np.array([[raw_value(d, e, protocol, ax) for ax, *_ in AXES] for e, *_ in series])
+
+
+def axis_best(raw):
+    """best raw value per axis over the rows given (one panel, or both panels stacked)."""
+    return np.array([np.nanmax(raw[:, j]) if hib else np.nanmin(raw[:, j]) for j, (*_, hib) in enumerate(AXES)])
+
+
+def panel_scores(d, protocol, series, best=None):
+    """rows x axes of relative scores in [0, 1], and the best raw value per axis (the panel's own unless given)."""
+    raw = panel_raw(d, protocol, series)
+    best = axis_best(raw) if best is None else best
+    scores = np.full_like(raw, np.nan)
     for j, (_, _, _, _, hib) in enumerate(AXES):
-        col = raw[:, j]
-        b = np.nanmax(col) if hib else np.nanmin(col)
-        best.append(b)
-        scores[:, j] = col / b if hib else b / col
-    return raw, scores, np.array(best)
+        scores[:, j] = raw[:, j] / best[j] if hib else best[j] / raw[:, j]
+    return raw, scores, best
 
 
 def draw(ax, series, scores, best, title, rmin):
@@ -142,19 +150,20 @@ def draw(ax, series, scores, best, title, rmin):
     ax.set_title(title, fontsize=8.5, color=th["ink"], fontweight="bold", pad=23)
 
 
-def build(d, series, ncol, rows):
+def build(d, series, ncol, rows, shared=True, rmin=RMIN):
     """One pass at the figure, with page-point sizes drawn K times larger."""
     fig, axes = plt.subplots(1, 2, figsize=(PRINT_IN, 0.50 * PRINT_IN), subplot_kw=dict(polar=True),
                              facecolor=th["surface"])
     bm = 0.225 + 0.085 * (rows - 1)          # bottom margin: the note, then the legend under it
     fig.subplots_adjust(left=0.100, right=0.872, top=0.825, bottom=bm, wspace=0.70)
     export = []
+    shared_best = axis_best(np.vstack([panel_raw(d, p, series) for p, _ in PANELS])) if shared else None
     for ax, (proto, title) in zip(axes, PANELS):
-        raw, scores, best = panel_scores(d, proto, series)
+        raw, scores, best = panel_scores(d, proto, series, shared_best)
         lo = np.nanmin(scores)
-        if lo < RMIN:
-            sys.exit(f"RMIN={RMIN} would clip a value ({lo:.3f}) in the {proto} panel -- lower it")
-        draw(ax, series, scores, best, title, RMIN)
+        if lo < rmin:
+            sys.exit(f"RMIN={rmin} would clip a value ({lo:.3f}) in the {proto} panel -- lower it")
+        draw(ax, series, scores, best, title, rmin)
         for i, (enc, label, *_) in enumerate(series):
             for j, (axis, axlabel, unit, scale, hib) in enumerate(AXES):
                 export.append([proto, axis, axlabel, enc, label, unit, hib, raw[i, j], best[j], scores[i, j]])
@@ -166,8 +175,9 @@ def build(d, series, ncol, rows):
     for t in leg.get_texts():
         t.set_color(th["ink2"])
     fig.text(0.5, bm * 0.55,
-             f"further out is better; each axis scaled to its panel's best (= 1.00); "
-             f"radial axis {RMIN:.2f}\u20131.00",
+             f"further out is better; each axis scaled to "
+             f"{'the best value in either panel' if shared else 'its panel' + chr(39) + 's best'} (= 1.00); "
+             f"radial axis {rmin:.2f}\u20131.00",
              ha="center", fontsize=5.7, color=th["muted"])
     return fig, export
 
@@ -175,7 +185,8 @@ def build(d, series, ncol, rows):
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--outdir", default=OUT_DIR)
-    p.add_argument("--with-ablations", action="store_true", help="add the two WristMAE ablation rows of Table 2")
+    p.add_argument("--with-ablations", action="store_true", help="add the two inrtlWrist ablation rows of Table 2")
+    p.add_argument("--per-panel", action="store_true", help="scale each panel to its own best (the pre-2026-09-25 figure)")
     a = p.parse_args()
     if not os.path.exists(SRC):
         sys.exit(f"{SRC} not found -- run analysis/paper_tables/make_main_table.py first")
@@ -184,7 +195,7 @@ def main():
     ncol = min(len(series), 4 if len(series) > 6 else 6)
     rows = -(-len(series) // ncol)  # legend rows, so the note never lands on the legend
 
-    fig, export = build(d, series, ncol, rows)
+    fig, export = build(d, series, ncol, rows, shared=not a.per_panel, rmin=0.30 if a.per_panel else RMIN)
 
     os.makedirs(a.outdir, exist_ok=True)
     stem = NAME + ("_ablations" if a.with_ablations else "")

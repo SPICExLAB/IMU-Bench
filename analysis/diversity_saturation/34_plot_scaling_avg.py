@@ -2,9 +2,21 @@
 """Section 6 main figure in two simple panels, each one average over the eight downstream probes.
 
 Reads paper_results/fig3_scaling_grid/grid_long.csv (written by 33_plot_grid_nonleaky.py, which stays as the
-per-task breakdown in the appendix). Each probe is expressed as the % change against the full-pool, all-modes
-model (k1000_f100), signed so that positive = better, then averaged over the eight tasks with equal weight.
-MAE validation loss is a pretraining quantity and is not in the average.
+per-task breakdown in the appendix). Each probe is expressed against the full-pool, all-modes model (k1000_f100),
+signed so that positive = better, then averaged over the eight tasks with equal weight. MAE validation loss is a
+pretraining quantity and is not in the average.
+
+Normalisation (--norm, default gain, user decision 2026-09-24):
+  gain   100 * (v - v_ref) / (v_ref - v_rand), sign flipped for errors: the change in percent of what the full
+         pool gains over a NEVER-TRAINED encoder under the same probe (0 = full pool, -100 = never trained).
+         A plain ratio hid the kinematic tasks: 3 mm of full-body error is ~3 % of the error but a large share of
+         what pretraining buys, while 3 F1 points on HHAR is a small share of its 24-point gain. v_rand is bench's
+         control_random probe for the benchmark panels and out/grid_random_anchor.json (35_harvest_...) for the
+         grid's own arm/full-body/odometry probes. EVERY probe is clipped to +-100 (user, 2026-09-25): no task
+         counts for more than one full pretraining gain either way, and -100 also stands for "worse than never
+         trained". Needed because two probes barely beat the never-trained encoder -- Parkinson's by 1.2 window-F1
+         points, the grid's arm probe by 1.1 % of its val loss -- so their unclipped values run from -440 to +182.
+  ratio  the earlier 100 * (v - v_ref) / v_ref.
 
   (a) data amount      the uniform draws (all 1,000 modes available) at 0.1 / 1 / 10 / 100 % of the pool
   (b) motion diversity  motion modes 1 -> 1000, one line per volume. 0.01, 0.1 and 1 % have the full ladder;
@@ -13,8 +25,10 @@ MAE validation loss is a pretraining quantity and is not in the average.
 
 Writes <paper>/Pictures/scaling_avg_5src.{png,pdf} and paper_results/fig3_scaling_grid/scaling_avg.csv
 """
+import argparse
 import collections
 import csv
+import json
 import os
 import sys
 
@@ -26,7 +40,7 @@ import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
-OUT_DIR = "/gpfs/home/vbc1591/paper_iclr/Pictures"
+OUT_DIR = os.environ.get("PAPER_PICTURES", "/gpfs/home/vbc1591/paper_iclr/Pictures")  # override: write into a worktree
 sys.path.insert(0, os.path.join(REPO, "paper_results"))
 from paper_io import write_csv  # noqa: E402
 
@@ -43,25 +57,60 @@ REF = "k1000_f100"
 FRACS = [("0p01", 0.01), ("0p1", 0.1), ("1", 1.0), ("10", 10.0), ("100", 100.0)]
 K_TYPES = [1, 5, 10, 25, 50, 100, 1000]
 
-per_task, hib = collections.defaultdict(dict), {}
+ap = argparse.ArgumentParser()
+ap.add_argument("--norm", choices=["gain", "ratio"], default="gain")
+ap.add_argument("--drop", default="", help="comma-separated panel-label prefixes to leave out of the average")
+_a = ap.parse_args()
+NORM, DROP = _a.norm, tuple(s for s in _a.drop.split(",") if s)
+CLIP = 100.0                            # every probe capped at one full gain either way; see the docstring
+
+per_task, hib, source = collections.defaultdict(dict), {}, {}
 for r in csv.DictReader(open(os.path.join(REPO, "paper_results", "fig3_scaling_grid", "grid_long.csv"))):
-    if r["panel"].startswith(("WristMAE", "MAE")):
+    if r["panel"].startswith(("inrtlWrist", "WristMAE", "MAE")):
         continue
     per_task[r["panel"]][r["cell"]] = float(r["value"])
     hib[r["panel"]] = r["higher_is_better"] == "1"
-tasks = sorted(per_task)
-cells = sorted(set.intersection(*(set(d) for d in per_task.values())))
-assert len(tasks) == 8 and len(cells) == 22, (len(tasks), len(cells))
+    source[r["panel"]] = r["source"]
+tasks = sorted(t for t in per_task if not t.startswith(DROP)) if DROP else sorted(per_task)
+cells = sorted(set.intersection(*(set(per_task[t]) for t in tasks)))
+assert len(tasks) == 8 - len(DROP) and len(cells) == 22, (len(tasks), len(cells))
+
+
+def never_trained(task):
+    """The never-trained encoder's value under the same probe as the panel."""
+    s = source[task]
+    if s.startswith("bench probe: "):
+        bt, metric = s[len("bench probe: "):].split()
+        return json.load(open(os.path.join(REPO, "bench", "results", bt, "control_random__probe__s42.json")))["metrics"][metric]
+    anchors = json.load(open(os.path.join(HERE, "out", "grid_random_anchor.json")))["values"]
+    if task not in anchors:
+        sys.exit(f"no never-trained anchor for {task!r} yet -- run 35_harvest_grid_random_anchor.py once "
+                 f"jobs 7318003/05/07 finish (or pass --norm ratio)")
+    return anchors[task]
+
+
+RAND = {t: never_trained(t) for t in tasks} if NORM == "gain" else {}
+for t in RAND:
+    gain = (per_task[t][REF] - RAND[t]) * (1 if hib[t] else -1)
+    assert gain > 0, f"{t}: the full pool is not better than the never-trained encoder ({gain})"
 
 
 def rel(task, cell):
     v, ref = per_task[task][cell], per_task[task][REF]
-    return 100.0 * ((v - ref) / ref if hib[task] else (ref - v) / ref)
+    if NORM == "ratio":
+        return 100.0 * ((v - ref) / ref if hib[task] else (ref - v) / ref)
+    x = 100.0 * (v - ref) / (ref - RAND[task])      # same sign convention for errors: both deltas flip
+    return max(-CLIP, min(CLIP, x))
 
 
 avg = {c: float(np.mean([rel(t, c) for t in tasks])) for c in cells}
-write_csv("fig3_scaling_grid", "scaling_avg.csv", ["cell", "avg_rel_change_pct"] + tasks,
+write_csv("fig3_scaling_grid", "scaling_avg.csv", ["cell", f"avg_change_pct_{NORM}"] + tasks,
           [[c, round(avg[c], 3)] + [round(rel(t, c), 3) for t in tasks] for c in cells])
+if RAND:
+    write_csv("fig3_scaling_grid", "scaling_avg_anchors.csv",
+              ["panel", "source", "higher_is_better", "full_pool", "never_trained", "gain", "clip"],
+              [[t, source[t], int(hib[t]), per_task[t][REF], RAND[t], abs(per_task[t][REF] - RAND[t]),
+                CLIP] for t in tasks])
 
 fig, (ax_v, ax_d) = plt.subplots(1, 2, figsize=(9.6, 3.5), facecolor=th["surface"])
 
@@ -102,14 +151,19 @@ leg = ax_d.legend(frameon=False, fontsize=8.2, loc="lower right", labelspacing=0
 for t in leg.get_texts():
     t.set_color(th["ink"])
 
-lo = min(avg.values())
-ax_d.set_ylim(lo - 1.5, 4.0)
+pad = max(1.5, 0.05 * (max(avg.values()) - min(avg.values())))
+lo, hi = min(avg.values()) - pad, max(4.0 if NORM == "ratio" else 10.0, max(avg.values()) + pad)
+ax_d.set_ylim(lo, hi)
 # (a): same y span as (b), centred on its own line so the line sits in the middle of the panel
 ya = [avg[f"k1000_f{tag}"] for tag, _ in FRACS if f"k1000_f{tag}" in avg]
-mid, half = (min(ya) + max(ya)) / 2, (4.0 - (lo - 1.5)) / 2
+mid, half = (min(ya) + max(ya)) / 2, (hi - lo) / 2
 ax_v.set_ylim(mid - half, mid + half)
 for ax in (ax_v, ax_d):
     ax.axhline(0, color=th["muted"], lw=1.0, ls="--", zorder=2)
+    if NORM == "gain" and ax.get_ylim()[0] < -100:
+        ax.axhline(-100, color=th["muted"], lw=0.9, ls=":", zorder=2)
+        ax.text(1.3 if ax is ax_d else ax.get_xlim()[0], -100, " never-trained encoder", va="bottom", ha="left",
+                fontsize=7.5, color=th["muted"], zorder=2)
     ax.set_facecolor(th["surface"])
     ax.minorticks_off()
     for s in ("top", "right"):
@@ -119,7 +173,8 @@ for ax in (ax_v, ax_d):
     ax.tick_params(colors=th["muted"], labelsize=8.5)
     ax.grid(True, color=th["grid"], lw=0.8, zorder=0)
     ax.set_axisbelow(True)
-ax_v.set_ylabel("avg. change vs. full pool (%, up = better)", fontsize=9.3, color=th["ink2"])
+ax_v.set_ylabel("avg. change vs. full pool (%, up = better)" if NORM == "ratio" else
+               "avg. change vs. full pool\n(% of its gain over never-trained)", fontsize=9.3, color=th["ink2"])
 fig.tight_layout(w_pad=2.5)
 for ext in ("png", "pdf"):
     p = os.path.join(OUT_DIR, f"scaling_avg_5src.{ext}")

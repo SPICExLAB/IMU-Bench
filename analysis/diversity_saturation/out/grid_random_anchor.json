@@ -1,0 +1,9 @@
+{
+ "encoder": "control_random_frozen_5src",
+ "values": {
+  "Arm pose (val loss)": 0.017674,
+  "Full-body (mpjpe mm)": 104.425574,
+  "Odometry (vel MSE)": 0.03148
+ },
+ "missing": []
+}

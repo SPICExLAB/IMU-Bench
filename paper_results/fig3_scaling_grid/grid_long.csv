@@ -1,0 +1,199 @@
+cell,motion_types_K,pool_fraction,n_windows,panel,value,higher_is_better,source
+k1000_f0p1,1000,0.001,1959,inrtlWrist val loss (pretrain),0.796747,0,pretraining (grid validation set)
+k1000_f1,1000,0.01,19593,inrtlWrist val loss (pretrain),0.793177,0,pretraining (grid validation set)
+k1000_f10,1000,0.1,195929,inrtlWrist val loss (pretrain),0.794358,0,pretraining (grid validation set)
+k1000_f100,1000,1.0,1959288,inrtlWrist val loss (pretrain),0.794531,0,pretraining (grid validation set)
+k100_f0p01,100,0.0001,196,inrtlWrist val loss (pretrain),0.853549,0,pretraining (grid validation set)
+k100_f0p1,100,0.001,1959,inrtlWrist val loss (pretrain),0.807117,0,pretraining (grid validation set)
+k100_f1,100,0.01,19593,inrtlWrist val loss (pretrain),0.802643,0,pretraining (grid validation set)
+k100_f10,100,0.1,195929,inrtlWrist val loss (pretrain),0.802693,0,pretraining (grid validation set)
+k10_f0p01,10,0.0001,196,inrtlWrist val loss (pretrain),0.879232,0,pretraining (grid validation set)
+k10_f0p1,10,0.001,1959,inrtlWrist val loss (pretrain),0.819635,0,pretraining (grid validation set)
+k10_f1,10,0.01,19593,inrtlWrist val loss (pretrain),0.818161,0,pretraining (grid validation set)
+k1_f0p01,1,0.0001,196,inrtlWrist val loss (pretrain),0.957035,0,pretraining (grid validation set)
+k1_f0p1,1,0.001,1959,inrtlWrist val loss (pretrain),0.936277,0,pretraining (grid validation set)
+k25_f0p01,25,0.0001,196,inrtlWrist val loss (pretrain),0.856204,0,pretraining (grid validation set)
+k25_f0p1,25,0.001,1959,inrtlWrist val loss (pretrain),0.812754,0,pretraining (grid validation set)
+k25_f1,25,0.01,19593,inrtlWrist val loss (pretrain),0.809999,0,pretraining (grid validation set)
+k50_f0p01,50,0.0001,196,inrtlWrist val loss (pretrain),0.862618,0,pretraining (grid validation set)
+k50_f0p1,50,0.001,1959,inrtlWrist val loss (pretrain),0.808042,0,pretraining (grid validation set)
+k50_f1,50,0.01,19593,inrtlWrist val loss (pretrain),0.805192,0,pretraining (grid validation set)
+k5_f0p01,5,0.0001,196,inrtlWrist val loss (pretrain),0.874047,0,pretraining (grid validation set)
+k5_f0p1,5,0.001,1959,inrtlWrist val loss (pretrain),0.829415,0,pretraining (grid validation set)
+k5_f1,5,0.01,19593,inrtlWrist val loss (pretrain),0.829148,0,pretraining (grid validation set)
+k1000_f0p1,1000,0.001,1959,HHAR (macro-F1),0.5522991180839738,1,bench probe: har_hhar macro_f1
+k1000_f1,1000,0.01,19593,HHAR (macro-F1),0.606200870336372,1,bench probe: har_hhar macro_f1
+k1000_f10,1000,0.1,195929,HHAR (macro-F1),0.5840933304968122,1,bench probe: har_hhar macro_f1
+k1000_f100,1000,1.0,1959288,HHAR (macro-F1),0.5602998599193366,1,bench probe: har_hhar macro_f1
+k100_f0p01,100,0.0001,196,HHAR (macro-F1),0.5210200716896897,1,bench probe: har_hhar macro_f1
+k100_f0p1,100,0.001,1959,HHAR (macro-F1),0.5715767743187374,1,bench probe: har_hhar macro_f1
+k100_f1,100,0.01,19593,HHAR (macro-F1),0.5786498543872083,1,bench probe: har_hhar macro_f1
+k100_f10,100,0.1,195929,HHAR (macro-F1),0.4993983243305829,1,bench probe: har_hhar macro_f1
+k10_f0p01,10,0.0001,196,HHAR (macro-F1),0.4981218222528116,1,bench probe: har_hhar macro_f1
+k10_f0p1,10,0.001,1959,HHAR (macro-F1),0.563838186044408,1,bench probe: har_hhar macro_f1
+k10_f1,10,0.01,19593,HHAR (macro-F1),0.571711970136651,1,bench probe: har_hhar macro_f1
+k1_f0p01,1,0.0001,196,HHAR (macro-F1),0.40686250283397835,1,bench probe: har_hhar macro_f1
+k1_f0p1,1,0.001,1959,HHAR (macro-F1),0.3411559571644893,1,bench probe: har_hhar macro_f1
+k25_f0p01,25,0.0001,196,HHAR (macro-F1),0.5422055881344136,1,bench probe: har_hhar macro_f1
+k25_f0p1,25,0.001,1959,HHAR (macro-F1),0.5360403033199274,1,bench probe: har_hhar macro_f1
+k25_f1,25,0.01,19593,HHAR (macro-F1),0.5704271732060343,1,bench probe: har_hhar macro_f1
+k50_f0p01,50,0.0001,196,HHAR (macro-F1),0.5243441644316381,1,bench probe: har_hhar macro_f1
+k50_f0p1,50,0.001,1959,HHAR (macro-F1),0.5162530528679986,1,bench probe: har_hhar macro_f1
+k50_f1,50,0.01,19593,HHAR (macro-F1),0.495221157312258,1,bench probe: har_hhar macro_f1
+k5_f0p01,5,0.0001,196,HHAR (macro-F1),0.5247729793336263,1,bench probe: har_hhar macro_f1
+k5_f0p1,5,0.001,1959,HHAR (macro-F1),0.5710576125201687,1,bench probe: har_hhar macro_f1
+k5_f1,5,0.01,19593,HHAR (macro-F1),0.5608264215157927,1,bench probe: har_hhar macro_f1
+k1000_f0p1,1000,0.001,1959,MHEALTH (macro-F1),0.6530155870920297,1,bench probe: har_mhealth macro_f1
+k1000_f1,1000,0.01,19593,MHEALTH (macro-F1),0.6670104019463919,1,bench probe: har_mhealth macro_f1
+k1000_f10,1000,0.1,195929,MHEALTH (macro-F1),0.6436920796790995,1,bench probe: har_mhealth macro_f1
+k1000_f100,1000,1.0,1959288,MHEALTH (macro-F1),0.6702674972033242,1,bench probe: har_mhealth macro_f1
+k100_f0p01,100,0.0001,196,MHEALTH (macro-F1),0.6446918814665442,1,bench probe: har_mhealth macro_f1
+k100_f0p1,100,0.001,1959,MHEALTH (macro-F1),0.669264664936385,1,bench probe: har_mhealth macro_f1
+k100_f1,100,0.01,19593,MHEALTH (macro-F1),0.6769819385456343,1,bench probe: har_mhealth macro_f1
+k100_f10,100,0.1,195929,MHEALTH (macro-F1),0.6424361044783341,1,bench probe: har_mhealth macro_f1
+k10_f0p01,10,0.0001,196,MHEALTH (macro-F1),0.6422527945333355,1,bench probe: har_mhealth macro_f1
+k10_f0p1,10,0.001,1959,MHEALTH (macro-F1),0.6928212767535288,1,bench probe: har_mhealth macro_f1
+k10_f1,10,0.01,19593,MHEALTH (macro-F1),0.6863076787320819,1,bench probe: har_mhealth macro_f1
+k1_f0p01,1,0.0001,196,MHEALTH (macro-F1),0.5454507492436164,1,bench probe: har_mhealth macro_f1
+k1_f0p1,1,0.001,1959,MHEALTH (macro-F1),0.4557933261201102,1,bench probe: har_mhealth macro_f1
+k25_f0p01,25,0.0001,196,MHEALTH (macro-F1),0.638342333596123,1,bench probe: har_mhealth macro_f1
+k25_f0p1,25,0.001,1959,MHEALTH (macro-F1),0.6907156401698269,1,bench probe: har_mhealth macro_f1
+k25_f1,25,0.01,19593,MHEALTH (macro-F1),0.6893586842115962,1,bench probe: har_mhealth macro_f1
+k50_f0p01,50,0.0001,196,MHEALTH (macro-F1),0.6303460751739176,1,bench probe: har_mhealth macro_f1
+k50_f0p1,50,0.001,1959,MHEALTH (macro-F1),0.6317241272439699,1,bench probe: har_mhealth macro_f1
+k50_f1,50,0.01,19593,MHEALTH (macro-F1),0.6437531488289974,1,bench probe: har_mhealth macro_f1
+k5_f0p01,5,0.0001,196,MHEALTH (macro-F1),0.6976160910679076,1,bench probe: har_mhealth macro_f1
+k5_f0p1,5,0.001,1959,MHEALTH (macro-F1),0.6796137795043892,1,bench probe: har_mhealth macro_f1
+k5_f1,5,0.01,19593,MHEALTH (macro-F1),0.6698790587104689,1,bench probe: har_mhealth macro_f1
+k1000_f0p1,1000,0.001,1959,PRISM (macro-F1),0.25368347188744356,1,bench probe: har_prism macro_f1
+k1000_f1,1000,0.01,19593,PRISM (macro-F1),0.2507511120182552,1,bench probe: har_prism macro_f1
+k1000_f10,1000,0.1,195929,PRISM (macro-F1),0.251094614369324,1,bench probe: har_prism macro_f1
+k1000_f100,1000,1.0,1959288,PRISM (macro-F1),0.24637125198974444,1,bench probe: har_prism macro_f1
+k100_f0p01,100,0.0001,196,PRISM (macro-F1),0.24819855609589198,1,bench probe: har_prism macro_f1
+k100_f0p1,100,0.001,1959,PRISM (macro-F1),0.2372905565911223,1,bench probe: har_prism macro_f1
+k100_f1,100,0.01,19593,PRISM (macro-F1),0.2643045836754925,1,bench probe: har_prism macro_f1
+k100_f10,100,0.1,195929,PRISM (macro-F1),0.2459595472548965,1,bench probe: har_prism macro_f1
+k10_f0p01,10,0.0001,196,PRISM (macro-F1),0.24716115544974843,1,bench probe: har_prism macro_f1
+k10_f0p1,10,0.001,1959,PRISM (macro-F1),0.25915310655620283,1,bench probe: har_prism macro_f1
+k10_f1,10,0.01,19593,PRISM (macro-F1),0.25465536784562054,1,bench probe: har_prism macro_f1
+k1_f0p01,1,0.0001,196,PRISM (macro-F1),0.182884435286429,1,bench probe: har_prism macro_f1
+k1_f0p1,1,0.001,1959,PRISM (macro-F1),0.1796049317330624,1,bench probe: har_prism macro_f1
+k25_f0p01,25,0.0001,196,PRISM (macro-F1),0.2390334169847772,1,bench probe: har_prism macro_f1
+k25_f0p1,25,0.001,1959,PRISM (macro-F1),0.2536790033007912,1,bench probe: har_prism macro_f1
+k25_f1,25,0.01,19593,PRISM (macro-F1),0.2518452608608583,1,bench probe: har_prism macro_f1
+k50_f0p01,50,0.0001,196,PRISM (macro-F1),0.25939466223937857,1,bench probe: har_prism macro_f1
+k50_f0p1,50,0.001,1959,PRISM (macro-F1),0.2565174460134184,1,bench probe: har_prism macro_f1
+k50_f1,50,0.01,19593,PRISM (macro-F1),0.264215161281281,1,bench probe: har_prism macro_f1
+k5_f0p01,5,0.0001,196,PRISM (macro-F1),0.23872549135703175,1,bench probe: har_prism macro_f1
+k5_f0p1,5,0.001,1959,PRISM (macro-F1),0.23859290320305448,1,bench probe: har_prism macro_f1
+k5_f1,5,0.01,19593,PRISM (macro-F1),0.23219929833676695,1,bench probe: har_prism macro_f1
+k1000_f0p1,1000,0.001,1959,Parkinson's (window F1),0.41397899673147603,1,bench probe: pd_pads window_macro_f1
+k1000_f1,1000,0.01,19593,Parkinson's (window F1),0.40895429884493933,1,bench probe: pd_pads window_macro_f1
+k1000_f10,1000,0.1,195929,Parkinson's (window F1),0.3978007294149986,1,bench probe: pd_pads window_macro_f1
+k1000_f100,1000,1.0,1959288,Parkinson's (window F1),0.3954793146012616,1,bench probe: pd_pads window_macro_f1
+k100_f0p01,100,0.0001,196,Parkinson's (window F1),0.40718875983259495,1,bench probe: pd_pads window_macro_f1
+k100_f0p1,100,0.001,1959,Parkinson's (window F1),0.4037778444206583,1,bench probe: pd_pads window_macro_f1
+k100_f1,100,0.01,19593,Parkinson's (window F1),0.41746165315268663,1,bench probe: pd_pads window_macro_f1
+k100_f10,100,0.1,195929,Parkinson's (window F1),0.3972680452558775,1,bench probe: pd_pads window_macro_f1
+k10_f0p01,10,0.0001,196,Parkinson's (window F1),0.39392078609595066,1,bench probe: pd_pads window_macro_f1
+k10_f0p1,10,0.001,1959,Parkinson's (window F1),0.4240582013153438,1,bench probe: pd_pads window_macro_f1
+k10_f1,10,0.01,19593,Parkinson's (window F1),0.423018614245439,1,bench probe: pd_pads window_macro_f1
+k1_f0p01,1,0.0001,196,Parkinson's (window F1),0.3859629573391464,1,bench probe: pd_pads window_macro_f1
+k1_f0p1,1,0.001,1959,Parkinson's (window F1),0.33651683499247403,1,bench probe: pd_pads window_macro_f1
+k25_f0p01,25,0.0001,196,Parkinson's (window F1),0.3890990383970782,1,bench probe: pd_pads window_macro_f1
+k25_f0p1,25,0.001,1959,Parkinson's (window F1),0.36523017937861785,1,bench probe: pd_pads window_macro_f1
+k25_f1,25,0.01,19593,Parkinson's (window F1),0.388238671779934,1,bench probe: pd_pads window_macro_f1
+k50_f0p01,50,0.0001,196,Parkinson's (window F1),0.3808623899718504,1,bench probe: pd_pads window_macro_f1
+k50_f0p1,50,0.001,1959,Parkinson's (window F1),0.4443502876565211,1,bench probe: pd_pads window_macro_f1
+k50_f1,50,0.01,19593,Parkinson's (window F1),0.39917273158336447,1,bench probe: pd_pads window_macro_f1
+k5_f0p01,5,0.0001,196,Parkinson's (window F1),0.38990806338770057,1,bench probe: pd_pads window_macro_f1
+k5_f0p1,5,0.001,1959,Parkinson's (window F1),0.41168963397978237,1,bench probe: pd_pads window_macro_f1
+k5_f1,5,0.01,19593,Parkinson's (window F1),0.38090805108145015,1,bench probe: pd_pads window_macro_f1
+k1000_f0p1,1000,0.001,1959,Gesture (clip F1),0.5948684098838898,1,bench probe: microgesture_openwatch clip_macro_f1
+k1000_f1,1000,0.01,19593,Gesture (clip F1),0.5582558751952345,1,bench probe: microgesture_openwatch clip_macro_f1
+k1000_f10,1000,0.1,195929,Gesture (clip F1),0.5728864734299516,1,bench probe: microgesture_openwatch clip_macro_f1
+k1000_f100,1000,1.0,1959288,Gesture (clip F1),0.5863187380215243,1,bench probe: microgesture_openwatch clip_macro_f1
+k100_f0p01,100,0.0001,196,Gesture (clip F1),0.6000093862323886,1,bench probe: microgesture_openwatch clip_macro_f1
+k100_f0p1,100,0.001,1959,Gesture (clip F1),0.6142780884319965,1,bench probe: microgesture_openwatch clip_macro_f1
+k100_f1,100,0.01,19593,Gesture (clip F1),0.5065402476780185,1,bench probe: microgesture_openwatch clip_macro_f1
+k100_f10,100,0.1,195929,Gesture (clip F1),0.5356532356532356,1,bench probe: microgesture_openwatch clip_macro_f1
+k10_f0p01,10,0.0001,196,Gesture (clip F1),0.5868542568542569,1,bench probe: microgesture_openwatch clip_macro_f1
+k10_f0p1,10,0.001,1959,Gesture (clip F1),0.5992446393762183,1,bench probe: microgesture_openwatch clip_macro_f1
+k10_f1,10,0.01,19593,Gesture (clip F1),0.6229030866961901,1,bench probe: microgesture_openwatch clip_macro_f1
+k1_f0p01,1,0.0001,196,Gesture (clip F1),0.298223215042437,1,bench probe: microgesture_openwatch clip_macro_f1
+k1_f0p1,1,0.001,1959,Gesture (clip F1),0.3028083028083028,1,bench probe: microgesture_openwatch clip_macro_f1
+k25_f0p01,25,0.0001,196,Gesture (clip F1),0.5415336726079336,1,bench probe: microgesture_openwatch clip_macro_f1
+k25_f0p1,25,0.001,1959,Gesture (clip F1),0.48412146874264045,1,bench probe: microgesture_openwatch clip_macro_f1
+k25_f1,25,0.01,19593,Gesture (clip F1),0.5857423065065458,1,bench probe: microgesture_openwatch clip_macro_f1
+k50_f0p01,50,0.0001,196,Gesture (clip F1),0.5483426704014939,1,bench probe: microgesture_openwatch clip_macro_f1
+k50_f0p1,50,0.001,1959,Gesture (clip F1),0.5338340838727835,1,bench probe: microgesture_openwatch clip_macro_f1
+k50_f1,50,0.01,19593,Gesture (clip F1),0.5351232917409388,1,bench probe: microgesture_openwatch clip_macro_f1
+k5_f0p01,5,0.0001,196,Gesture (clip F1),0.5638440897408894,1,bench probe: microgesture_openwatch clip_macro_f1
+k5_f0p1,5,0.001,1959,Gesture (clip F1),0.53864044168392,1,bench probe: microgesture_openwatch clip_macro_f1
+k5_f1,5,0.01,19593,Gesture (clip F1),0.5410280967599167,1,bench probe: microgesture_openwatch clip_macro_f1
+k1000_f0p1,1000,0.001,1959,Arm pose (val loss),0.017132,0,legacy grid probe (lighter decoder)
+k1000_f1,1000,0.01,19593,Arm pose (val loss),0.017468,0,legacy grid probe (lighter decoder)
+k1000_f10,1000,0.1,195929,Arm pose (val loss),0.017498,0,legacy grid probe (lighter decoder)
+k1000_f100,1000,1.0,1959288,Arm pose (val loss),0.017482,0,legacy grid probe (lighter decoder)
+k100_f0p01,100,0.0001,196,Arm pose (val loss),0.017971,0,legacy grid probe (lighter decoder)
+k100_f0p1,100,0.001,1959,Arm pose (val loss),0.017714,0,legacy grid probe (lighter decoder)
+k100_f1,100,0.01,19593,Arm pose (val loss),0.017735,0,legacy grid probe (lighter decoder)
+k100_f10,100,0.1,195929,Arm pose (val loss),0.017314,0,legacy grid probe (lighter decoder)
+k10_f0p01,10,0.0001,196,Arm pose (val loss),0.018065,0,legacy grid probe (lighter decoder)
+k10_f0p1,10,0.001,1959,Arm pose (val loss),0.01761,0,legacy grid probe (lighter decoder)
+k10_f1,10,0.01,19593,Arm pose (val loss),0.017676,0,legacy grid probe (lighter decoder)
+k1_f0p01,1,0.0001,196,Arm pose (val loss),0.01826,0,legacy grid probe (lighter decoder)
+k1_f0p1,1,0.001,1959,Arm pose (val loss),0.018326,0,legacy grid probe (lighter decoder)
+k25_f0p01,25,0.0001,196,Arm pose (val loss),0.018052,0,legacy grid probe (lighter decoder)
+k25_f0p1,25,0.001,1959,Arm pose (val loss),0.017633,0,legacy grid probe (lighter decoder)
+k25_f1,25,0.01,19593,Arm pose (val loss),0.017648,0,legacy grid probe (lighter decoder)
+k50_f0p01,50,0.0001,196,Arm pose (val loss),0.018,0,legacy grid probe (lighter decoder)
+k50_f0p1,50,0.001,1959,Arm pose (val loss),0.017665,0,legacy grid probe (lighter decoder)
+k50_f1,50,0.01,19593,Arm pose (val loss),0.017426,0,legacy grid probe (lighter decoder)
+k5_f0p01,5,0.0001,196,Arm pose (val loss),0.018052,0,legacy grid probe (lighter decoder)
+k5_f0p1,5,0.001,1959,Arm pose (val loss),0.017732,0,legacy grid probe (lighter decoder)
+k5_f1,5,0.01,19593,Arm pose (val loss),0.017995,0,legacy grid probe (lighter decoder)
+k1000_f0p1,1000,0.001,1959,Full-body (mpjpe mm),100.746094,0,legacy grid probe (lighter decoder)
+k1000_f1,1000,0.01,19593,Full-body (mpjpe mm),100.626375,0,legacy grid probe (lighter decoder)
+k1000_f10,1000,0.1,195929,Full-body (mpjpe mm),100.518604,0,legacy grid probe (lighter decoder)
+k1000_f100,1000,1.0,1959288,Full-body (mpjpe mm),100.335811,0,legacy grid probe (lighter decoder)
+k100_f0p01,100,0.0001,196,Full-body (mpjpe mm),102.31555,0,legacy grid probe (lighter decoder)
+k100_f0p1,100,0.001,1959,Full-body (mpjpe mm),101.634414,0,legacy grid probe (lighter decoder)
+k100_f1,100,0.01,19593,Full-body (mpjpe mm),101.60248,0,legacy grid probe (lighter decoder)
+k100_f10,100,0.1,195929,Full-body (mpjpe mm),101.00618,0,legacy grid probe (lighter decoder)
+k10_f0p01,10,0.0001,196,Full-body (mpjpe mm),102.764732,0,legacy grid probe (lighter decoder)
+k10_f0p1,10,0.001,1959,Full-body (mpjpe mm),101.422748,0,legacy grid probe (lighter decoder)
+k10_f1,10,0.01,19593,Full-body (mpjpe mm),101.70835,0,legacy grid probe (lighter decoder)
+k1_f0p01,1,0.0001,196,Full-body (mpjpe mm),104.73523,0,legacy grid probe (lighter decoder)
+k1_f0p1,1,0.001,1959,Full-body (mpjpe mm),104.738632,0,legacy grid probe (lighter decoder)
+k25_f0p01,25,0.0001,196,Full-body (mpjpe mm),102.250598,0,legacy grid probe (lighter decoder)
+k25_f0p1,25,0.001,1959,Full-body (mpjpe mm),101.852578,0,legacy grid probe (lighter decoder)
+k25_f1,25,0.01,19593,Full-body (mpjpe mm),101.547769,0,legacy grid probe (lighter decoder)
+k50_f0p01,50,0.0001,196,Full-body (mpjpe mm),101.966829,0,legacy grid probe (lighter decoder)
+k50_f0p1,50,0.001,1959,Full-body (mpjpe mm),101.158987,0,legacy grid probe (lighter decoder)
+k50_f1,50,0.01,19593,Full-body (mpjpe mm),101.250766,0,legacy grid probe (lighter decoder)
+k5_f0p01,5,0.0001,196,Full-body (mpjpe mm),103.089488,0,legacy grid probe (lighter decoder)
+k5_f0p1,5,0.001,1959,Full-body (mpjpe mm),102.527873,0,legacy grid probe (lighter decoder)
+k5_f1,5,0.01,19593,Full-body (mpjpe mm),102.625381,0,legacy grid probe (lighter decoder)
+k1000_f0p1,1000,0.001,1959,Odometry (vel MSE),0.02852,0,legacy grid probe (lighter decoder)
+k1000_f1,1000,0.01,19593,Odometry (vel MSE),0.02834,0,legacy grid probe (lighter decoder)
+k1000_f10,1000,0.1,195929,Odometry (vel MSE),0.02877,0,legacy grid probe (lighter decoder)
+k1000_f100,1000,1.0,1959288,Odometry (vel MSE),0.02854,0,legacy grid probe (lighter decoder)
+k100_f0p01,100,0.0001,196,Odometry (vel MSE),0.03069,0,legacy grid probe (lighter decoder)
+k100_f0p1,100,0.001,1959,Odometry (vel MSE),0.02969,0,legacy grid probe (lighter decoder)
+k100_f1,100,0.01,19593,Odometry (vel MSE),0.02942,0,legacy grid probe (lighter decoder)
+k100_f10,100,0.1,195929,Odometry (vel MSE),0.02926,0,legacy grid probe (lighter decoder)
+k10_f0p01,10,0.0001,196,Odometry (vel MSE),0.03098,0,legacy grid probe (lighter decoder)
+k10_f0p1,10,0.001,1959,Odometry (vel MSE),0.02893,0,legacy grid probe (lighter decoder)
+k10_f1,10,0.01,19593,Odometry (vel MSE),0.02946,0,legacy grid probe (lighter decoder)
+k1_f0p01,1,0.0001,196,Odometry (vel MSE),0.0343,0,legacy grid probe (lighter decoder)
+k1_f0p1,1,0.001,1959,Odometry (vel MSE),0.03406,0,legacy grid probe (lighter decoder)
+k25_f0p01,25,0.0001,196,Odometry (vel MSE),0.03065,0,legacy grid probe (lighter decoder)
+k25_f0p1,25,0.001,1959,Odometry (vel MSE),0.02972,0,legacy grid probe (lighter decoder)
+k25_f1,25,0.01,19593,Odometry (vel MSE),0.02934,0,legacy grid probe (lighter decoder)
+k50_f0p01,50,0.0001,196,Odometry (vel MSE),0.03056,0,legacy grid probe (lighter decoder)
+k50_f0p1,50,0.001,1959,Odometry (vel MSE),0.0294,0,legacy grid probe (lighter decoder)
+k50_f1,50,0.01,19593,Odometry (vel MSE),0.02933,0,legacy grid probe (lighter decoder)
+k5_f0p01,5,0.0001,196,Odometry (vel MSE),0.0318,0,legacy grid probe (lighter decoder)
+k5_f0p1,5,0.001,1959,Odometry (vel MSE),0.03061,0,legacy grid probe (lighter decoder)
+k5_f1,5,0.01,19593,Odometry (vel MSE),0.03108,0,legacy grid probe (lighter decoder)
