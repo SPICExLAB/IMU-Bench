@@ -1,0 +1,99 @@
+protocol,task,task_label,encoder,encoder_label,unit,higher_is_better,value,panel_best,score
+probe,arm_pose_nymeria,Arm,mae_5src,InrtlWrist (Ours),cm,0,8.137550950050354,8.012033253908157,0.9845754948985702
+probe,full_body_pose_nymeria,Body,mae_5src,InrtlWrist (Ours),mm,0,97.85016,88.110126,0.9004597028763162
+probe,odometry_nymeria_local,Odom.,mae_5src,InrtlWrist (Ours),m,0,0.1998629427138598,0.1541021577928981,0.7710391716463587
+probe,microgesture_openwatch,Gesture,mae_5src,InrtlWrist (Ours),F1,1,0.6467218088133121,0.6467218088133121,1.0
+probe,language_humanml3d,Text,mae_5src,InrtlWrist (Ours),R@1,1,27.923936596302084,38.8213756360522,0.7192928158467933
+probe,pd_pads,PD,mae_5src,InrtlWrist (Ours),F1,1,0.5521003818876159,0.5744699744699745,0.9610604669060423
+probe,__har,Activity,mae_5src,InrtlWrist (Ours),F1,1,0.5781948311630126,0.6389562638135742,0.9049051772528054
+probe,arm_pose_nymeria,Arm,limubert_5src,LIMU-BERT,cm,0,8.139204233884811,8.012033253908157,0.9843755020365234
+probe,full_body_pose_nymeria,Body,limubert_5src,LIMU-BERT,mm,0,98.545129,88.110126,0.8941093983447927
+probe,odometry_nymeria_local,Odom.,limubert_5src,LIMU-BERT,m,0,0.207840867590574,0.1541021577928981,0.7414430067548802
+probe,microgesture_openwatch,Gesture,limubert_5src,LIMU-BERT,F1,1,0.6165824915824916,0.6467218088133121,0.953396782325736
+probe,language_humanml3d,Text,limubert_5src,LIMU-BERT,R@1,1,24.909930349135976,38.8213756360522,0.6416550145637523
+probe,pd_pads,PD,limubert_5src,LIMU-BERT,F1,1,0.5045595894461721,0.5744699744699745,0.8783045448314264
+probe,__har,Activity,limubert_5src,LIMU-BERT,F1,1,0.5622949906924465,0.6389562638135742,0.8800210946151787
+probe,arm_pose_nymeria,Arm,simmtm_5src,SimMTM,cm,0,8.465863019227982,8.012033253908157,0.946392970889197
+probe,full_body_pose_nymeria,Body,simmtm_5src,SimMTM,mm,0,103.645474,88.110126,0.8501106956199553
+probe,odometry_nymeria_local,Odom.,simmtm_5src,SimMTM,m,0,0.2239658524743558,0.1541021577928981,0.6880609525532151
+probe,microgesture_openwatch,Gesture,simmtm_5src,SimMTM,F1,1,0.5585422203069262,0.6467218088133121,0.8636514382154685
+probe,language_humanml3d,Text,simmtm_5src,SimMTM,R@1,1,17.18668774245554,38.8213756360522,0.44271197145561214
+probe,pd_pads,PD,simmtm_5src,SimMTM,F1,1,0.4868008821497193,0.5744699744699745,0.8473913412077947
+probe,__har,Activity,simmtm_5src,SimMTM,F1,1,0.5311012148248679,0.6389562638135742,0.8312012024970543
+probe,arm_pose_nymeria,Arm,focal_5src,FOCAL,cm,0,8.708436042070389,8.012033253908157,0.9200312450136954
+probe,full_body_pose_nymeria,Body,focal_5src,FOCAL,mm,0,108.413672,88.110126,0.8127215357118426
+probe,odometry_nymeria_local,Odom.,focal_5src,FOCAL,m,0,0.2403601483533262,0.1541021577928981,0.6411302324808437
+probe,microgesture_openwatch,Gesture,focal_5src,FOCAL,F1,1,0.4805163056192392,0.6467218088133121,0.7430030951035221
+probe,language_humanml3d,Text,focal_5src,FOCAL,R@1,1,8.565239558667944,38.8213756360522,0.22063204660665534
+probe,pd_pads,PD,focal_5src,FOCAL,F1,1,0.4065037944348289,0.5744699744699745,0.7076153889676882
+probe,__har,Activity,focal_5src,FOCAL,F1,1,0.4421079931677787,0.6389562638135742,0.6919221521189608
+probe,arm_pose_nymeria,Arm,relcon_5src,RelCon,cm,0,8.504417538642883,8.012033253908157,0.942102527010533
+probe,full_body_pose_nymeria,Body,relcon_5src,RelCon,mm,0,104.291822,88.110126,0.8448421392043568
+probe,odometry_nymeria_local,Odom.,relcon_5src,RelCon,m,0,0.2152826207477719,0.1541021577928981,0.7158132749296392
+probe,microgesture_openwatch,Gesture,relcon_5src,RelCon,F1,1,0.3850710055189124,0.6467218088133121,0.5954198548298377
+probe,language_humanml3d,Text,relcon_5src,RelCon,R@1,1,13.151747695097988,38.8213756360522,0.33877593154850416
+probe,pd_pads,PD,relcon_5src,RelCon,F1,1,0.4053872053872054,0.5744699744699745,0.7056717033143975
+probe,__har,Activity,relcon_5src,RelCon,F1,1,0.3540869115612821,0.6389562638135742,0.5541645518081855
+probe,arm_pose_nymeria,Arm,sslwear_5src,SSL-Wearables,cm,0,8.423518389463425,8.012033253908157,0.9511504437302619
+probe,full_body_pose_nymeria,Body,sslwear_5src,SSL-Wearables,mm,0,101.666022,88.110126,0.8666624725417111
+probe,odometry_nymeria_local,Odom.,sslwear_5src,SSL-Wearables,m,0,0.220467907458128,0.1541021577928981,0.6989777313605868
+probe,microgesture_openwatch,Gesture,sslwear_5src,SSL-Wearables,F1,1,0.5468391012784606,0.6467218088133121,0.8455553745463925
+probe,language_humanml3d,Text,sslwear_5src,SSL-Wearables,R@1,1,24.800471434329182,38.8213756360522,0.6388354618556524
+probe,pd_pads,PD,sslwear_5src,SSL-Wearables,F1,1,0.5744699744699745,0.5744699744699745,1.0
+probe,__har,Activity,sslwear_5src,SSL-Wearables,F1,1,0.5511664368432219,0.6389562638135742,0.8626043253001642
+probe,arm_pose_nymeria,Arm,scratch,Scratch,cm,0,8.214804530143738,8.012033253908157,0.9753163601773452
+probe,full_body_pose_nymeria,Body,scratch,Scratch,mm,0,92.720507,88.110126,0.950276576895767
+probe,odometry_nymeria_local,Odom.,scratch,Scratch,m,0,0.1617673473599045,0.1541021577928981,0.9526159655078433
+probe,microgesture_openwatch,Gesture,scratch,Scratch,F1,1,0.6081037062982316,0.6467218088133121,0.9402863766324165
+probe,language_humanml3d,Text,scratch,Scratch,R@1,1,23.178559121366312,38.8213756360522,0.5970566148573341
+probe,pd_pads,PD,scratch,Scratch,F1,1,0.2989417989417989,0.5744699744699745,0.5203784570596797
+probe,__har,Activity,scratch,Scratch,F1,1,0.5334188128152366,0.6389562638135742,0.8348283646701524
+finetune,arm_pose_nymeria,Arm,mae_5src,InrtlWrist (Ours),cm,0,8.012033253908157,8.012033253908157,1.0
+finetune,full_body_pose_nymeria,Body,mae_5src,InrtlWrist (Ours),mm,0,88.110126,88.110126,1.0
+finetune,odometry_nymeria_local,Odom.,mae_5src,InrtlWrist (Ours),m,0,0.1541021577928981,0.1541021577928981,1.0
+finetune,microgesture_openwatch,Gesture,mae_5src,InrtlWrist (Ours),F1,1,0.5419450067476383,0.6467218088133121,0.8379878324222101
+finetune,language_humanml3d,Text,mae_5src,InrtlWrist (Ours),R@1,1,38.8213756360522,38.8213756360522,1.0
+finetune,pd_pads,PD,mae_5src,InrtlWrist (Ours),F1,1,0.5185250091274187,0.5744699744699745,0.9026146398788335
+finetune,__har,Activity,mae_5src,InrtlWrist (Ours),F1,1,0.6389562638135742,0.6389562638135742,1.0
+finetune,arm_pose_nymeria,Arm,limubert_5src,LIMU-BERT,cm,0,8.175131678581238,8.012033253908157,0.9800494437171702
+finetune,full_body_pose_nymeria,Body,limubert_5src,LIMU-BERT,mm,0,89.742643,88.110126,0.9818089043800503
+finetune,odometry_nymeria_local,Odom.,limubert_5src,LIMU-BERT,m,0,0.1576361778028309,0.1541021577928981,0.9775811615125996
+finetune,microgesture_openwatch,Gesture,limubert_5src,LIMU-BERT,F1,1,0.5727866904337492,0.6467218088133121,0.8856770911820208
+finetune,language_humanml3d,Text,limubert_5src,LIMU-BERT,R@1,1,36.585868809511815,38.8213756360522,0.9424155690025486
+finetune,pd_pads,PD,limubert_5src,LIMU-BERT,F1,1,0.4596172674677347,0.5744699744699745,0.8000718712789004
+finetune,__har,Activity,limubert_5src,LIMU-BERT,F1,1,0.5612000875368965,0.6389562638135742,0.8783075138623819
+finetune,arm_pose_nymeria,Arm,simmtm_5src,SimMTM,cm,0,8.440148085355759,8.012033253908157,0.949276383883547
+finetune,full_body_pose_nymeria,Body,simmtm_5src,SimMTM,mm,0,92.914468,88.110126,0.9482928535952011
+finetune,odometry_nymeria_local,Odom.,simmtm_5src,SimMTM,m,0,0.1628884587735134,0.1541021577928981,0.9460594013426566
+finetune,microgesture_openwatch,Gesture,simmtm_5src,SimMTM,F1,1,0.618838045859207,0.6467218088133121,0.9568844554581052
+finetune,language_humanml3d,Text,simmtm_5src,SimMTM,R@1,1,32.37359136480427,38.8213756360522,0.8339114942320571
+finetune,pd_pads,PD,simmtm_5src,SimMTM,F1,1,0.4680569262676106,0.5744699744699745,0.8147630808719912
+finetune,__har,Activity,simmtm_5src,SimMTM,F1,1,0.5205709123117412,0.6389562638135742,0.8147207278394037
+finetune,arm_pose_nymeria,Arm,focal_5src,FOCAL,cm,0,8.656147122383118,8.012033253908157,0.9255888492457104
+finetune,full_body_pose_nymeria,Body,focal_5src,FOCAL,mm,0,95.916763,88.110126,0.918610295470459
+finetune,odometry_nymeria_local,Odom.,focal_5src,FOCAL,m,0,0.1767092889220965,0.1541021577928981,0.8720659719299481
+finetune,microgesture_openwatch,Gesture,focal_5src,FOCAL,F1,1,0.3925299506694856,0.6467218088133121,0.6069533226191177
+finetune,language_humanml3d,Text,focal_5src,FOCAL,R@1,1,22.365535165499523,38.8213756360522,0.5761139269039541
+finetune,pd_pads,PD,focal_5src,FOCAL,F1,1,0.463095238095238,0.5744699744699745,0.8061260965336011
+finetune,__har,Activity,focal_5src,FOCAL,F1,1,0.5607781483129808,0.6389562638135742,0.877647156889907
+finetune,arm_pose_nymeria,Arm,relcon_5src,RelCon,cm,0,8.553347736597061,8.012033253908157,0.9367131444483672
+finetune,full_body_pose_nymeria,Body,relcon_5src,RelCon,mm,0,92.147361,88.110126,0.9561871880411202
+finetune,odometry_nymeria_local,Odom.,relcon_5src,RelCon,m,0,0.167245759201532,0.1541021577928981,0.9214114517977355
+finetune,microgesture_openwatch,Gesture,relcon_5src,RelCon,F1,1,0.4272283272283272,0.6467218088133121,0.6606060309180858
+finetune,language_humanml3d,Text,relcon_5src,RelCon,R@1,1,30.00377777217996,38.8213756360522,0.7728674546070537
+finetune,pd_pads,PD,relcon_5src,RelCon,F1,1,0.4914816513177169,0.5744699744699745,0.8555393199987077
+finetune,__har,Activity,relcon_5src,RelCon,F1,1,0.5278527634525108,0.6389562638135742,0.8261172060542165
+finetune,arm_pose_nymeria,Arm,sslwear_5src,SSL-Wearables,cm,0,8.571162819862366,8.012033253908157,0.9347661947736531
+finetune,full_body_pose_nymeria,Body,sslwear_5src,SSL-Wearables,mm,0,90.61382,88.110126,0.9723696230883986
+finetune,odometry_nymeria_local,Odom.,sslwear_5src,SSL-Wearables,m,0,0.1656260864622372,0.1541021577928981,0.9304220191668505
+finetune,microgesture_openwatch,Gesture,sslwear_5src,SSL-Wearables,F1,1,0.5826885988840077,0.6467218088133121,0.9009880151609535
+finetune,language_humanml3d,Text,sslwear_5src,SSL-Wearables,R@1,1,34.51883193107965,38.8213756360522,0.8891707562012071
+finetune,pd_pads,PD,sslwear_5src,SSL-Wearables,F1,1,0.4874140637687436,0.5744699744699745,0.8484587279229838
+finetune,__har,Activity,sslwear_5src,SSL-Wearables,F1,1,0.5672553320305813,0.6389562638135742,0.8877842884659274
+finetune,arm_pose_nymeria,Arm,scratch,Scratch,cm,0,8.214804530143738,8.012033253908157,0.9753163601773452
+finetune,full_body_pose_nymeria,Body,scratch,Scratch,mm,0,92.720507,88.110126,0.950276576895767
+finetune,odometry_nymeria_local,Odom.,scratch,Scratch,m,0,0.1617673473599045,0.1541021577928981,0.9526159655078433
+finetune,microgesture_openwatch,Gesture,scratch,Scratch,F1,1,0.6081037062982316,0.6467218088133121,0.9402863766324165
+finetune,language_humanml3d,Text,scratch,Scratch,R@1,1,23.178559121366312,38.8213756360522,0.5970566148573341
+finetune,pd_pads,PD,scratch,Scratch,F1,1,0.2989417989417989,0.5744699744699745,0.5203784570596797
+finetune,__har,Activity,scratch,Scratch,F1,1,0.5334188128152366,0.6389562638135742,0.8348283646701524

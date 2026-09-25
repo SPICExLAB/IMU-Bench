@@ -47,7 +47,7 @@ PRINT_IN = 5.5
 RMIN = 0.20             # radial floor: the axis runs RMIN..1.00, not 0..1.00 (declared in the caption); 0.30 with --per-panel
 
 # house theme, shared with the other paper figures
-th = dict(surface="#fcfcfb", ink="#0b0b0b", ink2="#52514e", muted="#898781", grid="#e1e0d9", axis="#c3c2b7")
+th = dict(surface="#ffffff", ink="#0b0b0b", ink2="#52514e", muted="#898781", grid="#e1e0d9", axis="#c3c2b7")
 # categorical slots 1, 3, 4, 7, 8 of the documented palette: this five-hue set is the one that clears the
 # all-pairs normal-vision floor (worst 16.3). Its worst CVD pair is 6.9 (deuteranopia), inside the 6-8
 # band that is legal only with secondary encoding -- hence a line style and a marker shape per series.
@@ -174,11 +174,7 @@ def build(d, series, ncol, rows, shared=True, rmin=RMIN):
                      columnspacing=1.6, handletextpad=0.6)
     for t in leg.get_texts():
         t.set_color(th["ink2"])
-    fig.text(0.5, bm * 0.55,
-             f"further out is better; each axis scaled to "
-             f"{'the best value in either panel' if shared else 'its panel' + chr(39) + 's best'} (= 1.00); "
-             f"radial axis {rmin:.2f}\u20131.00",
-             ha="center", fontsize=5.7, color=th["muted"])
+    # no in-figure subtitle: the scaling rule and the radial floor are stated in the LaTeX caption (user, 2026-09-25)
     return fig, export
 
 
