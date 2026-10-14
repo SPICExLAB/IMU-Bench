@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Task-similarity table: are two OmniIMU-Bench tasks solved by similar wrist-IMU representations?
+"""Task-similarity table: are two IMU-Bench tasks solved by similar wrist-IMU representations?
 
     python analysis/paper_tables/make_task_similarity.py
 

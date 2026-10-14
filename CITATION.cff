@@ -1,6 +1,6 @@
 cff-version: 1.2.0
-message: "If you use OmniIMU-Bench or InrtlWrist, please cite the paper."
-title: "OmniIMU-Bench: Benchmarking Wrist IMU Representations Across Kinematic, Semantic and Clinical Tasks"
+message: "If you use IMU-Bench or InrtlWrist, please cite the paper."
+title: "IMU-Bench: Benchmarking Wrist IMU Representations Across Kinematic, Semantic and Clinical Tasks"
 authors:
   - family-names: Li
     given-names: Yiquan
@@ -15,7 +15,7 @@ repository-code: "https://github.com/SPICExLAB/IMU-Bench"
 url: "https://spicexlab.github.io/imubench/"
 preferred-citation:
   type: article
-  title: "OmniIMU-Bench: Benchmarking Wrist IMU Representations Across Kinematic, Semantic and Clinical Tasks"
+  title: "IMU-Bench: Benchmarking Wrist IMU Representations Across Kinematic, Semantic and Clinical Tasks"
   authors:
     - family-names: Li
       given-names: Yiquan

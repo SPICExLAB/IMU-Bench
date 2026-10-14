@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""One results table per OmniIMU-Bench task, with every metric that task reports.
+"""One results table per IMU-Bench task, with every metric that task reports.
 
     python analysis/paper_tables/make_task_tables.py
 

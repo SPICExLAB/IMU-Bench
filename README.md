@@ -1,4 +1,4 @@
-# OmniIMU-Bench
+# IMU-Bench
 
 **Benchmarking Wrist IMU Representations Across Kinematic, Semantic and Clinical Tasks**
 
@@ -6,7 +6,7 @@ Yiquan Li\*, Aidan Bradshaw\*, Chenfeng Gao, Karan Ahuja (Northwestern Universit
 
 Project website and leaderboard: **https://spicexlab.github.io/imubench/** · Paper: arXiv (link to follow)
 
-OmniIMU-Bench is a benchmark of **ten tasks from eight datasets** for studying what a single wrist IMU
+IMU-Bench is a benchmark of **ten tasks from eight datasets** for studying what a single wrist IMU
 (accelerometer + gyroscope, six channels) representation carries across kinematic, semantic and clinical
 targets, and how supervision for one task transfers to the others. This repository holds the registry-driven
 harness that produced every number in the paper, the task cards and generated per-cell configs, the scorers,
@@ -154,8 +154,8 @@ Mix-Token and the PADS pipeline are ported in `baselines/mixtoken/` and `baselin
 ## Citation
 
 ```bibtex
-@article{li2026omniimubench,
-  title   = {OmniIMU-Bench: Benchmarking Wrist IMU Representations Across Kinematic, Semantic and Clinical Tasks},
+@article{li2026imubench,
+  title   = {IMU-Bench: Benchmarking Wrist IMU Representations Across Kinematic, Semantic and Clinical Tasks},
   author  = {Li, Yiquan and Bradshaw, Aidan and Gao, Chenfeng and Ahuja, Karan},
   journal = {arXiv preprint},
   year    = {2026}
