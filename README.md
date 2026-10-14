@@ -102,8 +102,11 @@ The datasets are not redistributed. Download each from its source, then point th
   `scripts/build_multidata_cache.py --config configs/base.yaml --model-config <pretrain config> --out-dir <cache dir>`.
 * The full-body pose scorer needs the SMPL model file; see `assets/smpl/README.md`.
 
-All inputs are one wrist, six channels in a forward–left–up frame (acc m/s², gyro rad/s), z-scored per
-channel and window; the loaders and unit checks live in `imu_lm/data/`.
+The benchmark fixes the **raw input**: one wrist, six channels in a forward–left–up frame (acc m/s², gyro rad/s)
+at 50 Hz, the released windows and splits. How an encoder normalises that input is part of the submission, not of
+the protocol: the encoder card declares it (`normalize_method: zscore | physical | raw`) and the harness feeds every
+probe and fine-tune of that encoder the same way. The released encoders use per-window z-scoring; physical-unit and
+raw inputs are supported as well. The loaders and unit checks live in `imu_lm/data/`.
 
 ## Pretraining InrtlWrist
 
