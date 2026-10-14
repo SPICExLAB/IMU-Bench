@@ -13,7 +13,7 @@ Yiquan Li\*, Aidan Bradshaw\*, Chenfeng Gao, Karan Ahuja (Northwestern Universit
 
 Project website and leaderboard: **https://spicexlab.github.io/imubench/** · Paper: arXiv (link to follow)
 
-New here? **[USER_GUIDE.md](USER_GUIDE.md)** takes you from a clone to a leaderboard submission.
+New here? The **[documentation site](https://spicexlab.github.io/imubench/docs/)** (sources in `docs/`, built with `./build_docs.sh`) takes you from a clone to a leaderboard submission.
 
 IMU-Bench is a benchmark of **ten tasks from eight datasets** for studying what a single wrist IMU
 (accelerometer + gyroscope, six channels) representation carries across kinematic, semantic and clinical

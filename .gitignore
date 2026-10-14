@@ -26,7 +26,6 @@ checkpoints/
 outputs/
 logs/
 datadrive/
-docs/
 demo/
 
 WatchHand/
@@ -71,3 +70,4 @@ baselines/language_alignment/UniMTS/
 baselines/odometry/Air-IO/
 baselines/odometry/TLIO/
 bench/results_nosel/_units/
+site/

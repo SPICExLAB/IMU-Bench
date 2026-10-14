@@ -1,0 +1,77 @@
+site_name: IMU-Bench
+site_description: Benchmarking wrist IMU representations across kinematic, semantic and clinical tasks
+site_url: https://spicexlab.github.io/imubench/docs/
+repo_url: https://github.com/SPICExLAB/IMU-Bench
+repo_name: SPICExLAB/IMU-Bench
+edit_uri: edit/main/docs/
+copyright: IMU-Bench authors, 2026. MIT License.
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.action.edit
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-night
+        name: Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-sunny
+        name: Light mode
+  icon:
+    repo: fontawesome/brands/github
+  font:
+    text: IBM Plex Sans
+    code: IBM Plex Mono
+
+extra_css:
+  - stylesheets/extra.css
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+
+nav:
+  - Leaderboard: https://spicexlab.github.io/imubench/#leaderboard
+  - IMU-Bench:
+      - Home: index.md
+      - Installation: installation.md
+      - FAQ: faq.md
+      - Roadmap: roadmap.md
+  - User Guides:
+      - Quickstart: guides/quickstart.md
+      - Datasets: guides/datasets.md
+      - Submission modes: guides/submission-modes.md
+      - Evaluation: guides/evaluation.md
+      - Tracks and leaderboard submission: guides/submit.md
+      - Data audit and leakage: guides/audit.md
+      - Reproducing the paper: guides/reproducing.md
+      - Reference:
+          - CLI: reference/cli.md
+          - Encoder cards: reference/encoder-card.md
+          - Task cards: reference/task-cards.md
+          - Result files: reference/results.md

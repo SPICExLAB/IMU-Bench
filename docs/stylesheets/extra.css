@@ -1,0 +1,6 @@
+:root { --md-primary-fg-color: #1d6f8f; --md-primary-fg-color--light: #5aa3bf; --md-primary-fg-color--dark: #155369; --md-accent-fg-color: #c2662a; }
+[data-md-color-scheme="slate"] { --md-primary-fg-color: #3a9fbd; --md-accent-fg-color: #e39159; }
+.md-typeset table:not([class]) { font-size: .78rem; }
+.md-typeset h1 { font-weight: 700; }
+.links-row { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0 1.5rem; }
+.links-row a { border: 1px solid var(--md-default-fg-color--lightest); border-radius: 6px; padding: .35rem .7rem; text-decoration: none; }
