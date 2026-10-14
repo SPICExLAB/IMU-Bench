@@ -28,7 +28,7 @@ bench/generated/submissions.tsv every sbatch call (job id, kind, cell, run, scri
 | `language_humanml3d` | HumanML3D / UniMTS_data, official val/test | `[6,512]` wrap-padded | `[512]` CLIP-space embedding | fixed 8k budget, `latest.pt` | **test** | R@1 @ G=100 (mean i2t/t2i) ↑ |
 | `pd_pads` | PADS, 375/94 subjects | `[6,128]` 2.56 s (gravity-free) | `[3]` logits → subject mean-prob | val window bal-acc | val | subject bal-acc ↑ |
 
-All inputs are a single wrist IMU in the FLU frame, acc m/s² (+gravity except PADS), gyro rad/s, z-scored per window; the acc-only ablation sees `x[:3]`.
+All inputs are a single wrist IMU in the FLU frame, acc m/s² (+gravity except PADS), gyro rad/s. Input normalisation is per encoder (`normalize_method: zscore | physical | raw` in its card; the released encoders use per-window z-scoring); the acc-only ablation sees `x[:3]`.
 
 ## What "controlled" means here
 

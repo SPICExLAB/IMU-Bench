@@ -157,7 +157,8 @@ On a SLURM cluster `python -m bench.launch --cell pd_pads mae_5src probe` submit
 `python -m bench.launch --fill-missing --dry-run` lists every cell that has no result yet.
 The generated configs of every cell in the paper are committed under `bench/generated/configs/`.
 
-**Adding an encoder** is one entry in `encoders.yaml` (run directory or checkpoint, attention flag, channels).
+**Adding an encoder** is one entry in `encoders.yaml` (run directory or checkpoint, attention flag, channels,
+`normalize_method`: how the encoder wants the fixed raw input scaled).
 **Adding a task** is one card in `tasks.yaml` plus a scorer in `bench/score/` exposing
 `score(run_dir, ckpt_path, task) -> (metrics, info)`.
 
@@ -194,8 +195,9 @@ HfApi().upload_folder(
 )
 ```
 
-Cells enter the ranking only when they come from the released task cards (same decoder, recipe, split, selection
-rule and scorer); systems trained under their own recipes are listed for orientation.
+Cells enter the ranking only when they come from the released task cards (same raw input, decoder, recipe, split,
+selection rule and scorer). Input normalisation and any other preprocessing inside the encoder are the submitter's
+choice and are declared in the encoder card; systems trained under their own task recipes are listed for orientation.
 
 ## Task-specific baselines
 

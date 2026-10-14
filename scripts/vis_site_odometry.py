@@ -69,6 +69,7 @@ def main():
     ap.add_argument("--windows", type=int, default=6)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--no-scratch", action="store_true", help="plot ground truth and InrtlWrist only")
+    ap.add_argument("--best-pct", type=float, default=25.0, help="with --select best: keep this percentile of relative error")
     ap.add_argument("--select", choices=["random", "best"], default="random",
                     help="best: among windows with above-median motion, sample from the lowest-error quarter (ATE / path length)")
     a = ap.parse_args()
@@ -87,7 +88,7 @@ def main():
         tr_all = trajectories(P_all, GY[cand], R0[cand], ps)
         ate_all = np.sqrt(np.mean(np.sum((tr_all - POS[cand].astype(np.float64)) ** 2, axis=2), axis=1))
         rel = ate_all / plen[cand]
-        keep = cand[rel <= np.percentile(rel, 25)]
+        keep = cand[rel <= np.percentile(rel, a.best_pct)]
         long_ = keep[plen[keep] >= np.percentile(plen[keep], 50)]        # the longer half of the low-error windows
         idx = np.sort(rng.choice(long_, size=a.windows, replace=False))
         print(f"[odom] {len(X)} windows; {len(cand)} with above-median motion; {len(keep)} in the lowest-error quarter; picked {idx.tolist()}")
@@ -102,8 +103,8 @@ def main():
     print("[odom] ATE ours:", np.round(a_ours, 3), "scratch:", np.round(a_scr, 3))
 
     import matplotlib; matplotlib.use("Agg"); import matplotlib.pyplot as plt
-    ncol = 3; nrow = int(np.ceil(len(idx) / ncol))
-    fig, axes = plt.subplots(nrow, ncol, figsize=(3.6 * ncol, 3.5 * nrow), facecolor="white", squeeze=False)
+    ncol = min(4, len(idx)) if len(idx) <= 4 else 3; nrow = int(np.ceil(len(idx) / ncol))
+    fig, axes = plt.subplots(nrow, ncol, figsize=(3.6 * ncol, 3.6 * nrow + 0.4), facecolor="white", squeeze=False)
     for k, ax in enumerate(axes.flat):
         if k >= len(idx): ax.axis("off"); continue
         g, o, s = gt[k], tr_ours[k], tr_scr[k]   # world frame is Y-up: plot the ground plane X-Z
