@@ -55,7 +55,7 @@ z = enc(zscore(torch.randn(2, 6, 512)))            # [2, 384] pooled embedding o
 
 ## Documentation structure
 
-- **Getting started:** [Installation](installation.md), [Quickstart](guides/quickstart.md), [Datasets](guides/datasets.md).
+- **Getting started:** [Tasks](tasks.md), [Installation](installation.md), [Quickstart](guides/quickstart.md), [Datasets](guides/datasets.md).
 - **Guides:** [Submission modes](guides/submission-modes.md), [Evaluation](guides/evaluation.md),
   [Tracks and leaderboard submission](guides/submit.md), [Data audit and leakage](guides/audit.md),
   [Reproducing the paper](guides/reproducing.md).
