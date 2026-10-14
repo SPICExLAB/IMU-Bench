@@ -11,6 +11,7 @@ authors:
   - family-names: Ahuja
     given-names: Karan
 year: 2026
+license: MIT
 repository-code: "https://github.com/SPICExLAB/IMU-Bench"
 url: "https://spicexlab.github.io/imubench/"
 preferred-citation:

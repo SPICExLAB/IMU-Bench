@@ -185,5 +185,6 @@ Mix-Token and the PADS pipeline are ported in `baselines/mixtoken/` and `baselin
 
 ## Licence
 
-The code in this repository is released for research use; a licence file will be added with the public
-release. The datasets, the SMPL model and the third-party baseline repositories keep their own licences.
+The code, task cards, generated configs and result files in this repository are released under the MIT License
+(see `LICENSE`), as is the InrtlWrist checkpoint. The datasets, the SMPL model and the third-party baseline
+repositories keep their own licences.
