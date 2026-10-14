@@ -8,7 +8,7 @@ Yiquan Li\*, Aidan Bradshaw\*, Chenfeng Gao, Karan Ahuja (Northwestern Universit
 [![Leaderboard](https://img.shields.io/badge/%F0%9F%A4%97%20Space-Leaderboard-blue)](https://huggingface.co/spaces/YiquanLi/IMU-Bench)
 [![Model](https://img.shields.io/badge/%F0%9F%A4%97%20Model-InrtlWrist-blue)](https://huggingface.co/YiquanLi/InrtlWrist)
 [![Results](https://img.shields.io/badge/%F0%9F%A4%97%20Dataset-Results%20%26%20submissions-blue)](https://huggingface.co/datasets/YiquanLi/IMU-Bench-results)
-[![Collection](https://img.shields.io/badge/%F0%9F%A4%97%20Collection-IMU--Bench-blue)](https://huggingface.co/collections/YiquanLi/imu-bench)
+[![Collection](https://img.shields.io/badge/%F0%9F%A4%97%20Collection-IMU--Bench-blue)](https://huggingface.co/collections/YiquanLi/imu-bench-6acf98435ad7fb7337edd21f)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 Project website and leaderboard: **https://spicexlab.github.io/imubench/** · Paper: arXiv (link to follow)
