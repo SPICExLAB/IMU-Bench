@@ -108,7 +108,26 @@ python scripts/run_pretrain.py --config configs/base.yaml \
 
 The five baseline objectives use the same corpus and backbone with `imu_lm/objectives/ssl_vit_baselines.py`
 (`scripts/run_ssl_baseline.py`); their configs and launch scripts are under `configs/` and `launch/pretrain/`.
-Pretrained checkpoints will be published alongside the paper.
+
+### Pretrained InrtlWrist
+
+The reference checkpoint (144,000 updates on the five-source corpus, the `mae_5src` row of every table) is on the
+Hugging Face Hub: **https://huggingface.co/YiquanLi/InrtlWrist** (encoder + reconstruction decoder + config,
+93 MB). `scripts/load_inrtlwrist.py` builds the encoder and loads it:
+
+```python
+import torch
+from huggingface_hub import hf_hub_download
+from scripts.load_inrtlwrist import load_inrtlwrist, zscore
+
+enc = load_inrtlwrist(hf_hub_download("YiquanLi/InrtlWrist", "inrtlwrist_mae_5src_step144k.pt"))
+x = zscore(torch.randn(2, 6, 512))        # [B, 6, T]: acc x/y/z (m/s^2) then gyro x/y/z (rad/s), 50 Hz, T <= 512
+z = enc(x)                                # [B, 384] pooled embedding (what the frozen probes read)
+tokens, patches = enc.forward_tokens(x)   # [B, 6 * T/16, 384] patch tokens (what the kinematic decoders read)
+```
+
+To evaluate it with the harness, point the `mae_5src` card in `bench/registry/encoders.yaml` at a run directory
+whose `checkpoints/best.pt` is this file.
 
 ## Running a cell
 
