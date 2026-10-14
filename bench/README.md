@@ -39,7 +39,7 @@ Encoders (all ViT1D 384/12/6, 21M): `mae_11src` (ours), `mae_5src`, `mae_noaltat
 ## Daily use
 
 ```bash
-source TransfHAR_env/bin/activate
+source imu-bench/bin/activate
 python -m bench.launch --fill-missing --dry-run      # what would run
 python -m bench.launch --fill-missing                # submit everything missing (train+score or score-only)
 python -m bench.launch --fill-missing --tasks language_humanml3d --seeds 43 44   # replicate seeds

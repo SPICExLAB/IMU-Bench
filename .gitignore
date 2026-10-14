@@ -2,6 +2,7 @@ __pycache__/
 *.py[cod]
 
 TransfHAR_env/
+imu-bench/
 venv/
 .env/
 .venv/

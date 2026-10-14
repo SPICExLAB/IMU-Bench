@@ -73,7 +73,7 @@ launch/                         the SLURM scripts used for the paper's runs
 ## Setup
 
 ```bash
-python -m venv TransfHAR_env && source TransfHAR_env/bin/activate
+python -m venv imu-bench && source imu-bench/bin/activate
 pip install -r requirements.txt      # install the CUDA build of PyTorch first if needed
 ```
 

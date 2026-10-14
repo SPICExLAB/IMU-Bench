@@ -5,7 +5,7 @@ current rendered figure where there is one (`current_*`), and nothing else. Ever
 **generated** — edit the generator, not the CSV.
 
 ```bash
-cd /gpfs/home/vbc1591/IMU-SSL && source TransfHAR_env/bin/activate
+cd /gpfs/home/vbc1591/IMU-SSL && source imu-bench/bin/activate
 python paper_results/build.py      # re-runs every generator: paper .tex/.png AND these CSVs
 ```
 
