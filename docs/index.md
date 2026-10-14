@@ -72,18 +72,6 @@ z = enc(zscore(torch.randn(2, 6, 512)))            # [2, 384] pooled embedding o
 | Per-cell results, registry, splits, leaderboard data | [huggingface.co/datasets/YiquanLi/IMU-Bench-results](https://huggingface.co/datasets/YiquanLi/IMU-Bench-results) |
 | Website and leaderboard (also mirrored as a Space) | [spicexlab.github.io/imubench](https://spicexlab.github.io/imubench/) · [Space](https://huggingface.co/spaces/YiquanLi/IMU-Bench) |
 
-## How IMU-Bench relates to SWE-bench's practices
-
-| SWE-bench practice | IMU-Bench | Status |
-|---|---|---|
-| One evaluation harness that everyone runs | `imu-bench eval`: the same trainer, decoders, splits, selection rule and scorers for every encoder | available |
-| A fixed submission format | an encoder card plus an encoder reachable through the plugin interface; one result JSON per cell | available |
-| Leaderboard entries carry their artefacts and can be re-run | `imu-bench package` lays out results, card and the exact configs; submissions are pull requests | available |
-| Verified instances | participant-duplicate and corpus-overlap audits on every evaluation set (`imu-bench audit`) | available |
-| Lite subset for fast iteration | `--tasks` / `--protocols` subsets today; a named Lite subset | planned |
-| Containerised runs | editable install with pinned requirements today; an official Docker image | planned |
-| Maintainers re-run submissions | leaderboard regenerated only from merged result files; spot re-runs of public-weight submissions | planned |
-
 ## Citation
 
 ```bibtex
