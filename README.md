@@ -4,6 +4,13 @@
 
 Yiquan Li\*, Aidan Bradshaw\*, Chenfeng Gao, Karan Ahuja (Northwestern University; \* equal contribution)
 
+[![Project page](https://img.shields.io/badge/Project%20page-spicexlab.github.io%2Fimubench-1d6f8f)](https://spicexlab.github.io/imubench/)
+[![Leaderboard](https://img.shields.io/badge/%F0%9F%A4%97%20Space-Leaderboard-blue)](https://huggingface.co/spaces/YiquanLi/IMU-Bench)
+[![Model](https://img.shields.io/badge/%F0%9F%A4%97%20Model-InrtlWrist-blue)](https://huggingface.co/YiquanLi/InrtlWrist)
+[![Results](https://img.shields.io/badge/%F0%9F%A4%97%20Dataset-Results%20%26%20submissions-blue)](https://huggingface.co/datasets/YiquanLi/IMU-Bench-results)
+[![Collection](https://img.shields.io/badge/%F0%9F%A4%97%20Collection-IMU--Bench-blue)](https://huggingface.co/collections/YiquanLi/imu-bench)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
 Project website and leaderboard: **https://spicexlab.github.io/imubench/** · Paper: arXiv (link to follow)
 
 IMU-Bench is a benchmark of **ten tasks from eight datasets** for studying what a single wrist IMU
@@ -164,6 +171,28 @@ python analysis/plot_transferability_5src.py         # Figure 3
 Each result file in `bench/results/<task>/` records the task, encoder, protocol, seed, all metrics, the
 evaluation split, the selected checkpoint step and the provenance of the run, so every printed number can be
 traced to one file.
+
+## Submitting to the leaderboard
+
+Results, task cards and splits live in the Hugging Face dataset
+[YiquanLi/IMU-Bench-results](https://huggingface.co/datasets/YiquanLi/IMU-Bench-results); the leaderboard page is
+generated from those files. To add an encoder:
+
+1. Register it as a card in `bench/registry/encoders.yaml` (run directory or checkpoint, `alt_attention`, `channels`).
+2. Run the ten task cards under the released protocols; every cell writes `bench/results/<task>/<encoder>__<protocol>__s<seed>.json`.
+3. Open a pull request to the dataset with your result files and your encoder card:
+
+```python
+from huggingface_hub import HfApi
+HfApi().upload_folder(
+    repo_id="YiquanLi/IMU-Bench-results", repo_type="dataset",
+    folder_path="my_submission",   # my_submission/results/<task>/<encoder>__<protocol>__s42.json + my_submission/registry/<encoder>.yaml
+    create_pr=True, commit_message="Add <encoder> to the leaderboard",
+)
+```
+
+Cells enter the ranking only when they come from the released task cards (same decoder, recipe, split, selection
+rule and scorer); systems trained under their own recipes are listed for orientation.
 
 ## Task-specific baselines
 
