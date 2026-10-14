@@ -4,13 +4,13 @@
   "protocol": "probe",
   "seed": 42,
   "metrics": {
-    "pos_err_cm": 8.137040585279465,
-    "ang_err_deg": 9.856380462646484,
-    "val_pose_mse": 0.016427
+    "pos_err_cm": 8.137550950050354,
+    "ang_err_deg": 9.892117500305176,
+    "val_pose_mse": 0.016496
   },
   "primary_metric": "pos_err_cm",
   "eval_split": "val",
-  "run": "vit1d_arm_pose_probe_nymeria_mae_realdata_ocdetect_eatingspeed_motionx_sonic",
+  "run": "bench_arm_pose_nymeria__mae_5src__probe__s42",
   "checkpoint": "best.pt",
   "checkpoint_step": 9000,
   "selection": {
@@ -19,21 +19,21 @@
     "mode": "min"
   },
   "job_ids": {
-    "train": null,
-    "score": "9559979"
+    "train": 6749183,
+    "score": "6749183"
   },
   "provenance": {
     "source": "scorer:bench.score.arm_pose",
-    "date": "2026-08-16T18:05:33-05:00",
+    "date": "2026-09-19T21:58:12-05:00",
     "git": "unknown",
-    "legacy_run": true,
+    "legacy_run": false,
     "info": {
       "n_val_windows": 18269,
       "n_val_sessions": 101,
-      "train_end": "unknown/incomplete"
+      "train_end": "early stopping at step=29000 epoch=48"
     }
   },
   "status": "ok",
-  "notes": "harvested from a pre-harness run with a recipe-equivalent config.",
+  "notes": "",
   "schema_version": 1
 }

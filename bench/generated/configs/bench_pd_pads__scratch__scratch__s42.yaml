@@ -17,7 +17,8 @@ vit1d:
   pooling: mean
 objective:
   type: supervised
-  supervised: {}
+  supervised:
+    class_weighted_ce: true
 paths:
   dataset_path: /projects/b53017/vbc1591/pads_dataset.parquet
   runs_root: /gpfs/home/vbc1591/IMU-SSL/runs
@@ -52,8 +53,14 @@ preprocess:
     max_missing_frac: 0.2
   normalize:
     enabled: true
-    method: zscore
+    method: physical
     eps: 1.0e-06
+    acc_units: auto
+    acc_scale: 9.81
+    gyro_scale: 5.0
+    clip_acc: 8.0
+    clip_gyro: 8.0
+    n_acc: 3
 trainer:
   seed: 42
   amp: true

@@ -1,0 +1,43 @@
+{
+  "task": "har_prism",
+  "encoder": "focal_5src",
+  "protocol": "probe",
+  "seed": 42,
+  "metrics": {
+    "macro_f1": 0.21484650933475397,
+    "bal_acc": 0.2285743034725046,
+    "acc": 0.6560691762564203,
+    "val_loss": 0.950776
+  },
+  "primary_metric": "macro_f1",
+  "eval_split": "val",
+  "run": "bench_har_prism__focal_5src__probe__s42",
+  "checkpoint": "latest.pt",
+  "checkpoint_step": 12200,
+  "selection": {
+    "split": "none",
+    "monitor": "fixed_budget",
+    "mode": "latest"
+  },
+  "job_ids": {
+    "train": 6561435,
+    "score": "6847263"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.har",
+    "date": "2026-09-19T18:34:18-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_val_samples": 15381,
+      "n_classes_seen": 5,
+      "n_classes_head": 5,
+      "n_val_batches": 61,
+      "logged_macro_f1_at_ckpt": 0.214979,
+      "train_end": "early stopping at step=12200 epoch=104"
+    }
+  },
+  "status": "ok",
+  "notes": "selection-free control: final checkpoint, no best-of-N selection (bench/rescore_noselection.py)",
+  "schema_version": 1
+}

@@ -1,0 +1,43 @@
+{
+  "task": "har_userwatch",
+  "encoder": "limubert_5src",
+  "protocol": "finetune",
+  "seed": 42,
+  "metrics": {
+    "macro_f1": 0.8250693849311647,
+    "bal_acc": 0.8154844082544525,
+    "acc": 0.8288888888888889,
+    "val_loss": 1.387937
+  },
+  "primary_metric": "macro_f1",
+  "eval_split": "val",
+  "run": "bench_har_userwatch__limubert_5src__finetune__s42",
+  "checkpoint": "latest.pt",
+  "checkpoint_step": 4600,
+  "selection": {
+    "split": "none",
+    "monitor": "fixed_budget",
+    "mode": "latest"
+  },
+  "job_ids": {
+    "train": 6583144,
+    "score": "6847264"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.har",
+    "date": "2026-09-19T18:31:57-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_val_samples": 900,
+      "n_classes_seen": 60,
+      "n_classes_head": 60,
+      "n_val_batches": 4,
+      "logged_macro_f1_at_ckpt": 0.825069,
+      "train_end": "early stopping at step=4600 epoch=256"
+    }
+  },
+  "status": "ok",
+  "notes": "selection-free control: final checkpoint, no best-of-N selection (bench/rescore_noselection.py)",
+  "schema_version": 1
+}

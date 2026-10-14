@@ -1,0 +1,67 @@
+{
+  "task": "language_humanml3d",
+  "encoder": "mae_5src_acconly",
+  "protocol": "finetune",
+  "seed": 42,
+  "metrics": {
+    "r1_i2t_g100": 31.724999999999998,
+    "r1_t2i_g100": 31.30132500377853,
+    "r5_i2t_g100": 65.02,
+    "r5_t2i_g100": 64.22993601692781,
+    "r10_i2t_g100": 76.25999999999999,
+    "r10_t2i_g100": 75.31865585168018,
+    "mrr_i2t_g100": 46.89592893672428,
+    "mrr_t2i_g100": 46.28029497628442,
+    "r1_i2t_full": 3.5936233450418804,
+    "r1_t2i_full": 3.296703296703297,
+    "mrr_i2t_full": 9.594140162711446,
+    "mrr_t2i_full": 8.796300556781624,
+    "medr_i2t_full": 51.0,
+    "medr_t2i_full": 58.0,
+    "r1_g100": 31.513162501889262,
+    "val_r1_i2t_g100": 33.050000000000004,
+    "val_r1_t2i_g100": 31.13096757722747,
+    "val_r5_i2t_g100": 66.515,
+    "val_r5_t2i_g100": 64.76895583354609,
+    "val_r10_i2t_g100": 78.32000000000001,
+    "val_r10_t2i_g100": 76.77304059229002,
+    "val_mrr_i2t_g100": 48.08570353630455,
+    "val_mrr_t2i_g100": 46.4792914099851,
+    "val_r1_i2t_full": 9.690893901420218,
+    "val_r1_t2i_full": 8.0,
+    "val_mrr_i2t_full": 19.379668160350004,
+    "val_mrr_t2i_full": 17.138282322328394,
+    "val_medr_i2t_full": 19.0,
+    "val_medr_t2i_full": 20.0,
+    "val_r1_g100": 32.09048378861374
+  },
+  "primary_metric": "r1_g100",
+  "eval_split": "test",
+  "run": "bench_language_humanml3d__mae_5src_acconly__finetune__s42",
+  "checkpoint": "latest.pt",
+  "checkpoint_step": 8000,
+  "selection": {
+    "split": "none",
+    "monitor": "fixed_budget",
+    "mode": "latest",
+    "note": "fixed 8k-step budget, final checkpoint (latest.pt); \u00a713e: val-loss best.pt under-selects for retrieval, latest \u2265 best on every arm"
+  },
+  "job_ids": {
+    "train": 6577716,
+    "score": "6847259"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.language",
+    "date": "2026-09-19T19:10:33-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_items_test": 3701,
+      "n_items_val": 1197,
+      "train_end": "max_steps reached at step=8000 epoch=1"
+    }
+  },
+  "status": "ok",
+  "notes": "selection-free control: final checkpoint, no best-of-N selection (bench/rescore_noselection.py)",
+  "schema_version": 1
+}

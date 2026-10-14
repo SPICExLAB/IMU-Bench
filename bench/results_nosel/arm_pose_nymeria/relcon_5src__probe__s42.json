@@ -1,0 +1,39 @@
+{
+  "task": "arm_pose_nymeria",
+  "encoder": "relcon_5src",
+  "protocol": "probe",
+  "seed": 42,
+  "metrics": {
+    "pos_err_cm": 8.939417451620102,
+    "ang_err_deg": 10.990946769714355,
+    "val_pose_mse": 0.020905
+  },
+  "primary_metric": "pos_err_cm",
+  "eval_split": "val",
+  "run": "bench_arm_pose_nymeria__relcon_5src__probe__s42",
+  "checkpoint": "latest.pt",
+  "checkpoint_step": 29000,
+  "selection": {
+    "split": "none",
+    "monitor": "fixed_budget",
+    "mode": "latest"
+  },
+  "job_ids": {
+    "train": 6749187,
+    "score": "6958869"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.arm_pose",
+    "date": "2026-09-20T11:44:02-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_val_windows": 18269,
+      "n_val_sessions": 101,
+      "train_end": "early stopping at step=29000 epoch=48"
+    }
+  },
+  "status": "ok",
+  "notes": "selection-free control: final checkpoint, no best-of-N selection (bench/rescore_noselection.py)",
+  "schema_version": 1
+}

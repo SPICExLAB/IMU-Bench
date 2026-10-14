@@ -1,0 +1,11 @@
+task,task_label,window_s,probe_decoder,finetune_decoder,lr_probe,lr_finetune,selection_metric,eval_split
+arm_pose_nymeria,Arm pose,10.24,"2+2 layers, 192","2+2 layers, 192",0.0003,0.0001,val_loss,val
+full_body_pose_nymeria,Full-body pose,10.24,"1 layer, 192","1 layer, 192",0.0003,0.001,mpjpe_mm,val
+odometry_nymeria_local,Odometry (wrist frame),2.56,"1 layer, 192","1 layer, 192",0.0001,0.0001,val_loss,val
+microgesture_openwatch,Microgesture,1.0,linear,linear,0.001,1e-05,macro_f1,test
+language_humanml3d,IMU–text,10.24,projection to text space,projection to text space,0.0001,0.0001,fixed_budget,test
+pd_pads,Parkinson's,2.56,linear,linear,0.001,0.0001,bal_acc,val
+har_hhar,HHAR,2.56,linear,linear,0.001,0.0001,val_loss,val
+har_mhealth,MHEALTH,2.56,linear,linear,0.001,0.0001,val_loss,val
+har_prism,PRISM,2.56,linear,linear,0.001,0.0001,val_loss,val
+har_userwatch,TransfHAR,2.56,linear,linear,0.001,0.0001,val_loss,val

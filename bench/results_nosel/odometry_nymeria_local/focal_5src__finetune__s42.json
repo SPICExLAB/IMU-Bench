@@ -1,0 +1,42 @@
+{
+  "task": "odometry_nymeria_local",
+  "encoder": "focal_5src",
+  "protocol": "finetune",
+  "seed": 42,
+  "metrics": {
+    "vel_mse": 0.02238994650542736,
+    "ate_m": 0.17564547700782643,
+    "drift_pct": 50.64319224955561
+  },
+  "primary_metric": "ate_m",
+  "eval_split": "val",
+  "run": "bench_odometry_nymeria_local__focal_5src__finetune__s42",
+  "checkpoint": "latest.pt",
+  "checkpoint_step": 78000,
+  "selection": {
+    "split": "none",
+    "monitor": "fixed_budget",
+    "mode": "latest"
+  },
+  "job_ids": {
+    "train": 6721824,
+    "score": "6847340"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.odometry_local",
+    "date": "2026-09-19T18:41:23-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_val_windows": 73515,
+      "n_val_windows_total": 73515,
+      "n_val_sessions": 101,
+      "T": 128,
+      "frame": "wrist FLU (local)",
+      "train_end": "early stopping at step=78000 epoch=32"
+    }
+  },
+  "status": "ok",
+  "notes": "selection-free control: final checkpoint, no best-of-N selection (bench/rescore_noselection.py)",
+  "schema_version": 1
+}

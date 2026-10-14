@@ -1,0 +1,42 @@
+{
+ "task": "odometry_nymeria_local_deepdec",
+ "encoder": "tx5_fullbody",
+ "protocol": "probe",
+ "seed": 42,
+ "metrics": {
+  "vel_mse": 0.01828022114932537,
+  "ate_m": 0.15236624082778594,
+  "drift_pct": 43.97894832647213
+ },
+ "primary_metric": "ate_m",
+ "eval_split": "val",
+ "run": "_deepdec/bench_odometry_nymeria_local__tx5_fullbody__probe__s42",
+ "checkpoint": "best.pt",
+ "checkpoint_step": 113000,
+ "selection": {
+  "split": "val",
+  "monitor": "val_loss",
+  "mode": "min"
+ },
+ "job_ids": {
+  "train": 6721855,
+  "score": "6721855"
+ },
+ "provenance": {
+  "source": "scorer:bench.score.odometry_local",
+  "date": "2026-09-18T23:34:41-05:00",
+  "git": "unknown",
+  "legacy_run": false,
+  "info": {
+   "n_val_windows": 73515,
+   "n_val_windows_total": 73515,
+   "n_val_sessions": 101,
+   "T": 128,
+   "frame": "wrist FLU (local)",
+   "train_end": "early stopping at step=133000 epoch=54"
+  }
+ },
+ "status": "ok",
+ "notes": "moved 2026-09-19 from task odometry_nymeria_local: frozen probe with the deep decoder (pose 4+8, odometry 12 layers), kept for the appendix after the benchmark switched to the shallow probe decoder",
+ "schema_version": 1
+}

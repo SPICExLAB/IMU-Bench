@@ -5,7 +5,14 @@
   "seed": 42,
   "metrics": {
     "mpjpe_mm": 88.110126,
-    "val_pose_mse": 0.018172
+    "val_pose_mse": 0.018172,
+    "mpjpe_mm_recomputed": 88.17423675254365,
+    "local_ang_err_deg": 11.205160764684464,
+    "global_ang_err_deg": 21.33903413093457,
+    "mp_joint_err_cm": 8.470813900100179,
+    "mp_mesh_err_cm": 10.184071202199574,
+    "mp_local_ang_err_deg": 8.90815249846104,
+    "mp_global_ang_err_deg": 20.048951334564144
   },
   "primary_metric": "mpjpe_mm",
   "eval_split": "val",
@@ -31,7 +38,27 @@
       "min_val_mpjpe_mm": 88.110126,
       "min_val_mpjpe_step": 21000,
       "n_val_evals": 41,
-      "train_end": "early stopping at step=41000 epoch=67"
+      "train_end": "early stopping at step=41000 epoch=67",
+      "extra_metrics": {
+        "n_windows": 18269,
+        "n_poses": 2338432,
+        "n_val_windows_total": 18269,
+        "step": 21000,
+        "max_batches": 0,
+        "amp": true,
+        "scorer": "bench.rescore_full_body_extra",
+        "ignored_joints": [
+          0,
+          7,
+          8,
+          10,
+          11,
+          20,
+          22,
+          23
+        ],
+        "date": "2026-09-21T14:56:59-0500"
+      }
     }
   },
   "status": "ok",

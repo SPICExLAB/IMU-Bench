@@ -11,11 +11,12 @@ vit1d:
     layer_norm_eps: 1.0e-06
     alt_attention: false
   pose_decoder:
-    hidden_size: 192
-    num_hidden_layers: 2
-    num_attention_heads: 4
+    hidden_size: 384
+    num_hidden_layers: 4
+    num_attention_heads: 6
     mlp_ratio: 4.0
-    dropout: 0.0
+    dropout: 0.1
+    num_temporal_layers: 8
   max_patches_per_channel: 256
   pooling: mean
 objective:

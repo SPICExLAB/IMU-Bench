@@ -210,6 +210,22 @@ def make_splits(session_index: pd.DataFrame, cfg: Any) -> Dict[str, List[Session
 
     rng = np.random.RandomState(seed)
 
+    # Predefined split carried in the session id (2026-09-18, user-study watch task): sessions named
+    # "<recording>__train" / "<recording>__val" are assigned to that split verbatim -- used when each
+    # recording is split in time rather than by subject. Every session must carry one of the suffixes.
+    if splits_cfg.get("split_by_session_suffix"):
+        sid = session_index[session_col].astype(str)
+        is_tr, is_va = sid.str.endswith("__train"), sid.str.endswith("__val")
+        if not (is_tr | is_va).all():
+            bad = sid[~(is_tr | is_va)].unique()[:5].tolist()
+            raise ValueError(f"split_by_session_suffix: sessions without __train/__val suffix, e.g. {bad}")
+        empty = pd.DataFrame(columns=session_index.columns)
+        keys = lambda d: _to_session_keys(d, dataset_col, subject_col, session_col)
+        logger.info("split_by_session_suffix: train sessions=%d val sessions=%d", int(is_tr.sum()), int(is_va.sum()))
+        return {"train_keys": keys(session_index[is_tr]), "val_keys": keys(session_index[is_va]),
+                "test_keys": keys(empty), "probe_train_keys": keys(empty), "probe_val_keys": keys(empty),
+                "probe_test_keys": keys(empty)}
+
     def group_sessions(df: pd.DataFrame) -> List[np.ndarray]:
         groups = []
         by = _group_key(df[group_key] if group_key in df else df[session_col], group_key)

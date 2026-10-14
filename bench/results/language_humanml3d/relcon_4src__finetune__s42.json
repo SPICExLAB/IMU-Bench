@@ -1,0 +1,67 @@
+{
+  "task": "language_humanml3d",
+  "encoder": "relcon_4src",
+  "protocol": "finetune",
+  "seed": 42,
+  "metrics": {
+    "r1_i2t_g100": 30.725,
+    "r1_t2i_g100": 29.437251246914204,
+    "r5_i2t_g100": 63.615,
+    "r5_t2i_g100": 62.804171494785635,
+    "r10_i2t_g100": 75.97500000000001,
+    "r10_t2i_g100": 74.6234067207416,
+    "mrr_i2t_g100": 45.82317050487895,
+    "mrr_t2i_g100": 44.585873839202236,
+    "r1_i2t_full": 3.728721967035936,
+    "r1_t2i_full": 3.5164835164835164,
+    "mrr_i2t_full": 9.369697450232538,
+    "mrr_t2i_full": 8.762433610289275,
+    "medr_i2t_full": 57.0,
+    "medr_t2i_full": 69.0,
+    "r1_g100": 30.081125623457105,
+    "val_r1_i2t_g100": 31.8,
+    "val_r1_t2i_g100": 31.968343119734488,
+    "val_r5_i2t_g100": 66.435,
+    "val_r5_t2i_g100": 65.35103395455705,
+    "val_r10_i2t_g100": 78.905,
+    "val_r10_t2i_g100": 76.89047740617819,
+    "val_mrr_i2t_g100": 47.38901595036787,
+    "val_mrr_t2i_g100": 47.174178383874704,
+    "val_r1_i2t_full": 8.688387635756056,
+    "val_r1_t2i_full": 9.11111111111111,
+    "val_mrr_i2t_full": 18.304420651469837,
+    "val_mrr_t2i_full": 17.713404069520326,
+    "val_medr_i2t_full": 19.0,
+    "val_medr_t2i_full": 19.0,
+    "val_r1_g100": 31.884171559867244
+  },
+  "primary_metric": "r1_g100",
+  "eval_split": "test",
+  "run": "bench_language_humanml3d__relcon_4src__finetune__s42",
+  "checkpoint": "latest.pt",
+  "checkpoint_step": 8000,
+  "selection": {
+    "split": "none",
+    "monitor": "fixed_budget",
+    "mode": "latest",
+    "note": "fixed 8k-step budget, final checkpoint (latest.pt); \u00a713e: val-loss best.pt under-selects for retrieval, latest \u2265 best on every arm"
+  },
+  "job_ids": {
+    "train": null,
+    "score": "5654141"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.language",
+    "date": "2026-09-07T16:06:51-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_items_test": 3701,
+      "n_items_val": 1197,
+      "train_end": "unknown/incomplete"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

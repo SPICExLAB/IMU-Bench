@@ -1,0 +1,39 @@
+{
+  "task": "arm_pose_nymeria",
+  "encoder": "simmtm_5src",
+  "protocol": "finetune",
+  "seed": 42,
+  "metrics": {
+    "pos_err_cm": 8.440148085355759,
+    "ang_err_deg": 10.285970687866211,
+    "val_pose_mse": 0.01788
+  },
+  "primary_metric": "pos_err_cm",
+  "eval_split": "val",
+  "run": "bench_arm_pose_nymeria__simmtm_5src__finetune__s42",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 6000,
+  "selection": {
+    "split": "val",
+    "monitor": "val_loss",
+    "mode": "min"
+  },
+  "job_ids": {
+    "train": 6577630,
+    "score": "6577630"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.arm_pose",
+    "date": "2026-09-18T18:32:02-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_val_windows": 18269,
+      "n_val_sessions": 101,
+      "train_end": "early stopping at step=26000 epoch=43"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

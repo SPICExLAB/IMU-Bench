@@ -1,0 +1,99 @@
+protocol,target_task,target_label,source_key,source_label,encoder,metric,value,scratch_reference,higher_is_better,status
+probe,har_prism,PRISM activity,mae,InrtlWrist (no source task),mae_5src,macro_f1,0.2790037680191397,0.2780723555888085,1,ok
+probe,har_prism,PRISM activity,armpose,Arm,tx5_armpose,macro_f1,,0.2780723555888085,1,pending
+probe,har_prism,PRISM activity,fullbody,Full-body,tx5_fullbody,macro_f1,0.30821469978677396,0.2780723555888085,1,ok
+probe,har_prism,PRISM activity,gesture,Gesture,tx5_gesture,macro_f1,0.2825034477382746,0.2780723555888085,1,ok
+probe,har_prism,PRISM activity,odom,Odometry,tx5_odom,macro_f1,0.26026763566151256,0.2780723555888085,1,ok
+probe,har_prism,PRISM activity,pd,Parkinson's,tx5_pd,macro_f1,0.28118649393841044,0.2780723555888085,1,ok
+probe,har_prism,PRISM activity,language,IMU–text,tx5_language,macro_f1,0.28939101867129763,0.2780723555888085,1,ok
+probe,arm_pose_nymeria,Nymeria arm pose,mae,InrtlWrist (no source task),mae_5src,pos_err_cm,8.137550950050354,8.214804530143738,0,ok
+probe,arm_pose_nymeria,Nymeria arm pose,prism,PRISM,tx5_prism,pos_err_cm,,8.214804530143738,0,pending
+probe,arm_pose_nymeria,Nymeria arm pose,fullbody,Full-body,tx5_fullbody,pos_err_cm,7.7262282371521,8.214804530143738,0,ok
+probe,arm_pose_nymeria,Nymeria arm pose,gesture,Gesture,tx5_gesture,pos_err_cm,8.203575760126114,8.214804530143738,0,ok
+probe,arm_pose_nymeria,Nymeria arm pose,odom,Odometry,tx5_odom,pos_err_cm,8.073537796735764,8.214804530143738,0,ok
+probe,arm_pose_nymeria,Nymeria arm pose,pd,Parkinson's,tx5_pd,pos_err_cm,,8.214804530143738,0,pending
+probe,arm_pose_nymeria,Nymeria arm pose,language,IMU–text,tx5_language,pos_err_cm,,8.214804530143738,0,pending
+probe,full_body_pose_nymeria,Nymeria full-body pose,mae,InrtlWrist (no source task),mae_5src,mpjpe_mm,97.85016,92.720507,0,ok
+probe,full_body_pose_nymeria,Nymeria full-body pose,prism,PRISM,tx5_prism,mpjpe_mm,98.766664,92.720507,0,ok
+probe,full_body_pose_nymeria,Nymeria full-body pose,armpose,Arm,tx5_armpose,mpjpe_mm,,92.720507,0,pending
+probe,full_body_pose_nymeria,Nymeria full-body pose,gesture,Gesture,tx5_gesture,mpjpe_mm,97.976762,92.720507,0,ok
+probe,full_body_pose_nymeria,Nymeria full-body pose,odom,Odometry,tx5_odom,mpjpe_mm,95.051322,92.720507,0,ok
+probe,full_body_pose_nymeria,Nymeria full-body pose,pd,Parkinson's,tx5_pd,mpjpe_mm,99.546423,92.720507,0,ok
+probe,full_body_pose_nymeria,Nymeria full-body pose,language,IMU–text,tx5_language,mpjpe_mm,98.990621,92.720507,0,ok
+probe,microgesture_openwatch,OpenWatch gesture,mae,InrtlWrist (no source task),mae_5src,clip_macro_f1,0.6467218088133121,0.6081037062982316,1,ok
+probe,microgesture_openwatch,OpenWatch gesture,prism,PRISM,tx5_prism,clip_macro_f1,0.595123998267273,0.6081037062982316,1,ok
+probe,microgesture_openwatch,OpenWatch gesture,armpose,Arm,tx5_armpose,clip_macro_f1,,0.6081037062982316,1,pending
+probe,microgesture_openwatch,OpenWatch gesture,fullbody,Full-body,tx5_fullbody,clip_macro_f1,0.49869281045751634,0.6081037062982316,1,ok
+probe,microgesture_openwatch,OpenWatch gesture,odom,Odometry,tx5_odom,clip_macro_f1,0.5951683501683501,0.6081037062982316,1,ok
+probe,microgesture_openwatch,OpenWatch gesture,pd,Parkinson's,tx5_pd,clip_macro_f1,0.6049823310504424,0.6081037062982316,1,ok
+probe,microgesture_openwatch,OpenWatch gesture,language,IMU–text,tx5_language,clip_macro_f1,0.589117721840834,0.6081037062982316,1,ok
+probe,odometry_nymeria_local,Nymeria odometry,mae,InrtlWrist (no source task),mae_5src,ate_m,0.1998629427138598,0.16176734735990456,0,ok
+probe,odometry_nymeria_local,Nymeria odometry,prism,PRISM,tx5_prism,ate_m,0.19979687165503018,0.16176734735990456,0,ok
+probe,odometry_nymeria_local,Nymeria odometry,armpose,Arm,tx5_armpose,ate_m,,0.16176734735990456,0,pending
+probe,odometry_nymeria_local,Nymeria odometry,fullbody,Full-body,tx5_fullbody,ate_m,0.16671142597115254,0.16176734735990456,0,ok
+probe,odometry_nymeria_local,Nymeria odometry,gesture,Gesture,tx5_gesture,ate_m,0.19875669777868768,0.16176734735990456,0,ok
+probe,odometry_nymeria_local,Nymeria odometry,pd,Parkinson's,tx5_pd,ate_m,0.20251136865523023,0.16176734735990456,0,ok
+probe,odometry_nymeria_local,Nymeria odometry,language,IMU–text,tx5_language,ate_m,0.20522281980930948,0.16176734735990456,0,ok
+probe,pd_pads,PADS Parkinson's,mae,InrtlWrist (no source task),mae_5src,subject_macro_f1,0.5521003818876159,0.2989417989417989,1,ok
+probe,pd_pads,PADS Parkinson's,prism,PRISM,tx5_prism,subject_macro_f1,0.5678547578686275,0.2989417989417989,1,ok
+probe,pd_pads,PADS Parkinson's,armpose,Arm,tx5_armpose,subject_macro_f1,,0.2989417989417989,1,pending
+probe,pd_pads,PADS Parkinson's,fullbody,Full-body,tx5_fullbody,subject_macro_f1,0.435127674258109,0.2989417989417989,1,ok
+probe,pd_pads,PADS Parkinson's,gesture,Gesture,tx5_gesture,subject_macro_f1,0.5559539737757561,0.2989417989417989,1,ok
+probe,pd_pads,PADS Parkinson's,odom,Odometry,tx5_odom,subject_macro_f1,0.501813356921716,0.2989417989417989,1,ok
+probe,pd_pads,PADS Parkinson's,language,IMU–text,tx5_language,subject_macro_f1,0.580434111431416,0.2989417989417989,1,ok
+probe,language_humanml3d,HumanML3D IMU–text,mae,InrtlWrist (no source task),mae_5src,r1_g100,27.923936596302084,23.178559121366312,1,ok
+probe,language_humanml3d,HumanML3D IMU–text,prism,PRISM,tx5_prism,r1_g100,23.74515668295632,23.178559121366312,1,ok
+probe,language_humanml3d,HumanML3D IMU–text,armpose,Arm,tx5_armpose,r1_g100,,23.178559121366312,1,pending
+probe,language_humanml3d,HumanML3D IMU–text,fullbody,Full-body,tx5_fullbody,r1_g100,19.569028918333416,23.178559121366312,1,ok
+probe,language_humanml3d,HumanML3D IMU–text,gesture,Gesture,tx5_gesture,r1_g100,25.19389478059348,23.178559121366312,1,ok
+probe,language_humanml3d,HumanML3D IMU–text,odom,Odometry,tx5_odom,r1_g100,19.946558390850925,23.178559121366312,1,ok
+probe,language_humanml3d,HumanML3D IMU–text,pd,Parkinson's,tx5_pd,r1_g100,22.14912778981309,23.178559121366312,1,ok
+finetune,har_prism,PRISM activity,mae,InrtlWrist (no source task),mae_5src,macro_f1,0.3684501687913263,0.2780723555888085,1,ok
+finetune,har_prism,PRISM activity,armpose,Arm,tx5_armpose,macro_f1,,0.2780723555888085,1,pending
+finetune,har_prism,PRISM activity,fullbody,Full-body,tx5_fullbody,macro_f1,0.3580567506069861,0.2780723555888085,1,ok
+finetune,har_prism,PRISM activity,gesture,Gesture,tx5_gesture,macro_f1,0.2951306960498601,0.2780723555888085,1,ok
+finetune,har_prism,PRISM activity,odom,Odometry,tx5_odom,macro_f1,0.3420000366341208,0.2780723555888085,1,ok
+finetune,har_prism,PRISM activity,pd,Parkinson's,tx5_pd,macro_f1,0.32179697505222177,0.2780723555888085,1,ok
+finetune,har_prism,PRISM activity,language,IMU–text,tx5_language,macro_f1,0.382229206465505,0.2780723555888085,1,ok
+finetune,arm_pose_nymeria,Nymeria arm pose,mae,InrtlWrist (no source task),mae_5src,pos_err_cm,8.012033253908157,8.214804530143738,0,ok
+finetune,arm_pose_nymeria,Nymeria arm pose,prism,PRISM,tx5_prism,pos_err_cm,,8.214804530143738,0,pending
+finetune,arm_pose_nymeria,Nymeria arm pose,fullbody,Full-body,tx5_fullbody,pos_err_cm,,8.214804530143738,0,pending
+finetune,arm_pose_nymeria,Nymeria arm pose,gesture,Gesture,tx5_gesture,pos_err_cm,,8.214804530143738,0,pending
+finetune,arm_pose_nymeria,Nymeria arm pose,odom,Odometry,tx5_odom,pos_err_cm,,8.214804530143738,0,pending
+finetune,arm_pose_nymeria,Nymeria arm pose,pd,Parkinson's,tx5_pd,pos_err_cm,,8.214804530143738,0,pending
+finetune,arm_pose_nymeria,Nymeria arm pose,language,IMU–text,tx5_language,pos_err_cm,,8.214804530143738,0,pending
+finetune,full_body_pose_nymeria,Nymeria full-body pose,mae,InrtlWrist (no source task),mae_5src,mpjpe_mm,88.110126,92.720507,0,ok
+finetune,full_body_pose_nymeria,Nymeria full-body pose,prism,PRISM,tx5_prism,mpjpe_mm,88.196928,92.720507,0,ok
+finetune,full_body_pose_nymeria,Nymeria full-body pose,armpose,Arm,tx5_armpose,mpjpe_mm,,92.720507,0,pending
+finetune,full_body_pose_nymeria,Nymeria full-body pose,gesture,Gesture,tx5_gesture,mpjpe_mm,88.138975,92.720507,0,ok
+finetune,full_body_pose_nymeria,Nymeria full-body pose,odom,Odometry,tx5_odom,mpjpe_mm,87.282062,92.720507,0,ok
+finetune,full_body_pose_nymeria,Nymeria full-body pose,pd,Parkinson's,tx5_pd,mpjpe_mm,87.486824,92.720507,0,ok
+finetune,full_body_pose_nymeria,Nymeria full-body pose,language,IMU–text,tx5_language,mpjpe_mm,87.943939,92.720507,0,ok
+finetune,microgesture_openwatch,OpenWatch gesture,mae,InrtlWrist (no source task),mae_5src,clip_macro_f1,0.5419450067476383,0.6081037062982316,1,ok
+finetune,microgesture_openwatch,OpenWatch gesture,prism,PRISM,tx5_prism,clip_macro_f1,0.4993972746331237,0.6081037062982316,1,ok
+finetune,microgesture_openwatch,OpenWatch gesture,armpose,Arm,tx5_armpose,clip_macro_f1,,0.6081037062982316,1,pending
+finetune,microgesture_openwatch,OpenWatch gesture,fullbody,Full-body,tx5_fullbody,clip_macro_f1,0.5983308993112915,0.6081037062982316,1,ok
+finetune,microgesture_openwatch,OpenWatch gesture,odom,Odometry,tx5_odom,clip_macro_f1,0.5644047310713978,0.6081037062982316,1,ok
+finetune,microgesture_openwatch,OpenWatch gesture,pd,Parkinson's,tx5_pd,clip_macro_f1,0.49797962940486307,0.6081037062982316,1,ok
+finetune,microgesture_openwatch,OpenWatch gesture,language,IMU–text,tx5_language,clip_macro_f1,0.5951614833967774,0.6081037062982316,1,ok
+finetune,odometry_nymeria_local,Nymeria odometry,mae,InrtlWrist (no source task),mae_5src,ate_m,0.15410215779289813,0.16176734735990456,0,ok
+finetune,odometry_nymeria_local,Nymeria odometry,prism,PRISM,tx5_prism,ate_m,0.15667550380805487,0.16176734735990456,0,ok
+finetune,odometry_nymeria_local,Nymeria odometry,armpose,Arm,tx5_armpose,ate_m,,0.16176734735990456,0,pending
+finetune,odometry_nymeria_local,Nymeria odometry,fullbody,Full-body,tx5_fullbody,ate_m,0.15281475137791775,0.16176734735990456,0,ok
+finetune,odometry_nymeria_local,Nymeria odometry,gesture,Gesture,tx5_gesture,ate_m,0.1560323251988953,0.16176734735990456,0,ok
+finetune,odometry_nymeria_local,Nymeria odometry,pd,Parkinson's,tx5_pd,ate_m,0.15514143282906573,0.16176734735990456,0,ok
+finetune,odometry_nymeria_local,Nymeria odometry,language,IMU–text,tx5_language,ate_m,0.1553712499984865,0.16176734735990456,0,ok
+finetune,pd_pads,PADS Parkinson's,mae,InrtlWrist (no source task),mae_5src,subject_macro_f1,0.5185250091274187,0.2989417989417989,1,ok
+finetune,pd_pads,PADS Parkinson's,prism,PRISM,tx5_prism,subject_macro_f1,0.5519203936256151,0.2989417989417989,1,ok
+finetune,pd_pads,PADS Parkinson's,armpose,Arm,tx5_armpose,subject_macro_f1,,0.2989417989417989,1,pending
+finetune,pd_pads,PADS Parkinson's,fullbody,Full-body,tx5_fullbody,subject_macro_f1,0.6344527986633249,0.2989417989417989,1,ok
+finetune,pd_pads,PADS Parkinson's,gesture,Gesture,tx5_gesture,subject_macro_f1,0.6517841404144947,0.2989417989417989,1,ok
+finetune,pd_pads,PADS Parkinson's,odom,Odometry,tx5_odom,subject_macro_f1,0.5212078977932636,0.2989417989417989,1,ok
+finetune,pd_pads,PADS Parkinson's,language,IMU–text,tx5_language,subject_macro_f1,0.6289525635320028,0.2989417989417989,1,ok
+finetune,language_humanml3d,HumanML3D IMU–text,mae,InrtlWrist (no source task),mae_5src,r1_g100,38.821375636052196,23.178559121366312,1,ok
+finetune,language_humanml3d,HumanML3D IMU–text,prism,PRISM,tx5_prism,r1_g100,39.39172842460577,23.178559121366312,1,ok
+finetune,language_humanml3d,HumanML3D IMU–text,armpose,Arm,tx5_armpose,r1_g100,,23.178559121366312,1,pending
+finetune,language_humanml3d,HumanML3D IMU–text,fullbody,Full-body,tx5_fullbody,r1_g100,34.95982089777823,23.178559121366312,1,ok
+finetune,language_humanml3d,HumanML3D IMU–text,gesture,Gesture,tx5_gesture,r1_g100,38.9581063277747,23.178559121366312,1,ok
+finetune,language_humanml3d,HumanML3D IMU–text,odom,Odometry,tx5_odom,r1_g100,38.696489747594335,23.178559121366312,1,ok
+finetune,language_humanml3d,HumanML3D IMU–text,pd,Parkinson's,tx5_pd,r1_g100,38.77641367323291,23.178559121366312,1,ok

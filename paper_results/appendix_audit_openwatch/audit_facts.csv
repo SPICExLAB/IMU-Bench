@@ -1,0 +1,7 @@
+item,value
+Participant ids in the release,50
+Distinct identities after merging duplicate ids,43
+Duplicate-identity groups (ids),"{39, 41, 42, 46, 47, 48, 49}; {40, 43}"
+Byte-identical files / groups / ids involved,254 / 102 / 9
+Recordings before / after exact de-duplication,"2,330 / 2,178"
+Augmented ids that are mirrored copies of real ids,35 of 35 (ids 51--85; 32 distinct sources)

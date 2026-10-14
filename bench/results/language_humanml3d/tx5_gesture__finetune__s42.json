@@ -1,0 +1,67 @@
+{
+  "task": "language_humanml3d",
+  "encoder": "tx5_gesture",
+  "protocol": "finetune",
+  "seed": 42,
+  "metrics": {
+    "r1_i2t_g100": 39.345,
+    "r1_t2i_g100": 38.571212655549395,
+    "r5_i2t_g100": 74.07000000000001,
+    "r5_t2i_g100": 73.34374527684014,
+    "r10_i2t_g100": 84.47,
+    "r10_t2i_g100": 83.45508589853394,
+    "mrr_i2t_g100": 54.81387686761908,
+    "mrr_t2i_g100": 54.05922942085649,
+    "r1_i2t_full": 5.133747635774115,
+    "r1_t2i_full": 4.395604395604396,
+    "mrr_i2t_full": 12.596465695899997,
+    "mrr_t2i_full": 11.255639863935023,
+    "medr_i2t_full": 30.0,
+    "medr_t2i_full": 37.5,
+    "r1_g100": 38.9581063277747,
+    "val_r1_i2t_g100": 40.905,
+    "val_r1_t2i_g100": 39.41792187898902,
+    "val_r5_i2t_g100": 75.52,
+    "val_r5_t2i_g100": 74.20474853203982,
+    "val_r10_i2t_g100": 85.18,
+    "val_r10_t2i_g100": 83.89583865202962,
+    "val_mrr_i2t_g100": 56.26495665184312,
+    "val_mrr_t2i_g100": 54.941619695250424,
+    "val_r1_i2t_full": 11.36173767752715,
+    "val_r1_t2i_full": 10.333333333333334,
+    "val_mrr_i2t_full": 23.7029986661586,
+    "val_mrr_t2i_full": 21.245072726200615,
+    "val_medr_i2t_full": 10.0,
+    "val_medr_t2i_full": 12.0,
+    "val_r1_g100": 40.16146093949451
+  },
+  "primary_metric": "r1_g100",
+  "eval_split": "test",
+  "run": "bench_language_humanml3d__tx5_gesture__finetune__s42",
+  "checkpoint": "latest.pt",
+  "checkpoint_step": 8000,
+  "selection": {
+    "split": "none",
+    "monitor": "fixed_budget",
+    "mode": "latest",
+    "note": "fixed 8k-step budget, final checkpoint (latest.pt); \u00a713e: val-loss best.pt under-selects for retrieval, latest \u2265 best on every arm"
+  },
+  "job_ids": {
+    "train": 6964885,
+    "score": "6964885"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.language",
+    "date": "2026-09-20T21:46:47-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_items_test": 3701,
+      "n_items_val": 1197,
+      "train_end": "max_steps reached at step=8000 epoch=1"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

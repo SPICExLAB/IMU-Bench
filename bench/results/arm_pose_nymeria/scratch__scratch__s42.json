@@ -4,36 +4,36 @@
   "protocol": "scratch",
   "seed": 42,
   "metrics": {
-    "pos_err_cm": 8.152887970209122,
-    "ang_err_deg": 9.939508438110352,
-    "val_pose_mse": 0.016716
+    "pos_err_cm": 8.214804530143738,
+    "ang_err_deg": 9.890199661254883,
+    "val_pose_mse": 0.016737
   },
   "primary_metric": "pos_err_cm",
   "eval_split": "val",
-  "run": "vit1d_arm_pose_supervised_nymeria_altattn_scratch",
+  "run": "bench_arm_pose_nymeria__scratch__scratch__s42",
   "checkpoint": "best.pt",
-  "checkpoint_step": 6000,
+  "checkpoint_step": 50000,
   "selection": {
     "split": "val",
     "monitor": "val_loss",
     "mode": "min"
   },
   "job_ids": {
-    "train": null,
-    "score": "9560099"
+    "train": 6724708,
+    "score": "6724708"
   },
   "provenance": {
     "source": "scorer:bench.score.arm_pose",
-    "date": "2026-08-16T18:19:30-05:00",
+    "date": "2026-09-19T04:17:07-05:00",
     "git": "unknown",
-    "legacy_run": true,
+    "legacy_run": false,
     "info": {
       "n_val_windows": 18269,
       "n_val_sessions": 101,
-      "train_end": "unknown/incomplete"
+      "train_end": "early stopping at step=70000 epoch=114"
     }
   },
   "status": "ok",
-  "notes": "harvested from a pre-harness run with a recipe-equivalent config.",
+  "notes": "",
   "schema_version": 1
 }

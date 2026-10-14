@@ -507,12 +507,24 @@ def _best_positive_scores(sim: torch.Tensor, positives: List[np.ndarray]) -> tor
 
 
 def _ranks(sim: torch.Tensor, positives: List[np.ndarray], chunk: int = 2048) -> np.ndarray:
-    """rank(q) = 1 + #{gallery items scoring strictly higher than q's best positive}."""
+    """Expected rank of q's best positive under random tie-breaking:
+    1 + #{items scoring strictly higher} + 0.5 * #{non-positive items tied with it}.
+
+    Fixed 2026-09-19: the previous rule counted only strictly higher items, so a collapsed encoder
+    (all embeddings equal -> every score tied) was credited with rank 1 for every query. Exact ties
+    do not occur for non-degenerate embeddings, so ordinary results are unchanged.
+    """
     best = _best_positive_scores(sim, positives)
-    ranks = torch.empty(sim.shape[0], dtype=torch.long, device=sim.device)
+    ranks = torch.empty(sim.shape[0], dtype=torch.float64, device=sim.device)
     for s in range(0, sim.shape[0], chunk):
         e = min(s + chunk, sim.shape[0])
-        ranks[s:e] = 1 + (sim[s:e] > best[s:e, None]).sum(dim=1)
+        blk, b = sim[s:e], best[s:e, None]
+        higher = (blk > b).sum(dim=1).double()
+        tied = (blk == b).sum(dim=1).double()
+        for q in range(s, e):                      # positives tied with the best one are not competitors
+            pos = torch.as_tensor(positives[q], device=sim.device)
+            tied[q - s] -= (sim[q, pos] == best[q]).sum().double()
+        ranks[s:e] = 1.0 + higher + 0.5 * tied
     return ranks.cpu().numpy()
 
 
@@ -561,9 +573,13 @@ def eval_full(z_imu: torch.Tensor, z_txt: torch.Tensor, item_caps, cap_items, de
 
 
 def eval_fixed(z_imu: torch.Tensor, z_txt: torch.Tensor, item_caps, G: int, n_subsets: int, seed: int,
-               device) -> Dict[str, Any]:
+               device, collect: Optional[Dict[str, list]] = None) -> Dict[str, Any]:
     """Pool per-query ranks over n_subsets random galleries of G items (text gallery =
-    the unique captions of those G items)."""
+    the unique captions of those G items).
+
+    collect: optional dict; if given, the per-query records are appended to it
+    (i2t_subset/i2t_item/i2t_rank, t2i_subset/t2i_cap/t2i_rank) -- the rng stream
+    and every reported number are unchanged."""
     N = z_imu.shape[0]
     if N < G:
         return {"gallery": G, "skipped": f"only {N} items"}
@@ -588,6 +604,14 @@ def eval_fixed(z_imu: torch.Tensor, z_txt: torch.Tensor, item_caps, G: int, n_su
         rt = _ranks(sim.T.contiguous(), pos_t2i)
         all_i2t.append(ri)
         all_t2i.append(rt)
+        if collect is not None:
+            s_id = len(all_i2t) - 1
+            collect.setdefault("i2t_subset", []).append(np.full(len(idx), s_id, dtype=np.int32))
+            collect.setdefault("i2t_item", []).append(np.asarray(idx, dtype=np.int64))
+            collect.setdefault("i2t_rank", []).append(np.asarray(ri, dtype=np.int64))
+            collect.setdefault("t2i_subset", []).append(np.full(len(cap_ids), s_id, dtype=np.int32))
+            collect.setdefault("t2i_cap", []).append(np.asarray(cap_ids, dtype=np.int64))
+            collect.setdefault("t2i_rank", []).append(np.asarray(rt, dtype=np.int64))
         r1_i2t.append(float((ri <= 1).mean() * 100))
         r1_t2i.append(float((rt <= 1).mean() * 100))
     out = {
@@ -629,6 +653,9 @@ def main():
     ap.add_argument("--limit-items", type=int, default=None, help="debug: cap #items after enumeration")
     ap.add_argument("--limit-sessions", type=int, default=None, help="debug: cap #Nymeria val sessions")
     ap.add_argument("--out", required=True)
+    ap.add_argument("--dump-units", default=None,
+                    help="optional .npz with the per-query ranks of every fixed-gallery protocol "
+                         "(per caption mode and G) plus the item/caption index, for bootstrap CIs")
     args = ap.parse_args()
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -746,8 +773,15 @@ def main():
     results: Dict[str, Any] = {"meta": meta, "dataset": dataset, "n_items": len(items), "protocols": {}}
     n_pairs = int(sum(len(it.caps) for it in items))
     results["n_caption_pairs"] = n_pairs
+    units: Dict[str, np.ndarray] = {}
+    if args.dump_units:
+        units["item_key"] = np.asarray([str(it.key) for it in items])
     for caption_mode in ("all", "first"):
         captions, item_caps, cap_items = build_caption_index(items, caption_mode)
+        if args.dump_units and caption_mode == "first":
+            # one caption per item under 'first': the item's caption id (items can share a caption)
+            units[f"{caption_mode}__item_cap"] = np.asarray([int(c[0]) for c in item_caps], dtype=np.int64)
+            units[f"{caption_mode}__n_captions"] = np.asarray(len(captions))
         log.info("[caption_mode=%s] %d unique captions over %d items -> encoding text ...",
                  caption_mode, len(captions), len(items))
         z_txt = text_embed_fn(captions)
@@ -757,7 +791,11 @@ def main():
             "fixed": {},
         }
         for G in gallery_sizes:
-            proto["fixed"][str(G)] = eval_fixed(z_imu, z_txt, item_caps, G, args.n_subsets, args.seed, device)
+            col: Optional[Dict[str, list]] = {} if args.dump_units else None
+            proto["fixed"][str(G)] = eval_fixed(z_imu, z_txt, item_caps, G, args.n_subsets, args.seed, device,
+                                                collect=col)
+            for k, v in (col or {}).items():
+                units[f"{caption_mode}__g{G}__{k}"] = np.concatenate(v)
         results["protocols"][caption_mode] = proto
         f = proto["full"]
         log.info("[%s] FULL  i2t R@1/5/10=%.2f/%.2f/%.2f MRR=%.2f MedR=%.0f | t2i R@1/5/10=%.2f/%.2f/%.2f MRR=%.2f MedR=%.0f",
@@ -772,6 +810,11 @@ def main():
                      fx["imu2text"]["MRR"], fx["text2imu"]["R@1"], fx["text2imu"]["R@5"], fx["text2imu"]["R@10"],
                      fx["text2imu"]["MRR"])
 
+    if args.dump_units:
+        units["meta_json"] = np.asarray(json.dumps(meta))
+        os.makedirs(os.path.dirname(os.path.abspath(args.dump_units)), exist_ok=True)
+        np.savez_compressed(args.dump_units, **units)
+        log.info("wrote per-query units %s", args.dump_units)
     results["elapsed_s"] = round(time.time() - t0, 1)
     os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)
     with open(args.out, "w") as fh:

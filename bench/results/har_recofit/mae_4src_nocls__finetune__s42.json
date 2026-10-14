@@ -1,0 +1,44 @@
+{
+  "task": "har_recofit",
+  "encoder": "mae_4src_nocls",
+  "protocol": "finetune",
+  "seed": 42,
+  "metrics": {
+    "macro_f1": 0.7765736377400562,
+    "bal_acc": 0.7832269326626295,
+    "acc": 0.8793362868845608,
+    "val_loss": 0.424894
+  },
+  "primary_metric": "macro_f1",
+  "eval_split": "val",
+  "run": "bench_har_recofit__mae_4src_nocls__finetune__s42",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 10000,
+  "selection": {
+    "split": "val",
+    "monitor": "val_loss",
+    "mode": "min",
+    "note": "same convention as Experiments_table \u00a73 (metrics read at the min-val-loss checkpoint)"
+  },
+  "job_ids": {
+    "train": 6243146,
+    "score": "6243146"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.har",
+    "date": "2026-09-13T21:12:08-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_val_samples": 23926,
+      "n_classes_seen": 13,
+      "n_classes_head": 13,
+      "n_val_batches": 95,
+      "logged_macro_f1_at_ckpt": 0.77663,
+      "train_end": "early stopping at step=18000 epoch=49"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

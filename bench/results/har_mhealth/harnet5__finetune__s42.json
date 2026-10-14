@@ -1,0 +1,44 @@
+{
+  "task": "har_mhealth",
+  "encoder": "harnet5",
+  "protocol": "finetune",
+  "seed": 42,
+  "metrics": {
+    "macro_f1": 0.9193958134638947,
+    "bal_acc": 0.9210278335063852,
+    "acc": 0.9170638703527169,
+    "val_loss": 0.208105
+  },
+  "primary_metric": "macro_f1",
+  "eval_split": "val",
+  "run": "bench_har_mhealth__harnet5__finetune__s42",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 1400,
+  "selection": {
+    "split": "val",
+    "monitor": "val_loss",
+    "mode": "min",
+    "note": "same convention as Experiments_table \u00a73 (metrics read at the min-val-loss checkpoint)"
+  },
+  "job_ids": {
+    "train": null,
+    "score": "5959276"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.har",
+    "date": "2026-09-10T16:16:32-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_val_samples": 1049,
+      "n_classes_seen": 12,
+      "n_classes_head": 12,
+      "n_val_batches": 5,
+      "logged_macro_f1_at_ckpt": 0.919396,
+      "train_end": "unknown/incomplete"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

@@ -1,0 +1,43 @@
+% OmniIMU-Bench overview (Figure 1), drawn in TikZ so fonts match the text. Included from 1_Introduction.tex.
+\begin{figure}[!b]
+\centering
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[
+  font=\sffamily\scriptsize,
+  box/.style={draw=black!55, rounded corners=2pt, align=center, inner sep=3pt, fill=white},
+  task/.style={draw=black!45, rounded corners=2pt, align=left, inner sep=2.5pt, fill=black!3,
+               text width=3.6cm, minimum height=0.78cm},
+  proto/.style={draw=black!45, rounded corners=2pt, align=center, inner sep=2pt, fill=black!3,
+                text width=1.55cm, minimum height=0.5cm},
+  arr/.style={-{Latex[length=1.6mm]}, black!60, line width=0.5pt}]
+  % input and encoder
+  \node[box, text width=1.55cm, minimum height=1.9cm] (imu) at (0,0)
+    {\textbf{Wrist IMU}\\[2pt]accelerometer\\+ gyroscope\\6 channels};
+  \node[box, text width=2.75cm, minimum height=1.9cm, right=0.45cm of imu] (enc)
+    {\textbf{Encoder}\\[2pt]one 12-layer ViT,\\one pretraining corpus\\[2pt]MAE $\cdot$ LIMU-BERT\\SimMTM $\cdot$ FOCAL\\RelCon};
+  % protocols
+  \node[proto, right=0.45cm of enc, yshift=0.62cm] (p1) {frozen probe};
+  \node[proto, right=0.45cm of enc] (p2) {fine-tune};
+  \node[proto, right=0.45cm of enc, yshift=-0.62cm] (p3) {from scratch};
+  \node[font=\sffamily\tiny, text=black!60, above=0pt of p1] (fd) {fixed decoder per task};
+  % tasks: two columns of three
+  \node[task, right=0.55cm of p1, yshift=0.3cm]  (t1) {\textbf{Pose} \hfill Nymeria\\arm (cm), full body (mm)};
+  \node[task, below=0.12cm of t1] (t2) {\textbf{Odometry} \hfill Nymeria\\wrist velocity, ATE (m)};
+  \node[task, below=0.12cm of t2] (t3) {\textbf{Microgesture} \hfill OpenWatch\\5 gestures + rest, clip F1};
+  \node[task, right=0.15cm of t1] (t4) {\textbf{IMU--text} \hfill HumanML3D\\retrieval, R@1 of 100};
+  \node[task, below=0.12cm of t4] (t5) {\textbf{Parkinson's} \hfill PADS\\3 classes, subject F1};
+  \node[task, below=0.12cm of t5] (t6) {\textbf{Activity} \hfill 4 datasets\\HHAR, MHEALTH, PRISM, ours};
+  % arrows
+  \draw[arr] (imu) -- (enc);
+  \foreach \p in {p1,p2,p3} \draw[arr] (enc.east) -- (\p.west);
+  \coordinate (fan) at ($(p2.east)+(0.28,0)$);
+  \foreach \p in {p1,p2,p3} \draw[black!60, line width=0.5pt] (\p.east) -- (fan);
+  \draw[arr] (fan) -- ($(t2.west)+(0,0)$);
+  % audit strip
+  \node[draw=black!45, dashed, rounded corners=2pt, inner sep=2.5pt, align=center,
+        fit=(imu)(enc)(fd)(t1)(t4)(t3)(t6), label={[font=\sffamily\scriptsize, text=black!70, anchor=north, yshift=-1pt]south:
+        \textbf{Audit:} every pretraining corpus checked against every evaluation set $\cdot$ duplicate participants removed $\cdot$ sensor units verified}] (audit) {};
+\end{tikzpicture}}
+\caption{OmniIMU-Bench. One wrist-IMU encoder, pretrained with one of five objectives on a shared corpus, is evaluated on ten tasks from eight datasets in six families under three protocols with the same backbone, one fixed decoder per task and fixed splits, and every pretraining corpus is audited against every evaluation set.}
+\label{fig:teaser}
+\end{figure}

@@ -1,0 +1,135 @@
+paths:
+  runs_root: /gpfs/home/vbc1591/IMU-SSL/runs
+  dataset_path: /projects/b53017/vbc1591/pads_dataset.parquet
+logging:
+  log_every_steps: 5
+  ckpt_every_steps: 500
+  save_step_checkpoints: false
+wandb:
+  project: TransfHAR_project
+  entity: yli32258-northwestern-university
+data:
+  dataset_column: dataset
+  subject_column: subject_id
+  session_column: session_id
+  time_column: timestamp_ns
+  label_column: dataset_activity_id
+  label_name_column: dataset_activity_label
+  sensor_columns:
+  - acc_x
+  - acc_y
+  - acc_z
+  - gyro_x
+  - gyro_y
+  - gyro_z
+  train_on_datasets:
+  - pads
+  drop_na: false
+  num_workers: 8
+  pin_memory: true
+  batch_size: 256
+  eval_batch_size: 256
+splits:
+  seed: 0
+  group_key: subject_id
+  shuffle: true
+  probe_dataset: prism
+  val_ratio: 0.2
+  test_ratio: 0
+windowing:
+  window_seconds: 2.56
+  window_hop_ratio: 0.5
+  label_policy: center
+  majority_threshold: 0.8
+  handle_gaps: true
+  gap_method: interpolate
+  max_gap_ms: 200
+  max_gaps_per_session: 100
+preprocess:
+  impute:
+    enabled: true
+    method: linear
+    max_missing_frac: 0.2
+  filter:
+    enabled: true
+    type: lowpass
+    order: 4
+    low_hz: 0.25
+    high_hz: 24
+  normalize:
+    enabled: true
+    method: zscore
+    eps: 1.0e-06
+spectrogram:
+  enabled: false
+  n_fft: 128
+  win_length: 64
+  hop_length: 2
+  center: true
+  return_image: false
+  log_scale: false
+gaussian_noise:
+  enabled: false
+  sigma: 0.6
+gain_jitter:
+  enabled: false
+  min_scale: 1.6
+  max_scale: 5.1
+time_warp:
+  enabled: false
+  max_warp: 0.05
+  smooth_sigma: 1
+axis_bias:
+  enabled: false
+  max_bias: 5.8
+vit1d:
+  patch_size: 16
+  shared_kernel: acc_gyro
+  use_cls_token: false
+  encoder:
+    hidden_size: 384
+    num_hidden_layers: 12
+    num_attention_heads: 6
+    intermediate_size: 1536
+    hidden_dropout_prob: 0.0
+    attention_probs_dropout_prob: 0.0
+    layer_norm_eps: 1.0e-06
+    drop_path_rate: 0.0
+    alt_attention: true
+  max_patches_per_channel: 256
+  pooling: mean
+objective:
+  type: utd_mhad_probe
+  utd_mhad_probe:
+    pretrained_run: vit1d_ssl_mae_grid_k50_f0p1
+    pretrained_ckpt: best
+trainer:
+  seed: 42
+  amp: true
+  max_steps: 20000
+  grad_clip_norm: 1.0
+  grad_accum_steps: 1
+  val_every_steps: 200
+  early_stopping:
+    enabled: true
+    patience: 20
+    monitor: bal_acc
+    mode: max
+  optim:
+    name: adamw
+    lr: 0.001
+    weight_decay: 0.1
+    betas:
+    - 0.9
+    - 0.95
+    eps: 1.0e-08
+  sched:
+    name: cosine
+    warmup_steps: 100
+bench:
+  task: pd_pads
+  encoder: g5_k50_f0p1
+  protocol: probe
+  seed: 42
+  template: configs/vit1d_pd_probe_pads_mae_multidata_flu.yaml
+  registry_version: 1

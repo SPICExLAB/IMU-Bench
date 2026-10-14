@@ -60,6 +60,7 @@ K_TYPES = [1, 5, 10, 25, 50, 100, 1000]
 ap = argparse.ArgumentParser()
 ap.add_argument("--norm", choices=["gain", "ratio"], default="gain")
 ap.add_argument("--drop", default="", help="comma-separated panel-label prefixes to leave out of the average")
+ap.add_argument("--only-b", action="store_true", help="draw only the motion-diversity panel (paper Figure 4 since 2026-09-25); writes scaling_avg_5src_b.*")
 _a = ap.parse_args()
 NORM, DROP = _a.norm, tuple(s for s in _a.drop.split(",") if s)
 CLIP = 100.0                            # every probe capped at one full gain either way; see the docstring
@@ -112,18 +113,23 @@ if RAND:
               [[t, source[t], int(hib[t]), per_task[t][REF], RAND[t], abs(per_task[t][REF] - RAND[t]),
                 CLIP] for t in tasks])
 
-fig, (ax_v, ax_d) = plt.subplots(1, 2, figsize=(9.6, 3.5), facecolor=th["surface"])
+ONLY_B = _a.only_b
+if ONLY_B:
+    fig, ax_d = plt.subplots(1, 1, figsize=(5.0, 3.5), facecolor=th["surface"]); ax_v = None
+else:
+    fig, (ax_v, ax_d) = plt.subplots(1, 2, figsize=(9.6, 3.5), facecolor=th["surface"])
 
-# (a) data amount, all modes available
-pts = [(pct, avg[f"k1000_f{tag}"]) for tag, pct in FRACS if f"k1000_f{tag}" in avg]
-ax_v.plot([p[0] for p in pts], [p[1] for p in pts], marker="o", ms=6, lw=2.2, color=th["ramp"][3],
-          markeredgecolor=th["surface"], markeredgewidth=1.2, zorder=3)
-ax_v.set_xscale("log")
-ax_v.set_xticks([p[0] for p in pts])
-ax_v.set_xticklabels(["0.1%\n1,959", "1%\n19.6k", "10%\n196k", "100%\n1.96M"])
-ax_v.set_xlabel("pretraining data (fraction of pool / windows)", fontsize=9.5, color=th["ink2"])
-ax_v.set_title("(a) Data amount (all 1,000 modes)", fontsize=10.5, color=th["ink"], fontweight="bold",
-               loc="left", pad=6)
+if not ONLY_B:
+    # (a) data amount, all modes available
+    pts = [(pct, avg[f"k1000_f{tag}"]) for tag, pct in FRACS if f"k1000_f{tag}" in avg]
+    ax_v.plot([p[0] for p in pts], [p[1] for p in pts], marker="o", ms=6, lw=2.2, color=th["ramp"][3],
+              markeredgecolor=th["surface"], markeredgewidth=1.2, zorder=3)
+    ax_v.set_xscale("log")
+    ax_v.set_xticks([p[0] for p in pts])
+    ax_v.set_xticklabels(["0.1%\n1,959", "1%\n19.6k", "10%\n196k", "100%\n1.96M"])
+    ax_v.set_xlabel("pretraining data (fraction of pool / windows)", fontsize=9.5, color=th["ink2"])
+    ax_v.set_title("(a) Data amount (all 1,000 modes)", fontsize=10.5, color=th["ink"], fontweight="bold",
+                   loc="left", pad=6)
 
 # (b) motion diversity, one line per volume
 for fi, (tag, pct) in enumerate(FRACS[:3]):
@@ -146,7 +152,7 @@ ax_d.set_xticks(K_TYPES)
 ax_d.set_xticklabels([str(k) for k in K_TYPES])
 ax_d.set_xlim(0.8, 1000 * 1.45)          # room for the reference star, which sits on the last tick
 ax_d.set_xlabel("motion modes in the pretraining set", fontsize=9.5, color=th["ink2"])
-ax_d.set_title("(b) Motion diversity", fontsize=10.5, color=th["ink"], fontweight="bold", loc="left", pad=6)
+ax_d.set_title("Motion diversity" if ONLY_B else "(b) Motion diversity", fontsize=10.5, color=th["ink"], fontweight="bold", loc="left", pad=6)
 leg = ax_d.legend(frameon=False, fontsize=8.2, loc="lower right", labelspacing=0.35, handlelength=2.0)
 for t in leg.get_texts():
     t.set_color(th["ink"])
@@ -154,11 +160,12 @@ for t in leg.get_texts():
 pad = max(1.5, 0.05 * (max(avg.values()) - min(avg.values())))
 lo, hi = min(avg.values()) - pad, max(4.0 if NORM == "ratio" else 10.0, max(avg.values()) + pad)
 ax_d.set_ylim(lo, hi)
-# (a): same y span as (b), centred on its own line so the line sits in the middle of the panel
-ya = [avg[f"k1000_f{tag}"] for tag, _ in FRACS if f"k1000_f{tag}" in avg]
-mid, half = (min(ya) + max(ya)) / 2, (hi - lo) / 2
-ax_v.set_ylim(mid - half, mid + half)
-for ax in (ax_v, ax_d):
+if not ONLY_B:
+    # (a): same y span as (b), centred on its own line so the line sits in the middle of the panel
+    ya = [avg[f"k1000_f{tag}"] for tag, _ in FRACS if f"k1000_f{tag}" in avg]
+    mid, half = (min(ya) + max(ya)) / 2, (hi - lo) / 2
+    ax_v.set_ylim(mid - half, mid + half)
+for ax in [a for a in (ax_v, ax_d) if a is not None]:
     ax.axhline(0, color=th["muted"], lw=1.0, ls="--", zorder=2)
     if NORM == "gain" and ax.get_ylim()[0] < -100:
         ax.axhline(-100, color=th["muted"], lw=0.9, ls=":", zorder=2)
@@ -173,11 +180,11 @@ for ax in (ax_v, ax_d):
     ax.tick_params(colors=th["muted"], labelsize=8.5)
     ax.grid(True, color=th["grid"], lw=0.8, zorder=0)
     ax.set_axisbelow(True)
-ax_v.set_ylabel("avg. change vs. full pool (%, up = better)" if NORM == "ratio" else
+(ax_d if ONLY_B else ax_v).set_ylabel("avg. change vs. full pool (%, up = better)" if NORM == "ratio" else
                "avg. change vs. full pool\n(% of its gain over never-trained)", fontsize=9.3, color=th["ink2"])
 fig.tight_layout(w_pad=2.5)
 for ext in ("png", "pdf"):
-    p = os.path.join(OUT_DIR, f"scaling_avg_5src.{ext}")
+    p = os.path.join(OUT_DIR, f"scaling_avg_5src{'_b' if ONLY_B else ''}.{ext}")
     fig.savefig(p, dpi=300 if ext == "png" else None, facecolor=th["surface"], bbox_inches="tight", pad_inches=0.05)
     print("wrote", p)
 for c in sorted(avg, key=lambda c: (int(c.split("_")[0][1:]), c)):

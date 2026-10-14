@@ -1,0 +1,3 @@
+realdata: raw 93510 (unique 93330), v3 93510 (unique 93484), v3 rows found in raw: 3887 (4.2 %), raw rows found in v3: 3970  [113s]
+sonic: raw 32626 (unique 32626), v3 32662 (unique 32662), v3 rows found in raw: 1342 (4.1 %), raw rows found in v3: 1342  [44s]
+motionx: raw 4284 (unique 4284), v3 4683 (unique 4683), v3 rows found in raw: 137 (2.9 %), raw rows found in v3: 137  [8s]

@@ -1,0 +1,40 @@
+{
+  "task": "full_body_pose_nymeria",
+  "encoder": "normwear_base",
+  "protocol": "probe",
+  "seed": 42,
+  "metrics": {
+    "mpjpe_mm": 107.739259,
+    "val_pose_mse": 0.020937
+  },
+  "primary_metric": "mpjpe_mm",
+  "eval_split": "val",
+  "run": "bench_full_body_pose_nymeria__normwear_base__probe__s42",
+  "checkpoint": "best_mpjpe.pt",
+  "checkpoint_step": 13000,
+  "selection": {
+    "split": "val",
+    "monitor": "mpjpe_mm",
+    "mode": "min",
+    "via": "best_mpjpe.pt (legacy)"
+  },
+  "job_ids": {
+    "train": 7107842,
+    "score": "7159380"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.full_body_pose",
+    "date": "2026-09-23T12:29:29-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "min_val_mpjpe_mm": 107.739259,
+      "min_val_mpjpe_step": 13000,
+      "n_val_evals": 16,
+      "train_end": "unknown/incomplete"
+    }
+  },
+  "status": "ok",
+  "notes": "capped budget: NormWear is ~26x slower per optimiser step than the 21M controlled encoders, so its kinematic runs were stopped early (this cell's own budget is checkpoint_step below); the controlled rows run to early stopping at 29k-219k steps, so this value is an upper bound on the error, not a converged number",
+  "schema_version": 1
+}

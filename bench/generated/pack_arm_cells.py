@@ -42,6 +42,9 @@ for i in $(seq 1 60); do [ -f runs/mae_nhanes2x2_arm{arm.upper()}/.done ] && bre
   fi ) > logs/packcell_{run}.log 2>&1 &"""
     body+="\nwait\npython -m bench.leaderboard && python -m bench.leaderboard_html || true\necho ARMPACK_DONE\n"
     sh=f"bench/generated/slurm/packs/armpack{arm}{i}.sh"; open(sh,"w").write(body); os.chmod(sh,0o755)
-    for part in (["--account=b53017","--partition=b53017"],["--account=p32139","--partition=gengpu"]):
+    # SINGLE job per cell. Dual-partition twins both `rm -rf runs/{name}` and then train
+    # into the same directory, silently corrupting the run (audit 2026-09-04: 27 bench
+    # cells affected). Never re-introduce a second partition in this loop.
+    for part in (["--account=p32139","--partition=gengpu"],):
         cmd=["sbatch","--parsable"]+part+([f"--dependency=afterany:{dep}"] if dep else [])+[sh]
         print(subprocess.check_output(cmd,text=True).strip(), os.path.basename(sh))

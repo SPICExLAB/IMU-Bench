@@ -48,7 +48,10 @@ def main():
                                                    "gyro_scale": 5.0, "clip_acc": 8.0, "clip_gyro": 8.0, "n_acc": 3})
         os.makedirs("bench/generated/configs", exist_ok=True)
         cp = f"bench/generated/configs/{name}.yaml"; yaml.safe_dump(cfg, open(cp, "w"), sort_keys=False)
-        for part in (["--account=p32139", "--partition=gengpu"], ["--account=b53017", "--partition=b53017"]):
+        # SINGLE job per cell. Dual-partition twins both `rm -rf runs/{name}` and then train
+        # into the same directory, silently corrupting the run (audit 2026-09-04: 27 bench
+        # cells affected). Never re-introduce a second partition in this loop.
+        for part in (["--account=p32139", "--partition=gengpu"],):
             sh = f"bench/generated/slurm/{name}.sh"
             open(sh, "w").write(f"""#!/bin/bash
 #SBATCH --gres=gpu:1

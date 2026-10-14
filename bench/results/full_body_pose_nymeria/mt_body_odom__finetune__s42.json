@@ -1,0 +1,40 @@
+{
+  "task": "full_body_pose_nymeria",
+  "encoder": "mt_body_odom",
+  "protocol": "finetune",
+  "seed": 42,
+  "metrics": {
+    "mpjpe_mm": 91.51264903677506,
+    "local_ang_err_deg": 11.37001082325956,
+    "global_ang_err_deg": 21.93664116782006,
+    "mp_joint_err_cm": 8.78844610399341,
+    "mp_mesh_err_cm": 10.576684507962694,
+    "mp_local_ang_err_deg": 9.058489538542814,
+    "mp_global_ang_err_deg": 20.63205955154993
+  },
+  "primary_metric": "mpjpe_mm",
+  "eval_split": "val",
+  "run": "mt_body_odom__full_body_pose_nymeria",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 40000,
+  "selection": {
+    "split": "val",
+    "monitor": "joint val loss",
+    "mode": "min",
+    "via": "best.pt of the joint run (the trainer selects on the summed per-task val loss)"
+  },
+  "provenance": {
+    "source": "bench.rescore_full_body_extra.evaluate (bench.score cannot read this run's metrics.txt: the joint trainer logs per-task losses, not the benchmark metric)",
+    "date": "2026-09-23T17:50:41-05:00",
+    "info": {
+      "n_windows": 18269,
+      "n_poses": 2338432,
+      "n_val_windows_total": 18269,
+      "step": 40000,
+      "max_batches": 0,
+      "amp": true
+    }
+  },
+  "status": "ok",
+  "notes": "joint multi-task fine-tune; this cell is the joint model's own full-body head, comparable with the single-task fine-tune row of the same MAE"
+}

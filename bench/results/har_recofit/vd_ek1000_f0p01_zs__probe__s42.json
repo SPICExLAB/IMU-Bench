@@ -1,0 +1,44 @@
+{
+  "task": "har_recofit",
+  "encoder": "vd_ek1000_f0p01_zs",
+  "protocol": "probe",
+  "seed": 42,
+  "metrics": {
+    "macro_f1": 0.5368018315258277,
+    "bal_acc": 0.5389996376451168,
+    "acc": 0.6809328763688038,
+    "val_loss": 0.989408
+  },
+  "primary_metric": "macro_f1",
+  "eval_split": "val",
+  "run": "bench_har_recofit__vd_ek1000_f0p01_zs__probe__s42",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 35600,
+  "selection": {
+    "split": "val",
+    "monitor": "val_loss",
+    "mode": "min",
+    "note": "same convention as Experiments_table \u00a73 (metrics read at the min-val-loss checkpoint)"
+  },
+  "job_ids": {
+    "train": 6378785,
+    "score": "6378785"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.har",
+    "date": "2026-09-15T19:36:12-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_val_samples": 23926,
+      "n_classes_seen": 13,
+      "n_classes_head": 13,
+      "n_val_batches": 95,
+      "logged_macro_f1_at_ckpt": 0.536461,
+      "train_end": "max_steps reached at step=40000 epoch=109"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

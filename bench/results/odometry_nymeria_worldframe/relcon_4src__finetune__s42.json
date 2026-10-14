@@ -1,0 +1,41 @@
+{
+  "task": "odometry_nymeria_worldframe",
+  "encoder": "relcon_4src",
+  "protocol": "finetune",
+  "seed": 42,
+  "metrics": {
+    "vel_mse": 0.015781279653310776,
+    "ate_m": 0.11925216780472422,
+    "drift_pct": 32.204705041632586
+  },
+  "primary_metric": "ate_m",
+  "eval_split": "val",
+  "run": "bench_odometry_nymeria_worldframe__relcon_4src__finetune__s42",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 32000,
+  "selection": {
+    "split": "val",
+    "monitor": "val_loss",
+    "mode": "min"
+  },
+  "job_ids": {
+    "train": null,
+    "score": "5654137"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.odometry",
+    "date": "2026-09-07T16:02:16-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_val_windows": 73515,
+      "n_val_windows_total": 73515,
+      "n_val_sessions": 101,
+      "T": 128,
+      "train_end": "unknown/incomplete"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

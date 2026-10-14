@@ -1,0 +1,42 @@
+{
+  "task": "odometry_nymeria_local",
+  "encoder": "relcon_5src_native",
+  "protocol": "probe",
+  "seed": 42,
+  "metrics": {
+    "vel_mse": 0.03150470554828644,
+    "ate_m": 0.2319918523875736,
+    "drift_pct": 66.84326914487428
+  },
+  "primary_metric": "ate_m",
+  "eval_split": "val",
+  "run": "bench_odometry_nymeria_local__relcon_5src_native__probe__s42",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 160000,
+  "selection": {
+    "split": "val",
+    "monitor": "val_loss",
+    "mode": "min"
+  },
+  "job_ids": {
+    "train": 7051097,
+    "score": "7051097"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.odometry_local",
+    "date": "2026-09-23T02:00:31-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_val_windows": 73515,
+      "n_val_windows_total": 73515,
+      "n_val_sessions": 101,
+      "T": 128,
+      "frame": "wrist FLU (local)",
+      "train_end": "early stopping at step=180000 epoch=73"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

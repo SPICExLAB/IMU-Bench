@@ -19,6 +19,7 @@ Rules
 from __future__ import annotations
 
 import argparse
+import glob
 import json
 import math
 import os
@@ -166,7 +167,8 @@ def rank_table(tasks, encoders, cells, protocol: str, tids: List[str]) -> Tuple[
     body = []
     for e in enc_ids:
         # run-less encoders (scratch, arch-only controls) only ever have `scratch` cells
-        proto = "scratch" if (e == "scratch" or encoders[e].get("run") is None) else protocol
+        proto = ("scratch" if (e == "scratch" or not (encoders[e].get("run") or encoders[e].get("weights")))
+                 else protocol)   # external-weight baselines (harnet) have no run dir but do have probe/finetune cells
         row_cells, rk, covered = [], [], 0
         for t in tids:
             task = tasks["tasks"][t]
@@ -304,6 +306,19 @@ def build_markdown() -> Tuple[str, Dict[str, Any]]:
         out += rows
         out.append("")
         payload["tables"][proto] = pl
+    dm = deco_md(tasks, encoders, cells)
+    if dm:
+        out.append("## Probe-decoder capacity — `mae_4src_z`")
+        out.append("")
+        out.append("Same frozen encoder, same data and recipe; only the task head changes, from the board's "
+                   "1-layer default to ~12-layer decoders. **Not comparable to the frozen-probe table above** — "
+                   "an ablation, excluded from the ranking until one decoder is promoted into the task cards for "
+                   "every encoder. Bold = best across the `mae_4src_z` rows only.")
+        out.append("")
+        out += dm
+        out.append("")
+        out.append("> **Contamination caveat.** Every cell in the 3×3 grid above ran with a concurrent duplicate job writing into the same run directory for part of training (a dual-partition submission bug, fixed 2026-09-04). Single-job re-runs of the promoted arms reproduce full-body (91.64 → 91.45 mm) and odometry (0.1224 → 0.1228 ATE) but NOT arm pose: the promoted d12w decoder scores 8.14–8.16 cm when run alone, i.e. no better than the 1-layer default. **Treat the arm-pose row as noise, not a win.** The `mae_4src_z` numbers in the frozen-probe table are from the clean single-job re-runs.")
+        out.append("")
     out.append("## Task cards — unified input / output")
     out.append("")
     out += io_table(tasks, real_tids)
@@ -351,6 +366,71 @@ def build_markdown() -> Tuple[str, Dict[str, Any]]:
                "RecoFit, HHAR, MHEALTH; present only when all six are scored). Selection is min val loss and val is reported "
                "(no test split); scores are re-evaluated from the checkpoint with pooled predictions, not read from training logs.")
     return "\n".join(out) + "\n", payload
+
+
+
+DECO_TASKS = ["arm_pose_nymeria", "full_body_pose_nymeria", "odometry_nymeria_local"]
+DECO_ARMS = [("d12a", "12L balanced"), ("d12b", "12L temporal-heavy"), ("d12w", "12L wide")]
+DECO_REFS = [("scratch", "scratch"), ("mobileposer", "external"), ("tlio", "external"), ("airio", "external")]
+
+
+def _small_decoder_baseline(tasks, cells, tids, pks):
+    """The pre-promotion 1-layer-decoder probe number. Once a deep decoder is promoted the live
+    cell holds the DEEP result, so the baseline is read from the archive promote wrote."""
+    out = {}
+    for t in tids:
+        arch = os.path.join(REPO, "bench", "results", "_superseded_small_decoder",
+                            f"{t}__mae_4src_z__probe__s42.json")
+        if os.path.exists(arch):
+            try:
+                out[t] = json.load(open(arch)).get("metrics", {}).get(pks[t]); continue
+            except Exception:
+                pass
+        c = cells.get((t, "mae_4src_z", "probe"))
+        out[t] = c.primary()[0] if c else None
+    return out
+
+
+def deco_md(tasks, encoders, cells):
+    """Probe-decoder capacity ablation on mae_4src_z — its own table, never merged into the
+    ranking above: these cells use a deeper task head than every other number in this file."""
+    import json as _json
+    deco = {}
+    for f in glob.glob(os.path.join(REPO, "bench", "generated", "results_deco", "*.json")):
+        try:
+            d = _json.load(open(f))
+        except Exception:
+            continue
+        deco.setdefault(d["task"], {})[d["arm"]] = d.get("metrics", {})
+    if not deco:
+        return []
+    tids = [t for t in DECO_TASKS if t in tasks["tasks"]]
+    pks = {t: tasks["tasks"][t]["metrics"]["primary"] for t in tids}
+    hdr = ["Probe decoder"] + [f"{tasks['tasks'][t]['name']} ({tasks['tasks'][t]['metrics'][pks[t]]['label']} {'↑' if hib(tasks['tasks'][t], pks[t]) else '↓'})" for t in tids]
+    base = _small_decoder_baseline(tasks, cells, tids, pks)
+    best = {}
+    for t in tids:
+        vals = [v for v in [base[t]] + [deco.get(t, {}).get(a, {}).get(pks[t]) for a, _ in DECO_ARMS] if v is not None]
+        best[t] = (max if hib(tasks["tasks"][t], pks[t]) else min)(vals) if vals else None
+
+    def cel(t, v, mark=True):
+        if v is None:
+            return "—"
+        s_ = fmt_metric(tasks["tasks"][t], pks[t], v)
+        return f"**{s_}**" if mark and best[t] is not None and abs(v - best[t]) < 1e-9 else s_
+
+    rows = [["small decoder (board default, 1 layer)"] + [cel(t, base[t]) for t in tids]]
+    for a, label in DECO_ARMS:
+        rows.append([label] + [cel(t, deco.get(t, {}).get(a, {}).get(pks[t])) for t in tids])
+    for eid, proto in DECO_REFS:
+        if eid not in encoders:
+            continue
+        vals = [(cells[(t, eid, proto)].primary()[0] if (t, eid, proto) in cells else None) for t in tids]
+        if any(v is not None for v in vals):
+            rows.append([f"_{encoders[eid]['name']}_ (reference)"] + [cel(t, v, mark=False) for t, v in zip(tids, vals)])
+    out = ["| " + " | ".join(hdr) + " |", "|" + "---|" * len(hdr)]
+    out += ["| " + " | ".join(r) + " |" for r in rows]
+    return out
 
 
 def main():

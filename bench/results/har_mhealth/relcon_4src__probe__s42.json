@@ -1,0 +1,44 @@
+{
+  "task": "har_mhealth",
+  "encoder": "relcon_4src",
+  "protocol": "probe",
+  "seed": 42,
+  "metrics": {
+    "macro_f1": 0.8171916546603066,
+    "bal_acc": 0.8224553266915856,
+    "acc": 0.8350810295519543,
+    "val_loss": 0.488446
+  },
+  "primary_metric": "macro_f1",
+  "eval_split": "val",
+  "run": "bench_har_mhealth__relcon_4src__probe__s42",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 2000,
+  "selection": {
+    "split": "val",
+    "monitor": "val_loss",
+    "mode": "min",
+    "note": "same convention as Experiments_table \u00a73 (metrics read at the min-val-loss checkpoint)"
+  },
+  "job_ids": {
+    "train": null,
+    "score": "5654124"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.har",
+    "date": "2026-09-07T14:07:44-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_val_samples": 1049,
+      "n_classes_seen": 12,
+      "n_classes_head": 12,
+      "n_val_batches": 5,
+      "logged_macro_f1_at_ckpt": 0.81626,
+      "train_end": "unknown/incomplete"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

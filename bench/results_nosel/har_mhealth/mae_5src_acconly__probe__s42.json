@@ -1,0 +1,43 @@
+{
+  "task": "har_mhealth",
+  "encoder": "mae_5src_acconly",
+  "protocol": "probe",
+  "seed": 42,
+  "metrics": {
+    "macro_f1": 0.7013150372895353,
+    "bal_acc": 0.6981606408819242,
+    "acc": 0.6825548141086749,
+    "val_loss": 0.712776
+  },
+  "primary_metric": "macro_f1",
+  "eval_split": "val",
+  "run": "bench_har_mhealth__mae_5src_acconly__probe__s42",
+  "checkpoint": "latest.pt",
+  "checkpoint_step": 4800,
+  "selection": {
+    "split": "none",
+    "monitor": "fixed_budget",
+    "mode": "latest"
+  },
+  "job_ids": {
+    "train": 6561500,
+    "score": "6847262"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.har",
+    "date": "2026-09-19T18:32:39-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_val_samples": 1049,
+      "n_classes_seen": 12,
+      "n_classes_head": 12,
+      "n_val_batches": 5,
+      "logged_macro_f1_at_ckpt": 0.702206,
+      "train_end": "early stopping at step=4800 epoch=283"
+    }
+  },
+  "status": "ok",
+  "notes": "selection-free control: final checkpoint, no best-of-N selection (bench/rescore_noselection.py)",
+  "schema_version": 1
+}

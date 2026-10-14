@@ -1,0 +1,16 @@
+encoder,encoder_label,decoder_task_variant,decoder_label,mpjpe_mm
+mae_5src,WristMAE (Ours),full_body_pose_nymeria_dec0x0,linear,104.921941
+mae_5src,WristMAE (Ours),full_body_pose_nymeria,"1+0, 192 (benchmark)",97.85016
+mae_5src,WristMAE (Ours),full_body_pose_nymeria_dec1x0,1+0,97.319771
+mae_5src,WristMAE (Ours),full_body_pose_nymeria_dec1x4,1+4,93.02123
+mae_5src,WristMAE (Ours),full_body_pose_nymeria_deepdec,4+8,90.98572
+focal_5src,FOCAL,full_body_pose_nymeria_dec0x0,linear,113.609655
+focal_5src,FOCAL,full_body_pose_nymeria,"1+0, 192 (benchmark)",108.413672
+focal_5src,FOCAL,full_body_pose_nymeria_dec1x0,1+0,108.317164
+focal_5src,FOCAL,full_body_pose_nymeria_dec1x4,1+4,98.324483
+focal_5src,FOCAL,full_body_pose_nymeria_deepdec,4+8,96.08432
+control_random,Random frozen encoder,full_body_pose_nymeria_dec0x0,linear,114.591832
+control_random,Random frozen encoder,full_body_pose_nymeria,"1+0, 192 (benchmark)",104.987779
+control_random,Random frozen encoder,full_body_pose_nymeria_dec1x0,1+0,104.87586
+control_random,Random frozen encoder,full_body_pose_nymeria_dec1x4,1+4,93.253522
+control_random,Random frozen encoder,full_body_pose_nymeria_deepdec,4+8,91.772915

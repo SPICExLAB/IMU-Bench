@@ -22,12 +22,15 @@ objective:
   utd_mhad_probe:
     pretrained_run: vit1d_ssl_mae_varlen_altattn_realdata_ocdetect_eatingspeed_motionx_sonic
     pretrained_ckpt: best
+    class_weighted_ce: true
 paths:
   dataset_path: /projects/b53017/vbc1591/pads_dataset.parquet
   runs_root: /gpfs/home/vbc1591/IMU-SSL/runs
 preprocess:
   normalize:
     enabled: true
+    method: zscore
+    eps: 1.0e-06
 windowing:
   window_seconds: 2.56
 splits:

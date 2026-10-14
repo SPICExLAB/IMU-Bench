@@ -1,0 +1,39 @@
+{
+ "task": "arm_pose_nymeria_deepdec",
+ "encoder": "mae_mr90",
+ "protocol": "probe",
+ "seed": 42,
+ "metrics": {
+  "pos_err_cm": 8.529561758041382,
+  "ang_err_deg": 10.394122123718262,
+  "val_pose_mse": 0.01803
+ },
+ "primary_metric": "pos_err_cm",
+ "eval_split": "val",
+ "run": "_deepdec/bench_arm_pose_nymeria__mae_mr90__probe__s42",
+ "checkpoint": "best.pt",
+ "checkpoint_step": 8000,
+ "selection": {
+  "split": "val",
+  "monitor": "val_loss",
+  "mode": "min"
+ },
+ "job_ids": {
+  "train": null,
+  "score": "9972305"
+ },
+ "provenance": {
+  "source": "scorer:bench.score.arm_pose",
+  "date": "2026-08-20T18:11:24-05:00",
+  "git": "unknown",
+  "legacy_run": false,
+  "info": {
+   "n_val_windows": 18269,
+   "n_val_sessions": 101,
+   "train_end": "unknown/incomplete"
+  }
+ },
+ "status": "ok",
+ "notes": "moved 2026-09-19 from task arm_pose_nymeria: pre-switch frozen probe (the decoder is whatever the run used -- deep 4+8/12-layer for runs after 2026-08-27, older decoders before); not part of the paper",
+ "schema_version": 1
+}

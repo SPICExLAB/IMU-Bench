@@ -1,0 +1,67 @@
+{
+  "task": "language_humanml3d",
+  "encoder": "simmtm_5src",
+  "protocol": "probe",
+  "seed": 42,
+  "metrics": {
+    "r1_i2t_g100": 17.37,
+    "r1_t2i_g100": 17.00337548491108,
+    "r5_i2t_g100": 43.22,
+    "r5_t2i_g100": 42.63690866038591,
+    "r10_i2t_g100": 56.81,
+    "r10_t2i_g100": 55.90709859438763,
+    "mrr_i2t_g100": 30.30844650675883,
+    "mrr_t2i_g100": 29.750997726226775,
+    "r1_i2t_full": 1.7022426371251014,
+    "r1_t2i_full": 1.2454212454212454,
+    "mrr_i2t_full": 5.020484443814767,
+    "mrr_t2i_full": 4.191881619417099,
+    "medr_i2t_full": 187.0,
+    "medr_t2i_full": 226.5,
+    "r1_g100": 17.18668774245554,
+    "val_r1_i2t_g100": 17.945,
+    "val_r1_t2i_g100": 16.584120500382944,
+    "val_r5_i2t_g100": 44.755,
+    "val_r5_t2i_g100": 43.93158029103906,
+    "val_r10_i2t_g100": 59.230000000000004,
+    "val_r10_t2i_g100": 58.69798315037018,
+    "val_mrr_i2t_g100": 31.31675689293079,
+    "val_mrr_t2i_g100": 30.05077272458532,
+    "val_r1_i2t_full": 3.5923141186299077,
+    "val_r1_t2i_full": 3.0,
+    "val_mrr_i2t_full": 9.534165779457899,
+    "val_mrr_t2i_full": 8.302641087871086,
+    "val_medr_i2t_full": 58.0,
+    "val_medr_t2i_full": 69.0,
+    "val_r1_g100": 17.264560250191472
+  },
+  "primary_metric": "r1_g100",
+  "eval_split": "test",
+  "run": "bench_language_humanml3d__simmtm_5src__probe__s42",
+  "checkpoint": "latest.pt",
+  "checkpoint_step": 8000,
+  "selection": {
+    "split": "none",
+    "monitor": "fixed_budget",
+    "mode": "latest",
+    "note": "fixed 8k-step budget, final checkpoint (latest.pt); \u00a713e: val-loss best.pt under-selects for retrieval, latest \u2265 best on every arm"
+  },
+  "job_ids": {
+    "train": 6568971,
+    "score": "6568971"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.language",
+    "date": "2026-09-18T17:20:54-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_items_test": 3701,
+      "n_items_val": 1197,
+      "train_end": "max_steps reached at step=8000 epoch=1"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

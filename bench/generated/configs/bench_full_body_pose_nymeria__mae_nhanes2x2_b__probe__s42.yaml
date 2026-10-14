@@ -11,13 +11,13 @@ vit1d:
     layer_norm_eps: 1.0e-06
     alt_attention: true
   pose_decoder:
-    hidden_size: 192
-    num_hidden_layers: 1
-    num_attention_heads: 4
+    hidden_size: 384
+    num_hidden_layers: 4
+    num_attention_heads: 6
     mlp_ratio: 4.0
-    dropout: 0.2
+    dropout: 0.1
     sub_patches: 4
-    num_temporal_layers: 0
+    num_temporal_layers: 8
   max_patches_per_channel: 256
   pooling: mean
 objective:
@@ -86,6 +86,16 @@ logging:
 wandb:
   entity: yli32258-northwestern-university
   project: TransfHAR_project
+preprocess:
+  normalize:
+    enabled: true
+    method: physical
+    acc_scale: 9.81
+    gyro_scale: 5.0
+    clip_acc: 8.0
+    clip_gyro: 8.0
+    n_acc: 3
+    acc_units: auto
 bench:
   task: full_body_pose_nymeria
   encoder: mae_nhanes2x2_b

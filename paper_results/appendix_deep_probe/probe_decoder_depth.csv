@@ -1,0 +1,31 @@
+encoder,encoder_label,task,benchmark_decoder,two_layer,four_layer,deep
+mae_5src,WristMAE (Ours),arm_pose_nymeria,8.137550950050354,8.200518041849136,,8.176489919424057
+mae_5src,WristMAE (Ours),full_body_pose_nymeria,97.85016,,,90.98572
+mae_5src,WristMAE (Ours),odometry_nymeria_local,0.1998629427138598,,,0.1783973052950857
+limubert_5src,LIMU-BERT,arm_pose_nymeria,8.139204233884811,,,8.1486277282238
+limubert_5src,LIMU-BERT,full_body_pose_nymeria,98.545129,,,90.073367
+limubert_5src,LIMU-BERT,odometry_nymeria_local,0.207840867590574,,,0.18453608690223922
+simmtm_5src,SimMTM,arm_pose_nymeria,8.465863019227982,,,8.365996181964874
+simmtm_5src,SimMTM,full_body_pose_nymeria,103.645474,,,92.980023
+simmtm_5src,SimMTM,odometry_nymeria_local,0.22396585247435583,,,0.17966955806894225
+focal_5src,FOCAL,arm_pose_nymeria,8.708436042070389,,,8.508890867233276
+focal_5src,FOCAL,full_body_pose_nymeria,108.413672,,,96.08432
+focal_5src,FOCAL,odometry_nymeria_local,0.2403601483533262,,,0.19949182660872486
+relcon_5src,RelCon,arm_pose_nymeria,8.504417538642883,,,8.48643183708191
+relcon_5src,RelCon,full_body_pose_nymeria,104.291822,,,
+relcon_5src,RelCon,odometry_nymeria_local,0.21528262074777194,,,
+sslwear_5src,SSL-Wearables,arm_pose_nymeria,8.423518389463425,,,
+sslwear_5src,SSL-Wearables,full_body_pose_nymeria,101.666022,,,
+sslwear_5src,SSL-Wearables,odometry_nymeria_local,0.22046790745812805,,,
+mae_5src_noaltattn,"WristMAE, plain attention",arm_pose_nymeria,8.363016694784164,,,8.119609206914902
+mae_5src_noaltattn,"WristMAE, plain attention",full_body_pose_nymeria,99.963851,,,92.478261
+mae_5src_noaltattn,"WristMAE, plain attention",odometry_nymeria_local,0.21040970112973734,,,0.1862308980164421
+mae_5src_acconly,"WristMAE, accelerometer only",arm_pose_nymeria,8.758489042520523,,,8.688420057296753
+mae_5src_acconly,"WristMAE, accelerometer only",full_body_pose_nymeria,102.787634,,,97.626237
+mae_5src_acconly,"WristMAE, accelerometer only",odometry_nymeria_local,0.2296265066070148,,,0.20418806167824627
+control_random,Random frozen encoder,arm_pose_nymeria,8.456384390592575,,,8.311404287815094
+control_random,Random frozen encoder,full_body_pose_nymeria,104.987779,,,91.772915
+control_random,Random frozen encoder,odometry_nymeria_local,0.23341782659051732,,,0.16709675057558107
+control_raw,"Raw input, 0 layers",arm_pose_nymeria,8.509549498558044,,,8.473215997219086
+control_raw,"Raw input, 0 layers",full_body_pose_nymeria,106.363257,,,92.165017
+control_raw,"Raw input, 0 layers",odometry_nymeria_local,0.2557545186063136,,,0.22387863785372622

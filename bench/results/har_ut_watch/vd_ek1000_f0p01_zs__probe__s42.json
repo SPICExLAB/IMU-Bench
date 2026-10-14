@@ -1,0 +1,43 @@
+{
+  "task": "har_ut_watch",
+  "encoder": "vd_ek1000_f0p01_zs",
+  "protocol": "probe",
+  "seed": 42,
+  "metrics": {
+    "macro_f1": 0.3932107724836143,
+    "bal_acc": 0.3837684217552343,
+    "acc": 0.5008568980291346,
+    "val_loss": 1.168699
+  },
+  "primary_metric": "macro_f1",
+  "eval_split": "val",
+  "run": "bench_har_ut_watch__vd_ek1000_f0p01_zs__probe__s42",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 3800,
+  "selection": {
+    "split": "val",
+    "monitor": "val_loss",
+    "mode": "min"
+  },
+  "job_ids": {
+    "train": 6473316,
+    "score": "6473316"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.har",
+    "date": "2026-09-17T00:41:28-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_val_samples": 2334,
+      "n_classes_seen": 5,
+      "n_classes_head": 5,
+      "n_val_batches": 13,
+      "logged_macro_f1_at_ckpt": 0.393211,
+      "train_end": "early stopping at step=7800 epoch=61"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

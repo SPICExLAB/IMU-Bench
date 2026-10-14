@@ -83,6 +83,7 @@ import time
 from typing import Optional, Tuple
 
 import copy
+import datetime
 
 import numpy as np
 import torch
@@ -92,6 +93,7 @@ from tqdm import tqdm
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from imu_lm.data.combined_mae_multidata_loader import ALL_SOURCES, _BUILDERS
+from imu_lm.data.unit_check import check_gyro_units
 from imu_lm.utils.helpers import cfg_get, deep_update, load_yaml
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
@@ -330,8 +332,24 @@ def main():
             logger.exception("[%s] builder failed, skipping", name)
             continue
 
+        # Physical-units caches: refuse to write a source whose gyroscope is not rad/s (2026-09-17; the
+        # EatingSpeed pickles were deg/s for months). Per-window z-scored caches hide any constant scale,
+        # so the check is skipped there and the marker says so.
+        normalize = cfg_get(build_cfg, ["preprocess", "normalize"], {}) or {}
+        is_zscored = bool(normalize.get("enabled", False)) and normalize.get("method", "zscore") == "zscore"
+        marker = {"source": name, "gyro_units": "rad/s", "date": datetime.date.today().isoformat(),
+                  "normalized": (normalize.get("method", "zscore") if normalize.get("enabled", False) else "none")}
+        if is_zscored:
+            marker["gyro_units"] = "n/a (per-window z-score)"
+            logger.info("[%s] per-window z-score cache: gyro unit check skipped (scale-invariant)", name)
+        elif train_ds is not None and len(train_ds) > 0:
+            marker["unit_check"] = check_gyro_units(train_ds, name)   # raises GyroUnitError -> nothing written
+            logger.info("[%s] gyro unit check passed: %s", name, marker["unit_check"])
+
         _cache_split(train_ds, train_out, train_mask_out, name, "train", args.batch_size, args.num_workers)
         _cache_split(val_ds, val_out, val_mask_out, name, "val", args.batch_size, args.num_workers)
+        with open(os.path.join(args.out_dir, f"{name}_units.json"), "w") as f:
+            json.dump(marker, f, indent=1)
 
     logger.info("Done. Set objective.mae_multidata_varlen_altattn_flu.cache_dir: %s in your config "
                 "to use this cache next time.", args.out_dir)

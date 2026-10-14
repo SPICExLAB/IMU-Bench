@@ -1,0 +1,44 @@
+{
+  "task": "har_userwatch",
+  "encoder": "harnet5",
+  "protocol": "probe",
+  "seed": 42,
+  "metrics": {
+    "macro_f1": 0.4672488841503375,
+    "bal_acc": 0.4545725504247336,
+    "acc": 0.49777777777777776,
+    "val_loss": 2.34991
+  },
+  "primary_metric": "macro_f1",
+  "eval_split": "val",
+  "run": "bench_har_userwatch__harnet5__probe__s42",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 19800,
+  "selection": {
+    "split": "val",
+    "monitor": "val_loss",
+    "mode": "min",
+    "note": "same convention as Experiments_table \u00a73 (metrics read at the min-val-loss checkpoint)"
+  },
+  "job_ids": {
+    "train": 7027425,
+    "score": "7027425"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.har",
+    "date": "2026-09-21T15:27:51-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_val_samples": 900,
+      "n_classes_seen": 60,
+      "n_classes_head": 60,
+      "n_val_batches": 4,
+      "logged_macro_f1_at_ckpt": 0.467857,
+      "train_end": "max_steps reached at step=20000 epoch=1112"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

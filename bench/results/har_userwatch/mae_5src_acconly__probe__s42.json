@@ -1,0 +1,44 @@
+{
+  "task": "har_userwatch",
+  "encoder": "mae_5src_acconly",
+  "protocol": "probe",
+  "seed": 42,
+  "metrics": {
+    "macro_f1": 0.6948651714904642,
+    "bal_acc": 0.6900308634165448,
+    "acc": 0.7,
+    "val_loss": 1.325445
+  },
+  "primary_metric": "macro_f1",
+  "eval_split": "val",
+  "run": "bench_har_userwatch__mae_5src_acconly__probe__s42",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 6400,
+  "selection": {
+    "split": "val",
+    "monitor": "val_loss",
+    "mode": "min",
+    "note": "same convention as Experiments_table \u00a73 (metrics read at the min-val-loss checkpoint)"
+  },
+  "job_ids": {
+    "train": 6583152,
+    "score": "6583152"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.har",
+    "date": "2026-09-18T16:42:57-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_val_samples": 900,
+      "n_classes_seen": 60,
+      "n_classes_head": 60,
+      "n_val_batches": 4,
+      "logged_macro_f1_at_ckpt": 0.694253,
+      "train_end": "early stopping at step=10400 epoch=578"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

@@ -1,0 +1,44 @@
+{
+  "task": "har_userwatch",
+  "encoder": "simmtm_5src",
+  "protocol": "finetune",
+  "seed": 42,
+  "metrics": {
+    "macro_f1": 0.7365207475954829,
+    "bal_acc": 0.7430641630402456,
+    "acc": 0.7455555555555555,
+    "val_loss": 1.070312
+  },
+  "primary_metric": "macro_f1",
+  "eval_split": "val",
+  "run": "bench_har_userwatch__simmtm_5src__finetune__s42",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 600,
+  "selection": {
+    "split": "val",
+    "monitor": "val_loss",
+    "mode": "min",
+    "note": "same convention as Experiments_table \u00a73 (metrics read at the min-val-loss checkpoint)"
+  },
+  "job_ids": {
+    "train": 6583140,
+    "score": "6583140"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.har",
+    "date": "2026-09-18T20:46:12-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_val_samples": 900,
+      "n_classes_seen": 60,
+      "n_classes_head": 60,
+      "n_val_batches": 4,
+      "logged_macro_f1_at_ckpt": 0.736521,
+      "train_end": "early stopping at step=4600 epoch=256"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

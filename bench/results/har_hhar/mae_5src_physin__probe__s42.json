@@ -1,0 +1,44 @@
+{
+  "task": "har_hhar",
+  "encoder": "mae_5src_physin",
+  "protocol": "probe",
+  "seed": 42,
+  "metrics": {
+    "macro_f1": 0.6532354965596742,
+    "bal_acc": 0.6547646518764848,
+    "acc": 0.6257046223224352,
+    "val_loss": 0.956191
+  },
+  "primary_metric": "macro_f1",
+  "eval_split": "val",
+  "run": "bench_har_hhar__mae_5src_physin__probe__s42",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 7000,
+  "selection": {
+    "split": "val",
+    "monitor": "val_loss",
+    "mode": "min",
+    "note": "same convention as Experiments_table \u00a73 (metrics read at the min-val-loss checkpoint)"
+  },
+  "job_ids": {
+    "train": 7029160,
+    "score": "7029160"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.har",
+    "date": "2026-09-21T15:41:39-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_val_samples": 2661,
+      "n_classes_seen": 6,
+      "n_classes_head": 6,
+      "n_val_batches": 11,
+      "logged_macro_f1_at_ckpt": 0.653537,
+      "train_end": "early stopping at step=11000 epoch=269"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

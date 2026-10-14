@@ -1,0 +1,4 @@
+encoder,protocol,clip_macro_f1_release_split,clip_macro_f1_canonical_split
+mae_5src,probe,0.5704437668341681,0.6467218088133121
+mae_5src,finetune,0.6471697857887116,0.5419450067476383
+scratch,scratch,0.5480865480865481,0.6081037062982316

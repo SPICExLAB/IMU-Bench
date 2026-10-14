@@ -1,0 +1,11 @@
+family,task,dataset,subjects,hours,output,metric,split
+Pose,Arm pose,Nymeria,235,300.0,5-joint rotations,pos. err. (cm) (lower better),session
+Pose,Full-body pose,Nymeria,,300.0,23-joint rotations,MPJPE (mm) (lower better),session
+Pose,Inertial odometry,Nymeria,,300.0,wrist-frame velocity,ATE (m) (lower better),session
+Gesture,Microgesture,OpenWatch,43,1.917,6 classes / clip,clip F1 (higher better),subject
+Language,IMU--text retrieval,HumanML3D (sim.),,28.59,text embedding,"R@1, G=100 (higher better)",official
+Clinical,Parkinson's disease,PADS,469,35.93,3 classes / subject,subject F1 (higher better),subject
+Activity,Activity recognition,HHAR,9,4.76,6 classes / window,macro-F1 (higher better),subject
+Activity,Activity recognition,MHEALTH,10,1.91,12 classes / window,macro-F1 (higher better),subject
+Activity,Activity recognition,PRISM,31,16.28,5 classes / window,macro-F1 (higher better),subject
+Activity,Activity recognition,TransfHAR,10,1.9752116957155552,60 classes / window,macro-F1 (higher better),time

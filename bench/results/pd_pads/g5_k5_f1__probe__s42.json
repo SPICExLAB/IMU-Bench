@@ -1,62 +1,62 @@
 {
- "task": "pd_pads",
- "encoder": "g5_k5_f1",
- "protocol": "probe",
- "seed": 42,
- "metrics": {
-  "subject_bal_acc": 0.3874458874458874,
-  "subject_macro_f1": 0.35950782997762865,
-  "subject_acc": 0.648936170212766,
-  "subject_vote_bal_acc": 0.3874458874458874,
-  "window_bal_acc": 0.40285780630608214,
-  "window_macro_f1": 0.39882554793164177,
-  "window_acc": 0.5817966903073286,
-  "n_classes_predicted": 3.0
- },
- "primary_metric": "subject_macro_f1",
- "eval_split": "val",
- "run": "bench_pd_pads__g5_k5_f1__probe__s42",
- "checkpoint": "best.pt",
- "checkpoint_step": 5600,
- "selection": {
-  "split": "val",
-  "monitor": "bal_acc",
-  "mode": "max",
-  "note": "window-level val balanced accuracy"
- },
- "job_ids": {
-  "train": 6577103,
-  "score": "6577103"
- },
- "provenance": {
-  "source": "scorer:bench.score.pd",
-  "date": "2026-09-18T04:01:51-05:00",
-  "git": "unknown",
-  "legacy_run": false,
-  "info": {
-   "n_windows": 16920,
-   "n_subjects": 94,
-   "subject_confusion_mean_prob": [
-    [
-     1,
-     13,
-     0
-    ],
-    [
-     0,
-     58,
-     0
-    ],
-    [
-     0,
-     20,
-     2
-    ]
-   ],
-   "train_end": "early stopping at step=9600 epoch=37"
-  }
- },
- "status": "ok",
- "notes": "",
- "schema_version": 1
+  "task": "pd_pads",
+  "encoder": "g5_k5_f1",
+  "protocol": "probe",
+  "seed": 42,
+  "metrics": {
+    "subject_bal_acc": 0.6386774145394836,
+    "subject_macro_f1": 0.5242545091996736,
+    "subject_acc": 0.5212765957446809,
+    "subject_vote_bal_acc": 0.6214360352291387,
+    "window_bal_acc": 0.4500165862234828,
+    "window_macro_f1": 0.38090805108145015,
+    "window_acc": 0.39278959810874703,
+    "n_classes_predicted": 3.0
+  },
+  "primary_metric": "subject_macro_f1",
+  "eval_split": "val",
+  "run": "bench_pd_pads__g5_k5_f1__probe__s42",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 400,
+  "selection": {
+    "split": "val",
+    "monitor": "bal_acc",
+    "mode": "max",
+    "note": "window-level val balanced accuracy"
+  },
+  "job_ids": {
+    "train": 7216993,
+    "score": "7216993"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.pd",
+    "date": "2026-09-24T13:53:44-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_windows": 16920,
+      "n_subjects": 94,
+      "subject_confusion_mean_prob": [
+        [
+          13,
+          1,
+          0
+        ],
+        [
+          26,
+          23,
+          9
+        ],
+        [
+          6,
+          3,
+          13
+        ]
+      ],
+      "train_end": "early stopping at step=4400 epoch=17"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
 }

@@ -1,0 +1,191 @@
+task,task_label,encoder,encoder_label,group,protocol,metric,metric_label,value,higher_is_better,status,result_file
+arm_pose_nymeria,Arm pose,mae_5src,inrtlWrist (Ours),ssl,probe,pos_err_cm,pos. err. cm,8.137550950050354,0,ok,bench/results/arm_pose_nymeria/mae_5src__probe__s42.json
+full_body_pose_nymeria,Full-body pose,mae_5src,inrtlWrist (Ours),ssl,probe,mpjpe_mm,MPJPE mm,97.85016,0,ok,bench/results/full_body_pose_nymeria/mae_5src__probe__s42.json
+odometry_nymeria_local,Odometry (wrist frame),mae_5src,inrtlWrist (Ours),ssl,probe,ate_m,ATE m,0.1998629427138598,0,ok,bench/results/odometry_nymeria_local/mae_5src__probe__s42.json
+microgesture_openwatch,Microgesture,mae_5src,inrtlWrist (Ours),ssl,probe,clip_macro_f1,clip F1,0.6467218088133121,1,ok,bench/results/microgesture_openwatch/mae_5src__probe__s42.json
+language_humanml3d,IMU–text,mae_5src,inrtlWrist (Ours),ssl,probe,r1_g100,"R@1, G=100",27.923936596302084,1,ok,bench/results/language_humanml3d/mae_5src__probe__s42.json
+pd_pads,Parkinson's,mae_5src,inrtlWrist (Ours),ssl,probe,subject_macro_f1,subject F1,0.5521003818876159,1,ok,bench/results/pd_pads/mae_5src__probe__s42.json
+har_hhar,HHAR,mae_5src,inrtlWrist (Ours),ssl,probe,macro_f1,macro-F1,0.6206766747245619,1,ok,bench/results/har_hhar/mae_5src__probe__s42.json
+har_mhealth,MHEALTH,mae_5src,inrtlWrist (Ours),ssl,probe,macro_f1,macro-F1,0.6859750749194534,1,ok,bench/results/har_mhealth/mae_5src__probe__s42.json
+har_prism,PRISM,mae_5src,inrtlWrist (Ours),ssl,probe,macro_f1,macro-F1,0.2790037680191397,1,ok,bench/results/har_prism/mae_5src__probe__s42.json
+har_userwatch,TransfHAR,mae_5src,inrtlWrist (Ours),ssl,probe,macro_f1,macro-F1,0.7271238069888954,1,ok,bench/results/har_userwatch/mae_5src__probe__s42.json
+arm_pose_nymeria,Arm pose,mae_5src,inrtlWrist (Ours),ssl,finetune,pos_err_cm,pos. err. cm,8.012033253908157,0,ok,bench/results/arm_pose_nymeria/mae_5src__finetune__s42.json
+full_body_pose_nymeria,Full-body pose,mae_5src,inrtlWrist (Ours),ssl,finetune,mpjpe_mm,MPJPE mm,88.110126,0,ok,bench/results/full_body_pose_nymeria/mae_5src__finetune__s42.json
+odometry_nymeria_local,Odometry (wrist frame),mae_5src,inrtlWrist (Ours),ssl,finetune,ate_m,ATE m,0.15410215779289813,0,ok,bench/results/odometry_nymeria_local/mae_5src__finetune__s42.json
+microgesture_openwatch,Microgesture,mae_5src,inrtlWrist (Ours),ssl,finetune,clip_macro_f1,clip F1,0.5419450067476383,1,ok,bench/results/microgesture_openwatch/mae_5src__finetune__s42.json
+language_humanml3d,IMU–text,mae_5src,inrtlWrist (Ours),ssl,finetune,r1_g100,"R@1, G=100",38.821375636052196,1,ok,bench/results/language_humanml3d/mae_5src__finetune__s42.json
+pd_pads,Parkinson's,mae_5src,inrtlWrist (Ours),ssl,finetune,subject_macro_f1,subject F1,0.5185250091274187,1,ok,bench/results/pd_pads/mae_5src__finetune__s42.json
+har_hhar,HHAR,mae_5src,inrtlWrist (Ours),ssl,finetune,macro_f1,macro-F1,0.6026970145906821,1,ok,bench/results/har_hhar/mae_5src__finetune__s42.json
+har_mhealth,MHEALTH,mae_5src,inrtlWrist (Ours),ssl,finetune,macro_f1,macro-F1,0.7236298848642327,1,ok,bench/results/har_mhealth/mae_5src__finetune__s42.json
+har_prism,PRISM,mae_5src,inrtlWrist (Ours),ssl,finetune,macro_f1,macro-F1,0.3684501687913263,1,ok,bench/results/har_prism/mae_5src__finetune__s42.json
+har_userwatch,TransfHAR,mae_5src,inrtlWrist (Ours),ssl,finetune,macro_f1,macro-F1,0.8610479870080552,1,ok,bench/results/har_userwatch/mae_5src__finetune__s42.json
+arm_pose_nymeria,Arm pose,limubert_5src,LIMU-BERT,ssl,probe,pos_err_cm,pos. err. cm,8.139204233884811,0,ok,bench/results/arm_pose_nymeria/limubert_5src__probe__s42.json
+full_body_pose_nymeria,Full-body pose,limubert_5src,LIMU-BERT,ssl,probe,mpjpe_mm,MPJPE mm,98.545129,0,ok,bench/results/full_body_pose_nymeria/limubert_5src__probe__s42.json
+odometry_nymeria_local,Odometry (wrist frame),limubert_5src,LIMU-BERT,ssl,probe,ate_m,ATE m,0.207840867590574,0,ok,bench/results/odometry_nymeria_local/limubert_5src__probe__s42.json
+microgesture_openwatch,Microgesture,limubert_5src,LIMU-BERT,ssl,probe,clip_macro_f1,clip F1,0.6165824915824916,1,ok,bench/results/microgesture_openwatch/limubert_5src__probe__s42.json
+language_humanml3d,IMU–text,limubert_5src,LIMU-BERT,ssl,probe,r1_g100,"R@1, G=100",24.909930349135976,1,ok,bench/results/language_humanml3d/limubert_5src__probe__s42.json
+pd_pads,Parkinson's,limubert_5src,LIMU-BERT,ssl,probe,subject_macro_f1,subject F1,0.5045595894461721,1,ok,bench/results/pd_pads/limubert_5src__probe__s42.json
+har_hhar,HHAR,limubert_5src,LIMU-BERT,ssl,probe,macro_f1,macro-F1,0.6120173326293354,1,ok,bench/results/har_hhar/limubert_5src__probe__s42.json
+har_mhealth,MHEALTH,limubert_5src,LIMU-BERT,ssl,probe,macro_f1,macro-F1,0.6760070160743559,1,ok,bench/results/har_mhealth/limubert_5src__probe__s42.json
+har_prism,PRISM,limubert_5src,LIMU-BERT,ssl,probe,macro_f1,macro-F1,0.250563823034932,1,ok,bench/results/har_prism/limubert_5src__probe__s42.json
+har_userwatch,TransfHAR,limubert_5src,LIMU-BERT,ssl,probe,macro_f1,macro-F1,0.7105917910311624,1,ok,bench/results/har_userwatch/limubert_5src__probe__s42.json
+arm_pose_nymeria,Arm pose,limubert_5src,LIMU-BERT,ssl,finetune,pos_err_cm,pos. err. cm,8.175131678581238,0,ok,bench/results/arm_pose_nymeria/limubert_5src__finetune__s42.json
+full_body_pose_nymeria,Full-body pose,limubert_5src,LIMU-BERT,ssl,finetune,mpjpe_mm,MPJPE mm,89.742643,0,ok,bench/results/full_body_pose_nymeria/limubert_5src__finetune__s42.json
+odometry_nymeria_local,Odometry (wrist frame),limubert_5src,LIMU-BERT,ssl,finetune,ate_m,ATE m,0.15763617780283093,0,ok,bench/results/odometry_nymeria_local/limubert_5src__finetune__s42.json
+microgesture_openwatch,Microgesture,limubert_5src,LIMU-BERT,ssl,finetune,clip_macro_f1,clip F1,0.5727866904337492,1,ok,bench/results/microgesture_openwatch/limubert_5src__finetune__s42.json
+language_humanml3d,IMU–text,limubert_5src,LIMU-BERT,ssl,finetune,r1_g100,"R@1, G=100",36.585868809511815,1,ok,bench/results/language_humanml3d/limubert_5src__finetune__s42.json
+pd_pads,Parkinson's,limubert_5src,LIMU-BERT,ssl,finetune,subject_macro_f1,subject F1,0.45961726746773474,1,ok,bench/results/pd_pads/limubert_5src__finetune__s42.json
+har_hhar,HHAR,limubert_5src,LIMU-BERT,ssl,finetune,macro_f1,macro-F1,0.5633099444981653,1,ok,bench/results/har_hhar/limubert_5src__finetune__s42.json
+har_mhealth,MHEALTH,limubert_5src,LIMU-BERT,ssl,finetune,macro_f1,macro-F1,0.6286592553876077,1,ok,bench/results/har_mhealth/limubert_5src__finetune__s42.json
+har_prism,PRISM,limubert_5src,LIMU-BERT,ssl,finetune,macro_f1,macro-F1,0.29456286898969986,1,ok,bench/results/har_prism/limubert_5src__finetune__s42.json
+har_userwatch,TransfHAR,limubert_5src,LIMU-BERT,ssl,finetune,macro_f1,macro-F1,0.7582682812721131,1,ok,bench/results/har_userwatch/limubert_5src__finetune__s42.json
+arm_pose_nymeria,Arm pose,simmtm_5src,SimMTM,ssl,probe,pos_err_cm,pos. err. cm,8.465863019227982,0,ok,bench/results/arm_pose_nymeria/simmtm_5src__probe__s42.json
+full_body_pose_nymeria,Full-body pose,simmtm_5src,SimMTM,ssl,probe,mpjpe_mm,MPJPE mm,103.645474,0,ok,bench/results/full_body_pose_nymeria/simmtm_5src__probe__s42.json
+odometry_nymeria_local,Odometry (wrist frame),simmtm_5src,SimMTM,ssl,probe,ate_m,ATE m,0.22396585247435583,0,ok,bench/results/odometry_nymeria_local/simmtm_5src__probe__s42.json
+microgesture_openwatch,Microgesture,simmtm_5src,SimMTM,ssl,probe,clip_macro_f1,clip F1,0.5585422203069262,1,ok,bench/results/microgesture_openwatch/simmtm_5src__probe__s42.json
+language_humanml3d,IMU–text,simmtm_5src,SimMTM,ssl,probe,r1_g100,"R@1, G=100",17.18668774245554,1,ok,bench/results/language_humanml3d/simmtm_5src__probe__s42.json
+pd_pads,Parkinson's,simmtm_5src,SimMTM,ssl,probe,subject_macro_f1,subject F1,0.48680088214971934,1,ok,bench/results/pd_pads/simmtm_5src__probe__s42.json
+har_hhar,HHAR,simmtm_5src,SimMTM,ssl,probe,macro_f1,macro-F1,0.5754691034944489,1,ok,bench/results/har_hhar/simmtm_5src__probe__s42.json
+har_mhealth,MHEALTH,simmtm_5src,SimMTM,ssl,probe,macro_f1,macro-F1,0.6137127441749204,1,ok,bench/results/har_mhealth/simmtm_5src__probe__s42.json
+har_prism,PRISM,simmtm_5src,SimMTM,ssl,probe,macro_f1,macro-F1,0.26713729558667876,1,ok,bench/results/har_prism/simmtm_5src__probe__s42.json
+har_userwatch,TransfHAR,simmtm_5src,SimMTM,ssl,probe,macro_f1,macro-F1,0.6680857160434235,1,ok,bench/results/har_userwatch/simmtm_5src__probe__s42.json
+arm_pose_nymeria,Arm pose,simmtm_5src,SimMTM,ssl,finetune,pos_err_cm,pos. err. cm,8.440148085355759,0,ok,bench/results/arm_pose_nymeria/simmtm_5src__finetune__s42.json
+full_body_pose_nymeria,Full-body pose,simmtm_5src,SimMTM,ssl,finetune,mpjpe_mm,MPJPE mm,92.914468,0,ok,bench/results/full_body_pose_nymeria/simmtm_5src__finetune__s42.json
+odometry_nymeria_local,Odometry (wrist frame),simmtm_5src,SimMTM,ssl,finetune,ate_m,ATE m,0.1628884587735134,0,ok,bench/results/odometry_nymeria_local/simmtm_5src__finetune__s42.json
+microgesture_openwatch,Microgesture,simmtm_5src,SimMTM,ssl,finetune,clip_macro_f1,clip F1,0.618838045859207,1,ok,bench/results/microgesture_openwatch/simmtm_5src__finetune__s42.json
+language_humanml3d,IMU–text,simmtm_5src,SimMTM,ssl,finetune,r1_g100,"R@1, G=100",32.37359136480427,1,ok,bench/results/language_humanml3d/simmtm_5src__finetune__s42.json
+pd_pads,Parkinson's,simmtm_5src,SimMTM,ssl,finetune,subject_macro_f1,subject F1,0.46805692626761064,1,ok,bench/results/pd_pads/simmtm_5src__finetune__s42.json
+har_hhar,HHAR,simmtm_5src,SimMTM,ssl,finetune,macro_f1,macro-F1,0.4698562551551742,1,ok,bench/results/har_hhar/simmtm_5src__finetune__s42.json
+har_mhealth,MHEALTH,simmtm_5src,SimMTM,ssl,finetune,macro_f1,macro-F1,0.56809607684745,1,ok,bench/results/har_mhealth/simmtm_5src__finetune__s42.json
+har_prism,PRISM,simmtm_5src,SimMTM,ssl,finetune,macro_f1,macro-F1,0.30781056964885767,1,ok,bench/results/har_prism/simmtm_5src__finetune__s42.json
+har_userwatch,TransfHAR,simmtm_5src,SimMTM,ssl,finetune,macro_f1,macro-F1,0.7365207475954829,1,ok,bench/results/har_userwatch/simmtm_5src__finetune__s42.json
+arm_pose_nymeria,Arm pose,focal_5src,FOCAL,ssl,probe,pos_err_cm,pos. err. cm,8.708436042070389,0,ok,bench/results/arm_pose_nymeria/focal_5src__probe__s42.json
+full_body_pose_nymeria,Full-body pose,focal_5src,FOCAL,ssl,probe,mpjpe_mm,MPJPE mm,108.413672,0,ok,bench/results/full_body_pose_nymeria/focal_5src__probe__s42.json
+odometry_nymeria_local,Odometry (wrist frame),focal_5src,FOCAL,ssl,probe,ate_m,ATE m,0.2403601483533262,0,ok,bench/results/odometry_nymeria_local/focal_5src__probe__s42.json
+microgesture_openwatch,Microgesture,focal_5src,FOCAL,ssl,probe,clip_macro_f1,clip F1,0.4805163056192392,1,ok,bench/results/microgesture_openwatch/focal_5src__probe__s42.json
+language_humanml3d,IMU–text,focal_5src,FOCAL,ssl,probe,r1_g100,"R@1, G=100",8.565239558667944,1,ok,bench/results/language_humanml3d/focal_5src__probe__s42.json
+pd_pads,Parkinson's,focal_5src,FOCAL,ssl,probe,subject_macro_f1,subject F1,0.4065037944348289,1,ok,bench/results/pd_pads/focal_5src__probe__s42.json
+har_hhar,HHAR,focal_5src,FOCAL,ssl,probe,macro_f1,macro-F1,0.449448095778419,1,ok,bench/results/har_hhar/focal_5src__probe__s42.json
+har_mhealth,MHEALTH,focal_5src,FOCAL,ssl,probe,macro_f1,macro-F1,0.6298459814077716,1,ok,bench/results/har_mhealth/focal_5src__probe__s42.json
+har_prism,PRISM,focal_5src,FOCAL,ssl,probe,macro_f1,macro-F1,0.2192555943176763,1,ok,bench/results/har_prism/focal_5src__probe__s42.json
+har_userwatch,TransfHAR,focal_5src,FOCAL,ssl,probe,macro_f1,macro-F1,0.46988230116724805,1,ok,bench/results/har_userwatch/focal_5src__probe__s42.json
+arm_pose_nymeria,Arm pose,focal_5src,FOCAL,ssl,finetune,pos_err_cm,pos. err. cm,8.656147122383118,0,ok,bench/results/arm_pose_nymeria/focal_5src__finetune__s42.json
+full_body_pose_nymeria,Full-body pose,focal_5src,FOCAL,ssl,finetune,mpjpe_mm,MPJPE mm,95.916763,0,ok,bench/results/full_body_pose_nymeria/focal_5src__finetune__s42.json
+odometry_nymeria_local,Odometry (wrist frame),focal_5src,FOCAL,ssl,finetune,ate_m,ATE m,0.17670928892209659,0,ok,bench/results/odometry_nymeria_local/focal_5src__finetune__s42.json
+microgesture_openwatch,Microgesture,focal_5src,FOCAL,ssl,finetune,clip_macro_f1,clip F1,0.39252995066948565,1,ok,bench/results/microgesture_openwatch/focal_5src__finetune__s42.json
+language_humanml3d,IMU–text,focal_5src,FOCAL,ssl,finetune,r1_g100,"R@1, G=100",22.365535165499523,1,ok,bench/results/language_humanml3d/focal_5src__finetune__s42.json
+pd_pads,Parkinson's,focal_5src,FOCAL,ssl,finetune,subject_macro_f1,subject F1,0.46309523809523806,1,ok,bench/results/pd_pads/focal_5src__finetune__s42.json
+har_hhar,HHAR,focal_5src,FOCAL,ssl,finetune,macro_f1,macro-F1,0.612704633715298,1,ok,bench/results/har_hhar/focal_5src__finetune__s42.json
+har_mhealth,MHEALTH,focal_5src,FOCAL,ssl,finetune,macro_f1,macro-F1,0.6593984789302519,1,ok,bench/results/har_mhealth/focal_5src__finetune__s42.json
+har_prism,PRISM,focal_5src,FOCAL,ssl,finetune,macro_f1,macro-F1,0.28771748890571247,1,ok,bench/results/har_prism/focal_5src__finetune__s42.json
+har_userwatch,TransfHAR,focal_5src,FOCAL,ssl,finetune,macro_f1,macro-F1,0.6832919917006607,1,ok,bench/results/har_userwatch/focal_5src__finetune__s42.json
+arm_pose_nymeria,Arm pose,relcon_5src,RelCon,ssl,probe,pos_err_cm,pos. err. cm,8.504417538642883,0,ok,bench/results/arm_pose_nymeria/relcon_5src__probe__s42.json
+full_body_pose_nymeria,Full-body pose,relcon_5src,RelCon,ssl,probe,mpjpe_mm,MPJPE mm,104.291822,0,ok,bench/results/full_body_pose_nymeria/relcon_5src__probe__s42.json
+odometry_nymeria_local,Odometry (wrist frame),relcon_5src,RelCon,ssl,probe,ate_m,ATE m,0.21528262074777194,0,ok,bench/results/odometry_nymeria_local/relcon_5src__probe__s42.json
+microgesture_openwatch,Microgesture,relcon_5src,RelCon,ssl,probe,clip_macro_f1,clip F1,0.3850710055189124,1,ok,bench/results/microgesture_openwatch/relcon_5src__probe__s42.json
+language_humanml3d,IMU–text,relcon_5src,RelCon,ssl,probe,r1_g100,"R@1, G=100",13.151747695097988,1,ok,bench/results/language_humanml3d/relcon_5src__probe__s42.json
+pd_pads,Parkinson's,relcon_5src,RelCon,ssl,probe,subject_macro_f1,subject F1,0.4053872053872054,1,ok,bench/results/pd_pads/relcon_5src__probe__s42.json
+har_hhar,HHAR,relcon_5src,RelCon,ssl,probe,macro_f1,macro-F1,0.333098308416739,1,ok,bench/results/har_hhar/relcon_5src__probe__s42.json
+har_mhealth,MHEALTH,relcon_5src,RelCon,ssl,probe,macro_f1,macro-F1,0.3835878745244416,1,ok,bench/results/har_mhealth/relcon_5src__probe__s42.json
+har_prism,PRISM,relcon_5src,RelCon,ssl,probe,macro_f1,macro-F1,0.18326851373606007,1,ok,bench/results/har_prism/relcon_5src__probe__s42.json
+har_userwatch,TransfHAR,relcon_5src,RelCon,ssl,probe,macro_f1,macro-F1,0.5163929495678877,1,ok,bench/results/har_userwatch/relcon_5src__probe__s42.json
+arm_pose_nymeria,Arm pose,relcon_5src,RelCon,ssl,finetune,pos_err_cm,pos. err. cm,8.553347736597061,0,ok,bench/results/arm_pose_nymeria/relcon_5src__finetune__s42.json
+full_body_pose_nymeria,Full-body pose,relcon_5src,RelCon,ssl,finetune,mpjpe_mm,MPJPE mm,92.147361,0,ok,bench/results/full_body_pose_nymeria/relcon_5src__finetune__s42.json
+odometry_nymeria_local,Odometry (wrist frame),relcon_5src,RelCon,ssl,finetune,ate_m,ATE m,0.167245759201532,0,ok,bench/results/odometry_nymeria_local/relcon_5src__finetune__s42.json
+microgesture_openwatch,Microgesture,relcon_5src,RelCon,ssl,finetune,clip_macro_f1,clip F1,0.42722832722832726,1,ok,bench/results/microgesture_openwatch/relcon_5src__finetune__s42.json
+language_humanml3d,IMU–text,relcon_5src,RelCon,ssl,finetune,r1_g100,"R@1, G=100",30.00377777217996,1,ok,bench/results/language_humanml3d/relcon_5src__finetune__s42.json
+pd_pads,Parkinson's,relcon_5src,RelCon,ssl,finetune,subject_macro_f1,subject F1,0.4914816513177169,1,ok,bench/results/pd_pads/relcon_5src__finetune__s42.json
+har_hhar,HHAR,relcon_5src,RelCon,ssl,finetune,macro_f1,macro-F1,0.4291068827131796,1,ok,bench/results/har_hhar/relcon_5src__finetune__s42.json
+har_mhealth,MHEALTH,relcon_5src,RelCon,ssl,finetune,macro_f1,macro-F1,0.6034168198160796,1,ok,bench/results/har_mhealth/relcon_5src__finetune__s42.json
+har_prism,PRISM,relcon_5src,RelCon,ssl,finetune,macro_f1,macro-F1,0.28919325601987994,1,ok,bench/results/har_prism/relcon_5src__finetune__s42.json
+har_userwatch,TransfHAR,relcon_5src,RelCon,ssl,finetune,macro_f1,macro-F1,0.7896940952609042,1,ok,bench/results/har_userwatch/relcon_5src__finetune__s42.json
+arm_pose_nymeria,Arm pose,sslwear_5src,SSL-Wearables,ssl,probe,pos_err_cm,pos. err. cm,8.423518389463425,0,ok,bench/results/arm_pose_nymeria/sslwear_5src__probe__s42.json
+full_body_pose_nymeria,Full-body pose,sslwear_5src,SSL-Wearables,ssl,probe,mpjpe_mm,MPJPE mm,101.666022,0,ok,bench/results/full_body_pose_nymeria/sslwear_5src__probe__s42.json
+odometry_nymeria_local,Odometry (wrist frame),sslwear_5src,SSL-Wearables,ssl,probe,ate_m,ATE m,0.22046790745812805,0,ok,bench/results/odometry_nymeria_local/sslwear_5src__probe__s42.json
+microgesture_openwatch,Microgesture,sslwear_5src,SSL-Wearables,ssl,probe,clip_macro_f1,clip F1,0.5468391012784606,1,ok,bench/results/microgesture_openwatch/sslwear_5src__probe__s42.json
+language_humanml3d,IMU–text,sslwear_5src,SSL-Wearables,ssl,probe,r1_g100,"R@1, G=100",24.800471434329186,1,ok,bench/results/language_humanml3d/sslwear_5src__probe__s42.json
+pd_pads,Parkinson's,sslwear_5src,SSL-Wearables,ssl,probe,subject_macro_f1,subject F1,0.5744699744699745,1,ok,bench/results/pd_pads/sslwear_5src__probe__s42.json
+har_hhar,HHAR,sslwear_5src,SSL-Wearables,ssl,probe,macro_f1,macro-F1,0.5918854111494102,1,ok,bench/results/har_hhar/sslwear_5src__probe__s42.json
+har_mhealth,MHEALTH,sslwear_5src,SSL-Wearables,ssl,probe,macro_f1,macro-F1,0.6632913551485989,1,ok,bench/results/har_mhealth/sslwear_5src__probe__s42.json
+har_prism,PRISM,sslwear_5src,SSL-Wearables,ssl,probe,macro_f1,macro-F1,0.27567264826815296,1,ok,bench/results/har_prism/sslwear_5src__probe__s42.json
+har_userwatch,TransfHAR,sslwear_5src,SSL-Wearables,ssl,probe,macro_f1,macro-F1,0.6738163328067254,1,ok,bench/results/har_userwatch/sslwear_5src__probe__s42.json
+arm_pose_nymeria,Arm pose,sslwear_5src,SSL-Wearables,ssl,finetune,pos_err_cm,pos. err. cm,8.571162819862366,0,ok,bench/results/arm_pose_nymeria/sslwear_5src__finetune__s42.json
+full_body_pose_nymeria,Full-body pose,sslwear_5src,SSL-Wearables,ssl,finetune,mpjpe_mm,MPJPE mm,90.61382,0,ok,bench/results/full_body_pose_nymeria/sslwear_5src__finetune__s42.json
+odometry_nymeria_local,Odometry (wrist frame),sslwear_5src,SSL-Wearables,ssl,finetune,ate_m,ATE m,0.16562608646223723,0,ok,bench/results/odometry_nymeria_local/sslwear_5src__finetune__s42.json
+microgesture_openwatch,Microgesture,sslwear_5src,SSL-Wearables,ssl,finetune,clip_macro_f1,clip F1,0.5826885988840077,1,ok,bench/results/microgesture_openwatch/sslwear_5src__finetune__s42.json
+language_humanml3d,IMU–text,sslwear_5src,SSL-Wearables,ssl,finetune,r1_g100,"R@1, G=100",34.51883193107965,1,ok,bench/results/language_humanml3d/sslwear_5src__finetune__s42.json
+pd_pads,Parkinson's,sslwear_5src,SSL-Wearables,ssl,finetune,subject_macro_f1,subject F1,0.4874140637687436,1,ok,bench/results/pd_pads/sslwear_5src__finetune__s42.json
+har_hhar,HHAR,sslwear_5src,SSL-Wearables,ssl,finetune,macro_f1,macro-F1,0.5345405728813457,1,ok,bench/results/har_hhar/sslwear_5src__finetune__s42.json
+har_mhealth,MHEALTH,sslwear_5src,SSL-Wearables,ssl,finetune,macro_f1,macro-F1,0.6478655983445454,1,ok,bench/results/har_mhealth/sslwear_5src__finetune__s42.json
+har_prism,PRISM,sslwear_5src,SSL-Wearables,ssl,finetune,macro_f1,macro-F1,0.32773549393045653,1,ok,bench/results/har_prism/sslwear_5src__finetune__s42.json
+har_userwatch,TransfHAR,sslwear_5src,SSL-Wearables,ssl,finetune,macro_f1,macro-F1,0.7588796629659776,1,ok,bench/results/har_userwatch/sslwear_5src__finetune__s42.json
+arm_pose_nymeria,Arm pose,mae_5src_noaltattn,"inrtlWrist, plain attention",ablation,probe,pos_err_cm,pos. err. cm,8.363016694784164,0,ok,bench/results/arm_pose_nymeria/mae_5src_noaltattn__probe__s42.json
+full_body_pose_nymeria,Full-body pose,mae_5src_noaltattn,"inrtlWrist, plain attention",ablation,probe,mpjpe_mm,MPJPE mm,99.963851,0,ok,bench/results/full_body_pose_nymeria/mae_5src_noaltattn__probe__s42.json
+odometry_nymeria_local,Odometry (wrist frame),mae_5src_noaltattn,"inrtlWrist, plain attention",ablation,probe,ate_m,ATE m,0.21040970112973734,0,ok,bench/results/odometry_nymeria_local/mae_5src_noaltattn__probe__s42.json
+microgesture_openwatch,Microgesture,mae_5src_noaltattn,"inrtlWrist, plain attention",ablation,probe,clip_macro_f1,clip F1,0.639049390070768,1,ok,bench/results/microgesture_openwatch/mae_5src_noaltattn__probe__s42.json
+language_humanml3d,IMU–text,mae_5src_noaltattn,"inrtlWrist, plain attention",ablation,probe,r1_g100,"R@1, G=100",26.343021814700993,1,ok,bench/results/language_humanml3d/mae_5src_noaltattn__probe__s42.json
+pd_pads,Parkinson's,mae_5src_noaltattn,"inrtlWrist, plain attention",ablation,probe,subject_macro_f1,subject F1,0.4810547875064004,1,ok,bench/results/pd_pads/mae_5src_noaltattn__probe__s42.json
+har_hhar,HHAR,mae_5src_noaltattn,"inrtlWrist, plain attention",ablation,probe,macro_f1,macro-F1,0.6018452840350537,1,ok,bench/results/har_hhar/mae_5src_noaltattn__probe__s42.json
+har_mhealth,MHEALTH,mae_5src_noaltattn,"inrtlWrist, plain attention",ablation,probe,macro_f1,macro-F1,0.6806410867737379,1,ok,bench/results/har_mhealth/mae_5src_noaltattn__probe__s42.json
+har_prism,PRISM,mae_5src_noaltattn,"inrtlWrist, plain attention",ablation,probe,macro_f1,macro-F1,0.2645189635705403,1,ok,bench/results/har_prism/mae_5src_noaltattn__probe__s42.json
+har_userwatch,TransfHAR,mae_5src_noaltattn,"inrtlWrist, plain attention",ablation,probe,macro_f1,macro-F1,0.7302040754268603,1,ok,bench/results/har_userwatch/mae_5src_noaltattn__probe__s42.json
+arm_pose_nymeria,Arm pose,mae_5src_noaltattn,"inrtlWrist, plain attention",ablation,finetune,pos_err_cm,pos. err. cm,8.193564414978027,0,ok,bench/results/arm_pose_nymeria/mae_5src_noaltattn__finetune__s42.json
+full_body_pose_nymeria,Full-body pose,mae_5src_noaltattn,"inrtlWrist, plain attention",ablation,finetune,mpjpe_mm,MPJPE mm,88.382216,0,ok,bench/results/full_body_pose_nymeria/mae_5src_noaltattn__finetune__s42.json
+odometry_nymeria_local,Odometry (wrist frame),mae_5src_noaltattn,"inrtlWrist, plain attention",ablation,finetune,ate_m,ATE m,0.15685019528354383,0,ok,bench/results/odometry_nymeria_local/mae_5src_noaltattn__finetune__s42.json
+microgesture_openwatch,Microgesture,mae_5src_noaltattn,"inrtlWrist, plain attention",ablation,finetune,clip_macro_f1,clip F1,0.7031746031746032,1,ok,bench/results/microgesture_openwatch/mae_5src_noaltattn__finetune__s42.json
+language_humanml3d,IMU–text,mae_5src_noaltattn,"inrtlWrist, plain attention",ablation,finetune,r1_g100,"R@1, G=100",37.01952894352361,1,ok,bench/results/language_humanml3d/mae_5src_noaltattn__finetune__s42.json
+pd_pads,Parkinson's,mae_5src_noaltattn,"inrtlWrist, plain attention",ablation,finetune,subject_macro_f1,subject F1,0.6103703703703703,1,ok,bench/results/pd_pads/mae_5src_noaltattn__finetune__s42.json
+har_hhar,HHAR,mae_5src_noaltattn,"inrtlWrist, plain attention",ablation,finetune,macro_f1,macro-F1,0.5263603316162049,1,ok,bench/results/har_hhar/mae_5src_noaltattn__finetune__s42.json
+har_mhealth,MHEALTH,mae_5src_noaltattn,"inrtlWrist, plain attention",ablation,finetune,macro_f1,macro-F1,0.6862593204058584,1,ok,bench/results/har_mhealth/mae_5src_noaltattn__finetune__s42.json
+har_prism,PRISM,mae_5src_noaltattn,"inrtlWrist, plain attention",ablation,finetune,macro_f1,macro-F1,0.36164409423180144,1,ok,bench/results/har_prism/mae_5src_noaltattn__finetune__s42.json
+har_userwatch,TransfHAR,mae_5src_noaltattn,"inrtlWrist, plain attention",ablation,finetune,macro_f1,macro-F1,0.7857333209986403,1,ok,bench/results/har_userwatch/mae_5src_noaltattn__finetune__s42.json
+arm_pose_nymeria,Arm pose,mae_5src_acconly,"inrtlWrist, accelerometer only",ablation,probe,pos_err_cm,pos. err. cm,8.758489042520523,0,ok,bench/results/arm_pose_nymeria/mae_5src_acconly__probe__s42.json
+full_body_pose_nymeria,Full-body pose,mae_5src_acconly,"inrtlWrist, accelerometer only",ablation,probe,mpjpe_mm,MPJPE mm,102.787634,0,ok,bench/results/full_body_pose_nymeria/mae_5src_acconly__probe__s42.json
+odometry_nymeria_local,Odometry (wrist frame),mae_5src_acconly,"inrtlWrist, accelerometer only",ablation,probe,ate_m,ATE m,0.2296265066070148,0,ok,bench/results/odometry_nymeria_local/mae_5src_acconly__probe__s42.json
+microgesture_openwatch,Microgesture,mae_5src_acconly,"inrtlWrist, accelerometer only",ablation,probe,clip_macro_f1,clip F1,0.6224069337880079,1,ok,bench/results/microgesture_openwatch/mae_5src_acconly__probe__s42.json
+language_humanml3d,IMU–text,mae_5src_acconly,"inrtlWrist, accelerometer only",ablation,probe,r1_g100,"R@1, G=100",20.67672099350093,1,ok,bench/results/language_humanml3d/mae_5src_acconly__probe__s42.json
+pd_pads,Parkinson's,mae_5src_acconly,"inrtlWrist, accelerometer only",ablation,probe,subject_macro_f1,subject F1,0.48186506414354513,1,ok,bench/results/pd_pads/mae_5src_acconly__probe__s42.json
+har_hhar,HHAR,mae_5src_acconly,"inrtlWrist, accelerometer only",ablation,probe,macro_f1,macro-F1,0.5777468620096887,1,ok,bench/results/har_hhar/mae_5src_acconly__probe__s42.json
+har_mhealth,MHEALTH,mae_5src_acconly,"inrtlWrist, accelerometer only",ablation,probe,macro_f1,macro-F1,0.6849604810004192,1,ok,bench/results/har_mhealth/mae_5src_acconly__probe__s42.json
+har_prism,PRISM,mae_5src_acconly,"inrtlWrist, accelerometer only",ablation,probe,macro_f1,macro-F1,0.27965877512144066,1,ok,bench/results/har_prism/mae_5src_acconly__probe__s42.json
+har_userwatch,TransfHAR,mae_5src_acconly,"inrtlWrist, accelerometer only",ablation,probe,macro_f1,macro-F1,0.6948651714904642,1,ok,bench/results/har_userwatch/mae_5src_acconly__probe__s42.json
+arm_pose_nymeria,Arm pose,mae_5src_acconly,"inrtlWrist, accelerometer only",ablation,finetune,pos_err_cm,pos. err. cm,8.88017788529396,0,ok,bench/results/arm_pose_nymeria/mae_5src_acconly__finetune__s42.json
+full_body_pose_nymeria,Full-body pose,mae_5src_acconly,"inrtlWrist, accelerometer only",ablation,finetune,mpjpe_mm,MPJPE mm,94.423523,0,ok,bench/results/full_body_pose_nymeria/mae_5src_acconly__finetune__s42.json
+odometry_nymeria_local,Odometry (wrist frame),mae_5src_acconly,"inrtlWrist, accelerometer only",ablation,finetune,ate_m,ATE m,0.18979155489025815,0,ok,bench/results/odometry_nymeria_local/mae_5src_acconly__finetune__s42.json
+microgesture_openwatch,Microgesture,mae_5src_acconly,"inrtlWrist, accelerometer only",ablation,finetune,clip_macro_f1,clip F1,0.6063080194659143,1,ok,bench/results/microgesture_openwatch/mae_5src_acconly__finetune__s42.json
+language_humanml3d,IMU–text,mae_5src_acconly,"inrtlWrist, accelerometer only",ablation,finetune,r1_g100,"R@1, G=100",31.51318152047962,1,ok,bench/results/language_humanml3d/mae_5src_acconly__finetune__s42.json
+pd_pads,Parkinson's,mae_5src_acconly,"inrtlWrist, accelerometer only",ablation,finetune,subject_macro_f1,subject F1,0.5988727858293076,1,ok,bench/results/pd_pads/mae_5src_acconly__finetune__s42.json
+har_hhar,HHAR,mae_5src_acconly,"inrtlWrist, accelerometer only",ablation,finetune,macro_f1,macro-F1,0.5679461542324876,1,ok,bench/results/har_hhar/mae_5src_acconly__finetune__s42.json
+har_mhealth,MHEALTH,mae_5src_acconly,"inrtlWrist, accelerometer only",ablation,finetune,macro_f1,macro-F1,0.6827158275006312,1,ok,bench/results/har_mhealth/mae_5src_acconly__finetune__s42.json
+har_prism,PRISM,mae_5src_acconly,"inrtlWrist, accelerometer only",ablation,finetune,macro_f1,macro-F1,0.2975784655447593,1,ok,bench/results/har_prism/mae_5src_acconly__finetune__s42.json
+har_userwatch,TransfHAR,mae_5src_acconly,"inrtlWrist, accelerometer only",ablation,finetune,macro_f1,macro-F1,0.7721156308385229,1,ok,bench/results/har_userwatch/mae_5src_acconly__finetune__s42.json
+arm_pose_nymeria,Arm pose,control_random,Random frozen encoder,control,probe,pos_err_cm,pos. err. cm,8.456384390592575,0,ok,bench/results/arm_pose_nymeria/control_random__probe__s42.json
+full_body_pose_nymeria,Full-body pose,control_random,Random frozen encoder,control,probe,mpjpe_mm,MPJPE mm,104.987779,0,ok,bench/results/full_body_pose_nymeria/control_random__probe__s42.json
+odometry_nymeria_local,Odometry (wrist frame),control_random,Random frozen encoder,control,probe,ate_m,ATE m,0.23341782659051732,0,ok,bench/results/odometry_nymeria_local/control_random__probe__s42.json
+microgesture_openwatch,Microgesture,control_random,Random frozen encoder,control,probe,clip_macro_f1,clip F1,0.3644942576449426,1,ok,bench/results/microgesture_openwatch/control_random__probe__s42.json
+language_humanml3d,IMU–text,control_random,Random frozen encoder,control,probe,r1_g100,"R@1, G=100",9.536809537004384,1,ok,bench/results/language_humanml3d/control_random__probe__s42.json
+pd_pads,Parkinson's,control_random,Random frozen encoder,control,probe,subject_macro_f1,subject F1,0.5174696820714519,1,ok,bench/results/pd_pads/control_random__probe__s42.json
+har_hhar,HHAR,control_random,Random frozen encoder,control,probe,macro_f1,macro-F1,0.32376438427956883,1,ok,bench/results/har_hhar/control_random__probe__s42.json
+har_mhealth,MHEALTH,control_random,Random frozen encoder,control,probe,macro_f1,macro-F1,0.4657505822873323,1,ok,bench/results/har_mhealth/control_random__probe__s42.json
+har_prism,PRISM,control_random,Random frozen encoder,control,probe,macro_f1,macro-F1,0.16064712007024706,1,ok,bench/results/har_prism/control_random__probe__s42.json
+har_userwatch,TransfHAR,control_random,Random frozen encoder,control,probe,macro_f1,macro-F1,0.09695242776419427,1,ok,bench/results/har_userwatch/control_random__probe__s42.json
+arm_pose_nymeria,Arm pose,control_raw,"Raw input, 0 layers",control,probe,pos_err_cm,pos. err. cm,8.509549498558044,0,ok,bench/results/arm_pose_nymeria/control_raw__probe__s42.json
+full_body_pose_nymeria,Full-body pose,control_raw,"Raw input, 0 layers",control,probe,mpjpe_mm,MPJPE mm,106.363257,0,ok,bench/results/full_body_pose_nymeria/control_raw__probe__s42.json
+odometry_nymeria_local,Odometry (wrist frame),control_raw,"Raw input, 0 layers",control,probe,ate_m,ATE m,0.2557545186063136,0,ok,bench/results/odometry_nymeria_local/control_raw__probe__s42.json
+microgesture_openwatch,Microgesture,control_raw,"Raw input, 0 layers",control,probe,clip_macro_f1,clip F1,0.11363636363636363,1,ok,bench/results/microgesture_openwatch/control_raw__probe__s42.json
+language_humanml3d,IMU–text,control_raw,"Raw input, 0 layers",control,probe,r1_g100,"R@1, G=100",0.5,1,ok,bench/results/language_humanml3d/control_raw__probe__s42.json
+pd_pads,Parkinson's,control_raw,"Raw input, 0 layers",control,probe,subject_macro_f1,subject F1,0.1264367816091954,1,ok,bench/results/pd_pads/control_raw__probe__s42.json
+har_hhar,HHAR,control_raw,"Raw input, 0 layers",control,probe,macro_f1,macro-F1,0.05316908822910086,1,ok,bench/results/har_hhar/control_raw__probe__s42.json
+har_mhealth,MHEALTH,control_raw,"Raw input, 0 layers",control,probe,macro_f1,macro-F1,0.014107038976148923,1,ok,bench/results/har_mhealth/control_raw__probe__s42.json
+har_prism,PRISM,control_raw,"Raw input, 0 layers",control,probe,macro_f1,macro-F1,0.15634059405940595,1,ok,bench/results/har_prism/control_raw__probe__s42.json
+har_userwatch,TransfHAR,control_raw,"Raw input, 0 layers",control,probe,macro_f1,macro-F1,0.0014523556500177118,1,ok,bench/results/har_userwatch/control_raw__probe__s42.json
+arm_pose_nymeria,Arm pose,scratch,Scratch,scratch,scratch,pos_err_cm,pos. err. cm,8.214804530143738,0,ok,bench/results/arm_pose_nymeria/scratch__scratch__s42.json
+full_body_pose_nymeria,Full-body pose,scratch,Scratch,scratch,scratch,mpjpe_mm,MPJPE mm,92.720507,0,ok,bench/results/full_body_pose_nymeria/scratch__scratch__s42.json
+odometry_nymeria_local,Odometry (wrist frame),scratch,Scratch,scratch,scratch,ate_m,ATE m,0.16176734735990456,0,ok,bench/results/odometry_nymeria_local/scratch__scratch__s42.json
+microgesture_openwatch,Microgesture,scratch,Scratch,scratch,scratch,clip_macro_f1,clip F1,0.6081037062982316,1,ok,bench/results/microgesture_openwatch/scratch__scratch__s42.json
+language_humanml3d,IMU–text,scratch,Scratch,scratch,scratch,r1_g100,"R@1, G=100",23.178559121366312,1,ok,bench/results/language_humanml3d/scratch__scratch__s42.json
+pd_pads,Parkinson's,scratch,Scratch,scratch,scratch,subject_macro_f1,subject F1,0.2989417989417989,1,ok,bench/results/pd_pads/scratch__scratch__s42.json
+har_hhar,HHAR,scratch,Scratch,scratch,scratch,macro_f1,macro-F1,0.48833564345494906,1,ok,bench/results/har_hhar/scratch__scratch__s42.json
+har_mhealth,MHEALTH,scratch,Scratch,scratch,scratch,macro_f1,macro-F1,0.6318941748103751,1,ok,bench/results/har_mhealth/scratch__scratch__s42.json
+har_prism,PRISM,scratch,Scratch,scratch,scratch,macro_f1,macro-F1,0.2780723555888085,1,ok,bench/results/har_prism/scratch__scratch__s42.json
+har_userwatch,TransfHAR,scratch,Scratch,scratch,scratch,macro_f1,macro-F1,0.7353730774068141,1,ok,bench/results/har_userwatch/scratch__scratch__s42.json

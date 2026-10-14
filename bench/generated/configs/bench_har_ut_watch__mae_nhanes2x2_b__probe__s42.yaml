@@ -19,12 +19,20 @@ objective:
   utd_mhad_probe:
     pretrained_run: mae_nhanes2x2_armB
     pretrained_ckpt: best
+    class_weighted_ce: true
 paths:
   dataset_path: /projects/b53017/vbc1591/IMULM_master_dataset_v2.parquet
   runs_root: /gpfs/home/vbc1591/IMU-SSL/runs
 preprocess:
   normalize:
     enabled: true
+    method: physical
+    acc_scale: 9.81
+    gyro_scale: 5.0
+    clip_acc: 8.0
+    clip_gyro: 8.0
+    n_acc: 3
+    acc_units: auto
 windowing:
   window_seconds: 2.56
 splits:
@@ -59,8 +67,8 @@ trainer:
   val_every_steps: 200
   early_stopping:
     enabled: true
+    monitor: bal_acc
     patience: 20
-    monitor: val_loss
   optim:
     name: adamw
     lr: 0.001

@@ -18,7 +18,7 @@ from typing import Any, Dict, Optional
 
 from bench.registry_io import REPO, load_encoders, load_tasks, run_name as bench_run_name
 from bench.schema import Result, save_result, stamp_provenance
-from bench.score.common import resolve_ckpt, run_dir_of, slurm_job_id_for_run
+from bench.score.common import resolve_ckpt, run_dir_of, slurm_job_id_for_run, units_context, units_enabled
 
 
 def _train_end_reason(run_dir: str) -> str:
@@ -59,7 +59,9 @@ def score_cell(task_id: str, encoder_id: str, protocol: str, seed: int = 42, run
         raise FileNotFoundError(f"no checkpoint ({prefer}) in {run_dir}/checkpoints")
 
     mod = importlib.import_module(task["scorer"])
-    metrics, info = mod.score(run_dir, ckpt_path, task)
+    # units_context: lets the scorer write its per-unit sidecar (bench/results/_units/, for bootstrap CIs)
+    with units_context(task_id, encoder_id, protocol, seed, run=run):
+        metrics, info = mod.score(run_dir, ckpt_path, task)
     info["train_end"] = _train_end_reason(run_dir)
 
     sel = dict(task.get("selection", {}))
@@ -85,6 +87,15 @@ def score_cell(task_id: str, encoder_id: str, protocol: str, seed: int = 42, run
     if legacy:
         r.notes = (r.notes + " " if r.notes else "") + "harvested from a pre-harness run with a recipe-equivalent config."
     save_result(r)
+    # Scorers whose sidecar needs an extra (slow) pass run it only AFTER the result JSON is safely
+    # on disk (full-body pose re-evaluates the val set; its JSON number is read from the train log).
+    hook = getattr(mod, "write_units_after_save", None)
+    if hook is not None and units_enabled():
+        try:
+            with units_context(task_id, encoder_id, protocol, seed, run=run):
+                hook(run_dir, ckpt_path, task, dict(r.metrics))
+        except Exception as e:     # never fail a scoring run over a sidecar
+            print(f"[units] WARNING: post-save sidecar pass failed for {task_id}/{r.cell_id}: {e!r}")
     return r
 
 

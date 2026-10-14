@@ -4,14 +4,14 @@
   "protocol": "scratch",
   "seed": 42,
   "metrics": {
-    "macro_f1": 0.5043315410921968,
-    "bal_acc": 0.5096627758005218,
-    "acc": 0.5009394964299135,
-    "val_loss": 1.241499
+    "macro_f1": 0.48833564345494906,
+    "bal_acc": 0.5031488457506937,
+    "acc": 0.49642991356632843,
+    "val_loss": 1.233214
   },
   "primary_metric": "macro_f1",
   "eval_split": "val",
-  "run": "vit1d_har_supervised_hhar_altattn_scratch",
+  "run": "bench_har_hhar__scratch__scratch__s42",
   "checkpoint": "best.pt",
   "checkpoint_step": 800,
   "selection": {
@@ -21,24 +21,24 @@
     "note": "same convention as Experiments_table \u00a73 (metrics read at the min-val-loss checkpoint)"
   },
   "job_ids": {
-    "train": null,
-    "score": "9725912"
+    "train": 6724711,
+    "score": "6724711"
   },
   "provenance": {
     "source": "scorer:bench.score.har",
-    "date": "2026-08-17T18:46:41-05:00",
+    "date": "2026-09-19T02:42:56-05:00",
     "git": "unknown",
-    "legacy_run": true,
+    "legacy_run": false,
     "info": {
       "n_val_samples": 2661,
       "n_classes_seen": 6,
       "n_classes_head": 6,
       "n_val_batches": 11,
-      "logged_macro_f1_at_ckpt": 0.503892,
-      "train_end": "unknown/incomplete"
+      "logged_macro_f1_at_ckpt": 0.488336,
+      "train_end": "early stopping at step=4800 epoch=118"
     }
   },
   "status": "ok",
-  "notes": "harvested from a pre-harness run with a recipe-equivalent config.",
+  "notes": "",
   "schema_version": 1
 }

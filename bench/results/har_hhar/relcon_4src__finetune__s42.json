@@ -1,0 +1,44 @@
+{
+  "task": "har_hhar",
+  "encoder": "relcon_4src",
+  "protocol": "finetune",
+  "seed": 42,
+  "metrics": {
+    "macro_f1": 0.6612580862678655,
+    "bal_acc": 0.6834697958516629,
+    "acc": 0.6497557309282225,
+    "val_loss": 1.63111
+  },
+  "primary_metric": "macro_f1",
+  "eval_split": "val",
+  "run": "bench_har_hhar__relcon_4src__finetune__s42",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 800,
+  "selection": {
+    "split": "val",
+    "monitor": "val_loss",
+    "mode": "min",
+    "note": "same convention as Experiments_table \u00a73 (metrics read at the min-val-loss checkpoint)"
+  },
+  "job_ids": {
+    "train": null,
+    "score": "5654123"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.har",
+    "date": "2026-09-07T14:05:17-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_val_samples": 2661,
+      "n_classes_seen": 6,
+      "n_classes_head": 6,
+      "n_val_batches": 11,
+      "logged_macro_f1_at_ckpt": 0.660489,
+      "train_end": "unknown/incomplete"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

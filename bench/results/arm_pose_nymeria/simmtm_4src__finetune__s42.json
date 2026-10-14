@@ -4,9 +4,9 @@
   "protocol": "finetune",
   "seed": 42,
   "metrics": {
-    "pos_err_cm": 8.157763630151749,
-    "ang_err_deg": 9.943985939025879,
-    "val_pose_mse": 0.016527
+    "pos_err_cm": 8.117925375699997,
+    "ang_err_deg": 9.86424446105957,
+    "val_pose_mse": 0.016244
   },
   "primary_metric": "pos_err_cm",
   "eval_split": "val",
@@ -20,11 +20,11 @@
   },
   "job_ids": {
     "train": null,
-    "score": "4895729"
+    "score": "5654082"
   },
   "provenance": {
     "source": "scorer:bench.score.arm_pose",
-    "date": "2026-08-27T19:07:29-05:00",
+    "date": "2026-09-07T13:32:35-05:00",
     "git": "unknown",
     "legacy_run": false,
     "info": {

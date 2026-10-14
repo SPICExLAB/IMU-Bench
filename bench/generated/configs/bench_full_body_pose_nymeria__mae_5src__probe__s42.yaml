@@ -89,6 +89,11 @@ logging:
 wandb:
   entity: yli32258-northwestern-university
   project: TransfHAR_project
+preprocess:
+  normalize:
+    enabled: true
+    method: zscore
+    eps: 1.0e-06
 bench:
   task: full_body_pose_nymeria
   encoder: mae_5src

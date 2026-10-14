@@ -60,6 +60,8 @@ data:
   eval_batch_size: 256
   num_workers: 8
   pin_memory: true
+  acc_scale: 0.0023942
+  gyro_scale: 0.0012217
 preprocess:
   filter:
     enabled: true

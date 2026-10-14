@@ -1,0 +1,67 @@
+{
+  "task": "language_humanml3d",
+  "encoder": "control_raw",
+  "protocol": "probe",
+  "seed": 42,
+  "metrics": {
+    "r1_i2t_g100": 1.0,
+    "r1_t2i_g100": 0.0,
+    "r5_i2t_g100": 4.955,
+    "r5_t2i_g100": 0.0,
+    "r10_i2t_g100": 9.879999999999999,
+    "r10_t2i_g100": 0.0,
+    "mrr_i2t_g100": 5.207239376305427,
+    "mrr_t2i_g100": 1.9803486621018391,
+    "r1_i2t_full": 0.027019724398811132,
+    "r1_t2i_full": 0.0,
+    "mrr_i2t_full": 0.2677449451608067,
+    "mrr_t2i_full": 0.05403004377346164,
+    "medr_i2t_full": 1439.5,
+    "medr_t2i_full": 1851.0,
+    "r1_g100": 0.5,
+    "val_r1_i2t_g100": 0.9900000000000001,
+    "val_r1_t2i_g100": 0.0,
+    "val_r5_i2t_g100": 4.9750000000000005,
+    "val_r5_t2i_g100": 0.0,
+    "val_r10_i2t_g100": 10.03,
+    "val_r10_t2i_g100": 0.0,
+    "val_mrr_i2t_g100": 5.248258682687193,
+    "val_mrr_t2i_g100": 1.9806176788217495,
+    "val_r1_i2t_full": 0.0835421888053467,
+    "val_r1_t2i_full": 0.0,
+    "val_mrr_i2t_full": 0.7345411448577661,
+    "val_mrr_t2i_full": 0.16699093438868334,
+    "val_medr_i2t_full": 460.0,
+    "val_medr_t2i_full": 599.0,
+    "val_r1_g100": 0.49500000000000005
+  },
+  "primary_metric": "r1_g100",
+  "eval_split": "test",
+  "run": "bench_language_humanml3d__control_raw__probe__s42",
+  "checkpoint": "latest.pt",
+  "checkpoint_step": 8000,
+  "selection": {
+    "split": "none",
+    "monitor": "fixed_budget",
+    "mode": "latest",
+    "note": "fixed 8k-step budget, final checkpoint (latest.pt); \u00a713e: val-loss best.pt under-selects for retrieval, latest \u2265 best on every arm"
+  },
+  "job_ids": {
+    "train": 6724593,
+    "score": "6743795"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.language",
+    "date": "2026-09-19T19:44:42-05:00",
+    "git": "unknown",
+    "legacy_run": true,
+    "info": {
+      "n_items_test": 3701,
+      "n_items_val": 1197,
+      "train_end": "max_steps reached at step=8000 epoch=1"
+    }
+  },
+  "status": "ok",
+  "notes": "harvested from a pre-harness run with a recipe-equivalent config.",
+  "schema_version": 1
+}

@@ -1,0 +1,67 @@
+{
+  "task": "language_humanml3d",
+  "encoder": "focal_5src_native",
+  "protocol": "probe",
+  "seed": 42,
+  "metrics": {
+    "r1_i2t_g100": 10.555,
+    "r1_t2i_g100": 9.461433825381631,
+    "r5_i2t_g100": 32.015,
+    "r5_t2i_g100": 30.31890775353922,
+    "r10_i2t_g100": 46.145,
+    "r10_t2i_g100": 44.79822661091239,
+    "mrr_i2t_g100": 22.06289700082019,
+    "mrr_t2i_g100": 20.782679762391883,
+    "r1_i2t_full": 0.7835720075655228,
+    "r1_t2i_full": 0.5128205128205128,
+    "mrr_i2t_full": 2.7854863397328837,
+    "mrr_t2i_full": 2.173639616020825,
+    "medr_i2t_full": 309.0,
+    "medr_t2i_full": 386.5,
+    "r1_g100": 10.008216912690816,
+    "val_r1_i2t_g100": 10.76,
+    "val_r1_t2i_g100": 10.038294613224407,
+    "val_r5_i2t_g100": 34.8,
+    "val_r5_t2i_g100": 31.66709216236916,
+    "val_r10_i2t_g100": 49.4,
+    "val_r10_t2i_g100": 47.030890988001026,
+    "val_mrr_i2t_g100": 22.957054966995056,
+    "val_mrr_t2i_g100": 21.539307032175135,
+    "val_r1_i2t_full": 1.7543859649122806,
+    "val_r1_t2i_full": 1.4444444444444444,
+    "val_mrr_i2t_full": 5.830883179752722,
+    "val_mrr_t2i_full": 5.214629080691982,
+    "val_medr_i2t_full": 94.0,
+    "val_medr_t2i_full": 116.0,
+    "val_r1_g100": 10.399147306612203
+  },
+  "primary_metric": "r1_g100",
+  "eval_split": "test",
+  "run": "bench_language_humanml3d__focal_5src_native__probe__s42",
+  "checkpoint": "latest.pt",
+  "checkpoint_step": 8000,
+  "selection": {
+    "split": "none",
+    "monitor": "fixed_budget",
+    "mode": "latest",
+    "note": "fixed 8k-step budget, final checkpoint (latest.pt); \u00a713e: val-loss best.pt under-selects for retrieval, latest \u2265 best on every arm"
+  },
+  "job_ids": {
+    "train": 7051070,
+    "score": "7051070"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.language",
+    "date": "2026-09-22T21:00:57-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_items_test": 3701,
+      "n_items_val": 1197,
+      "train_end": "max_steps reached at step=8000 epoch=1"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

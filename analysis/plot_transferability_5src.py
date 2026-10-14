@@ -115,12 +115,12 @@ def build(proto, mae_label, mae_sub, out, prefix="tx5_", ref=REF_SCRATCH, with_m
 # for 2.7 x 1.75 in on the page), so a 10-pt value prints at 5 pt. Same colour ramp and ink as the full
 # renderer; short labels, integer gains and no colour bar (every cell prints its gain).
 SHORT_SRC = {"PRISM": "HAR", "Full-body": "Body", "Gesture": "Gest.", "Odometry": "Odom.", "Parkinson's": "PD",
-             "IMU-text": "Text", "IMU–text": "Text", "InrtlWrist probe": "InrtlWrist", "InrtlWrist finetune": "InrtlWrist"}
+             "IMU-text": "Text", "IMU–text": "Text", "InrtlWrist probe": "MAE", "InrtlWrist finetune": "MAE"}
 SHORT_TGT = {"PRISM activity": ("HAR", "F1 %"), "Nymeria full-body pose": ("Body", "mm"),
              "Nymeria arm pose": ("Arm", "cm"),
              "OpenWatch gesture": ("Gesture", "F1 %"), "Nymeria odometry": ("Odom.", "ATE m"),
              "PADS Parkinson's": ("PD", "subj F1 %"), "HumanML3D IMU–text": ("Text", "R@1 %"), "HumanML3D IMU-text": ("Text", "R@1 %"),
-             "Masked reconstruction": ("InrtlWrist", "val loss")}
+             "Masked reconstruction": ("MAE", "val loss")}
 
 
 # Diverging encoding of the gain over training from scratch: green = benefit, orange-pink = harm, neutral grey at
@@ -174,7 +174,7 @@ def render_compact(spec, outdir, dpi, vmax, title, ref="scratch"):
         ax.text(PAD, PAD + 0.02, title, ha="left", va="top", fontsize=9.5, fontweight="bold", color=pt.INK)
     ax.text(x_ref + REF / 2, y0 - 0.05, spec.get("ref_short", "Scratch"), ha="center", va="bottom", fontsize=8.5, fontweight="bold", color=pt.INK_2)
     if vs_mae:
-        ax.text(x_ref + 1.5 * REF, y0 - 0.05, "InrtlWrist", ha="center", va="bottom", fontsize=8.5, fontweight="bold", color=pt.INK)
+        ax.text(x_ref + 1.5 * REF, y0 - 0.05, "MAE", ha="center", va="bottom", fontsize=8.5, fontweight="bold", color=pt.INK)
     for j, (_, lab, _) in enumerate(sources):
         ax.text(x0 + (j + 0.5) * CW, y0 - 0.05, SHORT_SRC.get(lab, lab), ha="center", va="bottom", fontsize=8.5,
                 fontweight="bold", color=pt.INK)

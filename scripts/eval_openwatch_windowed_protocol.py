@@ -95,7 +95,10 @@ def predict_windows(encoder, head, rec, cfg, cfg_block, T: int, stride: int = ST
     return preds
 
 
-def eval_run(name: str, run_dir: str, objective_key: str, stride: int = STRIDE_SAMPLES, split: str = "val"):
+def eval_run(name: str, run_dir: str, objective_key: str, stride: int = STRIDE_SAMPLES, split: str = "val",
+             return_units: bool = False):
+    """return_units=True adds result["per_clip"]: one entry per scored clip (subject id, path,
+    position, gesture, true label, voted prediction, #windows) -- used by the bench sidecars."""
     ckpt_path = os.path.join(RUNS_ROOT, run_dir, "checkpoints", "best.pt")
     if not os.path.exists(ckpt_path):
         print(f"[skip] {name}: no checkpoint at {ckpt_path}")
@@ -111,6 +114,7 @@ def eval_run(name: str, run_dir: str, objective_key: str, stride: int = STRIDE_S
 
     window_true, window_pred = [], []
     clip_true, clip_pred = [], []
+    clip_recs, clip_nwin = [], []
 
     for rec in val_records:
         preds = predict_windows(encoder, head, rec, cfg, cfg_block, T, stride=stride)
@@ -120,6 +124,8 @@ def eval_run(name: str, run_dir: str, objective_key: str, stride: int = STRIDE_S
         window_pred.extend(preds)
         clip_true.append(rec.label)
         clip_pred.append(aggregate_clip_label(preds))
+        clip_recs.append(rec)
+        clip_nwin.append(len(preds))
 
     window_metrics = compute_metrics(window_true, window_pred)
     clip_metrics = compute_metrics(clip_true, clip_pred)
@@ -143,6 +149,17 @@ def eval_run(name: str, run_dir: str, objective_key: str, stride: int = STRIDE_S
             "macro_recall": clip_metrics["macro_recall"],
         },
     }
+    if return_units:
+        result["contamination_safe"] = bool(cfg_block.get("contamination_safe", False))
+        result["per_clip"] = {
+            "subject_id": [int(r.subject_id) for r in clip_recs],
+            "path": [str(r.path) for r in clip_recs],
+            "position": [str(r.position) for r in clip_recs],
+            "gesture": [str(r.gesture) for r in clip_recs],
+            "label": [int(v) for v in clip_true],
+            "pred": [int(v) for v in clip_pred],
+            "n_windows": [int(v) for v in clip_nwin],
+        }
     print(
         f"{name:28s} [{split}] n_clips={result['n_clips']:4d} n_windows={result['n_windows']:5d}  "
         f"window[F1={result['window']['macro_f1']:.3f} Acc={result['window']['acc']:.3f} "

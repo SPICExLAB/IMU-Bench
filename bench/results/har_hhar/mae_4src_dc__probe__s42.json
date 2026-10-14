@@ -4,10 +4,10 @@
   "protocol": "probe",
   "seed": 42,
   "metrics": {
-    "macro_f1": 0.6633818419093314,
-    "bal_acc": 0.6728517130147226,
-    "acc": 0.639609169485156,
-    "val_loss": 1.082516
+    "macro_f1": 0.6623843587190085,
+    "bal_acc": 0.6721957753643579,
+    "acc": 0.6388575723412251,
+    "val_loss": 1.083872
   },
   "primary_metric": "macro_f1",
   "eval_split": "val",
@@ -22,11 +22,11 @@
   },
   "job_ids": {
     "train": null,
-    "score": "4329675"
+    "score": "5654078"
   },
   "provenance": {
     "source": "scorer:bench.score.har",
-    "date": "2026-08-25T10:39:00-05:00",
+    "date": "2026-09-07T12:06:51-05:00",
     "git": "unknown",
     "legacy_run": false,
     "info": {
@@ -34,7 +34,7 @@
       "n_classes_seen": 6,
       "n_classes_head": 6,
       "n_val_batches": 11,
-      "logged_macro_f1_at_ckpt": 0.663813,
+      "logged_macro_f1_at_ckpt": 0.662113,
       "train_end": "unknown/incomplete"
     }
   },

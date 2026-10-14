@@ -1,0 +1,44 @@
+{
+  "task": "har_mhealth",
+  "encoder": "vd_ek5_f1_zs",
+  "protocol": "probe",
+  "seed": 42,
+  "metrics": {
+    "macro_f1": 0.6133909975869486,
+    "bal_acc": 0.6243262783220745,
+    "acc": 0.6282173498570067,
+    "val_loss": 0.73513
+  },
+  "primary_metric": "macro_f1",
+  "eval_split": "val",
+  "run": "bench_har_mhealth__vd_ek5_f1_zs__probe__s42",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 17000,
+  "selection": {
+    "split": "val",
+    "monitor": "val_loss",
+    "mode": "min",
+    "note": "same convention as Experiments_table \u00a73 (metrics read at the min-val-loss checkpoint)"
+  },
+  "job_ids": {
+    "train": 6472624,
+    "score": "6472624"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.har",
+    "date": "2026-09-16T21:08:26-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_val_samples": 1049,
+      "n_classes_seen": 12,
+      "n_classes_head": 12,
+      "n_val_batches": 5,
+      "logged_macro_f1_at_ckpt": 0.613391,
+      "train_end": "max_steps reached at step=20000 epoch=1177"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

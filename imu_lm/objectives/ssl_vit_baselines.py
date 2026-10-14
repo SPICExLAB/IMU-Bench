@@ -132,17 +132,57 @@ class SimMTMHeadVarLen(nn.Module):
 
 
 def simmtm_forward_loss_varlen(batch, encoder, head: SimMTMHeadVarLen, cfg) -> Tuple[torch.Tensor, Dict]:
+    """SimMTM on the shared ViT1D backbone.
+
+    Two objective flags restore what SimMTM's own ``Model.pretrain`` does and this
+    port originally did not (both default to False, i.e. the behaviour every
+    ``*_5src``/``*_4src`` SimMTM row in the leaderboard was trained with):
+
+    ``visible_point_instance_norm``
+        SimMTM normalises inside the model, not in the dataloader: per sample and
+        per channel, mean/std over the VISIBLE points only, detached, and the
+        reconstruction is de-normalised back to the input's own units before the
+        MSE (SimMTM_Forecasting/models/SimMTM.py:172-178 and 205-207). With the
+        benchmark's per-window z-score in the dataloader this is a near no-op --
+        the stats are already ~(0, 1) and the recon loss is scale-free. Fed
+        un-z-scored input instead, it is the real objective: window amplitude
+        survives into the encoder input statistics and weights the recon loss.
+
+    ``recon_on_original_only``
+        ``pred_batch_x = dec_out[:batch_x.shape[0]]`` — only the un-masked copy is
+        reconstructed, against the original series (SimMTM.py:208-211). This port
+        instead took the MSE over all (1+positive_nums) copies against ``x_om``,
+        whose masked copies are zero at the masked points. Harmless under z-score,
+        but in physical units "predict 0 at the masked points" is an amplitude-
+        weighted error term SimMTM never had, so the faithful arm turns it off.
+    """
     x = batch[0] if isinstance(batch, (tuple, list)) else batch
     x = x.float()                                              # [B, C, L]
     obj = cfg_get(cfg, ["objective"], {}) or {}
     masking_ratio = float(obj.get("masking_ratio", 0.5))
     lm            = int(obj.get("lm", 3))
     positive_nums = int(obj.get("positive_nums", 3))
+    inst_norm     = bool(obj.get("visible_point_instance_norm", False))
+    recon_orig    = bool(obj.get("recon_on_original_only", False))
 
-    masked_m, _ = data_transform_masked4cl(x, masking_ratio, lm, positive_nums)
+    B = x.shape[0]
+    masked_m, keep_m = data_transform_masked4cl(x, masking_ratio, lm, positive_nums)
     x_om = torch.cat([x, masked_m.to(x.device)], dim=0)        # [(1+P)*B, C, L]
 
-    tokens, Pt = encoder.forward_tokens(x_om)                  # [N', C*Pt, D], Pt=L//ps
+    x_in = x_om
+    means = stdev = None
+    if inst_norm:
+        # keep_m is True where the point SURVIVED the geometric mask (SimMTM's mask == 1);
+        # the first B rows are the un-masked copy, so their mask is all ones.
+        keep = torch.cat([torch.ones_like(x),
+                          keep_m.to(x.device).float()], dim=0)          # [N', C, L]
+        denom = keep.sum(dim=-1, keepdim=True).clamp(min=1.0)
+        means = ((x_om * keep).sum(dim=-1, keepdim=True) / denom).detach()
+        xc = (x_om - means).masked_fill(keep == 0, 0.0)
+        stdev = torch.sqrt((xc * xc).sum(dim=-1, keepdim=True) / denom + 1e-5).detach()
+        x_in = xc / stdev
+
+    tokens, Pt = encoder.forward_tokens(x_in)                  # [N', C*Pt, D], Pt=L//ps
     C, ps = encoder.in_channels, head.patch_size
 
     z = head.proj(tokens.mean(dim=1))                          # pool tokens → [N', D] → proj
@@ -150,7 +190,12 @@ def simmtm_forward_loss_varlen(batch, encoder, head: SimMTMHeadVarLen, cfg) -> T
     _, agg = head.aggregation(sim, tokens)                     # [N', C*Pt, D]
     pred_patches = head.recon(agg)                             # [N', C*Pt, ps]
     pred = pred_patches.reshape(pred_patches.size(0), C, Pt * ps)   # [N', C, L]
-    loss_rb = F.mse_loss(pred, x_om.detach())
+    if inst_norm:
+        pred = pred * stdev + means                            # de-Normalization
+    if recon_orig:
+        loss_rb = F.mse_loss(pred[:B], x_om[:B].detach())
+    else:
+        loss_rb = F.mse_loss(pred, x_om.detach())
     loss = head.awl(loss_cl, loss_rb)
     return loss, {"loss": float(loss.detach()),
                   "loss_cl": float(loss_cl.detach()),

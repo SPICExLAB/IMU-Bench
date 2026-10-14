@@ -1,0 +1,67 @@
+{
+  "task": "language_humanml3d",
+  "encoder": "relcon_4src",
+  "protocol": "probe",
+  "seed": 42,
+  "metrics": {
+    "r1_i2t_g100": 16.1,
+    "r1_t2i_g100": 14.947856315179605,
+    "r5_i2t_g100": 42.885,
+    "r5_t2i_g100": 41.12549750617159,
+    "r10_i2t_g100": 57.3,
+    "r10_t2i_g100": 55.579626177641195,
+    "mrr_i2t_g100": 29.358230151281077,
+    "mrr_t2i_g100": 28.028149895648035,
+    "r1_i2t_full": 0.8646311807619562,
+    "r1_t2i_full": 1.1721611721611722,
+    "mrr_i2t_full": 3.8292627810592927,
+    "mrr_t2i_full": 3.8200689576479188,
+    "medr_i2t_full": 180.0,
+    "medr_t2i_full": 228.5,
+    "r1_g100": 15.523928157589804,
+    "val_r1_i2t_g100": 15.155,
+    "val_r1_t2i_g100": 14.311973449068164,
+    "val_r5_i2t_g100": 43.93,
+    "val_r5_t2i_g100": 41.31222874648966,
+    "val_r10_i2t_g100": 58.95,
+    "val_r10_t2i_g100": 56.293081439877454,
+    "val_mrr_i2t_g100": 28.999477536401454,
+    "val_mrr_t2i_g100": 27.575822416819523,
+    "val_r1_i2t_full": 2.506265664160401,
+    "val_r1_t2i_full": 4.0,
+    "val_mrr_i2t_full": 8.058253306133206,
+    "val_mrr_t2i_full": 8.27515316118312,
+    "val_medr_i2t_full": 60.0,
+    "val_medr_t2i_full": 73.0,
+    "val_r1_g100": 14.733486724534082
+  },
+  "primary_metric": "r1_g100",
+  "eval_split": "test",
+  "run": "bench_language_humanml3d__relcon_4src__probe__s42",
+  "checkpoint": "latest.pt",
+  "checkpoint_step": 8000,
+  "selection": {
+    "split": "none",
+    "monitor": "fixed_budget",
+    "mode": "latest",
+    "note": "fixed 8k-step budget, final checkpoint (latest.pt); \u00a713e: val-loss best.pt under-selects for retrieval, latest \u2265 best on every arm"
+  },
+  "job_ids": {
+    "train": null,
+    "score": "5654140"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.language",
+    "date": "2026-09-07T15:49:40-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_items_test": 3701,
+      "n_items_val": 1197,
+      "train_end": "unknown/incomplete"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

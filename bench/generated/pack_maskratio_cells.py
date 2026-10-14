@@ -62,7 +62,10 @@ if [ ! -f runs/{run_done}/.done ]; then echo "[mrpack] runs/{run_done}/.done nev
     body += "\nwait\npython -m bench.leaderboard && python -m bench.leaderboard_html || true\necho MRPACK_DONE\n"
     sh = f"bench/generated/slurm/packs/{job}.sh"
     open(sh, "w").write(body); os.chmod(sh, 0o755)
-    for acct, part in (("b53017", "b53017"), ("p32139", "gengpu")):
+    # SINGLE job per cell. Dual-partition twins both `rm -rf runs/{name}` and then train
+    # into the same directory, silently corrupting the run (audit 2026-09-04: 27 bench
+    # cells affected). Never re-introduce a second partition in this loop.
+    for acct, part in (("p32139", "gengpu"),):
         cmd = ["sbatch", "--parsable", f"--account={acct}", f"--partition={part}"]
         if dep: cmd.append("--dependency=afterany:" + dep.replace(",", ":"))
         cmd.append(sh)

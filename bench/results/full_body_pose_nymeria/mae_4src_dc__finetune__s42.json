@@ -4,14 +4,14 @@
   "protocol": "finetune",
   "seed": 42,
   "metrics": {
-    "mpjpe_mm": 89.995647,
-    "val_pose_mse": 0.018756
+    "mpjpe_mm": 90.938232,
+    "val_pose_mse": 0.0191
   },
   "primary_metric": "mpjpe_mm",
   "eval_split": "val",
   "run": "bench_full_body_pose_nymeria__mae_4src_dc__finetune__s42",
   "checkpoint": "best_mpjpe.pt",
-  "checkpoint_step": 15000,
+  "checkpoint_step": 19000,
   "selection": {
     "split": "val",
     "monitor": "mpjpe_mm",
@@ -20,17 +20,17 @@
   },
   "job_ids": {
     "train": null,
-    "score": "4324694"
+    "score": "5658588"
   },
   "provenance": {
     "source": "scorer:bench.score.full_body_pose",
-    "date": "2026-08-25T12:41:50-05:00",
+    "date": "2026-09-08T00:15:38-05:00",
     "git": "unknown",
     "legacy_run": false,
     "info": {
-      "min_val_mpjpe_mm": 89.995647,
-      "min_val_mpjpe_step": 15000,
-      "n_val_evals": 35,
+      "min_val_mpjpe_mm": 90.938232,
+      "min_val_mpjpe_step": 19000,
+      "n_val_evals": 39,
       "train_end": "unknown/incomplete"
     }
   },

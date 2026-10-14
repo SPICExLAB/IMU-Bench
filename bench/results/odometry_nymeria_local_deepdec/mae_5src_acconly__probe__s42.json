@@ -1,0 +1,42 @@
+{
+ "task": "odometry_nymeria_local_deepdec",
+ "encoder": "mae_5src_acconly",
+ "protocol": "probe",
+ "seed": 42,
+ "metrics": {
+  "vel_mse": 0.028811438009142876,
+  "ate_m": 0.20418806167824627,
+  "drift_pct": 54.956246052900525
+ },
+ "primary_metric": "ate_m",
+ "eval_split": "val",
+ "run": "_deepdec/bench_odometry_nymeria_local__mae_5src_acconly__probe__s42",
+ "checkpoint": "best.pt",
+ "checkpoint_step": 73000,
+ "selection": {
+  "split": "val",
+  "monitor": "val_loss",
+  "mode": "min"
+ },
+ "job_ids": {
+  "train": 6721833,
+  "score": "6721833"
+ },
+ "provenance": {
+  "source": "scorer:bench.score.odometry_local",
+  "date": "2026-09-19T02:20:06-05:00",
+  "git": "unknown",
+  "legacy_run": false,
+  "info": {
+   "n_val_windows": 73515,
+   "n_val_windows_total": 73515,
+   "n_val_sessions": 101,
+   "T": 128,
+   "frame": "wrist FLU (local)",
+   "train_end": "early stopping at step=93000 epoch=38"
+  }
+ },
+ "status": "ok",
+ "notes": "moved 2026-09-19 from task odometry_nymeria_local: frozen probe with the deep decoder (pose 4+8, odometry 12 layers), kept for the appendix after the benchmark switched to the shallow probe decoder",
+ "schema_version": 1
+}

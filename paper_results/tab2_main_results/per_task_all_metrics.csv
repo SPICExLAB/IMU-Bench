@@ -1,0 +1,225 @@
+task,encoder,encoder_label,protocol,m1,m2,m3,m4,m5,m6,m7,m8,m9,metric_keys
+arm_pose_nymeria,mae_5src,WristMAE (Ours),probe,8.137550950050354,9.892117500305176,,,,,,,,pos_err_cm;ang_err_deg
+arm_pose_nymeria,limubert_5src,LIMU-BERT,probe,8.139204233884811,9.856184959411621,,,,,,,,pos_err_cm;ang_err_deg
+arm_pose_nymeria,simmtm_5src,SimMTM,probe,8.465863019227982,10.27480411529541,,,,,,,,pos_err_cm;ang_err_deg
+arm_pose_nymeria,focal_5src,FOCAL,probe,8.708436042070389,10.695087432861328,,,,,,,,pos_err_cm;ang_err_deg
+arm_pose_nymeria,relcon_5src,RelCon,probe,8.504417538642883,10.412152290344238,,,,,,,,pos_err_cm;ang_err_deg
+arm_pose_nymeria,sslwear_5src,SSL-Wearables,probe,8.423518389463425,10.14060115814209,,,,,,,,pos_err_cm;ang_err_deg
+arm_pose_nymeria,mae_5src_noaltattn,"WristMAE, plain attention",probe,8.363016694784164,10.17228889465332,,,,,,,,pos_err_cm;ang_err_deg
+arm_pose_nymeria,mae_5src_acconly,"WristMAE, accelerometer only",probe,8.758489042520523,10.6076078414917,,,,,,,,pos_err_cm;ang_err_deg
+arm_pose_nymeria,control_random,Random frozen encoder,probe,8.456384390592575,10.351130485534668,,,,,,,,pos_err_cm;ang_err_deg
+arm_pose_nymeria,control_raw,"Raw input, 0 layers",probe,8.509549498558044,10.302630424499512,,,,,,,,pos_err_cm;ang_err_deg
+arm_pose_nymeria,mae_5src,WristMAE (Ours),finetune,8.012033253908157,9.863895416259766,,,,,,,,pos_err_cm;ang_err_deg
+arm_pose_nymeria,limubert_5src,LIMU-BERT,finetune,8.175131678581238,9.969995498657227,,,,,,,,pos_err_cm;ang_err_deg
+arm_pose_nymeria,simmtm_5src,SimMTM,finetune,8.440148085355759,10.285970687866211,,,,,,,,pos_err_cm;ang_err_deg
+arm_pose_nymeria,focal_5src,FOCAL,finetune,8.656147122383118,10.688399314880371,,,,,,,,pos_err_cm;ang_err_deg
+arm_pose_nymeria,relcon_5src,RelCon,finetune,8.553347736597061,10.529242515563965,,,,,,,,pos_err_cm;ang_err_deg
+arm_pose_nymeria,sslwear_5src,SSL-Wearables,finetune,8.571162819862366,10.577226638793945,,,,,,,,pos_err_cm;ang_err_deg
+arm_pose_nymeria,mae_5src_noaltattn,"WristMAE, plain attention",finetune,8.193564414978027,10.058262825012207,,,,,,,,pos_err_cm;ang_err_deg
+arm_pose_nymeria,mae_5src_acconly,"WristMAE, accelerometer only",finetune,8.88017788529396,10.804521560668945,,,,,,,,pos_err_cm;ang_err_deg
+arm_pose_nymeria,scratch,Scratch,scratch,8.214804530143738,9.890199661254883,,,,,,,,pos_err_cm;ang_err_deg
+arm_pose_nymeria,mobileposer,MobilePoser (Xu et al.),external,9.74,24.28,,,,,,,,pos_err_cm;ang_err_deg
+arm_pose_nymeria,imuposer,IMUPoser (Mollyn et al.),external,10.153600573539734,23.81601905822754,,,,,,,,pos_err_cm;ang_err_deg
+full_body_pose_nymeria,mae_5src,WristMAE (Ours),probe,97.85016,,,,,,,,,mpjpe_mm
+full_body_pose_nymeria,limubert_5src,LIMU-BERT,probe,98.545129,,,,,,,,,mpjpe_mm
+full_body_pose_nymeria,simmtm_5src,SimMTM,probe,103.645474,,,,,,,,,mpjpe_mm
+full_body_pose_nymeria,focal_5src,FOCAL,probe,108.413672,,,,,,,,,mpjpe_mm
+full_body_pose_nymeria,relcon_5src,RelCon,probe,104.291822,,,,,,,,,mpjpe_mm
+full_body_pose_nymeria,sslwear_5src,SSL-Wearables,probe,101.666022,,,,,,,,,mpjpe_mm
+full_body_pose_nymeria,mae_5src_noaltattn,"WristMAE, plain attention",probe,99.963851,,,,,,,,,mpjpe_mm
+full_body_pose_nymeria,mae_5src_acconly,"WristMAE, accelerometer only",probe,102.787634,,,,,,,,,mpjpe_mm
+full_body_pose_nymeria,control_random,Random frozen encoder,probe,104.987779,,,,,,,,,mpjpe_mm
+full_body_pose_nymeria,control_raw,"Raw input, 0 layers",probe,106.363257,,,,,,,,,mpjpe_mm
+full_body_pose_nymeria,mae_5src,WristMAE (Ours),finetune,88.110126,,,,,,,,,mpjpe_mm
+full_body_pose_nymeria,limubert_5src,LIMU-BERT,finetune,89.742643,,,,,,,,,mpjpe_mm
+full_body_pose_nymeria,simmtm_5src,SimMTM,finetune,92.914468,,,,,,,,,mpjpe_mm
+full_body_pose_nymeria,focal_5src,FOCAL,finetune,95.916763,,,,,,,,,mpjpe_mm
+full_body_pose_nymeria,relcon_5src,RelCon,finetune,92.147361,,,,,,,,,mpjpe_mm
+full_body_pose_nymeria,sslwear_5src,SSL-Wearables,finetune,90.61382,,,,,,,,,mpjpe_mm
+full_body_pose_nymeria,mae_5src_noaltattn,"WristMAE, plain attention",finetune,88.382216,,,,,,,,,mpjpe_mm
+full_body_pose_nymeria,mae_5src_acconly,"WristMAE, accelerometer only",finetune,94.423523,,,,,,,,,mpjpe_mm
+full_body_pose_nymeria,scratch,Scratch,scratch,92.720507,,,,,,,,,mpjpe_mm
+full_body_pose_nymeria,mobileposer,MobilePoser (Xu et al.),external,91.88,,,,,,,,,mpjpe_mm
+full_body_pose_nymeria,imuposer,IMUPoser (Mollyn et al.),external,96.86602652072906,,,,,,,,,mpjpe_mm
+odometry_nymeria_local,mae_5src,WristMAE (Ours),probe,0.1998629427138598,0.027316568419337273,,,,,,,,ate_m;vel_mse
+odometry_nymeria_local,limubert_5src,LIMU-BERT,probe,0.207840867590574,0.028560079634189606,,,,,,,,ate_m;vel_mse
+odometry_nymeria_local,simmtm_5src,SimMTM,probe,0.22396585247435583,0.030642325058579445,,,,,,,,ate_m;vel_mse
+odometry_nymeria_local,focal_5src,FOCAL,probe,0.2403601483533262,0.03334490582346916,,,,,,,,ate_m;vel_mse
+odometry_nymeria_local,relcon_5src,RelCon,probe,0.21528262074777194,0.028932442888617516,,,,,,,,ate_m;vel_mse
+odometry_nymeria_local,sslwear_5src,SSL-Wearables,probe,0.22046790745812805,0.030783386901021004,,,,,,,,ate_m;vel_mse
+odometry_nymeria_local,mae_5src_noaltattn,"WristMAE, plain attention",probe,0.21040970112973734,0.02891816571354866,,,,,,,,ate_m;vel_mse
+odometry_nymeria_local,mae_5src_acconly,"WristMAE, accelerometer only",probe,0.2296265066070148,0.032321520149707794,,,,,,,,ate_m;vel_mse
+odometry_nymeria_local,control_random,Random frozen encoder,probe,0.23341782659051732,0.032169558107852936,,,,,,,,ate_m;vel_mse
+odometry_nymeria_local,control_raw,"Raw input, 0 layers",probe,0.2557545186063136,0.03720274567604065,,,,,,,,ate_m;vel_mse
+odometry_nymeria_local,mae_5src,WristMAE (Ours),finetune,0.15410215779289813,0.0182351041585207,,,,,,,,ate_m;vel_mse
+odometry_nymeria_local,limubert_5src,LIMU-BERT,finetune,0.15763617780283093,0.01884881779551506,,,,,,,,ate_m;vel_mse
+odometry_nymeria_local,simmtm_5src,SimMTM,finetune,0.1628884587735134,0.019460001960396767,,,,,,,,ate_m;vel_mse
+odometry_nymeria_local,focal_5src,FOCAL,finetune,0.17670928892209659,0.02218198962509632,,,,,,,,ate_m;vel_mse
+odometry_nymeria_local,relcon_5src,RelCon,finetune,0.167245759201532,0.02036716602742672,,,,,,,,ate_m;vel_mse
+odometry_nymeria_local,sslwear_5src,SSL-Wearables,finetune,0.16562608646223723,0.02030201070010662,,,,,,,,ate_m;vel_mse
+odometry_nymeria_local,mae_5src_noaltattn,"WristMAE, plain attention",finetune,0.15685019528354383,0.018796203657984734,,,,,,,,ate_m;vel_mse
+odometry_nymeria_local,mae_5src_acconly,"WristMAE, accelerometer only",finetune,0.18979155489025815,0.025582537055015564,,,,,,,,ate_m;vel_mse
+odometry_nymeria_local,scratch,Scratch,scratch,0.16176734735990456,0.019400550052523613,,,,,,,,ate_m;vel_mse
+odometry_nymeria_local,tlio,TLIO,external,0.18743787711058468,0.02977583557367325,,,,,,,,ate_m;vel_mse
+odometry_nymeria_local,airio,Air-IO,external,0.18026211711512127,0.031480807811021805,,,,,,,,ate_m;vel_mse
+microgesture_openwatch,mae_5src,WristMAE (Ours),probe,64.67218088133122,67.81609195402298,49.378846123217414,53.63984674329502,,,,,,clip_macro_f1;clip_acc;window_macro_f1;window_acc
+microgesture_openwatch,limubert_5src,LIMU-BERT,probe,61.658249158249156,60.91954022988506,49.75798143041888,51.91570881226054,,,,,,clip_macro_f1;clip_acc;window_macro_f1;window_acc
+microgesture_openwatch,simmtm_5src,SimMTM,probe,55.854222030692625,57.47126436781609,48.28576984633417,50.57471264367817,,,,,,clip_macro_f1;clip_acc;window_macro_f1;window_acc
+microgesture_openwatch,focal_5src,FOCAL,probe,48.05163056192392,47.12643678160919,36.89846398685888,38.31417624521073,,,,,,clip_macro_f1;clip_acc;window_macro_f1;window_acc
+microgesture_openwatch,relcon_5src,RelCon,probe,38.50710055189124,39.08045977011494,39.87557475168056,42.5287356321839,,,,,,clip_macro_f1;clip_acc;window_macro_f1;window_acc
+microgesture_openwatch,sslwear_5src,SSL-Wearables,probe,54.68391012784606,56.32183908045977,45.596893272851865,48.85057471264368,,,,,,clip_macro_f1;clip_acc;window_macro_f1;window_acc
+microgesture_openwatch,mae_5src_noaltattn,"WristMAE, plain attention",probe,63.9049390070768,66.66666666666666,49.36815997099684,53.25670498084292,,,,,,clip_macro_f1;clip_acc;window_macro_f1;window_acc
+microgesture_openwatch,mae_5src_acconly,"WristMAE, accelerometer only",probe,62.24069337880079,64.36781609195403,49.10124719848475,51.53256704980843,,,,,,clip_macro_f1;clip_acc;window_macro_f1;window_acc
+microgesture_openwatch,control_random,Random frozen encoder,probe,36.44942576449426,40.229885057471265,31.851944357491586,35.440613026819925,,,,,,clip_macro_f1;clip_acc;window_macro_f1;window_acc
+microgesture_openwatch,control_raw,"Raw input, 0 layers",probe,11.363636363636363,51.724137931034484,11.363636363636363,51.724137931034484,,,,,,clip_macro_f1;clip_acc;window_macro_f1;window_acc
+microgesture_openwatch,mae_5src,WristMAE (Ours),finetune,54.19450067476384,65.51724137931035,48.00878740576111,59.38697318007663,,,,,,clip_macro_f1;clip_acc;window_macro_f1;window_acc
+microgesture_openwatch,limubert_5src,LIMU-BERT,finetune,57.27866904337492,67.81609195402298,49.09204213042121,59.38697318007663,,,,,,clip_macro_f1;clip_acc;window_macro_f1;window_acc
+microgesture_openwatch,simmtm_5src,SimMTM,finetune,61.8838045859207,68.96551724137932,50.53327508287947,59.77011494252874,,,,,,clip_macro_f1;clip_acc;window_macro_f1;window_acc
+microgesture_openwatch,focal_5src,FOCAL,finetune,39.252995066948564,49.42528735632184,39.47378086175363,47.509578544061306,,,,,,clip_macro_f1;clip_acc;window_macro_f1;window_acc
+microgesture_openwatch,relcon_5src,RelCon,finetune,42.72283272283273,57.47126436781609,38.27110281954377,50.95785440613027,,,,,,clip_macro_f1;clip_acc;window_macro_f1;window_acc
+microgesture_openwatch,sslwear_5src,SSL-Wearables,finetune,58.26885988840077,66.66666666666666,53.10801445354373,60.727969348659,,,,,,clip_macro_f1;clip_acc;window_macro_f1;window_acc
+microgesture_openwatch,mae_5src_noaltattn,"WristMAE, plain attention",finetune,70.31746031746032,74.71264367816092,56.176854880890204,63.601532567049816,,,,,,clip_macro_f1;clip_acc;window_macro_f1;window_acc
+microgesture_openwatch,mae_5src_acconly,"WristMAE, accelerometer only",finetune,60.630801946591426,67.81609195402298,49.695034949813184,59.195402298850574,,,,,,clip_macro_f1;clip_acc;window_macro_f1;window_acc
+microgesture_openwatch,scratch,Scratch,scratch,60.81037062982316,68.96551724137932,45.07517157299014,56.513409961685824,,,,,,clip_macro_f1;clip_acc;window_macro_f1;window_acc
+microgesture_openwatch,mixtoken,Mix-Token (reimpl.),external,50.0,62.1,49.0,59.199999999999996,,,,,,clip_macro_f1;clip_acc;window_macro_f1;window_acc
+microgesture_openwatch,normwear,NormWear-Base (first-party),external,45.300000000000004,51.7,42.5,50.4,,,,,,clip_macro_f1;clip_acc;window_macro_f1;window_acc
+language_humanml3d,mae_5src,WristMAE (Ours),probe,27.923936596302084,28.315,27.532873192604164,42.485130469468075,41.75349828528485,3.6206430694406917,3.36996336996337,8.987111180591329,8.173528671259426,r1_g100;r1_i2t_g100;r1_t2i_g100;mrr_i2t_g100;mrr_t2i_g100;r1_i2t_full;r1_t2i_full;mrr_i2t_full;mrr_t2i_full
+language_humanml3d,limubert_5src,LIMU-BERT,probe,24.909930349135976,25.335,24.484860698271955,39.1975950879373,38.42078250063438,3.080248581464469,2.4542124542124544,7.826432082520263,6.63325571877343,r1_g100;r1_i2t_g100;r1_t2i_g100;mrr_i2t_g100;mrr_t2i_g100;r1_i2t_full;r1_t2i_full;mrr_i2t_full;mrr_t2i_full
+language_humanml3d,simmtm_5src,SimMTM,probe,17.18668774245554,17.37,17.00337548491108,30.30844650675883,29.750997726226775,1.7022426371251014,1.2454212454212454,5.020484443814767,4.191881619417099,r1_g100;r1_i2t_g100;r1_t2i_g100;mrr_i2t_g100;mrr_t2i_g100;r1_i2t_full;r1_t2i_full;mrr_i2t_full;mrr_t2i_full
+language_humanml3d,focal_5src,FOCAL,probe,8.565239558667944,9.120000000000001,8.010479117335887,19.862242408080466,18.550384216952644,0.6754931099702783,0.695970695970696,2.3136131851160897,2.197129773510312,r1_g100;r1_i2t_g100;r1_t2i_g100;mrr_i2t_g100;mrr_t2i_g100;r1_i2t_full;r1_t2i_full;mrr_i2t_full;mrr_t2i_full
+language_humanml3d,relcon_5src,RelCon,probe,13.151747695097988,13.919999999999998,12.38349539019598,26.94934531545936,25.014187524282004,0.9997298027560119,1.0256410256410255,3.579277522003915,3.1434667070921227,r1_g100;r1_i2t_g100;r1_t2i_g100;mrr_i2t_g100;mrr_t2i_g100;r1_i2t_full;r1_t2i_full;mrr_i2t_full;mrr_t2i_full
+language_humanml3d,sslwear_5src,SSL-Wearables,probe,24.800471434329186,25.635,23.96594286865837,39.23431091077265,37.94946516438077,2.5398540934882465,2.4542124542124544,7.429646947032725,6.605032755524403,r1_g100;r1_i2t_g100;r1_t2i_g100;mrr_i2t_g100;mrr_t2i_g100;r1_i2t_full;r1_t2i_full;mrr_i2t_full;mrr_t2i_full
+language_humanml3d,mae_5src_noaltattn,"WristMAE, plain attention",probe,26.343021814700993,26.72,25.966043629401987,40.43051856040849,39.71162781541807,3.3504458254525806,2.380952380952381,8.26741090914207,6.990076178159568,r1_g100;r1_i2t_g100;r1_t2i_g100;mrr_i2t_g100;mrr_t2i_g100;r1_i2t_full;r1_t2i_full;mrr_i2t_full;mrr_t2i_full
+language_humanml3d,mae_5src_acconly,"WristMAE, accelerometer only",probe,20.67672099350093,21.029999999999998,20.323441987001864,34.42282704758507,33.66595475109741,2.1345582275060795,1.684981684981685,6.083532527991854,5.430543597661318,r1_g100;r1_i2t_g100;r1_t2i_g100;mrr_i2t_g100;mrr_t2i_g100;r1_i2t_full;r1_t2i_full;mrr_i2t_full;mrr_t2i_full
+language_humanml3d,control_random,Random frozen encoder,probe,9.536809537004384,9.985,9.088619074008767,21.31171942705329,19.745627128120198,0.5944339367738449,0.43956043956043955,2.5738809578450503,2.0722501730448957,r1_g100;r1_i2t_g100;r1_t2i_g100;mrr_i2t_g100;mrr_t2i_g100;r1_i2t_full;r1_t2i_full;mrr_i2t_full;mrr_t2i_full
+language_humanml3d,control_raw,"Raw input, 0 layers",probe,0.5,1.0,0.0,5.207239376305427,1.9803486621018391,0.027019724398811132,0.0,0.2677449451608067,0.05403004377346164,r1_g100;r1_i2t_g100;r1_t2i_g100;mrr_i2t_g100;mrr_t2i_g100;r1_i2t_full;r1_t2i_full;mrr_i2t_full;mrr_t2i_full
+language_humanml3d,mae_5src,WristMAE (Ours),finetune,38.821375636052196,39.53,38.11275127210439,54.942919910840175,53.85095320618003,5.052688462577682,4.395604395604396,12.582497685681595,10.957496861795642,r1_g100;r1_i2t_g100;r1_t2i_g100;mrr_i2t_g100;mrr_t2i_g100;r1_i2t_full;r1_t2i_full;mrr_i2t_full;mrr_t2i_full
+language_humanml3d,limubert_5src,LIMU-BERT,finetune,36.585868809511815,37.18,35.99173761902363,52.49475594368667,51.35087204449695,4.4042150770062145,3.9194139194139193,11.510777282627615,10.284908508626279,r1_g100;r1_i2t_g100;r1_t2i_g100;mrr_i2t_g100;mrr_t2i_g100;r1_i2t_full;r1_t2i_full;mrr_i2t_full;mrr_t2i_full
+language_humanml3d,simmtm_5src,SimMTM,finetune,32.37359136480427,32.67,32.077182729608545,48.08533917946088,47.43021694822137,3.9989192110240475,3.4065934065934065,10.27296482005418,8.95060041883907,r1_g100;r1_i2t_g100;r1_t2i_g100;mrr_i2t_g100;mrr_t2i_g100;r1_i2t_full;r1_t2i_full;mrr_i2t_full;mrr_t2i_full
+language_humanml3d,focal_5src,FOCAL,finetune,22.365535165499523,22.735,21.996070330999043,37.20465003764397,36.51794497030721,2.053499054309646,1.9047619047619049,6.185327804942931,5.703531331604398,r1_g100;r1_i2t_g100;r1_t2i_g100;mrr_i2t_g100;mrr_t2i_g100;r1_i2t_full;r1_t2i_full;mrr_i2t_full;mrr_t2i_full
+language_humanml3d,relcon_5src,RelCon,finetune,30.00377777217996,30.53,29.47755554435992,45.54241978021186,44.501533166408976,3.2153472034585246,2.93040293040293,8.91081081153478,8.143323212234234,r1_g100;r1_i2t_g100;r1_t2i_g100;mrr_i2t_g100;mrr_t2i_g100;r1_i2t_full;r1_t2i_full;mrr_i2t_full;mrr_t2i_full
+language_humanml3d,sslwear_5src,SSL-Wearables,finetune,34.51883193107965,34.910000000000004,34.1276638621593,50.430381629498996,49.51256827703296,4.242096730613348,4.542124542124542,11.062166025054477,10.527438857351559,r1_g100;r1_i2t_g100;r1_t2i_g100;mrr_i2t_g100;mrr_t2i_g100;r1_i2t_full;r1_t2i_full;mrr_i2t_full;mrr_t2i_full
+language_humanml3d,mae_5src_noaltattn,"WristMAE, plain attention",finetune,37.01952894352361,37.74,36.29905788704721,52.973152048419706,51.75726897988281,4.566333423399081,4.102564102564102,11.711723232599276,10.556053088088365,r1_g100;r1_i2t_g100;r1_t2i_g100;mrr_i2t_g100;mrr_t2i_g100;r1_i2t_full;r1_t2i_full;mrr_i2t_full;mrr_t2i_full
+language_humanml3d,mae_5src_acconly,"WristMAE, accelerometer only",finetune,31.51318152047962,31.72,31.30636304095924,46.89337033809727,46.279719873710185,3.6206430694406917,3.2600732600732605,9.604043728907145,8.785345579116962,r1_g100;r1_i2t_g100;r1_t2i_g100;mrr_i2t_g100;mrr_t2i_g100;r1_i2t_full;r1_t2i_full;mrr_i2t_full;mrr_t2i_full
+language_humanml3d,scratch,Scratch,scratch,23.178559121366312,23.56,22.79711824273263,38.54580716001445,37.56571638476559,2.1075385031072686,2.1245421245421245,6.468599613687077,5.971516753489107,r1_g100;r1_i2t_g100;r1_t2i_g100;mrr_i2t_g100;mrr_t2i_g100;r1_i2t_full;r1_t2i_full;mrr_i2t_full;mrr_t2i_full
+language_humanml3d,unimts_scratch,"UniMTS (from scratch, wrist-only)",external,13.17,24.85,1.49,39.33,6.46,2.27,0.04,6.94,0.35,r1_g100;r1_i2t_g100;r1_t2i_g100;mrr_i2t_g100;mrr_t2i_g100;r1_i2t_full;r1_t2i_full;mrr_i2t_full;mrr_t2i_full
+pd_pads,mae_5src,WristMAE (Ours),probe,55.21003818876159,60.016420361247945,48.34664377767826,44.06982397656121,47.94917257683215,,,,,subject_macro_f1;subject_bal_acc;window_bal_acc;window_macro_f1;window_acc
+pd_pads,limubert_5src,LIMU-BERT,probe,50.45595894461721,58.3743842364532,49.02170307342721,43.800691237088316,46.660756501182036,,,,,subject_macro_f1;subject_bal_acc;window_bal_acc;window_macro_f1;window_acc
+pd_pads,simmtm_5src,SimMTM,probe,48.68008821497193,59.3222869084938,48.04469157917434,40.27198761386245,41.62529550827423,,,,,subject_macro_f1;subject_bal_acc;window_bal_acc;window_macro_f1;window_acc
+pd_pads,focal_5src,FOCAL,probe,40.65037944348289,53.933422898940144,39.225713622265346,31.29970039685454,31.50709219858156,,,,,subject_macro_f1;subject_bal_acc;window_bal_acc;window_macro_f1;window_acc
+pd_pads,relcon_5src,RelCon,probe,40.53872053872054,51.47783251231527,40.71702244116038,34.757994142336486,42.139479905437355,,,,,subject_macro_f1;subject_bal_acc;window_bal_acc;window_macro_f1;window_acc
+pd_pads,sslwear_5src,SSL-Wearables,probe,57.44699744699745,61.74055829228243,48.5189746396643,43.881016902710755,47.27541371158392,,,,,subject_macro_f1;subject_bal_acc;window_bal_acc;window_macro_f1;window_acc
+pd_pads,mae_5src_noaltattn,"WristMAE, plain attention",probe,48.10547875064004,59.688013136289,48.84348410210479,41.391274873741544,42.6063829787234,,,,,subject_macro_f1;subject_bal_acc;window_bal_acc;window_macro_f1;window_acc
+pd_pads,mae_5src_acconly,"WristMAE, accelerometer only",probe,48.18650641435451,61.64352888490819,47.566718083959465,40.10055266203526,41.21749408983452,,,,,subject_macro_f1;subject_bal_acc;window_bal_acc;window_macro_f1;window_acc
+pd_pads,control_random,Random frozen encoder,probe,51.746968207145194,55.888938647559335,42.73718299580369,38.35802804907575,42.26359338061466,,,,,subject_macro_f1;subject_bal_acc;window_bal_acc;window_macro_f1;window_acc
+pd_pads,control_raw,"Raw input, 0 layers",probe,12.643678160919539,33.33333333333333,33.33333333333333,12.643678160919539,23.404255319148938,,,,,subject_macro_f1;subject_bal_acc;window_bal_acc;window_macro_f1;window_acc
+pd_pads,mae_5src,WristMAE (Ours),finetune,51.852500912741874,63.94237945962084,50.99712229022574,43.614873352806875,45.26595744680851,,,,,subject_macro_f1;subject_bal_acc;window_bal_acc;window_macro_f1;window_acc
+pd_pads,limubert_5src,LIMU-BERT,finetune,45.96172674677347,54.95596357665322,49.322991822991824,43.007910183766725,48.93026004728133,,,,,subject_macro_f1;subject_bal_acc;window_bal_acc;window_macro_f1;window_acc
+pd_pads,simmtm_5src,SimMTM,finetune,46.805692626761065,59.26257650395582,49.110854024647125,40.59963397081205,41.45981087470449,,,,,subject_macro_f1;subject_bal_acc;window_bal_acc;window_macro_f1;window_acc
+pd_pads,focal_5src,FOCAL,finetune,46.3095238095238,57.67278698313181,45.063691098173855,36.98500582920236,37.75413711583924,,,,,subject_macro_f1;subject_bal_acc;window_bal_acc;window_macro_f1;window_acc
+pd_pads,relcon_5src,RelCon,finetune,49.14816513177169,58.090759814897744,46.916330795641144,39.87080017775287,41.41252955082742,,,,,subject_macro_f1;subject_bal_acc;window_bal_acc;window_macro_f1;window_acc
+pd_pads,sslwear_5src,SSL-Wearables,finetune,48.74140637687436,59.0311986863711,49.95977840805427,41.87621403186875,43.156028368794324,,,,,subject_macro_f1;subject_bal_acc;window_bal_acc;window_macro_f1;window_acc
+pd_pads,mae_5src_noaltattn,"WristMAE, plain attention",finetune,61.03703703703703,68.30870279146141,50.083636031911894,44.936829342207375,49.72222222222222,,,,,subject_macro_f1;subject_bal_acc;window_bal_acc;window_macro_f1;window_acc
+pd_pads,mae_5src_acconly,"WristMAE, accelerometer only",finetune,59.88727858293076,67.67427974324526,48.67227281020385,42.598928378832426,44.71631205673759,,,,,subject_macro_f1;subject_bal_acc;window_bal_acc;window_macro_f1;window_acc
+pd_pads,scratch,Scratch,scratch,29.89417989417989,45.5067920585162,43.8990894163308,31.792080972960452,31.879432624113473,,,,,subject_macro_f1;subject_bal_acc;window_bal_acc;window_macro_f1;window_acc
+pd_pads,pads_boss,"PADS pipeline, BOSS + CatBoost (Varghese et al.)",external,48.10958658416286,58.456486042692944,42.09504735366805,35.78842776001224,37.192671394799056,,,,,subject_macro_f1;subject_bal_acc;window_bal_acc;window_macro_f1;window_acc
+har_hhar,mae_5src,WristMAE (Ours),probe,62.067667472456186,62.653006244313005,61.8564449455092,,,,,,,macro_f1;bal_acc;acc
+har_mhealth,mae_5src,WristMAE (Ours),probe,68.59750749194534,69.97365173433293,68.25548141086749,,,,,,,macro_f1;bal_acc;acc
+har_prism,mae_5src,WristMAE (Ours),probe,27.900376801913968,27.236304144836275,66.97874000390091,,,,,,,macro_f1;bal_acc;acc
+har_userwatch,mae_5src,WristMAE (Ours),probe,72.71238069888955,72.20428555340621,73.0,,,,,,,macro_f1;bal_acc;acc
+har_mean,mae_5src,WristMAE (Ours),probe,57.819483116301264,,,,,,,,,macro_f1
+har_hhar,limubert_5src,LIMU-BERT,probe,61.201733262933544,60.83965524325943,59.90229237128899,,,,,,,macro_f1;bal_acc;acc
+har_mhealth,limubert_5src,LIMU-BERT,probe,67.60070160743558,68.05681224893885,66.3489037178265,,,,,,,macro_f1;bal_acc;acc
+har_prism,limubert_5src,LIMU-BERT,probe,25.0563823034932,25.14683812280435,65.97750471360769,,,,,,,macro_f1;bal_acc;acc
+har_userwatch,limubert_5src,LIMU-BERT,probe,71.05917910311625,70.30691064906107,71.44444444444444,,,,,,,macro_f1;bal_acc;acc
+har_mean,limubert_5src,LIMU-BERT,probe,56.22949906924464,,,,,,,,,macro_f1
+har_hhar,simmtm_5src,SimMTM,probe,57.54691034944489,57.789701147140214,56.82074408117249,,,,,,,macro_f1;bal_acc;acc
+har_mhealth,simmtm_5src,SimMTM,probe,61.37127441749204,63.09394256224215,62.53574833174452,,,,,,,macro_f1;bal_acc;acc
+har_prism,simmtm_5src,SimMTM,probe,26.713729558667875,26.313505472596827,66.86171250243808,,,,,,,macro_f1;bal_acc;acc
+har_userwatch,simmtm_5src,SimMTM,probe,66.80857160434235,67.2176212273175,68.66666666666667,,,,,,,macro_f1;bal_acc;acc
+har_mean,simmtm_5src,SimMTM,probe,53.11012148248679,,,,,,,,,macro_f1
+har_hhar,focal_5src,FOCAL,probe,44.9448095778419,46.657750514686946,45.847425779782036,,,,,,,macro_f1;bal_acc;acc
+har_mhealth,focal_5src,FOCAL,probe,62.98459814077716,62.9837997113888,63.39370829361296,,,,,,,macro_f1;bal_acc;acc
+har_prism,focal_5src,FOCAL,probe,21.92555943176763,23.17246275963516,65.89948637929913,,,,,,,macro_f1;bal_acc;acc
+har_userwatch,focal_5src,FOCAL,probe,46.98823011672481,48.14582132422874,48.888888888888886,,,,,,,macro_f1;bal_acc;acc
+har_mean,focal_5src,FOCAL,probe,44.21079931677788,,,,,,,,,macro_f1
+har_hhar,relcon_5src,RelCon,probe,33.3098308416739,35.48821907507121,35.47538519353626,,,,,,,macro_f1;bal_acc;acc
+har_mhealth,relcon_5src,RelCon,probe,38.35878745244416,40.3656354464951,42.89799809342231,,,,,,,macro_f1;bal_acc;acc
+har_prism,relcon_5src,RelCon,probe,18.326851373606008,21.24903083839281,64.8267342825564,,,,,,,macro_f1;bal_acc;acc
+har_userwatch,relcon_5src,RelCon,probe,51.639294956788774,53.06601868528863,53.333333333333336,,,,,,,macro_f1;bal_acc;acc
+har_mean,relcon_5src,RelCon,probe,35.408691156128214,,,,,,,,,macro_f1
+har_hhar,sslwear_5src,SSL-Wearables,probe,59.18854111494102,59.661619875332775,59.52649379932357,,,,,,,macro_f1;bal_acc;acc
+har_mhealth,sslwear_5src,SSL-Wearables,probe,66.3291355148599,67.04951093956755,66.25357483317445,,,,,,,macro_f1;bal_acc;acc
+har_prism,sslwear_5src,SSL-Wearables,probe,27.567264826815297,27.07729730617893,66.25056888368766,,,,,,,macro_f1;bal_acc;acc
+har_userwatch,sslwear_5src,SSL-Wearables,probe,67.38163328067253,66.62628378198028,67.22222222222223,,,,,,,macro_f1;bal_acc;acc
+har_mean,sslwear_5src,SSL-Wearables,probe,55.116643684322185,,,,,,,,,macro_f1
+har_hhar,mae_5src_noaltattn,"WristMAE, plain attention",probe,60.18452840350537,60.36237958124519,60.31567080045096,,,,,,,macro_f1;bal_acc;acc
+har_mhealth,mae_5src_noaltattn,"WristMAE, plain attention",probe,68.0641086773738,69.63718267167134,68.54146806482365,,,,,,,macro_f1;bal_acc;acc
+har_prism,mae_5src_noaltattn,"WristMAE, plain attention",probe,26.45189635705403,26.08895037463224,66.43261166374099,,,,,,,macro_f1;bal_acc;acc
+har_userwatch,mae_5src_noaltattn,"WristMAE, plain attention",probe,73.02040754268603,71.39453131850632,72.66666666666667,,,,,,,macro_f1;bal_acc;acc
+har_mean,mae_5src_noaltattn,"WristMAE, plain attention",probe,56.93023524515481,,,,,,,,,macro_f1
+har_hhar,mae_5src_acconly,"WristMAE, accelerometer only",probe,57.77468620096887,58.31194179798304,58.77489665539271,,,,,,,macro_f1;bal_acc;acc
+har_mhealth,mae_5src_acconly,"WristMAE, accelerometer only",probe,68.49604810004192,70.81653950978144,69.30409914204004,,,,,,,macro_f1;bal_acc;acc
+har_prism,mae_5src_acconly,"WristMAE, accelerometer only",probe,27.965877512144065,27.23922793321706,66.46511930303622,,,,,,,macro_f1;bal_acc;acc
+har_userwatch,mae_5src_acconly,"WristMAE, accelerometer only",probe,69.48651714904642,69.00308634165448,70.0,,,,,,,macro_f1;bal_acc;acc
+har_mean,mae_5src_acconly,"WristMAE, accelerometer only",probe,55.93078224055032,,,,,,,,,macro_f1
+har_hhar,control_random,Random frozen encoder,probe,32.376438427956884,36.180520023459515,37.73017662532882,,,,,,,macro_f1;bal_acc;acc
+har_mhealth,control_random,Random frozen encoder,probe,46.575058228733226,48.86458961122512,51.76358436606292,,,,,,,macro_f1;bal_acc;acc
+har_prism,control_random,Random frozen encoder,probe,16.064712007024706,20.17462717762193,64.14407385735647,,,,,,,macro_f1;bal_acc;acc
+har_userwatch,control_random,Random frozen encoder,probe,9.695242776419427,12.093286107383792,17.666666666666668,,,,,,,macro_f1;bal_acc;acc
+har_mean,control_random,Random frozen encoder,probe,26.177862860033564,,,,,,,,,macro_f1
+har_hhar,control_raw,"Raw input, 0 layers",probe,5.316908822910086,16.666666666666664,18.97782788425404,,,,,,,macro_f1;bal_acc;acc
+har_mhealth,control_raw,"Raw input, 0 layers",probe,1.4107038976148922,8.333333333333332,9.246901811248808,,,,,,,macro_f1;bal_acc;acc
+har_prism,control_raw,"Raw input, 0 layers",probe,15.634059405940596,20.0,64.16357844093362,,,,,,,macro_f1;bal_acc;acc
+har_userwatch,control_raw,"Raw input, 0 layers",probe,0.14523556500177118,1.6666666666666667,4.555555555555555,,,,,,,macro_f1;bal_acc;acc
+har_mean,control_raw,"Raw input, 0 layers",probe,5.626726922866837,,,,,,,,,macro_f1
+har_hhar,mae_5src,WristMAE (Ours),finetune,60.269701459068216,60.97778999299586,60.24051108605787,,,,,,,macro_f1;bal_acc;acc
+har_mhealth,mae_5src,WristMAE (Ours),finetune,72.36298848642328,74.94348705420256,73.68922783603432,,,,,,,macro_f1;bal_acc;acc
+har_prism,mae_5src,WristMAE (Ours),finetune,36.84501687913263,36.193398871331546,67.77192640270464,,,,,,,macro_f1;bal_acc;acc
+har_userwatch,mae_5src,WristMAE (Ours),finetune,86.10479870080552,85.40371035102152,85.88888888888889,,,,,,,macro_f1;bal_acc;acc
+har_mean,mae_5src,WristMAE (Ours),finetune,63.89562638135742,,,,,,,,,macro_f1
+har_hhar,limubert_5src,LIMU-BERT,finetune,56.33099444981653,58.54570772413816,57.19654265313792,,,,,,,macro_f1;bal_acc;acc
+har_mhealth,limubert_5src,LIMU-BERT,finetune,62.86592553876077,69.24917747927357,68.0648236415634,,,,,,,macro_f1;bal_acc;acc
+har_prism,limubert_5src,LIMU-BERT,finetune,29.456286898969985,29.152429848648094,64.89174956114687,,,,,,,macro_f1;bal_acc;acc
+har_userwatch,limubert_5src,LIMU-BERT,finetune,75.82682812721131,76.30273021256588,78.33333333333333,,,,,,,macro_f1;bal_acc;acc
+har_mean,limubert_5src,LIMU-BERT,finetune,56.120008753689646,,,,,,,,,macro_f1
+har_hhar,simmtm_5src,SimMTM,finetune,46.98562551551742,48.050095762985585,48.365276211950395,,,,,,,macro_f1;bal_acc;acc
+har_mhealth,simmtm_5src,SimMTM,finetune,56.809607684745004,62.8468707758344,62.34509056244042,,,,,,,macro_f1;bal_acc;acc
+har_prism,simmtm_5src,SimMTM,finetune,30.781056964885767,30.569080578515294,67.3363240361485,,,,,,,macro_f1;bal_acc;acc
+har_userwatch,simmtm_5src,SimMTM,finetune,73.6520747595483,74.30641630402455,74.55555555555556,,,,,,,macro_f1;bal_acc;acc
+har_mean,simmtm_5src,SimMTM,finetune,52.05709123117413,,,,,,,,,macro_f1
+har_hhar,focal_5src,FOCAL,finetune,61.27046337152981,61.67249621373288,61.367906801954156,,,,,,,macro_f1;bal_acc;acc
+har_mhealth,focal_5src,FOCAL,finetune,65.93984789302519,68.15571751420241,67.77883698760725,,,,,,,macro_f1;bal_acc;acc
+har_prism,focal_5src,FOCAL,finetune,28.771748890571246,27.880850936105052,68.53260516221312,,,,,,,macro_f1;bal_acc;acc
+har_userwatch,focal_5src,FOCAL,finetune,68.32919917006606,67.50103041849523,68.88888888888889,,,,,,,macro_f1;bal_acc;acc
+har_mean,focal_5src,FOCAL,finetune,56.07781483129808,,,,,,,,,macro_f1
+har_hhar,relcon_5src,RelCon,finetune,42.91068827131796,46.30133550318743,46.674182638105975,,,,,,,macro_f1;bal_acc;acc
+har_mhealth,relcon_5src,RelCon,finetune,60.34168198160796,63.35297609619847,62.24976167778837,,,,,,,macro_f1;bal_acc;acc
+har_prism,relcon_5src,RelCon,finetune,28.919325601987993,28.386272733256067,68.35056238215981,,,,,,,macro_f1;bal_acc;acc
+har_userwatch,relcon_5src,RelCon,finetune,78.96940952609042,78.30323440433621,79.11111111111111,,,,,,,macro_f1;bal_acc;acc
+har_mean,relcon_5src,RelCon,finetune,52.78527634525108,,,,,,,,,macro_f1
+har_hhar,sslwear_5src,SSL-Wearables,finetune,53.45405728813457,55.69197231188586,55.956407365652005,,,,,,,macro_f1;bal_acc;acc
+har_mhealth,sslwear_5src,SSL-Wearables,finetune,64.78655983445454,68.53188849585554,68.92278360343184,,,,,,,macro_f1;bal_acc;acc
+har_prism,sslwear_5src,SSL-Wearables,finetune,32.773549393045656,32.50755187779137,67.39483778687992,,,,,,,macro_f1;bal_acc;acc
+har_userwatch,sslwear_5src,SSL-Wearables,finetune,75.88796629659777,75.61480091457373,78.0,,,,,,,macro_f1;bal_acc;acc
+har_mean,sslwear_5src,SSL-Wearables,finetune,56.725533203058134,,,,,,,,,macro_f1
+har_hhar,mae_5src_noaltattn,"WristMAE, plain attention",finetune,52.63603316162049,54.9420441260023,55.204810221721154,,,,,,,macro_f1;bal_acc;acc
+har_mhealth,mae_5src_noaltattn,"WristMAE, plain attention",finetune,68.62593204058584,72.72552042348714,71.40133460438513,,,,,,,macro_f1;bal_acc;acc
+har_prism,mae_5src_noaltattn,"WristMAE, plain attention",finetune,36.164409423180146,35.32294364706216,70.00195045835771,,,,,,,macro_f1;bal_acc;acc
+har_userwatch,mae_5src_noaltattn,"WristMAE, plain attention",finetune,78.57333209986403,78.0725337069706,79.77777777777779,,,,,,,macro_f1;bal_acc;acc
+har_mean,mae_5src_noaltattn,"WristMAE, plain attention",finetune,58.99992668131263,,,,,,,,,macro_f1
+har_hhar,mae_5src_acconly,"WristMAE, accelerometer only",finetune,56.794615423248764,57.915570825657305,58.02329951146186,,,,,,,macro_f1;bal_acc;acc
+har_mhealth,mae_5src_acconly,"WristMAE, accelerometer only",finetune,68.27158275006312,70.68052321063027,68.82745471877979,,,,,,,macro_f1;bal_acc;acc
+har_prism,mae_5src_acconly,"WristMAE, accelerometer only",finetune,29.757846554475933,29.501336635792093,67.47285612118849,,,,,,,macro_f1;bal_acc;acc
+har_userwatch,mae_5src_acconly,"WristMAE, accelerometer only",finetune,77.21156308385228,76.62614047546448,77.77777777777779,,,,,,,macro_f1;bal_acc;acc
+har_mean,mae_5src_acconly,"WristMAE, accelerometer only",finetune,58.00890195291002,,,,,,,,,macro_f1
+har_hhar,scratch,Scratch,scratch,48.833564345494906,50.31488457506937,49.64299135663284,,,,,,,macro_f1;bal_acc;acc
+har_mhealth,scratch,Scratch,scratch,63.189417481037516,66.16698951547957,65.2049571020019,,,,,,,macro_f1;bal_acc;acc
+har_prism,scratch,Scratch,scratch,27.807235558880848,27.219167293804347,68.5000975229179,,,,,,,macro_f1;bal_acc;acc
+har_userwatch,scratch,Scratch,scratch,73.53730774068141,73.38341070190381,74.44444444444444,,,,,,,macro_f1;bal_acc;acc
+har_mean,scratch,Scratch,scratch,53.34188128152367,,,,,,,,,macro_f1
+har_hhar,deepconvlstm,DeepConvLSTM (Ordóñez \& Roggen),external,44.818615787884426,46.59850278873476,44.795189778278846,,,,,,,macro_f1;bal_acc;acc
+har_mhealth,deepconvlstm,DeepConvLSTM (Ordóñez \& Roggen),external,55.56921370990461,59.48021419688372,60.24785510009533,,,,,,,macro_f1;bal_acc;acc
+har_prism,deepconvlstm,DeepConvLSTM (Ordóñez \& Roggen),external,35.64961212428191,33.979258832127954,70.5675833820948,,,,,,,macro_f1;bal_acc;acc
+har_userwatch,deepconvlstm,DeepConvLSTM (Ordóñez \& Roggen),external,71.63831531792528,72.93627205847095,72.77777777777777,,,,,,,macro_f1;bal_acc;acc
+har_mean,deepconvlstm,DeepConvLSTM (Ordóñez \& Roggen),external,51.91893923499905,,,,,,,,,macro_f1

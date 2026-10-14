@@ -4,20 +4,20 @@
   "protocol": "scratch",
   "seed": 42,
   "metrics": {
-    "val_clip_macro_f1": 0.6212663067926225,
-    "val_clip_acc": 0.7156862745098039,
-    "val_window_macro_f1": 0.4855007006099239,
-    "val_window_acc": 0.6062091503267973,
-    "clip_macro_f1": 0.4875816993464053,
-    "clip_acc": 0.6091954022988506,
-    "window_macro_f1": 0.4034916454965454,
-    "window_acc": 0.5191570881226054
+    "val_clip_macro_f1": 0.6362434482543695,
+    "val_clip_acc": 0.7549019607843137,
+    "val_window_macro_f1": 0.49955958020254676,
+    "val_window_acc": 0.6372549019607843,
+    "clip_macro_f1": 0.6081037062982316,
+    "clip_acc": 0.6896551724137931,
+    "window_macro_f1": 0.4507517157299014,
+    "window_acc": 0.5651340996168582
   },
   "primary_metric": "clip_macro_f1",
   "eval_split": "test",
-  "run": "vit1d_gesture_supervised_openwatch_6class_altattn_scratch_windowed_strat",
+  "run": "bench_microgesture_openwatch__scratch__scratch__s42",
   "checkpoint": "best.pt",
-  "checkpoint_step": 2800,
+  "checkpoint_step": 5000,
   "selection": {
     "split": "val",
     "monitor": "macro_f1",
@@ -25,23 +25,23 @@
     "note": "window-level val macro-F1 (paper \u00a73.3.3), inverse-frequency class-weighted CE"
   },
   "job_ids": {
-    "train": 9404053,
-    "score": "9560119"
+    "train": 6724710,
+    "score": "6724710"
   },
   "provenance": {
     "source": "scorer:bench.score.microgesture",
-    "date": "2026-08-16T18:47:53-05:00",
+    "date": "2026-09-18T22:35:55-05:00",
     "git": "unknown",
-    "legacy_run": true,
+    "legacy_run": false,
     "info": {
       "n_clips_val": 102,
       "n_windows_val": 612,
       "n_clips_test": 87,
       "n_windows_test": 522,
-      "train_end": "early stopping at step=6800 epoch=524"
+      "train_end": "early stopping at step=9000 epoch=693"
     }
   },
   "status": "ok",
-  "notes": "harvested from a pre-harness run with a recipe-equivalent config.",
+  "notes": "",
   "schema_version": 1
 }

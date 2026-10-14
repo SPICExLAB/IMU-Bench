@@ -33,7 +33,10 @@ for enc in ENCS:
             yaml.safe_dump(cfg, open(f"bench/generated/configs/{name}.yaml", "w"), sort_keys=False)
             tl  = "12:00:00" if t in LONG else "03:00:00"
             mem = "80G" if t == "language_humanml3d" else "48G"
-            for part, acct, gres in (("gengpu", "p32139", "gpu:a100:1"), ("b53017", "b53017", "gpu:1")):
+            # SINGLE job per cell. Dual-partition twins both `rm -rf runs/{name}` and then train
+            # into the same directory, silently corrupting the run (audit 2026-09-04: 27 bench
+            # cells affected). Never re-introduce a second partition in this loop.
+            for part, acct, gres in (("gengpu", "p32139", "gpu:a100:1"),):
                 ex = "#SBATCH --exclude=qgpu3006,qgpu3013\n" if part == "gengpu" else ""
                 sh = f"""#!/bin/bash
 #SBATCH --account={acct}

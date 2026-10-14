@@ -4,16 +4,16 @@
   "protocol": "probe",
   "seed": 42,
   "metrics": {
-    "macro_f1": 0.771819347231805,
-    "bal_acc": 0.7772633147375769,
-    "acc": 0.7797902764537655,
-    "val_loss": 0.485834
+    "macro_f1": 0.7687208309347877,
+    "bal_acc": 0.7799046857493152,
+    "acc": 0.7816968541468065,
+    "val_loss": 0.461853
   },
   "primary_metric": "macro_f1",
   "eval_split": "val",
   "run": "bench_har_mhealth__mae_4src_dc__probe__s42",
   "checkpoint": "best.pt",
-  "checkpoint_step": 7400,
+  "checkpoint_step": 14600,
   "selection": {
     "split": "val",
     "monitor": "val_loss",
@@ -22,11 +22,11 @@
   },
   "job_ids": {
     "train": null,
-    "score": "4329676"
+    "score": "5654080"
   },
   "provenance": {
     "source": "scorer:bench.score.har",
-    "date": "2026-08-25T10:54:02-05:00",
+    "date": "2026-09-07T12:32:54-05:00",
     "git": "unknown",
     "legacy_run": false,
     "info": {
@@ -34,7 +34,7 @@
       "n_classes_seen": 12,
       "n_classes_head": 12,
       "n_val_batches": 5,
-      "logged_macro_f1_at_ckpt": 0.771819,
+      "logged_macro_f1_at_ckpt": 0.768721,
       "train_end": "unknown/incomplete"
     }
   },

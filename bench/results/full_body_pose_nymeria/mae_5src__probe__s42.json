@@ -4,14 +4,21 @@
   "protocol": "probe",
   "seed": 42,
   "metrics": {
-    "mpjpe_mm": 98.106741,
-    "val_pose_mse": 0.01951
+    "mpjpe_mm": 97.85016,
+    "val_pose_mse": 0.019345,
+    "mpjpe_mm_recomputed": 97.8163403667419,
+    "local_ang_err_deg": 11.86096752476427,
+    "global_ang_err_deg": 22.47905851014698,
+    "mp_joint_err_cm": 9.388364432147652,
+    "mp_mesh_err_cm": 11.204939037585886,
+    "mp_local_ang_err_deg": 9.522628422525756,
+    "mp_global_ang_err_deg": 21.217464847304733
   },
   "primary_metric": "mpjpe_mm",
   "eval_split": "val",
-  "run": "vit1d_full_body_pose_probe_nymeria_mae_realdata_ocdetect_eatingspeed_motionx_sonic",
+  "run": "bench_full_body_pose_nymeria__mae_5src__probe__s42",
   "checkpoint": "best_mpjpe.pt",
-  "checkpoint_step": 56000,
+  "checkpoint_step": 34000,
   "selection": {
     "split": "val",
     "monitor": "mpjpe_mm",
@@ -19,21 +26,42 @@
     "via": "best_mpjpe.pt (legacy)"
   },
   "job_ids": {
-    "train": null,
-    "score": null
+    "train": 6749192,
+    "score": "6749192"
   },
   "provenance": {
     "source": "scorer:bench.score.full_body_pose",
-    "date": "2026-08-16T17:24:22-05:00",
-    "git": "1b95aa3-dirty",
-    "legacy_run": true,
+    "date": "2026-09-20T00:22:02-05:00",
+    "git": "unknown",
+    "legacy_run": false,
     "info": {
-      "min_val_mpjpe_mm": 98.106741,
-      "min_val_mpjpe_step": 56000,
-      "n_val_evals": 623
+      "min_val_mpjpe_mm": 97.85016,
+      "min_val_mpjpe_step": 34000,
+      "n_val_evals": 54,
+      "train_end": "early stopping at step=54000 epoch=88",
+      "extra_metrics": {
+        "n_windows": 18269,
+        "n_poses": 2338432,
+        "n_val_windows_total": 18269,
+        "step": 34000,
+        "max_batches": 0,
+        "amp": true,
+        "scorer": "bench.rescore_full_body_extra",
+        "ignored_joints": [
+          0,
+          7,
+          8,
+          10,
+          11,
+          20,
+          22,
+          23
+        ],
+        "date": "2026-09-21T12:45:19-0500"
+      }
     }
   },
   "status": "ok",
-  "notes": "harvested from a pre-harness run with a recipe-equivalent config.",
+  "notes": "",
   "schema_version": 1
 }

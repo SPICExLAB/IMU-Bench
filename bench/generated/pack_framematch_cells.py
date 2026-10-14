@@ -90,7 +90,10 @@ if [ ! -f runs/{wait_run}/.done ]; then echo "[fmpack] runs/{wait_run}/.done nev
         open(sh, "w").write(body); os.chmod(sh, 0o755)
         if a.dry_run:
             print("  would submit", sh, pk); continue
-        for acct, part in (("b53017", "b53017"), ("p32139", "gengpu")):
+        # SINGLE job per cell. Dual-partition twins both `rm -rf runs/{name}` and then train
+        # into the same directory, silently corrupting the run (audit 2026-09-04: 27 bench
+        # cells affected). Never re-introduce a second partition in this loop.
+        for acct, part in (("p32139", "gengpu"),):
             cmd = ["sbatch", "--parsable", f"--account={acct}", f"--partition={part}"]
             if a.deps:
                 cmd.append("--dependency=afterany:" + a.deps.replace(",", ":"))

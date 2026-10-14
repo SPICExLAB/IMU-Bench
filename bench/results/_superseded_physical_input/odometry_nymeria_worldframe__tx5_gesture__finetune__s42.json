@@ -1,0 +1,41 @@
+{
+  "task": "odometry_nymeria_worldframe",
+  "encoder": "tx5_gesture",
+  "protocol": "finetune",
+  "seed": 42,
+  "metrics": {
+    "vel_mse": 0.017394233494997025,
+    "ate_m": 0.12924653973922898,
+    "drift_pct": 35.52104971596711
+  },
+  "primary_metric": "ate_m",
+  "eval_split": "val",
+  "run": "bench_odometry_nymeria_worldframe__tx5_gesture__finetune__s42",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 22000,
+  "selection": {
+    "split": "val",
+    "monitor": "val_loss",
+    "mode": "min"
+  },
+  "job_ids": {
+    "train": 6577836,
+    "score": "6577836"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.odometry",
+    "date": "2026-09-18T07:05:34-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_val_windows": 73515,
+      "n_val_windows_total": 73515,
+      "n_val_sessions": 101,
+      "T": 128,
+      "train_end": "early stopping at step=42000 epoch=17"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

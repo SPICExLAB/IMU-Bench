@@ -1,0 +1,44 @@
+{
+  "task": "har_utd_mhad",
+  "encoder": "vd_ek25_f0p1_zs",
+  "protocol": "probe",
+  "seed": 42,
+  "metrics": {
+    "macro_f1": 0.6472340287139748,
+    "bal_acc": 0.652294068365497,
+    "acc": 0.6521739130434783,
+    "val_loss": 1.231274
+  },
+  "primary_metric": "macro_f1",
+  "eval_split": "val",
+  "run": "bench_har_utd_mhad__vd_ek25_f0p1_zs__probe__s42",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 800,
+  "selection": {
+    "split": "val",
+    "monitor": "val_loss",
+    "mode": "min",
+    "note": "same convention as Experiments_table \u00a73 (metrics read at the min-val-loss checkpoint)"
+  },
+  "job_ids": {
+    "train": 6378668,
+    "score": "6378668"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.har",
+    "date": "2026-09-15T10:07:04-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_val_samples": 207,
+      "n_classes_seen": 21,
+      "n_classes_head": 21,
+      "n_val_batches": 1,
+      "logged_macro_f1_at_ckpt": 0.647234,
+      "train_end": "early stopping at step=4800 epoch=1600"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

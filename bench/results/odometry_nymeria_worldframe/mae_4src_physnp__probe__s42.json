@@ -4,15 +4,15 @@
   "protocol": "probe",
   "seed": 42,
   "metrics": {
-    "vel_mse": 0.021058300510048866,
-    "ate_m": 0.15878080278180898,
-    "drift_pct": 47.0887051447161
+    "vel_mse": 0.01637558825314045,
+    "ate_m": 0.11904567133686789,
+    "drift_pct": 32.88909547067861
   },
   "primary_metric": "ate_m",
   "eval_split": "val",
   "run": "bench_odometry_nymeria_worldframe__mae_4src_physnp__probe__s42",
   "checkpoint": "best.pt",
-  "checkpoint_step": 182000,
+  "checkpoint_step": 202000,
   "selection": {
     "split": "val",
     "monitor": "val_loss",
@@ -20,11 +20,11 @@
   },
   "job_ids": {
     "train": null,
-    "score": "4481035"
+    "score": "5654069"
   },
   "provenance": {
     "source": "scorer:bench.score.odometry",
-    "date": "2026-08-26T13:18:36-05:00",
+    "date": "2026-09-07T15:52:49-05:00",
     "git": "unknown",
     "legacy_run": false,
     "info": {

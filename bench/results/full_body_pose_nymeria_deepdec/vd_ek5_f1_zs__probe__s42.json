@@ -1,0 +1,40 @@
+{
+ "task": "full_body_pose_nymeria_deepdec",
+ "encoder": "vd_ek5_f1_zs",
+ "protocol": "probe",
+ "seed": 42,
+ "metrics": {
+  "mpjpe_mm": 91.111149,
+  "val_pose_mse": 0.020232
+ },
+ "primary_metric": "mpjpe_mm",
+ "eval_split": "val",
+ "run": "_deepdec/bench_full_body_pose_nymeria__vd_ek5_f1_zs__probe__s42",
+ "checkpoint": "best_mpjpe.pt",
+ "checkpoint_step": 122000,
+ "selection": {
+  "split": "val",
+  "monitor": "mpjpe_mm",
+  "mode": "min",
+  "via": "best_mpjpe.pt (legacy)"
+ },
+ "job_ids": {
+  "train": 6378818,
+  "score": "6378818"
+ },
+ "provenance": {
+  "source": "scorer:bench.score.full_body_pose",
+  "date": "2026-09-16T09:05:17-05:00",
+  "git": "unknown",
+  "legacy_run": false,
+  "info": {
+   "min_val_mpjpe_mm": 91.111149,
+   "min_val_mpjpe_step": 122000,
+   "n_val_evals": 142,
+   "train_end": "early stopping at step=142000 epoch=231"
+  }
+ },
+ "status": "ok",
+ "notes": "moved 2026-09-19 from task full_body_pose_nymeria: pre-switch frozen probe (the decoder is whatever the run used -- deep 4+8/12-layer for runs after 2026-08-27, older decoders before); not part of the paper",
+ "schema_version": 1
+}

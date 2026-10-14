@@ -1,0 +1,67 @@
+{
+  "task": "full_body_pose_nymeria",
+  "encoder": "mae_5src_acconly",
+  "protocol": "finetune",
+  "seed": 42,
+  "metrics": {
+    "mpjpe_mm": 94.423523,
+    "val_pose_mse": 0.019933,
+    "mpjpe_mm_recomputed": 94.43330735378629,
+    "local_ang_err_deg": 11.953590019192726,
+    "global_ang_err_deg": 22.464516121969936,
+    "mp_joint_err_cm": 9.073016763457758,
+    "mp_mesh_err_cm": 10.872020107542616,
+    "mp_local_ang_err_deg": 9.610697854908759,
+    "mp_global_ang_err_deg": 21.18129502416042
+  },
+  "primary_metric": "mpjpe_mm",
+  "eval_split": "val",
+  "run": "bench_full_body_pose_nymeria__mae_5src_acconly__finetune__s42",
+  "checkpoint": "best_mpjpe.pt",
+  "checkpoint_step": 12000,
+  "selection": {
+    "split": "val",
+    "monitor": "mpjpe_mm",
+    "mode": "min",
+    "via": "best_mpjpe.pt (legacy)"
+  },
+  "job_ids": {
+    "train": 6577713,
+    "score": "6577713"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.full_body_pose",
+    "date": "2026-09-18T17:25:11-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "min_val_mpjpe_mm": 94.423523,
+      "min_val_mpjpe_step": 12000,
+      "n_val_evals": 32,
+      "train_end": "early stopping at step=32000 epoch=52",
+      "extra_metrics": {
+        "n_windows": 18269,
+        "n_poses": 2338432,
+        "n_val_windows_total": 18269,
+        "step": 12000,
+        "max_batches": 0,
+        "amp": true,
+        "scorer": "bench.rescore_full_body_extra",
+        "ignored_joints": [
+          0,
+          7,
+          8,
+          10,
+          11,
+          20,
+          22,
+          23
+        ],
+        "date": "2026-09-21T16:23:30-0500"
+      }
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

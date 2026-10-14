@@ -1,0 +1,141 @@
+# Stage 1 of the RelCon native-normalisation arm: configs/pretrain5src/relcon_motifdist_5src.yaml
+# on the un-normalised cache twin, physical units. The distance network's own RevIN
+# (baselines/SSL/relcon/relcon/nets/CrossAttn/CrossAttn_Net.py:34) is untouched -- it is the
+# normalisation RelCon specifies, and it is the reason this stage does not need a z-scored input.
+# Consumed by configs/nativenorm/relcon_5src_native.yaml via objective.motifdist_run.
+objective:
+  type: relcon_motifdist_pretrain
+  mae_multidata_varlen_altattn_flu:
+    ssl_method: mae
+    cache_dir: /projects/b53017/vbc1591/mae_multidata_cache_v3raw
+    sampling_mode: natural
+    sources:
+      realdata:
+        enabled: true
+        train_on_datasets:
+        - pamap2
+        - recofit
+        - samosa
+        - shoaib
+        - ut_watch
+        - utd_mhad
+        - wisdm
+        subset_index_file_val: /projects/b53017/vbc1591/diversity_saturation/nativenorm/val_idx_realdata.npy
+      ocdetect:
+        enabled: true
+        data_dir: /projects/b53017/vbc1591/OCDetect_extracted/preprocessed
+        splits:
+        - 0.8
+        - 0.1
+        - 0.1
+        max_hours: 100000.0
+        max_files: null
+        subset_index_file_val: /projects/b53017/vbc1591/diversity_saturation/nativenorm/val_idx_ocdetect.npy
+      nymeria:
+        enabled: false
+      totalcapture:
+        enabled: false
+      imuposer:
+        enabled: false
+      eatingspeed:
+        enabled: true
+        root: /projects/b53017/vbc1591/EatingSpeed
+        subsets:
+        - FD-I
+        - FD-II
+        - MO
+        splits:
+        - 0.8
+        - 0.1
+        - 0.1
+        subset_index_file_val: /projects/b53017/vbc1591/diversity_saturation/nativenorm/val_idx_eatingspeed.npy
+      motionx:
+        enabled: true
+        root: /projects/b53017/vbc1591/Motion-Xplusplus
+        val_frac: 0.05
+        add_gravity: true
+        subset_index_file_val: /projects/b53017/vbc1591/diversity_saturation/nativenorm/val_idx_motionx.npy
+      humanml3d:
+        enabled: false
+      sonic:
+        enabled: true
+        root: /projects/b53017/vbc1591/bones-seed
+        add_gravity: true
+        subset_index_file_val: /projects/b53017/vbc1591/diversity_saturation/nativenorm/val_idx_sonic.npy
+      capture24:
+        enabled: false
+      openwatch:
+        enabled: false
+      nhanes:
+        enabled: false
+    scaling_mode: index_file
+    subset_indices_file: /projects/b53017/vbc1591/diversity_saturation/corpus_ablation/idx_ref_v3raw.npy
+  cache_is_normalized: false
+data:
+  batch_size: 128
+  eval_batch_size: 128
+  num_workers: 8
+  pin_memory: true
+  dataset_column: dataset
+  label_column: dataset_activity_id
+  label_name_column: dataset_activity_label
+  session_column: session_id
+  subject_column: subject_id
+  time_column: timestamp_ns
+  drop_na: false
+  variable_length:
+    enabled: true
+    min_samples: 64
+    max_samples: 512
+paths:
+  dataset_path: /projects/b53017/vbc1591/IMULM_master_dataset_v2.parquet
+  runs_root: /gpfs/home/vbc1591/IMU-SSL/runs
+preprocess:
+  filter:
+    enabled: true
+    type: lowpass
+    high_hz: 24
+    low_hz: 0.25
+    order: 4
+  impute:
+    enabled: true
+    method: linear
+    max_missing_frac: 0.2
+  normalize:
+    enabled: true
+    method: physical
+    eps: 1.0e-06
+    acc_scale: 9.81
+    gyro_scale: 5.0
+    clip_acc: 8.0
+    clip_gyro: 8.0
+    n_acc: 3
+random_rotation:
+  enabled: true
+  rotation_set: octahedral
+axis_bias:
+  enabled: false
+gain_jitter:
+  enabled: false
+gaussian_noise:
+  enabled: false
+time_warp:
+  enabled: false
+splits:
+  group_key: subject_id
+  seed: 42
+  shuffle: true
+  test_ratio: 0
+  val_ratio: 0.05
+windowing:
+  window_seconds: 10.24
+  window_hop_ratio: 0.5
+  label_policy: center
+  majority_threshold: 0.8
+  handle_gaps: true
+  gap_method: interpolate
+  max_gap_ms: 200
+  max_gaps_per_session: 100
+wandb:
+  entity: yli32258-northwestern-university
+  project: TransfHAR_project

@@ -1,0 +1,39 @@
+{
+  "task": "full_body_pose_nymeria",
+  "encoder": "mae_5src_acconly",
+  "protocol": "probe",
+  "seed": 42,
+  "metrics": {
+    "mpjpe_mm": 105.164715,
+    "val_pose_mse": 0.021189
+  },
+  "primary_metric": "mpjpe_mm",
+  "eval_split": "val",
+  "run": "bench_full_body_pose_nymeria__mae_5src_acconly__probe__s42",
+  "checkpoint": "latest.pt",
+  "checkpoint_step": 38000,
+  "selection": {
+    "split": "none",
+    "monitor": "fixed_budget",
+    "mode": "latest"
+  },
+  "job_ids": {
+    "train": 6749198,
+    "score": "6958870"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.full_body_pose",
+    "date": "2026-09-20T11:06:32-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "min_val_mpjpe_mm": 102.787634,
+      "min_val_mpjpe_step": 18000,
+      "n_val_evals": 38,
+      "train_end": "early stopping at step=38000 epoch=62"
+    }
+  },
+  "status": "ok",
+  "notes": "selection-free control: final checkpoint, no best-of-N selection (bench/rescore_noselection.py)",
+  "schema_version": 1
+}

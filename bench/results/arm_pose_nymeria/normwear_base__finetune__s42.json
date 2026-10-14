@@ -1,0 +1,39 @@
+{
+  "task": "arm_pose_nymeria",
+  "encoder": "normwear_base",
+  "protocol": "finetune",
+  "seed": 42,
+  "metrics": {
+    "pos_err_cm": 8.541486412286758,
+    "ang_err_deg": 10.418963432312012,
+    "val_pose_mse": 0.018035
+  },
+  "primary_metric": "pos_err_cm",
+  "eval_split": "val",
+  "run": "bench_arm_pose_nymeria__normwear_base__finetune__s42",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 21000,
+  "selection": {
+    "split": "val",
+    "monitor": "val_loss",
+    "mode": "min"
+  },
+  "job_ids": {
+    "train": 7107844,
+    "score": "7153151"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.arm_pose",
+    "date": "2026-09-23T12:04:42-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_val_windows": 18269,
+      "n_val_sessions": 101,
+      "train_end": "unknown/incomplete"
+    }
+  },
+  "status": "ok",
+  "notes": "budget capped at 25,000 optimiser steps (NormWear is ~26x slower per step than the 21M controlled encoders); the controlled rows run to early stopping at 29k-219k steps, so this value is an upper bound on the error",
+  "schema_version": 1
+}

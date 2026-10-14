@@ -10,7 +10,9 @@ Both light and dark themes via CSS tokens.
 from __future__ import annotations
 
 import argparse
+import glob
 import html
+import json
 import os
 import statistics
 from typing import Any, Dict, List
@@ -53,6 +55,7 @@ td.miss{color:var(--muted)}
 tr.ext td{font-style:italic;color:var(--muted)}
 tr.ref td{border-top:2px solid var(--rule)}
 sup.leg{color:var(--warn);font-weight:700}
+sup.deepdec{color:var(--accent);font-weight:700}
 .rank{display:inline-block;min-width:22px;text-align:center;border-radius:4px;background:var(--chip);font-size:12px;padding:0 4px;margin-left:6px}
 .chip{display:inline-block;border-radius:4px;padding:1px 7px;font-size:12px;font-family:ui-monospace,Menlo,Consolas,monospace}
 .c-ok{background:var(--best);color:var(--best-ink)}.c-run{color:var(--run);border:1px solid var(--run)}.c-pend{color:var(--pend);border:1px solid var(--pend)}
@@ -95,7 +98,8 @@ def main_table(tasks, encoders, cells, protocol, tids) -> str:
         f"{'↑' if hib(tasks['tasks'][t], tasks['tasks'][t]['metrics']['primary']) else '↓'}</small></th>" for t in tids) + "<th>Mean rank</th><th>Tasks</th></tr>"
     rows = []
     for e in enc_ids:
-        proto = "scratch" if (e == "scratch" or encoders[e].get("run") is None) else protocol
+        proto = ("scratch" if (e == "scratch" or not (encoders[e].get("run") or encoders[e].get("weights")))
+                 else protocol)   # external-weight baselines (harnet) have no run dir but do have probe/finetune cells
         tds, rk, cov = [], [], 0
         for t in tids:
             task = tasks["tasks"][t]; pk = task["metrics"]["primary"]
@@ -107,6 +111,10 @@ def main_table(tasks, encoders, cells, protocol, tids) -> str:
             s = fmt_metric(task, pk, m) + (f" ± {fmt_metric(task, pk, sd)}" if sd is not None else "") + (f" <small>(n={n})</small>" if n > 1 else "")
             if any(x.provenance.get("legacy_run") for x in c.ok):
                 s += '<sup class="leg" title="harvested from a recipe-equivalent pre-harness run">†</sup>'
+            if proto == "probe" and e == "mae_4src_z" and task.get("_decoder_note"):
+                s += ('<sup class="deepdec" title="uses the promoted ~12-layer probe decoder; every other '
+                      'encoder in this column still uses the 1-layer default, so this cell is not '
+                      'like-for-like">‡</sup>')
             r_ = ranks[t].get(e)
             cls = "num best" if r_ == 1 else "num"
             rank_html = f'<span class="rank">#{r_}</span>' if r_ else ""
@@ -187,6 +195,98 @@ def detail(tasks, encoders, cells, t) -> str:
     return f'<div class="wrap"><table>{head}{"".join(rows)}</table></div>'
 
 
+DECO_TASKS = ["arm_pose_nymeria", "full_body_pose_nymeria", "odometry_nymeria_local"]
+DECO_ARMS = [
+    ("d12a", "12 layers — balanced", "pose: 4 cross-channel + 8 temporal, 256-d/8h · odom: 12×256-d/8h"),
+    ("d12b", "12 layers — temporal-heavy", "pose: 2 cross-channel + 10 temporal, 256-d/8h · odom: 12×192-d/4h"),
+    ("d12w", "12 layers — wide", "pose: 4 cross-channel + 8 temporal, 384-d/6h · odom: 12×384-d/6h"),
+]
+DECO_REFS = [("scratch", "scratch", "same encoder architecture, random init, fully trained"),
+             ("mobileposer", "external", "expert model, its own recipe"),
+             ("tlio", "external", "expert model, its own recipe"),
+             ("airio", "external", "expert model, its own recipe")]
+
+
+def _deco_load():
+    """Ablation JSONs from bench/generated/results_deco/ -> {task: {arm: metrics}}."""
+    out: Dict[str, Dict[str, Dict[str, Any]]] = {}
+    for f in glob.glob(os.path.join(REPO, "bench", "generated", "results_deco", "*.json")):
+        try:
+            d = json.load(open(f))
+        except Exception:
+            continue
+        out.setdefault(d["task"], {})[d["arm"]] = d.get("metrics", {})
+    return out
+
+
+def _small_decoder_baseline(tasks, cells, tids, pks):
+    """The pre-promotion 1-layer-decoder probe number. Once a deep decoder is promoted the live
+    cell holds the DEEP result, so the baseline is read from the archive promote wrote."""
+    out = {}
+    for t in tids:
+        arch = os.path.join(REPO, "bench", "results", "_superseded_small_decoder",
+                            f"{t}__mae_4src_z__probe__s42.json")
+        if os.path.exists(arch):
+            try:
+                out[t] = json.load(open(arch)).get("metrics", {}).get(pks[t]); continue
+            except Exception:
+                pass
+        c = cells.get((t, "mae_4src_z", "probe"))
+        out[t] = c.primary()[0] if c else None
+    return out
+
+
+def deep_decoder(tasks, encoders, cells, jobs) -> str:
+    """Probe-decoder capacity ablation on mae_4src_z, in its own section: these cells use a
+    deeper task head than every other number on this page, so they are not comparable to the
+    frozen-probe table above and never enter the encoder ranking."""
+    deco = _deco_load()
+    if not deco:
+        return ""
+    tids = [t for t in DECO_TASKS if t in tasks["tasks"]]
+    head = "<tr><th>Probe decoder</th>" + "".join(
+        f"<th>{esc(tasks['tasks'][t]['name'])}<small>{esc(tasks['tasks'][t]['metrics'][tasks['tasks'][t]['metrics']['primary']]['label'])} "
+        f"{'↑' if hib(tasks['tasks'][t], tasks['tasks'][t]['metrics']['primary']) else '↓'}</small></th>" for t in tids) + "</tr>"
+
+    base = _small_decoder_baseline(tasks, cells, tids, {t: tasks["tasks"][t]["metrics"]["primary"] for t in tids})
+
+    best = {}
+    for t in tids:
+        task = tasks["tasks"][t]; pk = task["metrics"]["primary"]
+        vals = [v for v in [base[t]] + [deco.get(t, {}).get(a[0], {}).get(pk) for a in DECO_ARMS] if v is not None]
+        best[t] = (max if hib(task, pk) else min)(vals) if vals else None
+
+    running = any(v in ("RUNNING", "PENDING") for k, v in jobs.items()
+                  if k.startswith("decfull") or k.startswith("decodom") or k.startswith("decarm"))
+
+    def cell(t, v):
+        task = tasks["tasks"][t]; pk = task["metrics"]["primary"]
+        if v is None:
+            return f'<td class="num miss">{"running" if running else "·"}</td>'
+        cls = "num best" if best[t] is not None and abs(v - best[t]) < 1e-9 else "num"
+        return f'<td class="{cls}">{fmt_metric(task, pk, v)}</td>'
+
+    rows = ['<tr><td>small decoder <small style="color:var(--muted)">board default — 1× layer</small></td>'
+            + "".join(cell(t, base[t]) for t in tids) + "</tr>"]
+    for arm, label, shape in DECO_ARMS:
+        tds = "".join(cell(t, deco.get(t, {}).get(arm, {}).get(tasks["tasks"][t]["metrics"]["primary"])) for t in tids)
+        rows.append(f'<tr><td>{esc(label)}<br><small style="color:var(--muted)">{esc(shape)}</small></td>{tds}</tr>')
+    for eid, proto, note in DECO_REFS:
+        if eid not in encoders:
+            continue
+        tds, seen = [], False
+        for t in tids:
+            c = cells.get((t, eid, proto))
+            m = c.primary()[0] if c else None
+            if m is None:
+                tds.append('<td class="num miss">·</td>'); continue
+            seen = True
+            tds.append(f'<td class="num">{fmt_metric(tasks["tasks"][t], tasks["tasks"][t]["metrics"]["primary"], m)}</td>')
+        if seen:
+            rows.append(f'<tr class="ref"><td>{esc(encoders[eid]["name"])} <small style="color:var(--muted)">{esc(note)}</small></td>{"".join(tds)}</tr>')
+    return f'<div class="wrap"><table>{head}{"".join(rows)}</table></div>'
+
+
 def render(fragment: bool = False) -> str:
     tasks, encoders = load_tasks(), load_encoders()
     cells = collect(); jobs = squeue_state()
@@ -210,10 +310,13 @@ def render(fragment: bool = False) -> str:
              f"<div class='stat'><b>{n_leg}</b><span>legacy† harvested</span></div>",
              f"<div class='stat'><b>{n_run}</b><span>jobs running</span></div>",
              f"<div class='stat'><b>{n_pend}</b><span>jobs queued</span></div></div>",
-             "<h2>Frozen probe</h2><p class='legend'>Encoder frozen, task head trained. Best per column tinted; #n = rank within task; † = recipe-equivalent legacy run.</p>",
+             "<h2>Frozen probe</h2><p class='legend'>Encoder frozen, task head trained. Best per column tinted; #n = rank within task; † = recipe-equivalent legacy run; <b>‡ = uses the promoted ~12-layer probe decoder while every other encoder in that column still uses the 1-layer default — not like-for-like, and the rank next to it is therefore not a fair rank</b>.</p>",
              main_table(tasks, encoders, cells, "probe", tids),
              "<h2>Full finetune</h2><p class='legend'>Encoder warm-started and trainable. Scratch row = same architecture from random init.</p>",
              main_table(tasks, encoders, cells, "finetune", tids),
+             "<h2>Probe-decoder capacity — mae_4src_z</h2><p class='legend'>Same frozen encoder, same data and recipe; only the task head changes, from the board's 1-layer default to ~12-layer decoders. <b>Not comparable to the frozen-probe table above</b> — these cells are an ablation and are excluded from the ranking until one decoder is promoted into the task cards for every encoder. Best per column tinted across the mae_4src_z rows only.</p>",
+             deep_decoder(tasks, encoders, cells, jobs),
+             "<p class='legend' style='border-left:3px solid var(--warn);padding-left:10px'><b>Contamination caveat.</b> Every cell in the 3×3 grid above ran with a concurrent duplicate job writing into the same run directory for part of training (a dual-partition submission bug, fixed 2026-09-04). Single-job re-runs of the promoted arms reproduce full-body (91.64 → 91.45 mm) and odometry (0.1224 → 0.1228 ATE) but NOT arm pose: the promoted d12w decoder scores 8.14–8.16 cm when run alone, i.e. no better than the 1-layer default. Treat the arm-pose row as noise, not a win. The `mae_4src_z` numbers in the frozen-probe table are from the clean single-job re-runs.</p>",
              "<h2>Coverage of the controlled grid</h2>", coverage(tasks, encoders, cells, jobs, real_tids),
              "<h2>Task cards — unified input / output</h2>", task_cards(tasks, real_tids)]
     for t in [x for x in tids if tasks["tasks"][x].get("virtual")] + real_tids:

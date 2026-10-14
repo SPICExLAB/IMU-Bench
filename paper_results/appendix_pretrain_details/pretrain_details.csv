@@ -1,0 +1,11 @@
+encoder,objective,attention,step_cap,selected_step,run,config
+WristMAE (Ours),"masked patch reconstruction, 75 % mask",alternating,,144000,vit1d_ssl_mae_varlen_altattn_realdata_ocdetect_eatingspeed_motionx_sonic,configs/vit1d_ssl_mae_varlen_altattn_realdata_ocdetect_eatingspeed_motionx_sonic_flu.yaml
+LIMU-BERT,"15 % temporal span mask, MSE, 4x192 decoder",plain,160000,138000,vit1d_ssl_limubert_5src,configs/pretrain5src/limubert_5src.yaml
+SimMTM,"50 % mask, 3 positives, tau=0.2",plain,160000,22000,vit1d_ssl_simmtm_5src,configs/pretrain5src/simmtm_5src.yaml
+FOCAL,"acc/gyro factorised contrastive, tau=0.07",plain,160000,37000,vit1d_ssl_focal_5src,configs/pretrain5src/focal_5src.yaml
+RelCon,"relative contrastive, learned motif distance, tau=0.1",plain,160000,125000,vit1d_ssl_relcon_5src,configs/pretrain5src/relcon_5src.yaml
+SSL-Wearables,"arrow of time + permutation + time warp, p{=}0.5 each",plain,160000,153000,vit1d_ssl_sslwear_5src,configs/pretrain5src/sslwear_5src.yaml
+DINO,"2 global + 4 local crops, EMA teacher, 4,096 prototypes",plain,160000,2000,vit1d_ssl_dino_5src,configs/pretrain5src/dino_5src.yaml
+I-JEPA,"4 target blocks, EMA target encoder, 4x192 predictor",plain,160000,1000,vit1d_ssl_jepa_5src,configs/pretrain5src/jepa_5src.yaml
+"WristMAE, plain attention",as WristMAE,plain,160000,107000,vit1d_ssl_mae_varlen_noaltattn_5src,configs/pretrain5src/mae_noaltattn_5src.yaml
+"WristMAE, accelerometer only","as WristMAE, 3 input channels",alternating,160000,127000,vit1d_ssl_mae_varlen_acconly_5src,configs/pretrain5src/mae_acconly_5src.yaml

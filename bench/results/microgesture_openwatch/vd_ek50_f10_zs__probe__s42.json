@@ -1,0 +1,47 @@
+{
+  "task": "microgesture_openwatch",
+  "encoder": "vd_ek50_f10_zs",
+  "protocol": "probe",
+  "seed": 42,
+  "metrics": {
+    "val_clip_macro_f1": 0.6231149887819666,
+    "val_clip_acc": 0.6372549019607843,
+    "val_window_macro_f1": 0.5066973563601735,
+    "val_window_acc": 0.5490196078431373,
+    "clip_macro_f1": 0.5625717620438011,
+    "clip_acc": 0.6206896551724138,
+    "window_macro_f1": 0.4866288498215181,
+    "window_acc": 0.5421455938697318
+  },
+  "primary_metric": "clip_macro_f1",
+  "eval_split": "test",
+  "run": "bench_microgesture_openwatch__vd_ek50_f10_zs__probe__s42",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 5800,
+  "selection": {
+    "split": "val",
+    "monitor": "macro_f1",
+    "mode": "max",
+    "note": "window-level val macro-F1 (paper \u00a73.3.3), inverse-frequency class-weighted CE"
+  },
+  "job_ids": {
+    "train": 6378703,
+    "score": "6378703"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.microgesture",
+    "date": "2026-09-15T11:05:32-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_clips_val": 102,
+      "n_windows_val": 612,
+      "n_clips_test": 87,
+      "n_windows_test": 522,
+      "train_end": "early stopping at step=9800 epoch=754"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

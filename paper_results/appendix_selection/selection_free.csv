@@ -1,0 +1,172 @@
+task,encoder,encoder_label,protocol,reported_best_ckpt,final_ckpt,delta
+arm_pose_nymeria,mae_5src,WristMAE (Ours),probe,8.137550950050354,8.445178717374802,0.30762776732444763
+full_body_pose_nymeria,mae_5src,WristMAE (Ours),probe,97.85016,98.729378,0.8792179999999945
+odometry_nymeria_local,mae_5src,WristMAE (Ours),probe,0.1998629427138598,0.20271860318095236,0.002855660467092569
+language_humanml3d,mae_5src,WristMAE (Ours),probe,27.923936596302084,27.91637954053101,-0.007557055771073351
+pd_pads,mae_5src,WristMAE (Ours),probe,55.21003818876159,31.33333333333333,-23.876704855428258
+har_hhar,mae_5src,WristMAE (Ours),probe,62.067667472456186,62.5114960926694,0.44382862021321046
+har_mhealth,mae_5src,WristMAE (Ours),probe,68.59750749194534,70.17391608414373,1.5764085921983906
+har_prism,mae_5src,WristMAE (Ours),probe,27.900376801913968,29.315598165839717,1.415221363925749
+har_userwatch,mae_5src,WristMAE (Ours),probe,72.71238069888955,75.05336675846226,2.340986059572714
+arm_pose_nymeria,limubert_5src,LIMU-BERT,probe,8.139204233884811,8.456084877252579,0.31688064336776733
+full_body_pose_nymeria,limubert_5src,LIMU-BERT,probe,98.545129,99.570986,1.025857000000002
+odometry_nymeria_local,limubert_5src,LIMU-BERT,probe,0.207840867590574,0.20508850752485844,-0.0027523600657155534
+language_humanml3d,limubert_5src,LIMU-BERT,probe,24.909930349135976,24.930006423497407,0.02007607436143033
+pd_pads,limubert_5src,LIMU-BERT,probe,50.45595894461721,28.50561474229773,-21.950344202319478
+har_hhar,limubert_5src,LIMU-BERT,probe,61.201733262933544,60.53151339553834,-0.670219867395204
+har_mhealth,limubert_5src,LIMU-BERT,probe,67.60070160743558,67.98335165205988,0.38265004462429886
+har_prism,limubert_5src,LIMU-BERT,probe,25.0563823034932,24.517632299959253,-0.5387500035339485
+har_userwatch,limubert_5src,LIMU-BERT,probe,71.05917910311625,71.29007839409796,0.2308992909817107
+arm_pose_nymeria,simmtm_5src,SimMTM,probe,8.465863019227982,8.830276876688004,0.364413857460022
+full_body_pose_nymeria,simmtm_5src,SimMTM,probe,103.645474,104.318005,0.6725310000000064
+odometry_nymeria_local,simmtm_5src,SimMTM,probe,0.22396585247435583,0.22519129196871523,0.0012254394943594094
+language_humanml3d,simmtm_5src,SimMTM,probe,17.18668774245554,17.19674479822661,0.010057055771071077
+pd_pads,simmtm_5src,SimMTM,probe,48.68008821497193,25.438596491228072,-23.24149172374386
+har_hhar,simmtm_5src,SimMTM,probe,57.54691034944489,54.21904446141136,-3.3278658880335357
+har_mhealth,simmtm_5src,SimMTM,probe,61.37127441749204,61.546831660240834,0.1755572427487948
+har_prism,simmtm_5src,SimMTM,probe,26.713729558667875,26.558694545995742,-0.15503501267213338
+har_userwatch,simmtm_5src,SimMTM,probe,66.80857160434235,67.35098504009923,0.5424134357568846
+arm_pose_nymeria,focal_5src,FOCAL,probe,8.708436042070389,9.091581404209137,0.38314536213874817
+full_body_pose_nymeria,focal_5src,FOCAL,probe,108.413672,108.891277,0.47760499999999695
+odometry_nymeria_local,focal_5src,FOCAL,probe,0.2403601483533262,0.2463605018368048,0.006000353483478604
+language_humanml3d,focal_5src,FOCAL,probe,8.565239558667944,8.565258577258302,1.9018590357688936e-05
+pd_pads,focal_5src,FOCAL,probe,40.65037944348289,25.438596491228072,-15.211782952254818
+har_hhar,focal_5src,FOCAL,probe,44.9448095778419,44.90180927287477,-0.04300030496712992
+har_mhealth,focal_5src,FOCAL,probe,62.98459814077716,62.97509278721609,-0.009505353561067409
+har_prism,focal_5src,FOCAL,probe,21.92555943176763,21.484650933475397,-0.44090849829223444
+har_userwatch,focal_5src,FOCAL,probe,46.98823011672481,46.9628903559622,-0.02533976076260558
+arm_pose_nymeria,relcon_5src,RelCon,probe,8.504417538642883,8.939417451620102,0.43499991297721863
+full_body_pose_nymeria,relcon_5src,RelCon,probe,104.291822,105.391464,1.099642000000003
+odometry_nymeria_local,relcon_5src,RelCon,probe,0.21528262074777194,0.21689388083209632,0.001611260084324384
+language_humanml3d,relcon_5src,RelCon,probe,13.151747695097988,13.151690639326919,-5.7055771069514094e-05
+pd_pads,relcon_5src,RelCon,probe,40.53872053872054,25.438596491228072,-15.100124047492468
+har_hhar,relcon_5src,RelCon,probe,33.3098308416739,32.70208341998807,-0.6077474216858292
+har_mhealth,relcon_5src,RelCon,probe,38.35878745244416,37.636836610600746,-0.721950841843416
+har_prism,relcon_5src,RelCon,probe,18.326851373606008,17.48951554651015,-0.8373358270958562
+har_userwatch,relcon_5src,RelCon,probe,51.639294956788774,51.650336093742546,0.011041136953771513
+arm_pose_nymeria,sslwear_5src,SSL-Wearables,probe,8.423518389463425,,
+full_body_pose_nymeria,sslwear_5src,SSL-Wearables,probe,101.666022,,
+odometry_nymeria_local,sslwear_5src,SSL-Wearables,probe,0.22046790745812805,,
+language_humanml3d,sslwear_5src,SSL-Wearables,probe,24.800471434329186,,
+pd_pads,sslwear_5src,SSL-Wearables,probe,57.44699744699745,,
+har_hhar,sslwear_5src,SSL-Wearables,probe,59.18854111494102,,
+har_mhealth,sslwear_5src,SSL-Wearables,probe,66.3291355148599,,
+har_prism,sslwear_5src,SSL-Wearables,probe,27.567264826815297,,
+har_userwatch,sslwear_5src,SSL-Wearables,probe,67.38163328067253,,
+arm_pose_nymeria,mae_5src_noaltattn,"WristMAE, plain attention",probe,8.363016694784164,8.500588685274124,0.13757199048995972
+full_body_pose_nymeria,mae_5src_noaltattn,"WristMAE, plain attention",probe,99.963851,100.449334,0.4854829999999879
+odometry_nymeria_local,mae_5src_noaltattn,"WristMAE, plain attention",probe,0.21040970112973734,0.21066254012488786,0.00025283899515052277
+language_humanml3d,mae_5src_noaltattn,"WristMAE, plain attention",probe,26.343021814700993,26.342964758929924,-5.7055771069514094e-05
+pd_pads,mae_5src_noaltattn,"WristMAE, plain attention",probe,48.10547875064004,28.50561474229773,-19.59986400834231
+har_hhar,mae_5src_noaltattn,"WristMAE, plain attention",probe,60.18452840350537,59.93294322419902,-0.25158517930634616
+har_mhealth,mae_5src_noaltattn,"WristMAE, plain attention",probe,68.0641086773738,67.99358014061431,-0.07052853675948256
+har_prism,mae_5src_noaltattn,"WristMAE, plain attention",probe,26.45189635705403,26.250808854650703,-0.2010875024033254
+har_userwatch,mae_5src_noaltattn,"WristMAE, plain attention",probe,73.02040754268603,72.66912082179374,-0.35128672089228985
+arm_pose_nymeria,mae_5src_acconly,"WristMAE, accelerometer only",probe,8.758489042520523,9.141712635755539,0.38322359323501587
+full_body_pose_nymeria,mae_5src_acconly,"WristMAE, accelerometer only",probe,102.787634,105.164715,2.377081000000004
+odometry_nymeria_local,mae_5src_acconly,"WristMAE, accelerometer only",probe,0.2296265066070148,0.22803639834509032,-0.0015901082619244888
+language_humanml3d,mae_5src_acconly,"WristMAE, accelerometer only",probe,20.67672099350093,20.674259030681647,-0.0024619628192823484
+pd_pads,mae_5src_acconly,"WristMAE, accelerometer only",probe,48.18650641435451,28.50561474229773,-19.68089167205678
+har_hhar,mae_5src_acconly,"WristMAE, accelerometer only",probe,57.77468620096887,56.97783672477947,-0.7968494761894007
+har_mhealth,mae_5src_acconly,"WristMAE, accelerometer only",probe,68.49604810004192,70.13150372895353,1.6354556289116147
+har_prism,mae_5src_acconly,"WristMAE, accelerometer only",probe,27.965877512144065,26.96813405905291,-0.9977434530911538
+har_userwatch,mae_5src_acconly,"WristMAE, accelerometer only",probe,69.48651714904642,70.37826920313577,0.891752054089352
+arm_pose_nymeria,control_random,Random frozen encoder,probe,8.456384390592575,8.730382472276688,0.27399808168411255
+full_body_pose_nymeria,control_random,Random frozen encoder,probe,104.987779,106.415562,1.427782999999991
+odometry_nymeria_local,control_random,Random frozen encoder,probe,0.23341782659051732,0.23553622529229207,0.002118398701774743
+language_humanml3d,control_random,Random frozen encoder,probe,9.536809537004384,9.521790518414026,-0.015019018590358257
+pd_pads,control_random,Random frozen encoder,probe,51.746968207145194,25.438596491228072,-26.308371715917122
+har_hhar,control_random,Random frozen encoder,probe,32.376438427956884,32.438771528237,0.06233310028011374
+har_mhealth,control_random,Random frozen encoder,probe,46.575058228733226,46.835476877112136,0.26041864837890927
+har_prism,control_random,Random frozen encoder,probe,16.064712007024706,22.738628626144013,6.673916619119307
+har_userwatch,control_random,Random frozen encoder,probe,9.695242776419427,9.691742458684947,-0.0035003177344794523
+arm_pose_nymeria,control_raw,"Raw input, 0 layers",probe,8.509549498558044,8.726393431425095,0.21684393286705017
+full_body_pose_nymeria,control_raw,"Raw input, 0 layers",probe,106.363257,107.208237,0.8449799999999925
+odometry_nymeria_local,control_raw,"Raw input, 0 layers",probe,0.2557545186063136,0.26111264657181255,0.005358127965498949
+language_humanml3d,control_raw,"Raw input, 0 layers",probe,0.5,0.49500000000000005,-0.004999999999999949
+pd_pads,control_raw,"Raw input, 0 layers",probe,12.643678160919539,25.438596491228072,12.794918330308533
+har_hhar,control_raw,"Raw input, 0 layers",probe,5.316908822910086,5.60591851620298,0.2890096932928943
+har_mhealth,control_raw,"Raw input, 0 layers",probe,1.4107038976148922,1.3572679509632224,-0.05343594665166984
+har_prism,control_raw,"Raw input, 0 layers",probe,15.634059405940596,15.634059405940596,0.0
+har_userwatch,control_raw,"Raw input, 0 layers",probe,0.14523556500177118,0.14523556500177118,0.0
+arm_pose_nymeria,mae_5src,WristMAE (Ours),finetune,8.012033253908157,8.27089250087738,0.258859246969223
+full_body_pose_nymeria,mae_5src,WristMAE (Ours),finetune,88.110126,88.989572,0.8794460000000015
+odometry_nymeria_local,mae_5src,WristMAE (Ours),finetune,0.15410215779289813,0.15882342966155483,0.004721271868656701
+language_humanml3d,mae_5src,WristMAE (Ours),finetune,38.821375636052196,38.818818580281125,-0.002557055771070793
+pd_pads,mae_5src,WristMAE (Ours),finetune,51.852500912741874,46.097953508746876,-5.754547403994998
+har_hhar,mae_5src,WristMAE (Ours),finetune,60.269701459068216,69.33259937292785,9.06289791385963
+har_mhealth,mae_5src,WristMAE (Ours),finetune,72.36298848642328,73.51479335636624,1.1518048699429642
+har_prism,mae_5src,WristMAE (Ours),finetune,36.84501687913263,40.313872096209415,3.4688552170767863
+har_userwatch,mae_5src,WristMAE (Ours),finetune,86.10479870080552,87.36273107471929,1.2579323739137749
+arm_pose_nymeria,limubert_5src,LIMU-BERT,finetune,8.175131678581238,8.382128179073334,0.20699650049209595
+full_body_pose_nymeria,limubert_5src,LIMU-BERT,finetune,89.742643,90.587137,0.8444939999999974
+odometry_nymeria_local,limubert_5src,LIMU-BERT,finetune,0.15763617780283093,0.15974421017265555,0.002108032369824625
+language_humanml3d,limubert_5src,LIMU-BERT,finetune,36.585868809511815,36.5833307723311,-0.002538037180713104
+pd_pads,limubert_5src,LIMU-BERT,finetune,45.96172674677347,48.76702245123298,2.8052957044595104
+har_hhar,limubert_5src,LIMU-BERT,finetune,56.33099444981653,66.19739958844032,9.86640513862379
+har_mhealth,limubert_5src,LIMU-BERT,finetune,62.86592553876077,73.38315719676127,10.517231658000505
+har_prism,limubert_5src,LIMU-BERT,finetune,29.456286898969985,36.164684417199794,6.708397518229809
+har_userwatch,limubert_5src,LIMU-BERT,finetune,75.82682812721131,82.50693849311646,6.680110365905151
+arm_pose_nymeria,simmtm_5src,SimMTM,finetune,8.440148085355759,8.550124615430832,0.10997653007507324
+full_body_pose_nymeria,simmtm_5src,SimMTM,finetune,92.914468,94.540934,1.6264659999999935
+odometry_nymeria_local,simmtm_5src,SimMTM,finetune,0.1628884587735134,0.1628164228364615,-7.203593705190636e-05
+language_humanml3d,simmtm_5src,SimMTM,finetune,32.37359136480427,32.37111038339463,-0.0024809814096400373
+pd_pads,simmtm_5src,SimMTM,finetune,46.805692626761065,61.12999273783587,14.324300111074805
+har_hhar,simmtm_5src,SimMTM,finetune,46.98562551551742,63.530206950856574,16.544581435339154
+har_mhealth,simmtm_5src,SimMTM,finetune,56.809607684745004,69.4775056993134,12.667898014568394
+har_prism,simmtm_5src,SimMTM,finetune,30.781056964885767,32.49017573571675,1.7091187708309796
+har_userwatch,simmtm_5src,SimMTM,finetune,73.6520747595483,79.94674344720433,6.294668687656028
+arm_pose_nymeria,focal_5src,FOCAL,finetune,8.656147122383118,9.026618301868439,0.37047117948532104
+full_body_pose_nymeria,focal_5src,FOCAL,finetune,95.916763,96.586636,0.6698729999999955
+odometry_nymeria_local,focal_5src,FOCAL,finetune,0.17670928892209659,0.17564547700782643,-0.0010638119142701574
+language_humanml3d,focal_5src,FOCAL,finetune,22.365535165499523,22.36805418408988,0.002519018590355415
+pd_pads,focal_5src,FOCAL,finetune,46.3095238095238,33.950782997762865,-12.358740811760939
+har_hhar,focal_5src,FOCAL,finetune,61.27046337152981,58.385343551703336,-2.885119819826471
+har_mhealth,focal_5src,FOCAL,finetune,65.93984789302519,67.55825566327456,1.6184077702493767
+har_prism,focal_5src,FOCAL,finetune,28.771748890571246,31.414403602106994,2.642654711535748
+har_userwatch,focal_5src,FOCAL,finetune,68.32919917006606,71.09147679170087,2.7622776216348086
+arm_pose_nymeria,relcon_5src,RelCon,finetune,8.553347736597061,8.767596632242203,0.2142488956451416
+full_body_pose_nymeria,relcon_5src,RelCon,finetune,92.147361,94.261693,2.1143319999999903
+odometry_nymeria_local,relcon_5src,RelCon,finetune,0.167245759201532,0.1663383463116002,-0.000907412889931819
+language_humanml3d,relcon_5src,RelCon,finetune,30.00377777217996,30.011315809360674,0.007538037180715662
+pd_pads,relcon_5src,RelCon,finetune,49.14816513177169,38.57057057057057,-10.577594561201124
+har_hhar,relcon_5src,RelCon,finetune,42.91068827131796,58.86965344208672,15.958965170768764
+har_mhealth,relcon_5src,RelCon,finetune,60.34168198160796,70.22080557485228,9.879123593244316
+har_prism,relcon_5src,RelCon,finetune,28.919325601987993,33.43345034557727,4.514124743589278
+har_userwatch,relcon_5src,RelCon,finetune,78.96940952609042,80.80795142163021,1.838541895539791
+arm_pose_nymeria,sslwear_5src,SSL-Wearables,finetune,8.571162819862366,,
+full_body_pose_nymeria,sslwear_5src,SSL-Wearables,finetune,90.61382,,
+odometry_nymeria_local,sslwear_5src,SSL-Wearables,finetune,0.16562608646223723,,
+language_humanml3d,sslwear_5src,SSL-Wearables,finetune,34.51883193107965,,
+pd_pads,sslwear_5src,SSL-Wearables,finetune,48.74140637687436,,
+har_hhar,sslwear_5src,SSL-Wearables,finetune,53.45405728813457,,
+har_mhealth,sslwear_5src,SSL-Wearables,finetune,64.78655983445454,,
+har_prism,sslwear_5src,SSL-Wearables,finetune,32.773549393045656,,
+har_userwatch,sslwear_5src,SSL-Wearables,finetune,75.88796629659777,,
+arm_pose_nymeria,mae_5src_noaltattn,"WristMAE, plain attention",finetune,8.193564414978027,8.44934731721878,0.2557829022407532
+full_body_pose_nymeria,mae_5src_noaltattn,"WristMAE, plain attention",finetune,88.382216,90.084253,1.7020370000000042
+odometry_nymeria_local,mae_5src_noaltattn,"WristMAE, plain attention",finetune,0.15685019528354383,0.15879671008439147,0.0019465148008476485
+language_humanml3d,mae_5src_noaltattn,"WristMAE, plain attention",finetune,37.01952894352361,37.01700992493325,-0.0025190185903625206
+pd_pads,mae_5src_noaltattn,"WristMAE, plain attention",finetune,61.03703703703703,40.80500591916117,-20.232031117875863
+har_hhar,mae_5src_noaltattn,"WristMAE, plain attention",finetune,52.63603316162049,65.05025019481336,12.41421703319287
+har_mhealth,mae_5src_noaltattn,"WristMAE, plain attention",finetune,68.62593204058584,71.28291311048903,2.656981069903196
+har_prism,mae_5src_noaltattn,"WristMAE, plain attention",finetune,36.164409423180146,37.27189996699612,1.1074905438159774
+har_userwatch,mae_5src_noaltattn,"WristMAE, plain attention",finetune,78.57333209986403,84.12812773056228,5.554795630698251
+arm_pose_nymeria,mae_5src_acconly,"WristMAE, accelerometer only",finetune,8.88017788529396,9.177686274051666,0.2975083887577057
+full_body_pose_nymeria,mae_5src_acconly,"WristMAE, accelerometer only",finetune,94.423523,96.985723,2.56219999999999
+odometry_nymeria_local,mae_5src_acconly,"WristMAE, accelerometer only",finetune,0.18979155489025815,0.19579189778411032,0.0060003428938521786
+language_humanml3d,mae_5src_acconly,"WristMAE, accelerometer only",finetune,31.51318152047962,31.513162501889262,-1.9018590357688936e-05
+pd_pads,mae_5src_acconly,"WristMAE, accelerometer only",finetune,59.88727858293076,42.63718820861678,-17.250090374313984
+har_hhar,mae_5src_acconly,"WristMAE, accelerometer only",finetune,56.794615423248764,65.40512170620775,8.610506282958987
+har_mhealth,mae_5src_acconly,"WristMAE, accelerometer only",finetune,68.27158275006312,75.26747806593022,6.995895315867102
+har_prism,mae_5src_acconly,"WristMAE, accelerometer only",finetune,29.757846554475933,34.902423455402534,5.144576900926602
+har_userwatch,mae_5src_acconly,"WristMAE, accelerometer only",finetune,77.21156308385228,79.32808572792649,2.116522644074209
+arm_pose_nymeria,scratch,Scratch,scratch,8.214804530143738,8.204726874828339,-0.01007765531539917
+full_body_pose_nymeria,scratch,Scratch,scratch,92.720507,94.300028,1.5795209999999997
+odometry_nymeria_local,scratch,Scratch,scratch,0.16176734735990456,0.1612138311314832,-0.000553516228421369
+language_humanml3d,scratch,Scratch,scratch,23.178559121366312,23.168540102775957,-0.0100190185903557
+pd_pads,scratch,Scratch,scratch,29.89417989417989,33.81843381843382,3.9242539242539287
+har_hhar,scratch,Scratch,scratch,48.833564345494906,54.09774428786399,5.264179942369083
+har_mhealth,scratch,Scratch,scratch,63.189417481037516,65.07205905350808,1.8826415724705683
+har_prism,scratch,Scratch,scratch,27.807235558880848,32.03033788764682,4.223102328765975
+har_userwatch,scratch,Scratch,scratch,73.53730774068141,78.59426946417679,5.056961723495377

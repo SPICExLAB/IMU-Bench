@@ -1,5 +1,7 @@
 # IMU-Bench — controlled multi-task benchmark & leaderboard
 
+> The paper's ten tasks, the six compared objectives and the commands to run a cell are in the top-level README.md; the notes below are the harness's operational detail and predate the final task list.
+
 A SWE-Bench-style layer over this repo: fixed task instances, one submission
 format (an encoder + an adaptation protocol), one scorer per task, one result
 JSON schema, and a leaderboard generated only from those JSONs.

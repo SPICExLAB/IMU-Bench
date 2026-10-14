@@ -1,0 +1,43 @@
+{
+  "task": "har_samosa",
+  "encoder": "vd_ek25_f0p01_zs",
+  "protocol": "probe",
+  "seed": 42,
+  "metrics": {
+    "macro_f1": 0.33981441282558783,
+    "bal_acc": 0.34145877249519474,
+    "acc": 0.3733446041138349,
+    "val_loss": 2.167729
+  },
+  "primary_metric": "macro_f1",
+  "eval_split": "val",
+  "run": "bench_har_samosa__vd_ek25_f0p01_zs__probe__s42",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 12800,
+  "selection": {
+    "split": "val",
+    "monitor": "val_loss",
+    "mode": "min"
+  },
+  "job_ids": {
+    "train": 6472867,
+    "score": "6472867"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.har",
+    "date": "2026-09-16T17:24:29-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_val_samples": 3549,
+      "n_classes_seen": 27,
+      "n_classes_head": 27,
+      "n_val_batches": 14,
+      "logged_macro_f1_at_ckpt": 0.340222,
+      "train_end": "early stopping at step=16800 epoch=330"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

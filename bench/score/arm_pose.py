@@ -11,9 +11,52 @@ import glob
 import os
 from typing import Any, Dict, Tuple
 
-from bench.score.common import acc_only_slice, load_ckpt_meta, parse_metrics_txt, val_row_at_step
+from bench.score.common import acc_only_slice, load_ckpt_meta, parse_metrics_txt, save_units, val_row_at_step
 
 RIGHT_ARM_CHAIN = [14, 17, 19, 21, 23]
+
+
+class _WithIndex:
+    """Map-style dataset wrapper that appends the dataset index to every (non-None) item."""
+
+    def __init__(self, ds):
+        self.ds = ds
+
+    def __len__(self):
+        return len(self.ds)
+
+    def __getitem__(self, i):
+        item = self.ds[i]
+        return None if item is None else (*item, i)
+
+
+def _collate_with_index(batch):
+    import torch
+    batch = [b for b in batch if b is not None]
+    if not batch:
+        return None
+    cols = list(zip(*batch))
+    return (*[torch.stack(c, 0) for c in cols[:-1]], torch.as_tensor(cols[-1], dtype=torch.long))
+
+
+def indexed_loader(loader):
+    """Same batches (size / order / None-skipping) as `loader`, each with the dataset index of
+    its windows appended as the last element."""
+    from torch.utils.data import DataLoader
+    return DataLoader(_WithIndex(loader.dataset), batch_size=loader.batch_size, shuffle=False,
+                      num_workers=loader.num_workers, pin_memory=loader.pin_memory, drop_last=False,
+                      collate_fn=_collate_with_index)
+
+
+def window_sessions(ds, idx):
+    """(session file basename, window number inside the session) for dataset indices `idx` of a
+    NymeriaRealWristFullBodyDatasetFLU."""
+    import numpy as np
+    idx = np.asarray(idx, dtype=np.int64)
+    si = np.asarray(ds._sess_idx)[idx]
+    files = np.asarray([os.path.basename(f) for f in ds._session_files])[si]
+    first = np.searchsorted(np.asarray(ds._sess_idx), si)
+    return files, idx - first
 
 
 def score(run_dir: str, ckpt_path: str, task: Dict[str, Any]) -> Tuple[Dict[str, float], Dict[str, Any]]:
@@ -59,10 +102,11 @@ def score(run_dir: str, ckpt_path: str, task: Dict[str, Any]) -> Tuple[Dict[str,
     )
     body_model = art.model.ParametricModel(Paths.SMPL_FILE, device=torch.device("cpu"))
 
-    pos_errs, ang_errs = [], []
+    pos_errs, ang_errs, win_idx = [], [], []
     n_windows = 0
     with torch.no_grad():
-        for x, y_full, _pos in tqdm(loaders["val_loader"], desc="arm_pose", leave=False):
+        for x, y_full, _pos, bidx in tqdm(indexed_loader(loaders["val_loader"]), desc="arm_pose", leave=False):
+            win_idx.append(bidx)
             x = acc_only_slice(x.to(device).float(), cfg)
             tokens, _ = encoder.forward_tokens(x)
             pred = pose_decoder(tokens)                       # [B, Pt, 5*6]
@@ -88,4 +132,26 @@ def score(run_dir: str, ckpt_path: str, task: Dict[str, Any]) -> Tuple[Dict[str,
     if row and "pose_mse" in row:
         metrics["val_pose_mse"] = float(row["pose_mse"])
     info = {"checkpoint_step": meta["step"], "n_val_windows": n_windows, "n_val_sessions": len(val_files)}
+    try:
+        _save_arm_units(run_dir, ckpt_path, task, loaders["val_loader"].dataset, torch.cat(win_idx).numpy(),
+                        torch.cat(pos_errs), torch.cat(ang_errs), metrics, meta["step"])
+    except Exception as e:     # never fail scoring over the sidecar
+        print(f"[units] WARNING arm_pose sidecar: {e!r}")
     return metrics, info
+
+
+def _save_arm_units(run_dir, ckpt_path, task, ds, idx, pos_errs, ang_errs, metrics, step):
+    """Per-window sidecar: mean FK position error (cm) and angle error (deg) over the window's
+    32 patches x 5 arm joints; every window has the same number of terms, so the mean over
+    windows equals the reported mean over all terms (up to float32 summation order)."""
+    from bench.score.common import nymeria_participant as participant_of
+    n = len(idx)
+    pos_w = pos_errs.double().reshape(n, -1).mean(dim=1).numpy() * 100.0
+    ang_w = ang_errs.double().reshape(n, -1).mean(dim=1).numpy()
+    files, within = window_sessions(ds, idx)
+    save_units(run_dir, ckpt_path, task, kind="mean",
+               arrays={"unit_key": [f"{f}#{w}" for f, w in zip(files, within)], "value": pos_w, "ang_err_deg": ang_w},
+               groups={"participant": [participant_of(f) for f in files], "session": files},
+               metric_reported=metrics.get(task["metrics"]["primary"]), checkpoint_step=step,
+               notes="unit = 10.24 s val window; value = mean FK position error (cm) over its patches x 5 arm "
+                     "joints; session = val pkl file; participant parsed from the file name")

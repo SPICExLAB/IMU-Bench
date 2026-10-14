@@ -1,0 +1,40 @@
+{
+  "task": "full_body_pose_nymeria",
+  "encoder": "focal_5src_native",
+  "protocol": "probe",
+  "seed": 42,
+  "metrics": {
+    "mpjpe_mm": 103.940533,
+    "val_pose_mse": 0.020745
+  },
+  "primary_metric": "mpjpe_mm",
+  "eval_split": "val",
+  "run": "bench_full_body_pose_nymeria__focal_5src_native__probe__s42",
+  "checkpoint": "best_mpjpe.pt",
+  "checkpoint_step": 25000,
+  "selection": {
+    "split": "val",
+    "monitor": "mpjpe_mm",
+    "mode": "min",
+    "via": "best_mpjpe.pt (legacy)"
+  },
+  "job_ids": {
+    "train": 7051066,
+    "score": "7051066"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.full_body_pose",
+    "date": "2026-09-22T13:47:34-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "min_val_mpjpe_mm": 103.940533,
+      "min_val_mpjpe_step": 25000,
+      "n_val_evals": 45,
+      "train_end": "early stopping at step=45000 epoch=73"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

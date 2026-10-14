@@ -1,0 +1,39 @@
+{
+ "task": "full_body_pose_nymeria_deepdec",
+ "encoder": "simmtm",
+ "protocol": "probe",
+ "seed": 42,
+ "metrics": {
+  "mpjpe_mm": 103.477094,
+  "val_pose_mse": 0.020724
+ },
+ "primary_metric": "mpjpe_mm",
+ "eval_split": "val",
+ "run": "_deepdec/vit1d_full_body_pose_probe_nymeria_simmtm_multidata",
+ "checkpoint": "best_mpjpe.pt",
+ "checkpoint_step": 50000,
+ "selection": {
+  "split": "val",
+  "monitor": "mpjpe_mm",
+  "mode": "min",
+  "via": "best_mpjpe.pt (legacy)"
+ },
+ "job_ids": {
+  "train": null,
+  "score": null
+ },
+ "provenance": {
+  "source": "scorer:bench.score.full_body_pose",
+  "date": "2026-08-16T17:33:21-05:00",
+  "git": "1b95aa3-dirty",
+  "legacy_run": true,
+  "info": {
+   "min_val_mpjpe_mm": 103.477094,
+   "min_val_mpjpe_step": 50000,
+   "n_val_evals": 456
+  }
+ },
+ "status": "ok",
+ "notes": "harvested from a pre-harness run with a recipe-equivalent config. | moved 2026-09-19 from task full_body_pose_nymeria: pre-switch frozen probe (the decoder is whatever the run used -- deep 4+8/12-layer for runs after 2026-08-27, older decoders before); not part of the paper",
+ "schema_version": 1
+}

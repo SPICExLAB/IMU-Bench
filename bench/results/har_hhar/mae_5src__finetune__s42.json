@@ -4,14 +4,14 @@
   "protocol": "finetune",
   "seed": 42,
   "metrics": {
-    "macro_f1": 0.6137902578732681,
-    "bal_acc": 0.6236898665562859,
-    "acc": 0.6170612551672303,
-    "val_loss": 1.134872
+    "macro_f1": 0.6026970145906821,
+    "bal_acc": 0.6097778999299586,
+    "acc": 0.6024051108605787,
+    "val_loss": 1.178208
   },
   "primary_metric": "macro_f1",
   "eval_split": "val",
-  "run": "vit1d_har_finetune_hhar_mae_realdata_ocdetect_eatingspeed_motionx_sonic",
+  "run": "bench_har_hhar__mae_5src__finetune__s42",
   "checkpoint": "best.pt",
   "checkpoint_step": 200,
   "selection": {
@@ -21,24 +21,24 @@
     "note": "same convention as Experiments_table \u00a73 (metrics read at the min-val-loss checkpoint)"
   },
   "job_ids": {
-    "train": null,
-    "score": "9725906"
+    "train": 6724702,
+    "score": "6724702"
   },
   "provenance": {
     "source": "scorer:bench.score.har",
-    "date": "2026-08-17T18:44:36-05:00",
+    "date": "2026-09-19T02:28:48-05:00",
     "git": "unknown",
-    "legacy_run": true,
+    "legacy_run": false,
     "info": {
       "n_val_samples": 2661,
       "n_classes_seen": 6,
       "n_classes_head": 6,
       "n_val_batches": 11,
-      "logged_macro_f1_at_ckpt": 0.613538,
-      "train_end": "unknown/incomplete"
+      "logged_macro_f1_at_ckpt": 0.602697,
+      "train_end": "early stopping at step=4200 epoch=103"
     }
   },
   "status": "ok",
-  "notes": "harvested from a pre-harness run with a recipe-equivalent config.",
+  "notes": "",
   "schema_version": 1
 }

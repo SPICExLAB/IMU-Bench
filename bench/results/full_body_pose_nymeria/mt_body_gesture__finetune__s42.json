@@ -1,0 +1,40 @@
+{
+  "task": "full_body_pose_nymeria",
+  "encoder": "mt_body_gesture",
+  "protocol": "finetune",
+  "seed": 42,
+  "metrics": {
+    "mpjpe_mm": 94.42570152722392,
+    "local_ang_err_deg": 11.628930148864528,
+    "global_ang_err_deg": 22.391981445909796,
+    "mp_joint_err_cm": 9.070342371006879,
+    "mp_mesh_err_cm": 10.896429876446222,
+    "mp_local_ang_err_deg": 9.300702332602038,
+    "mp_global_ang_err_deg": 21.1064020844149
+  },
+  "primary_metric": "mpjpe_mm",
+  "eval_split": "val",
+  "run": "mt_body_gesture__full_body_pose_nymeria",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 22000,
+  "selection": {
+    "split": "val",
+    "monitor": "joint val loss",
+    "mode": "min",
+    "via": "best.pt of the joint run (the trainer selects on the summed per-task val loss)"
+  },
+  "provenance": {
+    "source": "bench.rescore_full_body_extra.evaluate (bench.score cannot read this run's metrics.txt: the joint trainer logs per-task losses, not the benchmark metric)",
+    "date": "2026-09-23T18:12:50-05:00",
+    "info": {
+      "n_windows": 18269,
+      "n_poses": 2338432,
+      "n_val_windows_total": 18269,
+      "step": 22000,
+      "max_batches": 0,
+      "amp": true
+    }
+  },
+  "status": "ok",
+  "notes": "joint multi-task fine-tune; this cell is the joint model's own full-body head, comparable with the single-task fine-tune row of the same MAE"
+}

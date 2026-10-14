@@ -1,0 +1,2 @@
+Participant-split (p3) sources retrained on 2026-09-24 16:50 WITHOUT BENCH_ZSCORE=1 (physical input) while every
+probe/finetune reading them is z-score. Moved here 2026-09-24 22:50; rerun with BENCH_ZSCORE=1. See NOTE_concurrent_sessions.md.

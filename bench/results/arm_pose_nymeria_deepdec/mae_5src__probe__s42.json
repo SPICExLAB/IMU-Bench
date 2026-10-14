@@ -1,0 +1,39 @@
+{
+ "task": "arm_pose_nymeria_deepdec",
+ "encoder": "mae_5src",
+ "protocol": "probe",
+ "seed": 42,
+ "metrics": {
+  "pos_err_cm": 8.176489919424057,
+  "ang_err_deg": 9.916475296020508,
+  "val_pose_mse": 0.016865
+ },
+ "primary_metric": "pos_err_cm",
+ "eval_split": "val",
+ "run": "_deepdec/bench_arm_pose_nymeria__mae_5src__probe__s42",
+ "checkpoint": "best.pt",
+ "checkpoint_step": 6000,
+ "selection": {
+  "split": "val",
+  "monitor": "val_loss",
+  "mode": "min"
+ },
+ "job_ids": {
+  "train": 6563362,
+  "score": "6563362"
+ },
+ "provenance": {
+  "source": "scorer:bench.score.arm_pose",
+  "date": "2026-09-18T01:23:43-05:00",
+  "git": "unknown",
+  "legacy_run": false,
+  "info": {
+   "n_val_windows": 18269,
+   "n_val_sessions": 101,
+   "train_end": "early stopping at step=26000 epoch=43"
+  }
+ },
+ "status": "ok",
+ "notes": "moved 2026-09-19 from task arm_pose_nymeria: frozen probe with the deep decoder (pose 4+8, odometry 12 layers), kept for the appendix after the benchmark switched to the shallow probe decoder",
+ "schema_version": 1
+}

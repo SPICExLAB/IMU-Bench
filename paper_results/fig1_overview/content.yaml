@@ -1,0 +1,45 @@
+# Content of Figure 1 (IMU-Bench overview), for redrawing it as pictograms.
+# Every fact below matches the paper (Table 1, Sec. 2, Appendix B); the current TikZ version is
+# current_fig_overview.tex (paper_iclr/Sections/fig_overview.tex). Suggested pictograms are only ideas.
+input:
+  label: Wrist IMU
+  detail: accelerometer + gyroscope, 6 channels, one wrist, 50 Hz (OpenWatch 100 Hz)
+  pictogram: watch on a wrist with three axes
+encoder:
+  label: Encoder
+  detail: one 12-layer ViT (21 M parameters), one 280 h pretraining corpus (5 sources)
+  objectives: [MAE, LIMU-BERT, SimMTM, FOCAL, RelCon]
+  pictogram: stacked blocks / chip
+protocols:  # every encoder scored under all three, one fixed decoder per task
+  - {label: frozen probe, pictogram: padlock on encoder}
+  - {label: fine-tune, pictogram: open padlock / gradient arrow}
+  - {label: from scratch, pictogram: empty (random) encoder}
+families:
+  - name: Pose
+    tasks: [arm pose (5 joints, cm), full-body pose (23 joints, MPJPE mm)]
+    dataset: Nymeria (real wrist IMU + motion capture), session split
+    pictogram: stick figure with highlighted arm
+  - name: Odometry
+    tasks: [pelvis velocity in the wrist frame, ATE (m)]
+    dataset: Nymeria, session split
+    pictogram: footprints / dotted trajectory
+  - name: Microgesture
+    tasks: [5 gestures + background, clip macro-F1]
+    dataset: OpenWatch, 43 canonical participants, subject split
+    pictogram: hand with pinch
+  - name: IMU-text retrieval
+    tasks: [Recall@1 in galleries of 100]
+    dataset: HumanML3D (simulated wrist IMU), official split
+    pictogram: speech bubble linked to a waveform
+  - name: Parkinson's disease
+    tasks: [healthy / PD / differential diagnosis per participant, subject macro-F1]
+    dataset: PADS, 469 participants, subject split
+    pictogram: tremor lines / clipboard
+  - name: Activity recognition
+    tasks: [macro-F1]
+    datasets: [HHAR (6 classes), MHEALTH (12), PRISM (96), user study (60, ours, time split)]
+    pictogram: walking / cooking / typing figures
+audit:
+  - every pretraining corpus checked against every evaluation set
+  - duplicate participants removed (OpenWatch 50 ids -> 43 people)
+  - sensor units verified (EatingSpeed gyroscope in deg/s)

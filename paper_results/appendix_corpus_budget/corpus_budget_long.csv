@@ -1,0 +1,81 @@
+encoder,corpus_label,windows,steps,task,value
+corpus_ref,Reference composition,197k,50k,arm_pose_nymeria,8.360476046800613
+corpus_ref,Reference composition,197k,50k,full_body_pose_nymeria,100.699133
+corpus_ref,Reference composition,197k,50k,odometry_nymeria_local,0.20946889467187926
+corpus_ref,Reference composition,197k,50k,microgesture_openwatch,0.5850877192982455
+corpus_ref,Reference composition,197k,50k,language_humanml3d,23.245070154667744
+corpus_ref,Reference composition,197k,50k,pd_pads,0.48108821605457425
+corpus_ref,Reference composition,197k,50k,har_hhar,0.5451987878485407
+corpus_ref,Reference composition,197k,50k,har_mhealth,0.7184451494717717
+corpus_ref,Reference composition,197k,50k,har_prism,0.27111726536344277
+corpus_ref,Reference composition,197k,50k,har_userwatch,0.722961754873505
+corpus_uniform,Uniform random,196k,50k,arm_pose_nymeria,8.413361757993698
+corpus_uniform,Uniform random,196k,50k,full_body_pose_nymeria,100.687425
+corpus_uniform,Uniform random,196k,50k,odometry_nymeria_local,0.21610754506884552
+corpus_uniform,Uniform random,196k,50k,microgesture_openwatch,0.5258398199574669
+corpus_uniform,Uniform random,196k,50k,language_humanml3d,22.135886064789158
+corpus_uniform,Uniform random,196k,50k,pd_pads,0.5412186379928315
+corpus_uniform,Uniform random,196k,50k,har_hhar,0.5953710667064952
+corpus_uniform,Uniform random,196k,50k,har_mhealth,0.6569470502145619
+corpus_uniform,Uniform random,196k,50k,har_prism,0.24597121858555146
+corpus_uniform,Uniform random,196k,50k,har_userwatch,0.6556936932822798
+corpus_temp03,Source temperature (alpha=0.3),196k,50k,arm_pose_nymeria,8.357685059309006
+corpus_temp03,Source temperature (alpha=0.3),196k,50k,full_body_pose_nymeria,100.35394
+corpus_temp03,Source temperature (alpha=0.3),196k,50k,odometry_nymeria_local,0.21422570023879464
+corpus_temp03,Source temperature (alpha=0.3),196k,50k,microgesture_openwatch,0.5238921919228824
+corpus_temp03,Source temperature (alpha=0.3),196k,50k,language_humanml3d,23.359262809209532
+corpus_temp03,Source temperature (alpha=0.3),196k,50k,pd_pads,0.4666666666666666
+corpus_temp03,Source temperature (alpha=0.3),196k,50k,har_hhar,0.552556973358055
+corpus_temp03,Source temperature (alpha=0.3),196k,50k,har_mhealth,0.6403600924961267
+corpus_temp03,Source temperature (alpha=0.3),196k,50k,har_prism,0.25057656360575714
+corpus_temp03,Source temperature (alpha=0.3),196k,50k,har_userwatch,0.6572582234507789
+g5_k1000_f10,Motion-mode balanced,196k,50k,arm_pose_nymeria,8.358178287744522
+g5_k1000_f10,Motion-mode balanced,196k,50k,full_body_pose_nymeria,100.636908
+g5_k1000_f10,Motion-mode balanced,196k,50k,odometry_nymeria_local,0.21611004816037263
+g5_k1000_f10,Motion-mode balanced,196k,50k,microgesture_openwatch,0.5728864734299516
+g5_k1000_f10,Motion-mode balanced,196k,50k,language_humanml3d,22.62671431810167
+g5_k1000_f10,Motion-mode balanced,196k,50k,pd_pads,0.48144826912661703
+g5_k1000_f10,Motion-mode balanced,196k,50k,har_hhar,0.5840933304968122
+g5_k1000_f10,Motion-mode balanced,196k,50k,har_mhealth,0.6436920796790995
+g5_k1000_f10,Motion-mode balanced,196k,50k,har_prism,0.251094614369324
+g5_k1000_f10,Motion-mode balanced,196k,50k,har_userwatch,0.709689071577057
+g5_k1000_f1,"Motion-mode balanced, 1 % of pool",19.6k,50k,arm_pose_nymeria,8.369626849889755
+g5_k1000_f1,"Motion-mode balanced, 1 % of pool",19.6k,50k,full_body_pose_nymeria,100.686472
+g5_k1000_f1,"Motion-mode balanced, 1 % of pool",19.6k,50k,odometry_nymeria_local,0.20895246415723737
+g5_k1000_f1,"Motion-mode balanced, 1 % of pool",19.6k,50k,microgesture_openwatch,0.5582558751952345
+g5_k1000_f1,"Motion-mode balanced, 1 % of pool",19.6k,50k,language_humanml3d,21.755714897475944
+g5_k1000_f1,"Motion-mode balanced, 1 % of pool",19.6k,50k,pd_pads,0.5002227568386349
+g5_k1000_f1,"Motion-mode balanced, 1 % of pool",19.6k,50k,har_hhar,0.606200870336372
+g5_k1000_f1,"Motion-mode balanced, 1 % of pool",19.6k,50k,har_mhealth,0.6670104019463919
+g5_k1000_f1,"Motion-mode balanced, 1 % of pool",19.6k,50k,har_prism,0.2507511120182552
+g5_k1000_f1,"Motion-mode balanced, 1 % of pool",19.6k,50k,har_userwatch,0.6463760747977754
+g5_k1000_f1_150k,"Motion-mode balanced, 1 % of pool",19.6k,150k,arm_pose_nymeria,8.219446241855621
+g5_k1000_f1_150k,"Motion-mode balanced, 1 % of pool",19.6k,150k,full_body_pose_nymeria,98.703596
+g5_k1000_f1_150k,"Motion-mode balanced, 1 % of pool",19.6k,150k,odometry_nymeria_local,0.20062810301511286
+g5_k1000_f1_150k,"Motion-mode balanced, 1 % of pool",19.6k,150k,microgesture_openwatch,0.6259473208767176
+g5_k1000_f1_150k,"Motion-mode balanced, 1 % of pool",19.6k,150k,language_humanml3d,25.02544385107562
+g5_k1000_f1_150k,"Motion-mode balanced, 1 % of pool",19.6k,150k,pd_pads,0.5333333333333333
+g5_k1000_f1_150k,"Motion-mode balanced, 1 % of pool",19.6k,150k,har_hhar,0.5951851744502502
+g5_k1000_f1_150k,"Motion-mode balanced, 1 % of pool",19.6k,150k,har_mhealth,0.6822034544724441
+g5_k1000_f1_150k,"Motion-mode balanced, 1 % of pool",19.6k,150k,har_prism,0.2797529235922336
+g5_k1000_f1_150k,"Motion-mode balanced, 1 % of pool",19.6k,150k,har_userwatch,0.7200191765789229
+g5_k1000_f100,Full pool,1.96M,50k,arm_pose_nymeria,8.335493505001068
+g5_k1000_f100,Full pool,1.96M,50k,full_body_pose_nymeria,101.014101
+g5_k1000_f100,Full pool,1.96M,50k,odometry_nymeria_local,0.21075572693094452
+g5_k1000_f100,Full pool,1.96M,50k,microgesture_openwatch,0.5863187380215243
+g5_k1000_f100,Full pool,1.96M,50k,language_humanml3d,21.802644339765227
+g5_k1000_f100,Full pool,1.96M,50k,pd_pads,0.4535794326422442
+g5_k1000_f100,Full pool,1.96M,50k,har_hhar,0.5602998599193366
+g5_k1000_f100,Full pool,1.96M,50k,har_mhealth,0.6702674972033242
+g5_k1000_f100,Full pool,1.96M,50k,har_prism,0.24637125198974444
+g5_k1000_f100,Full pool,1.96M,50k,har_userwatch,0.680904137058992
+g5_k1000_f100_150k,Full pool,1.96M,150k,arm_pose_nymeria,8.27796384692192
+g5_k1000_f100_150k,Full pool,1.96M,150k,full_body_pose_nymeria,99.084838
+g5_k1000_f100_150k,Full pool,1.96M,150k,odometry_nymeria_local,0.2007187988835391
+g5_k1000_f100_150k,Full pool,1.96M,150k,microgesture_openwatch,0.5514836589005387
+g5_k1000_f100_150k,Full pool,1.96M,150k,language_humanml3d,25.56937024535241
+g5_k1000_f100_150k,Full pool,1.96M,150k,pd_pads,0.6000712250712251
+g5_k1000_f100_150k,Full pool,1.96M,150k,har_hhar,0.6392145808197863
+g5_k1000_f100_150k,Full pool,1.96M,150k,har_mhealth,0.6860325836317848
+g5_k1000_f100_150k,Full pool,1.96M,150k,har_prism,0.2660561312043782
+g5_k1000_f100_150k,Full pool,1.96M,150k,har_userwatch,0.7502869284892455

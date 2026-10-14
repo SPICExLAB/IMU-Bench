@@ -1,0 +1,44 @@
+{
+  "task": "har_mhealth",
+  "encoder": "mt_body_odom",
+  "protocol": "probe",
+  "seed": 42,
+  "metrics": {
+    "macro_f1": 0.6542791760246163,
+    "bal_acc": 0.6735073008666008,
+    "acc": 0.6644423260247855,
+    "val_loss": 0.85793
+  },
+  "primary_metric": "macro_f1",
+  "eval_split": "val",
+  "run": "bench_har_mhealth__mt_body_odom__probe__s42",
+  "checkpoint": "best.pt",
+  "checkpoint_step": 800,
+  "selection": {
+    "split": "val",
+    "monitor": "val_loss",
+    "mode": "min",
+    "note": "same convention as Experiments_table \u00a73 (metrics read at the min-val-loss checkpoint)"
+  },
+  "job_ids": {
+    "train": 7115201,
+    "score": "7115201"
+  },
+  "provenance": {
+    "source": "scorer:bench.score.har",
+    "date": "2026-09-23T04:42:36-05:00",
+    "git": "unknown",
+    "legacy_run": false,
+    "info": {
+      "n_val_samples": 1049,
+      "n_classes_seen": 12,
+      "n_classes_head": 12,
+      "n_val_batches": 5,
+      "logged_macro_f1_at_ckpt": 0.654279,
+      "train_end": "early stopping at step=4800 epoch=283"
+    }
+  },
+  "status": "ok",
+  "notes": "",
+  "schema_version": 1
+}

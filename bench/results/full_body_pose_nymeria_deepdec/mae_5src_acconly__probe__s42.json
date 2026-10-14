@@ -1,0 +1,40 @@
+{
+ "task": "full_body_pose_nymeria_deepdec",
+ "encoder": "mae_5src_acconly",
+ "protocol": "probe",
+ "seed": 42,
+ "metrics": {
+  "mpjpe_mm": 97.626237,
+  "val_pose_mse": 0.020957
+ },
+ "primary_metric": "mpjpe_mm",
+ "eval_split": "val",
+ "run": "_deepdec/bench_full_body_pose_nymeria__mae_5src_acconly__probe__s42",
+ "checkpoint": "best_mpjpe.pt",
+ "checkpoint_step": 27000,
+ "selection": {
+  "split": "val",
+  "monitor": "mpjpe_mm",
+  "mode": "min",
+  "via": "best_mpjpe.pt (legacy)"
+ },
+ "job_ids": {
+  "train": 6561498,
+  "score": "6561498"
+ },
+ "provenance": {
+  "source": "scorer:bench.score.full_body_pose",
+  "date": "2026-09-18T18:07:51-05:00",
+  "git": "unknown",
+  "legacy_run": false,
+  "info": {
+   "min_val_mpjpe_mm": 97.626237,
+   "min_val_mpjpe_step": 27000,
+   "n_val_evals": 47,
+   "train_end": "early stopping at step=47000 epoch=77"
+  }
+ },
+ "status": "ok",
+ "notes": "moved 2026-09-19 from task full_body_pose_nymeria: frozen probe with the deep decoder (pose 4+8, odometry 12 layers), kept for the appendix after the benchmark switched to the shallow probe decoder",
+ "schema_version": 1
+}

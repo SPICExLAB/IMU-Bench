@@ -15,10 +15,10 @@ vit1d:
     alt_attention: true
   odom_decoder:
     hidden_size: 192
-    num_hidden_layers: 1
+    num_hidden_layers: 12
     num_attention_heads: 4
     mlp_ratio: 4.0
-    dropout: 0.0
+    dropout: 0.1
   max_patches_per_channel: 256
   pooling: mean
 objective:
@@ -65,6 +65,11 @@ logging:
 wandb:
   entity: yli32258-northwestern-university
   project: TransfHAR_project
+preprocess:
+  normalize:
+    enabled: true
+    method: zscore
+    eps: 1.0e-06
 bench:
   task: odometry_nymeria_worldframe
   encoder: mae_5src

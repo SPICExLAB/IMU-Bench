@@ -16,7 +16,7 @@ whenever jobs land.
 
 | Paper element (current number) | LaTeX label | Folder | Main file(s) | Generator |
 |---|---|---|---|---|
-| Figure 1, IMU-Bench overview | `fig:teaser` | `fig1_overview/` | `content.yaml` (what the figure must say), `current_fig_overview.tex` (TikZ) | hand-drawn |
+| Figure 1, OmniIMU-Bench overview | `fig:teaser` | `fig1_overview/` | `content.yaml` (what the figure must say), `current_fig_overview.tex` (TikZ) | hand-drawn |
 | Table 1, task list | `tab:imubench_tasks` | `tab1_tasks/` | `tasks.csv` | `analysis/bench_stats/make_task_table.py` |
 | Table 2, main results | `tab:main_results` | `tab2_main_results/` | `main_results_long.csv` (one row per cell, with source file), `main_results_{probe,finetune,scratch}_wide.csv` | `analysis/paper_tables/make_main_table.py` |
 | Figure 2, Table 2 as a radar | `fig:main_radar` | `tab2_main_results/` | `radar_normalized.csv` (raw value, panel best and relative score per cell), `current_main_radar.{png,pdf}` | `analysis/plot_main_radar.py` |

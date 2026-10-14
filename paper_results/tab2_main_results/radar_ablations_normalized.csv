@@ -1,0 +1,113 @@
+protocol,task,task_label,encoder,encoder_label,unit,higher_is_better,value,panel_best,score
+probe,arm_pose_nymeria,Arm,mae_5src,MAE (ours),cm,0,8.137550950050354,8.137550950050354,1.0
+probe,full_body_pose_nymeria,Body,mae_5src,MAE (ours),mm,0,97.85016,92.720507,0.9475764474989106
+probe,odometry_nymeria_local,Odom.,mae_5src,MAE (ours),m,0,0.1998629427138598,0.1617673473599045,0.8093914017442639
+probe,microgesture_openwatch,Gesture,mae_5src,MAE (ours),F1,1,0.6467218088133121,0.6467218088133121,1.0
+probe,language_humanml3d,Text,mae_5src,MAE (ours),R@1,1,27.923936596302084,27.923936596302084,1.0
+probe,pd_pads,PD,mae_5src,MAE (ours),F1,1,0.3395078299776286,0.4161699212058924,0.8157913695297151
+probe,__har,Activity,mae_5src,MAE (ours),F1,1,0.5781948311630126,0.5781948311630126,1.0
+probe,arm_pose_nymeria,Arm,limubert_5src,LIMU-BERT,cm,0,8.139204233884811,8.137550950050354,0.9997968740202421
+probe,full_body_pose_nymeria,Body,limubert_5src,LIMU-BERT,mm,0,98.545129,92.720507,0.9408938619381176
+probe,odometry_nymeria_local,Odom.,limubert_5src,LIMU-BERT,m,0,0.207840867590574,0.1617673473599045,0.7783230951410876
+probe,microgesture_openwatch,Gesture,limubert_5src,LIMU-BERT,F1,1,0.6165824915824916,0.6467218088133121,0.953396782325736
+probe,language_humanml3d,Text,limubert_5src,LIMU-BERT,R@1,1,24.909930349135976,27.923936596302084,0.8920637053886862
+probe,pd_pads,PD,limubert_5src,LIMU-BERT,F1,1,0.3395078299776286,0.4161699212058924,0.8157913695297151
+probe,__har,Activity,limubert_5src,LIMU-BERT,F1,1,0.5622949906924465,0.5781948311630126,0.972500894830581
+probe,arm_pose_nymeria,Arm,simmtm_5src,SimMTM,cm,0,8.465863019227982,8.137550950050354,0.9612193029308468
+probe,full_body_pose_nymeria,Body,simmtm_5src,SimMTM,mm,0,103.645474,92.720507,0.8945929177766123
+probe,odometry_nymeria_local,Odom.,simmtm_5src,SimMTM,m,0,0.2239658524743558,0.1617673473599045,0.7222857662126281
+probe,microgesture_openwatch,Gesture,simmtm_5src,SimMTM,F1,1,0.5585422203069262,0.6467218088133121,0.8636514382154685
+probe,language_humanml3d,Text,simmtm_5src,SimMTM,R@1,1,17.18668774245554,27.923936596302084,0.6154822649443897
+probe,pd_pads,PD,simmtm_5src,SimMTM,F1,1,0.360078277886497,0.4161699212058924,0.8652193720371129
+probe,__har,Activity,simmtm_5src,SimMTM,F1,1,0.5311012148248679,0.5781948311630126,0.9185506099329563
+probe,arm_pose_nymeria,Arm,focal_5src,FOCAL,cm,0,8.708436042070389,8.137550950050354,0.9344445903647804
+probe,full_body_pose_nymeria,Body,focal_5src,FOCAL,mm,0,108.413672,92.720507,0.8552473621592671
+probe,odometry_nymeria_local,Odom.,focal_5src,FOCAL,m,0,0.2403601483533262,0.1617673473599045,0.6730206669789065
+probe,microgesture_openwatch,Gesture,focal_5src,FOCAL,F1,1,0.4805163056192392,0.6467218088133121,0.7430030951035221
+probe,language_humanml3d,Text,focal_5src,FOCAL,R@1,1,8.565239558667944,27.923936596302084,0.306734672925816
+probe,pd_pads,PD,focal_5src,FOCAL,F1,1,0.2543859649122807,0.4161699212058924,0.6112550473978823
+probe,__har,Activity,focal_5src,FOCAL,F1,1,0.4421079931677787,0.5781948311630126,0.7646349800092446
+probe,arm_pose_nymeria,Arm,relcon_5src,RelCon,cm,0,8.504417538642883,8.137550950050354,0.9568616443247832
+probe,full_body_pose_nymeria,Body,relcon_5src,RelCon,mm,0,104.291822,92.720507,0.8890486830309667
+probe,odometry_nymeria_local,Odom.,relcon_5src,RelCon,m,0,0.2152826207477719,0.1617673473599045,0.751418515800369
+probe,microgesture_openwatch,Gesture,relcon_5src,RelCon,F1,1,0.3850710055189124,0.6467218088133121,0.5954198548298377
+probe,language_humanml3d,Text,relcon_5src,RelCon,R@1,1,13.151747695097988,27.923936596302084,0.4709847284512045
+probe,pd_pads,PD,relcon_5src,RelCon,F1,1,0.2543859649122807,0.4161699212058924,0.6112550473978823
+probe,__har,Activity,relcon_5src,RelCon,F1,1,0.3540869115612821,0.5781948311630126,0.6124006865454891
+probe,arm_pose_nymeria,Arm,mae_5src_noaltattn,"MAE, plain attn.",cm,0,8.363016694784164,8.137550950050354,0.9730401417380371
+probe,full_body_pose_nymeria,Body,mae_5src_noaltattn,"MAE, plain attn.",mm,0,99.963851,92.720507,0.9275403665671103
+probe,odometry_nymeria_local,Odom.,mae_5src_noaltattn,"MAE, plain attn.",m,0,0.2104097011297373,0.1617673473599045,0.7688207648760442
+probe,microgesture_openwatch,Gesture,mae_5src_noaltattn,"MAE, plain attn.",F1,1,0.639049390070768,0.6467218088133121,0.9881364465555562
+probe,language_humanml3d,Text,mae_5src_noaltattn,"MAE, plain attn.",R@1,1,26.343021814700997,27.923936596302084,0.943384960206132
+probe,pd_pads,PD,mae_5src_noaltattn,"MAE, plain attn.",F1,1,0.4161699212058924,0.4161699212058924,1.0
+probe,__har,Activity,mae_5src_noaltattn,"MAE, plain attn.",F1,1,0.569302352451548,0.5781948311630126,0.9846202729042427
+probe,arm_pose_nymeria,Arm,mae_5src_acconly,"MAE, acc. only",cm,0,8.758489042520523,8.137550950050354,0.9291044277779361
+probe,full_body_pose_nymeria,Body,mae_5src_acconly,"MAE, acc. only",mm,0,102.787634,92.720507,0.9020589675213265
+probe,odometry_nymeria_local,Odom.,mae_5src_acconly,"MAE, acc. only",m,0,0.2296265066070148,0.1617673473599045,0.7044802873596593
+probe,microgesture_openwatch,Gesture,mae_5src_acconly,"MAE, acc. only",F1,1,0.6224069337880079,0.6467218088133121,0.9624028837531856
+probe,language_humanml3d,Text,mae_5src_acconly,"MAE, acc. only",R@1,1,20.67672099350093,27.923936596302084,0.7404658337549409
+probe,pd_pads,PD,mae_5src_acconly,"MAE, acc. only",F1,1,0.3991596638655462,0.4161699212058924,0.9591266536249007
+probe,__har,Activity,mae_5src_acconly,"MAE, acc. only",F1,1,0.5593078224055031,0.5781948311630126,0.9673345250777854
+probe,arm_pose_nymeria,Arm,scratch,Scratch,cm,0,8.214804530143738,8.137550950050354,0.9905958103068787
+probe,full_body_pose_nymeria,Body,scratch,Scratch,mm,0,92.720507,92.720507,1.0
+probe,odometry_nymeria_local,Odom.,scratch,Scratch,m,0,0.1617673473599045,0.1617673473599045,1.0
+probe,microgesture_openwatch,Gesture,scratch,Scratch,F1,1,0.6081037062982316,0.6467218088133121,0.9402863766324165
+probe,language_humanml3d,Text,scratch,Scratch,R@1,1,23.178559121366312,27.923936596302084,0.8300605840952886
+probe,pd_pads,PD,scratch,Scratch,F1,1,0.3395078299776286,0.4161699212058924,0.8157913695297151
+probe,__har,Activity,scratch,Scratch,F1,1,0.5334188128152366,0.5781948311630126,0.9225589439156502
+finetune,arm_pose_nymeria,Arm,mae_5src,MAE (ours),cm,0,8.012033253908157,8.012033253908157,1.0
+finetune,full_body_pose_nymeria,Body,mae_5src,MAE (ours),mm,0,88.110126,88.110126,1.0
+finetune,odometry_nymeria_local,Odom.,mae_5src,MAE (ours),m,0,0.1541021577928981,0.1541021577928981,1.0
+finetune,microgesture_openwatch,Gesture,mae_5src,MAE (ours),F1,1,0.5419450067476383,0.7031746031746032,0.7707118606117656
+finetune,language_humanml3d,Text,mae_5src,MAE (ours),R@1,1,38.8213756360522,38.8213756360522,1.0
+finetune,pd_pads,PD,mae_5src,MAE (ours),F1,1,0.5971214790746631,0.6839386228699205,0.8730629607800796
+finetune,__har,Activity,mae_5src,MAE (ours),F1,1,0.6389562638135742,0.6389562638135742,1.0
+finetune,arm_pose_nymeria,Arm,limubert_5src,LIMU-BERT,cm,0,8.175131678581238,8.012033253908157,0.9800494437171702
+finetune,full_body_pose_nymeria,Body,limubert_5src,LIMU-BERT,mm,0,89.742643,88.110126,0.9818089043800503
+finetune,odometry_nymeria_local,Odom.,limubert_5src,LIMU-BERT,m,0,0.1576361778028309,0.1541021577928981,0.9775811615125996
+finetune,microgesture_openwatch,Gesture,limubert_5src,LIMU-BERT,F1,1,0.5727866904337492,0.7031746031746032,0.8145724942963024
+finetune,language_humanml3d,Text,limubert_5src,LIMU-BERT,R@1,1,36.585868809511815,38.8213756360522,0.9424155690025486
+finetune,pd_pads,PD,limubert_5src,LIMU-BERT,F1,1,0.5631508464751853,0.6839386228699205,0.8233938362950033
+finetune,__har,Activity,limubert_5src,LIMU-BERT,F1,1,0.5612000875368965,0.6389562638135742,0.8783075138623819
+finetune,arm_pose_nymeria,Arm,simmtm_5src,SimMTM,cm,0,8.440148085355759,8.012033253908157,0.949276383883547
+finetune,full_body_pose_nymeria,Body,simmtm_5src,SimMTM,mm,0,92.914468,88.110126,0.9482928535952011
+finetune,odometry_nymeria_local,Odom.,simmtm_5src,SimMTM,m,0,0.1628884587735134,0.1541021577928981,0.9460594013426566
+finetune,microgesture_openwatch,Gesture,simmtm_5src,SimMTM,F1,1,0.618838045859207,0.7031746031746032,0.8800631351948089
+finetune,language_humanml3d,Text,simmtm_5src,SimMTM,R@1,1,32.37359136480427,38.8213756360522,0.8339114942320571
+finetune,pd_pads,PD,simmtm_5src,SimMTM,F1,1,0.5230911829451975,0.6839386228699205,0.7648218209262985
+finetune,__har,Activity,simmtm_5src,SimMTM,F1,1,0.5205709123117412,0.6389562638135742,0.8147207278394037
+finetune,arm_pose_nymeria,Arm,focal_5src,FOCAL,cm,0,8.656147122383118,8.012033253908157,0.9255888492457104
+finetune,full_body_pose_nymeria,Body,focal_5src,FOCAL,mm,0,95.916763,88.110126,0.918610295470459
+finetune,odometry_nymeria_local,Odom.,focal_5src,FOCAL,m,0,0.1767092889220965,0.1541021577928981,0.8720659719299481
+finetune,microgesture_openwatch,Gesture,focal_5src,FOCAL,F1,1,0.3925299506694856,0.7031746031746032,0.5582254377466724
+finetune,language_humanml3d,Text,focal_5src,FOCAL,R@1,1,22.365535165499523,38.8213756360522,0.5761139269039541
+finetune,pd_pads,PD,focal_5src,FOCAL,F1,1,0.4405270655270655,0.6839386228699205,0.6441032145231695
+finetune,__har,Activity,focal_5src,FOCAL,F1,1,0.5607781483129808,0.6389562638135742,0.877647156889907
+finetune,arm_pose_nymeria,Arm,relcon_5src,RelCon,cm,0,8.553347736597061,8.012033253908157,0.9367131444483672
+finetune,full_body_pose_nymeria,Body,relcon_5src,RelCon,mm,0,92.147361,88.110126,0.9561871880411202
+finetune,odometry_nymeria_local,Odom.,relcon_5src,RelCon,m,0,0.167245759201532,0.1541021577928981,0.9214114517977355
+finetune,microgesture_openwatch,Gesture,relcon_5src,RelCon,F1,1,0.4272283272283272,0.7031746031746032,0.6075707588122937
+finetune,language_humanml3d,Text,relcon_5src,RelCon,R@1,1,30.00377777217996,38.8213756360522,0.7728674546070537
+finetune,pd_pads,PD,relcon_5src,RelCon,F1,1,0.5078002003721197,0.6839386228699205,0.7424645770717048
+finetune,__har,Activity,relcon_5src,RelCon,F1,1,0.5278527634525108,0.6389562638135742,0.8261172060542165
+finetune,arm_pose_nymeria,Arm,mae_5src_noaltattn,"MAE, plain attn.",cm,0,8.193564414978027,8.012033253908157,0.977844665413501
+finetune,full_body_pose_nymeria,Body,mae_5src_noaltattn,"MAE, plain attn.",mm,0,88.382216,88.110126,0.9969214394895913
+finetune,odometry_nymeria_local,Odom.,mae_5src_noaltattn,"MAE, plain attn.",m,0,0.1568501952835438,0.1541021577928981,0.9824798592970957
+finetune,microgesture_openwatch,Gesture,mae_5src_noaltattn,"MAE, plain attn.",F1,1,0.7031746031746032,0.7031746031746032,1.0
+finetune,language_humanml3d,Text,mae_5src_noaltattn,"MAE, plain attn.",R@1,1,37.01952894352361,38.8213756360522,0.9535862224610281
+finetune,pd_pads,PD,mae_5src_noaltattn,"MAE, plain attn.",F1,1,0.4929603362227475,0.6839386228699205,0.7207669222630003
+finetune,__har,Activity,mae_5src_noaltattn,"MAE, plain attn.",F1,1,0.5899992668131262,0.6389562638135742,0.923379736966266
+finetune,arm_pose_nymeria,Arm,mae_5src_acconly,"MAE, acc. only",cm,0,8.88017788529396,8.012033253908157,0.9022379233164354
+finetune,full_body_pose_nymeria,Body,mae_5src_acconly,"MAE, acc. only",mm,0,94.423523,88.110126,0.9331374555893238
+finetune,odometry_nymeria_local,Odom.,mae_5src_acconly,"MAE, acc. only",m,0,0.1897915548902581,0.1541021577928981,0.811954767334108
+finetune,microgesture_openwatch,Gesture,mae_5src_acconly,"MAE, acc. only",F1,1,0.6063080194659143,0.7031746031746032,0.862243910301413
+finetune,language_humanml3d,Text,mae_5src_acconly,"MAE, acc. only",R@1,1,31.51318152047962,38.8213756360522,0.8117481929520888
+finetune,pd_pads,PD,mae_5src_acconly,"MAE, acc. only",F1,1,0.6839386228699205,0.6839386228699205,1.0
+finetune,__har,Activity,mae_5src_acconly,"MAE, acc. only",F1,1,0.5800890195291002,0.6389562638135742,0.9078696811998865
+finetune,arm_pose_nymeria,Arm,scratch,Scratch,cm,0,8.214804530143738,8.012033253908157,0.9753163601773452
+finetune,full_body_pose_nymeria,Body,scratch,Scratch,mm,0,92.720507,88.110126,0.950276576895767
+finetune,odometry_nymeria_local,Odom.,scratch,Scratch,m,0,0.1617673473599045,0.1541021577928981,0.9526159655078433
+finetune,microgesture_openwatch,Gesture,scratch,Scratch,F1,1,0.6081037062982316,0.7031746031746032,0.8647975958643023
+finetune,language_humanml3d,Text,scratch,Scratch,R@1,1,23.178559121366312,38.8213756360522,0.5970566148573341
+finetune,pd_pads,PD,scratch,Scratch,F1,1,0.3395078299776286,0.6839386228699205,0.49640101995263425
+finetune,__har,Activity,scratch,Scratch,F1,1,0.5334188128152366,0.6389562638135742,0.8348283646701524
