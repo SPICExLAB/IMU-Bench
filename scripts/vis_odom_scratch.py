@@ -22,6 +22,7 @@ Usage
 """
 from __future__ import annotations
 
+from imu_lm.utils.data_root import data_path as _data_path
 import argparse
 import glob
 import os
@@ -89,7 +90,7 @@ def parse_args():
     p.add_argument("--run", default="vit1d_odom_supervised_nymeria_altattn_scratch")
     p.add_argument("--runs-root", default="runs")
     p.add_argument("--step", type=int, default=None)
-    p.add_argument("--val-dir", default="/projects/b53017/vbc1591/processed_data_test_body_Ty_rwrist")
+    p.add_argument("--val-dir", default=_data_path("/projects/b53017/vbc1591/processed_data_test_body_Ty_rwrist"))
     p.add_argument("--max-val-files", type=int, default=101)
     p.add_argument("--add-gravity", action="store_true", default=True)
     p.add_argument("--batch-size", type=int, default=256)

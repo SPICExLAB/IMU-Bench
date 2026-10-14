@@ -57,12 +57,20 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 _REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
-_INERTIA1_REPO = os.path.join(_REPO_ROOT, "baselines", "inertia1", "repo")
+from imu_lm.models.baselines._vendor import baselines_dir  # noqa: E402
+_INERTIA1_REPO = baselines_dir("inertia1", "repo")
 if _INERTIA1_REPO not in sys.path:
     sys.path.insert(0, _INERTIA1_REPO)
 
-from inertia1.models.backbones.patchtst.patchTST_accel import PatchTST_Accel  # noqa: E402  (pure torch)
-from inertia1.augmentations.patchtst import create_patch, random_masking  # noqa: E402
+# Optional: only the Inertia-1 encoders need the upstream code. `build_encoder` below is the factory every scorer
+# imports, so a missing Inertia-1 clone must not break the ViT, plugin or other adapter encoders.
+try:
+    from inertia1.models.backbones.patchtst.patchTST_accel import PatchTST_Accel  # noqa: E402  (pure torch)
+    from inertia1.augmentations.patchtst import create_patch, random_masking  # noqa: E402
+    _INERTIA1_IMPORT_ERROR = None
+except ImportError as _e:  # pragma: no cover - depends on the local baselines tree
+    PatchTST_Accel = create_patch = random_masking = None
+    _INERTIA1_IMPORT_ERROR = _e
 
 MODEL_HZ = 20
 G_MPS2 = 9.80665
@@ -151,6 +159,9 @@ class PatchTSTNet(nn.Module):
                  res_attention: bool = True, pre_norm: bool = True, store_attn: bool = False,
                  pe: str = "zeros", learn_pe: bool = True, head_dropout: float = 0.0):
         super().__init__()
+        if PatchTST_Accel is None:
+            raise ImportError(f"Inertia-1 code not found at {_INERTIA1_REPO} (set IMUBENCH_BASELINES_DIR): "
+                              f"{_INERTIA1_IMPORT_ERROR}")
         self.patch_len, self.stride, self.mask_ratio = int(patch_len), int(stride), float(mask_ratio)
         self.num_patch = int(num_patch)
         self.d_model = int(d_model)
@@ -375,6 +386,9 @@ def build_encoder(cfg: Any) -> nn.Module:
     if isinstance(cfg, dict) and cfg.get("harnet"):
         from imu_lm.models.baselines.harnet_encoder import HarnetEncoder
         return HarnetEncoder(cfg)
+    if isinstance(cfg, dict) and cfg.get("plugin"):
+        from imu_lm.models.baselines.plugin_encoder import PluginEncoder
+        return PluginEncoder(cfg)
     from imu_lm.utils.helpers import cfg_get
     from imu_lm.models.ViT1D.model import build_dual_stream, maybe_stats_wrap
     if (cfg_get(cfg, ["dual_stream"], None) or {}).get("enabled", False):

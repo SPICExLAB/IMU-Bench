@@ -41,7 +41,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-VENDOR_PARENT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "baselines", "SSL"))
+from imu_lm.models.baselines._vendor import baselines_dir
+VENDOR_PARENT = baselines_dir("SSL")
 N_FREQ_PATCH = 13          # 65 scales / patch height 5 -- fixed by the released architecture
 
 

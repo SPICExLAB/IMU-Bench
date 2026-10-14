@@ -25,6 +25,24 @@ from bench.registry_io import (REPO, ddel, deep_update, dget, dset, grid_cells, 
 GEN_DIR = os.path.join(REPO, "bench", "generated", "configs")
 
 
+def _plugin_weights(encoder_id: str, enc: Dict[str, Any]):
+    """Local file for a plugin card's `weights` (downloads hf://... once into the HF cache)."""
+    from imu_lm.models.baselines.plugin_encoder import resolve_weights
+    return resolve_weights(enc.get("weights"))
+
+
+def _plugin_builtin_marker(encoder_id: str) -> str:
+    """`weights: builtin` -> the builder loads its own weights; the training branches still open a
+    checkpoint file, so point them at an empty marker that PluginEncoder.load_pretrained_state skips."""
+    import torch
+    from imu_lm.models.baselines.plugin_encoder import BUILTIN_MARK
+    path = os.path.join(REPO, "bench", "generated", "plugin_weights", f"{encoder_id}.builtin.pt")
+    if not os.path.exists(path):
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        torch.save({BUILTIN_MARK: True}, path)
+    return path
+
+
 def build_config(task_id: str, encoder_id: str, protocol: str, seed: int = 42,
                  tasks=None, encoders=None) -> Tuple[str, Dict[str, Any]]:
     tasks = tasks or load_tasks()
@@ -82,6 +100,13 @@ def build_config(task_id: str, encoder_id: str, protocol: str, seed: int = 42,
                                        openwatch=(task_id == "microgesture_openwatch"),
                                        clip=(task_id == "language_humanml3d"))
         ob = cfg["objective"][obj_type]
+    elif enc.get("external_encoder") == "plugin":
+        # Any PyTorch model through imu_lm/models/baselines/plugin_encoder.py (the open track's entry point).
+        from imu_lm.models.baselines.plugin_encoder import plugin_downstream_config
+        cfg = plugin_downstream_config(cfg, enc, _plugin_weights(encoder_id, enc),
+                                       openwatch=(task_id == "microgesture_openwatch"),
+                                       clip=(task_id == "language_humanml3d"))
+        ob = cfg["objective"][obj_type]
     else:
         dset(cfg, "vit1d.encoder.alt_attention", bool(enc["alt_attention"]))
         dset(cfg, "vit1d.shared_kernel", enc["shared_kernel"])
@@ -109,6 +134,9 @@ def build_config(task_id: str, encoder_id: str, protocol: str, seed: int = 42,
         # as for HarNet below: a label for the branches' `pretrained_run` guard, and the release file as the checkpoint
         ob["pretrained_run"] = "normwear"
         ob["pretrained_ckpt"] = enc["weights"]
+    elif enc.get("external_encoder") == "plugin":
+        ob["pretrained_run"] = f"plugin:{encoder_id}"
+        ob["pretrained_ckpt"] = _plugin_weights(encoder_id, enc) or _plugin_builtin_marker(encoder_id)
     elif enc.get("external_encoder") == "harnet":
         # HarNet's weights are the authors' released .mdl, not a run/ directory.
         # Every downstream branch resolves `pretrained_ckpt` as an absolute path
@@ -140,6 +168,16 @@ def build_config(task_id: str, encoder_id: str, protocol: str, seed: int = 42,
     # a later regeneration of some other cell.
     if os.environ.get("BENCH_MAX_STEPS"):
         dset(cfg, "trainer.max_steps", int(os.environ["BENCH_MAX_STEPS"]))
+    # ---- raw-g adapters must see the loader's units ----------------------------
+    # The HarNet and Inertia-1 adapters convert the batch to g themselves (acc_scale_to_g). Their
+    # OpenWatch branch assumes the loader hands over raw sensor counts (4096 LSB/g), but since
+    # 2026-08-23 the microgesture card converts counts to m/s^2 in the loader (data.acc_scale), so
+    # applying 1/4096 on top shrank the signal ~418x. Found 2026-10-14; the HarNet5 microgesture
+    # cells of 2026-09-11 were trained that way and were rerun.
+    if float(dget(cfg, "data.acc_scale", 1.0) or 1.0) != 1.0:
+        for _blk in ("harnet", "inertia1"):
+            if isinstance(cfg.get(_blk), dict):
+                cfg[_blk]["acc_scale_to_g"] = 1.0 / 9.80665
     # ---- input normalisation --------------------------------------------------
     # A frozen or warm-started encoder must see downstream input preprocessed the way it was
     # pretrained. The encoder card's `normalize_method` (zscore | physical | raw) is authoritative
@@ -218,6 +256,8 @@ def build_config(task_id: str, encoder_id: str, protocol: str, seed: int = 42,
             norm["method"] = "zscore"
             norm.setdefault("eps", 1e-6)
     dset(cfg, "trainer.seed", int(seed))
+    from imu_lm.utils.data_root import remap_tree      # IMUBENCH_DATA_ROOT -> dataset paths (DATASETS.md)
+    cfg = remap_tree(cfg)
     dset(cfg, "paths.runs_root", os.path.join(REPO, "runs"))
 
     # provenance block (ignored by the trainer, kept in the resolved config)

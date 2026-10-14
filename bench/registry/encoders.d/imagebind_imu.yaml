@@ -1,0 +1,22 @@
+imagebind_imu:
+  name: ImageBind, IMU branch (Girdhar et al. 2023, released checkpoint)
+  short: ImageBind-IMU
+  group: external_pretrained
+  track: open
+  order: 122
+  external_encoder: plugin
+  entry: imu_lm.models.baselines.imagebind_imu_plugin:build
+  weights: /projects/b53017/vbc1591/SSL_baselines/baselines/SSL/ImageBind/weights/imagebind_huge_imu_only.pt
+  weights_url: https://dl.fbaipublicfiles.com/imagebind/imagebind_huge.pth
+  channels: 6
+  model_hz: 200
+  acc_units: m/s2
+  normalize_method: raw
+  params_m: 19.6
+  pretrain_data: Ego4D head-mounted camera IMU paired with video, 510,142 clips of 10 s (~1,400 h); aligned to the
+    frozen OpenCLIP image tower. No IMU-Bench evaluation set.
+  pretrain_objective: IMU-video contrastive alignment into the ImageBind (CLIP) space; the authors' released
+    imagebind_huge.pth, IMU keys only (CC BY-NC-SA 4.0)
+  note: input resampled to 200 Hz, 8-sample patches, position embedding interpolated from 250 patches to the window's
+    patch count, drop-path 0 downstream (imu_lm/models/baselines/imagebind_imu_plugin.py)
+  hide_in_summary: true

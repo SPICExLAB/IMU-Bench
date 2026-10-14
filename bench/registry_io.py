@@ -18,11 +18,26 @@ def _load(name: str) -> Dict[str, Any]:
 
 
 def load_tasks() -> Dict[str, Any]:
-    return _load("tasks.yaml")
+    from imu_lm.utils.data_root import remap_tree      # IMUBENCH_DATA_ROOT -> dataset paths
+    return remap_tree(_load("tasks.yaml"))
 
 
 def load_encoders() -> Dict[str, Any]:
-    return _load("encoders.yaml")["encoders"]
+    """encoders.yaml plus one card per file in encoders.d/ (how a submission registers its encoder:
+    a file `encoders.d/<id>.yaml` holding `{<id>: {...card...}}`). A card id may appear only once."""
+    encs = _load("encoders.yaml")["encoders"]
+    extra_dir = os.path.join(REG_DIR, "encoders.d")
+    if os.path.isdir(extra_dir):
+        for fn in sorted(os.listdir(extra_dir)):
+            if not fn.endswith((".yaml", ".yml")):
+                continue
+            with open(os.path.join(extra_dir, fn)) as f:
+                cards = yaml.safe_load(f) or {}
+            for k, v in cards.items():
+                if k in encs:
+                    raise ValueError(f"encoder id {k!r} in encoders.d/{fn} is already registered")
+                encs[k] = v
+    return encs
 
 
 def load_protocols() -> Dict[str, Any]:

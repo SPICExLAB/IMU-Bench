@@ -1,0 +1,25 @@
+unimts_release:
+  name: UniMTS (Zhang et al. 2024, released checkpoint, accelerometer only)
+  short: UniMTS
+  group: external_pretrained
+  track: open
+  order: 123
+  external_encoder: plugin
+  entry: imu_lm.models.baselines.unimts_plugin:build
+  weights: /projects/b53017/vbc1591/SSL_baselines/baselines/language_alignment/UniMTS/release_ckpt/checkpoint/UniMTS_acc_encoder_only.pt
+  weights_url: https://huggingface.co/xiyuanz/UniMTS
+  channels: 3
+  model_hz: 20
+  acc_units: m/s2
+  normalize_method: raw
+  params_m: 5.2
+  pretrain_data: IMU simulated at all 22 joints of every HumanML3D motion (14,616 motions, 28.6 h, incl. the official
+    test split) with GPT-augmented captions. CONTAMINATED for language_humanml3d, whose test IMU and captions it saw.
+  pretrain_objective: IMU-text contrastive alignment with a CLIP ViT-B/32 text tower, ST-GCN over the SMPL joint graph;
+    the authors' released checkpoint/UniMTS.pth (encoder keys only)
+  contaminated:
+    language_humanml3d: pretrained on every HumanML3D motion including the official test split, with the same
+      simulated IMU the task uses
+  note: one wrist on SMPL joint 21, other joints zero; 50 -> 20 Hz polyphase resampling; tokens = last ST-GCN map at the
+    wrist joint (imu_lm/models/baselines/unimts_plugin.py)
+  hide_in_summary: true

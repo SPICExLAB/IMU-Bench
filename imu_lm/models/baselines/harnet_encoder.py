@@ -75,10 +75,11 @@ import torch.nn.functional as F
 
 G_MPS2 = 9.80665
 MODEL_HZ = 30.0
-VENDOR = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                      "..", "..", "..", "baselines", "SSL", "ssl_wearables")
+from imu_lm.models.baselines._vendor import baselines_dir
+VENDOR = baselines_dir("SSL", "ssl_wearables")
 VARIANTS = {                       # epoch_len, native window seconds, feature dim
     "harnet5": (5, 5.0, 512),
+    "harnet10": (10, 10.0, 1024),     # mtl_best.mdl, the 10 s model the HarNet paper reports
     "harnet30": (30, 30.0, 1024),
 }
 

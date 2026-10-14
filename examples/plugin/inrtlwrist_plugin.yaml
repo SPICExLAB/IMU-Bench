@@ -1,0 +1,19 @@
+# Encoder card for examples/plugin/inrtlwrist_plugin.py. Copy to bench/registry/encoders.d/<your id>.yaml.
+inrtlwrist_plugin:
+  name: InrtlWrist via the plugin interface (example)
+  short: InrtlWrist-plugin
+  group: open
+  track: open
+  external_encoder: plugin
+  entry: examples.plugin.inrtlwrist_plugin:build
+  weights: hf://YiquanLi/InrtlWrist/inrtlwrist_mae_5src_step144k.pt
+  channels: 6
+  model_hz: 50
+  acc_units: m/s2
+  normalize_method: zscore
+  params_m: 21
+  pretrain_data: IMU-Bench corpus, 197,094 windows (UT-Watch, WISDM, RecoFit, PAMAP2, SAMoSA, Shoaib, OCDetect,
+    EatingSpeed, Motion-X++ and BONES-SEED simulated wrist motion); no evaluation recording
+  pretrain_objective: masked reconstruction (InrtlWrist)
+  weights_url: https://huggingface.co/YiquanLi/InrtlWrist
+  hide_in_summary: true

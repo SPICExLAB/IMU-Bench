@@ -1,0 +1,140 @@
+# IMU-Bench leaderboard tracks.
+#
+# Both tracks use the same ten task cards (raw input, decoder, recipe, split, selection rule, scorer)
+# and the same two protocols (frozen probe, fine-tune). They differ in what the encoder may be.
+#
+#   controlled  answers a scientific question: with data and model held fixed, which pretraining
+#               objective gives the most useful wrist-IMU representation?
+#   open        answers a practical one: what is the best wrist-IMU encoder anyone can build or
+#               download? Any data, any size, any architecture.
+#
+# A row enters a track's table only when all ten tasks are scored under both protocols.
+# `python -m bench.leaderboard_tracks` renders bench/leaderboard_tracks.json and the website table.
+
+columns:  # task id, header, unit, scale (x100 for F1), decimals
+  - [arm_pose_nymeria, Arm pose, cm, 1, 2]
+  - [full_body_pose_nymeria, Full-body pose, MPJPE mm, 1, 1]
+  - [odometry_nymeria_local, Odometry, ATE m, 1, 3]
+  - [microgesture_openwatch, Gesture, clip F1, 100, 1]
+  - [language_humanml3d, IMU–text, R@1, 1, 1]
+  - [pd_pads, Parkinson's, participant F1, 100, 1]
+  - [har_mean, Activity, mean F1, 100, 1]
+har_mean: [har_hhar, har_mhealth, har_prism, har_userwatch]
+
+tracks:
+  controlled:
+    title: Controlled track
+    question: With the corpus and the model held fixed, which pretraining objective gives the most useful
+      wrist-IMU representation?
+    rules:
+      - Pretrain only on the released IMU-Bench corpus (197,094 unlabeled wrist windows; built with
+        scripts/build_multidata_cache.py from the sources listed in DATASETS.md).
+      - Use the shared backbone, a 12-layer, width-384 ViT over 0.32 s patches (21 M parameters,
+        imu_lm/models/ViT1D), and the shared pretraining trainer (scripts/run_pretrain.py).
+      - At most 160,000 pretraining updates, checkpoint selected on the corpus validation split.
+      - Only the objective (loss, views, masking, heads discarded after pretraining) is free.
+    rows:   # encoder id, label
+      - [mae_5src, InrtlWrist (benchmark authors)]
+      - [limubert_5src, LIMU-BERT]
+      - [simmtm_5src, SimMTM]
+      - [focal_5src, FOCAL]
+      - [relcon_5src, RelCon]
+      - [sslwear_5src, SSL-Wearables]
+      - [dino_5src, DINO]
+      - [jepa_5src, I-JEPA]
+  open:
+    title: Open track
+    question: What is the best wrist-IMU encoder that anyone can train or download, at any scale?
+    rules:
+      - Any architecture, size, pretraining corpus and objective. Weights must be public, or released
+        with the submission.
+      - The pretraining corpus must not contain any recording from the evaluation splits of the ten
+        tasks; declare it in the encoder card (pretrain_data) so it can be audited.
+      - Same raw input, task cards and scorers as the controlled track. Input normalisation and other
+        preprocessing inside the encoder are the submitter's choice (normalize_method in the card).
+    rows:   # encoder id -> display metadata
+      mae_5src:
+        label: InrtlWrist (benchmark authors)
+        params: 21 M
+        data: IMU-Bench corpus, 197,094 windows (recorded + simulated wrist motion)
+        weights: official
+        url: https://huggingface.co/YiquanLi/InrtlWrist
+        run_by: benchmark authors
+      harnet5:
+        label: HarNet5 (Yuan et al., 2024)
+        params: 4.2 M
+        data: UK Biobank wrist accelerometry, ~700,000 person-days; accelerometer only
+        weights: official
+        url: https://github.com/OxWearables/ssl-wearables
+        run_by: benchmark authors, from the released weights
+      normwear_base:
+        label: NormWear (Luo et al., 2024)
+        params: 136 M
+        data: ~2.5 M segments of PPG, ECG, EEG, GSR and IMU signals
+        weights: official
+        url: https://github.com/Mobile-Sensing-and-UbiComp-Laboratory/NormWear
+        run_by: benchmark authors, from the released weights
+        note: five cells ran under a step cap (full-body fine-tune, both odometry cells and both Parkinson's cells)
+      harnet10:
+        label: HarNet10 (Yuan et al., 2024)
+        params: 10.5 M
+        data: UK Biobank wrist accelerometry, ~700,000 person-days; accelerometer only
+        weights: official
+        url: https://github.com/OxWearables/ssl-wearables
+        run_by: benchmark authors, from the released weights
+      imagebind_imu:
+        label: ImageBind, IMU branch (Girdhar et al., 2023)
+        params: 19.6 M
+        data: Ego4D head-mounted IMU paired with video, ~1,400 h
+        weights: official
+        url: https://github.com/facebookresearch/ImageBind
+        run_by: benchmark authors, from the released weights
+      unimts_release:
+        label: UniMTS (Zhang et al., 2024)
+        params: 5.2 M
+        data: IMU simulated from HumanML3D (28.6 h); accelerometer only
+        weights: official
+        url: https://huggingface.co/xiyuanz/UniMTS
+        run_by: benchmark authors, from the released weights
+        contaminated: [language_humanml3d]
+      inertia1_patchtst:
+        label: Inertia-1 PatchTST-S (Xu et al., 2026)
+        params: 8.5 M
+        data: NHANES wrist accelerometry, 14,693 participants; accelerometer only
+        weights: reproduction
+        url: https://github.com/yang-ai-lab/Inertia-1
+        note: no checkpoint is released; pretrained by us with the authors' code and recipe
+        run_by: benchmark authors, reproduction
+      inertia1_art:
+        label: Inertia-1 AR-Transformer-S (Xu et al., 2026)
+        params: 8.4 M
+        data: NHANES wrist accelerometry, 14,693 participants; accelerometer only
+        weights: reproduction
+        url: https://github.com/yang-ai-lab/Inertia-1
+        note: no checkpoint is released; pretrained by us with the authors' code and recipe
+        run_by: benchmark authors, reproduction
+
+# Rows shown under every track for orientation; never ranked. The two controls run the frozen-probe
+# decoders on an encoder that never learned anything: what a column's decoder achieves on its own.
+references:
+  - [control_random, probe, "Never-trained encoder, frozen (decoder alone)"]
+  - [control_raw, probe, "Raw input, 0 layers (decoder alone)"]
+  - [scratch, scratch, "Same backbone, trained from scratch"]
+
+# Printed with the tables. The benchmark authors' own encoder has a home advantage, stated here.
+disclosure: >-
+  InrtlWrist was developed by the benchmark authors together with the task cards. The cards' decoders,
+  budgets and selection rules are shared unchanged by every row, are not tuned per encoder, and may not be
+  tuned by submitters either. Rows marked "from the released weights" were run by the benchmark authors
+  with the other groups' public checkpoints and preprocessing; their authors are welcome to resubmit.
+
+# Models we would run with their released weights, and why they are not on the board yet.
+watchlist:
+  - model: RelCon (Xu et al., ICLR 2025)
+    status: weights not released ("we cannot release the pre-training dataset or the associated model
+      weights", github.com/maxxu05/relcon); the objective is in the controlled track as relcon_5src
+  - model: Inertia-1 (Xu et al., 2026), official checkpoints
+    status: code only as of 2026-10-14 (github.com/yang-ai-lab/Inertia-1); our NHANES reproduction is
+      in the open track and will be replaced by the official weights once released
+  - model: IMUDINO
+    status: no public code or weights found as of 2026-10-14

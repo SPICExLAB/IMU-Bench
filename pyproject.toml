@@ -3,10 +3,30 @@ requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "imu_lm"
-version = "0.1.0"
+name = "imu-bench"
+version = "1.0.0"
+description = "IMU-Bench: benchmarking wrist IMU representations across kinematic, semantic and clinical tasks"
+readme = "README.md"
+license = {text = "MIT"}
 requires-python = ">=3.9"
+dependencies = [
+    "torch", "numpy", "pandas", "pyarrow", "scipy", "timm", "transformers", "pyyaml", "scikit-learn", "tqdm",
+    "matplotlib", "huggingface_hub", "pypose", "opencv-python-headless", "chumpy-fix", "wandb",
+]
+
+[project.optional-dependencies]
+pads-baseline = ["pyts", "catboost", "skorch"]   # the PADS BOSS + CatBoost reference pipeline only
+
+[project.scripts]
+imu-bench = "bench.cli:main"
+
+[project.urls]
+Homepage = "https://spicexlab.github.io/imubench/"
+Repository = "https://github.com/SPICExLAB/IMU-Bench"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["imu_lm*", "scripts*", "core*"]
+include = ["imu_lm*", "scripts*", "core*", "bench*", "examples*"]
+
+[tool.setuptools.package-data]
+bench = ["registry/*.yaml", "registry/encoders.d/*.yaml"]

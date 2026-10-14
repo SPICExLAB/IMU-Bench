@@ -1,0 +1,24 @@
+harnet10:
+  name: HarNet10 (Yuan et al. 2024, UK Biobank, 10 s model)
+  short: HarNet10
+  group: external_pretrained
+  track: open
+  order: 119
+  external: false
+  external_encoder: harnet
+  variant: harnet10
+  run: null
+  ckpt: null
+  weights: /projects/b53017/vbc1591/harnet/mtl_best.mdl
+  weights_url: https://wearables-files.ndph.ox.ac.uk/files/ssl/mtl_best.mdl
+  alt_attention: false
+  channels: 3
+  shared_kernel: null
+  params_m: 10.5
+  normalize_method: raw
+  pretrain_data: UK Biobank wrist accelerometry, ~700,000 person-days; accelerometer only, 30 Hz, g units. No
+    IMU-Bench evaluation set.
+  pretrain_objective: multi-task self-supervision (arrow of time, permutation, time warp), 1-D ResNet-V2-18;
+    the authors' released weights (mtl_best.mdl, the torch.hub `harnet10` entry), not a reproduction
+  note: 'window-level encoder: tokens are 10 s crops slid across the window (imu_lm/models/baselines/harnet_encoder.py);
+    at 2.56 s windows the input is reflect-padded to the native length'

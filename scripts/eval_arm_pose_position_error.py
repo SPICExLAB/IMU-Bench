@@ -40,6 +40,7 @@ Usage
 
 from __future__ import annotations
 
+from imu_lm.utils.data_root import data_path as _data_path
 import os
 import sys
 import glob
@@ -179,7 +180,7 @@ def eval_run(run_name: str, alt_attention: bool, val_files, body_model, device):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--val-dir", default="/projects/b53017/vbc1591/processed_data_test_body_Ty_rwrist")
+    ap.add_argument("--val-dir", default=_data_path("/projects/b53017/vbc1591/processed_data_test_body_Ty_rwrist"))
     ap.add_argument("--max-val-files", type=int, default=101)
     ap.add_argument("--out-json", default="results_arm_pose_position_error.json")
     ap.add_argument("--runs", nargs="+", default=None, metavar="NAME=RUN_DIR[:alt]",

@@ -74,6 +74,7 @@ Then: python scripts/summarize_retrieval_alignment.py analysis/retrieval_eval
 """
 from __future__ import annotations
 
+from imu_lm.utils.data_root import data_path as _data_path
 import argparse
 import json
 import logging
@@ -641,9 +642,9 @@ def main():
     ap.add_argument("--imu-source", default="synthetic", choices=["real", "synthetic"], help="[unimts/nymeria]")
     ap.add_argument("--caption-source", default="atomic_action", help="[unimts/nymeria]")
     ap.add_argument("--add-gravity", type=int, default=1, help="[unimts/nymeria]")
-    ap.add_argument("--humanml3d-root", default="/projects/b53017/vbc1591/HumanML3D")
-    ap.add_argument("--nymeria-captions-root", default="/projects/b53017/vbc1591/nymeria_captions")
-    ap.add_argument("--nymeria-val-pkl-root", default="/projects/b53017/vbc1591/processed_data_test_body_Ty_rwrist")
+    ap.add_argument("--humanml3d-root", default=_data_path("/projects/b53017/vbc1591/HumanML3D"))
+    ap.add_argument("--nymeria-captions-root", default=_data_path("/projects/b53017/vbc1591/nymeria_captions"))
+    ap.add_argument("--nymeria-val-pkl-root", default=_data_path("/projects/b53017/vbc1591/processed_data_test_body_Ty_rwrist"))
     ap.add_argument("--split", default="val", help="[humanml3d] which HumanML3D/<split>.txt to evaluate (val|test); Section-13 tables use val")
     ap.add_argument("--gallery-sizes", default="64,100")
     ap.add_argument("--n-subsets", type=int, default=200)

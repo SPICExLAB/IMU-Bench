@@ -38,7 +38,8 @@ from imu_lm.utils.helpers import cfg_get
 
 logger = logging.getLogger(__name__)
 
-OPENWATCH_ROOT = "/projects/b53017/vbc1591/openwatch_raw/open_watch_without_augmentations"
+from imu_lm.utils.data_root import data_path as _data_path
+OPENWATCH_ROOT = _data_path("/projects/b53017/vbc1591/openwatch_raw/open_watch_without_augmentations")
 RAW_IMU_COLUMNS = ["AccX", "AccY", "AccZ", "GyroX", "GyroY", "GyroZ"]
 PPG_COLUMNS = ["PPG_mean"]
 _DUPLICATE_SUFFIX_RE = re.compile(r"\(\d+\)$")

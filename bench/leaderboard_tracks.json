@@ -1,0 +1,914 @@
+{
+ "generated_from": "bench/results/<task>/<encoder>__<protocol>__s42.json",
+ "columns": [
+  {
+   "task": "arm_pose_nymeria",
+   "label": "Arm pose",
+   "unit": "cm",
+   "higher_is_better": false
+  },
+  {
+   "task": "full_body_pose_nymeria",
+   "label": "Full-body pose",
+   "unit": "MPJPE mm",
+   "higher_is_better": false
+  },
+  {
+   "task": "odometry_nymeria_local",
+   "label": "Odometry",
+   "unit": "ATE m",
+   "higher_is_better": false
+  },
+  {
+   "task": "microgesture_openwatch",
+   "label": "Gesture",
+   "unit": "clip F1",
+   "higher_is_better": true
+  },
+  {
+   "task": "language_humanml3d",
+   "label": "IMU–text",
+   "unit": "R@1",
+   "higher_is_better": true
+  },
+  {
+   "task": "pd_pads",
+   "label": "Parkinson's",
+   "unit": "participant F1",
+   "higher_is_better": true
+  },
+  {
+   "task": "har_mean",
+   "label": "Activity",
+   "unit": "mean F1",
+   "higher_is_better": true
+  }
+ ],
+ "har_mean": [
+  "har_hhar",
+  "har_mhealth",
+  "har_prism",
+  "har_userwatch"
+ ],
+ "tracks": {
+  "controlled": {
+   "title": "Controlled track",
+   "question": "With the corpus and the model held fixed, which pretraining objective gives the most useful wrist-IMU representation?",
+   "rules": [
+    "Pretrain only on the released IMU-Bench corpus (197,094 unlabeled wrist windows; built with scripts/build_multidata_cache.py from the sources listed in DATASETS.md).",
+    "Use the shared backbone, a 12-layer, width-384 ViT over 0.32 s patches (21 M parameters, imu_lm/models/vit1d), and the shared pretraining trainer (scripts/run_pretrain.py).",
+    "At most 160,000 pretraining updates, checkpoint selected on the corpus validation split.",
+    "Only the objective (loss, views, masking, heads discarded after pretraining) is free."
+   ],
+   "tables": {
+    "probe": {
+     "track": "controlled",
+     "protocol": "probe",
+     "rows": [
+      {
+       "encoder": "mae_5src",
+       "meta": {
+        "label": "InrtlWrist (ours)"
+       },
+       "label": "InrtlWrist (ours)",
+       "values": [
+        8.14,
+        97.9,
+        0.2,
+        64.7,
+        27.9,
+        55.2,
+        57.8
+       ],
+       "best": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        false,
+        true
+       ],
+       "ranks": [
+        1.5,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        2.0,
+        1.0
+       ],
+       "mean_rank": 1.21
+      },
+      {
+       "encoder": "limubert_5src",
+       "meta": {
+        "label": "LIMU-BERT"
+       },
+       "label": "LIMU-BERT",
+       "values": [
+        8.14,
+        98.5,
+        0.208,
+        61.7,
+        24.9,
+        50.5,
+        56.2
+       ],
+       "best": [
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+       ],
+       "ranks": [
+        1.5,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        3.0,
+        2.0
+       ],
+       "mean_rank": 2.07
+      },
+      {
+       "encoder": "sslwear_5src",
+       "meta": {
+        "label": "SSL-Wearables"
+       },
+       "label": "SSL-Wearables",
+       "values": [
+        8.42,
+        101.7,
+        0.22,
+        54.7,
+        24.8,
+        57.4,
+        55.1
+       ],
+       "best": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false
+       ],
+       "ranks": [
+        3.0,
+        3.0,
+        4.0,
+        4.0,
+        3.0,
+        1.0,
+        3.0
+       ],
+       "mean_rank": 3.0
+      },
+      {
+       "encoder": "simmtm_5src",
+       "meta": {
+        "label": "SimMTM"
+       },
+       "label": "SimMTM",
+       "values": [
+        8.47,
+        103.6,
+        0.224,
+        55.9,
+        17.2,
+        48.7,
+        53.1
+       ],
+       "best": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+       ],
+       "ranks": [
+        4.0,
+        4.0,
+        5.0,
+        3.0,
+        4.0,
+        4.0,
+        4.0
+       ],
+       "mean_rank": 4.0
+      },
+      {
+       "encoder": "relcon_5src",
+       "meta": {
+        "label": "RelCon"
+       },
+       "label": "RelCon",
+       "values": [
+        8.5,
+        104.3,
+        0.215,
+        38.5,
+        13.2,
+        40.5,
+        35.4
+       ],
+       "best": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+       ],
+       "ranks": [
+        5.0,
+        5.0,
+        3.0,
+        6.0,
+        5.0,
+        6.0,
+        6.0
+       ],
+       "mean_rank": 5.14
+      },
+      {
+       "encoder": "focal_5src",
+       "meta": {
+        "label": "FOCAL"
+       },
+       "label": "FOCAL",
+       "values": [
+        8.71,
+        108.4,
+        0.24,
+        48.1,
+        8.6,
+        40.7,
+        44.2
+       ],
+       "best": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+       ],
+       "ranks": [
+        6.0,
+        6.0,
+        6.0,
+        5.0,
+        6.0,
+        5.0,
+        5.0
+       ],
+       "mean_rank": 5.57
+      }
+     ],
+     "references": [
+      {
+       "encoder": "control_random",
+       "label": "Random frozen encoder",
+       "values": [
+        8.46,
+        105.0,
+        0.233,
+        36.4,
+        9.5,
+        51.7,
+        26.2
+       ]
+      },
+      {
+       "encoder": "scratch",
+       "label": "Same backbone, trained from scratch",
+       "values": [
+        8.21,
+        92.7,
+        0.162,
+        60.8,
+        23.2,
+        29.9,
+        53.3
+       ]
+      }
+     ],
+     "pending": [
+      {
+       "encoder": "dino_5src",
+       "label": "DINO",
+       "cells": 10,
+       "of": 20
+      },
+      {
+       "encoder": "jepa_5src",
+       "label": "I-JEPA",
+       "cells": 4,
+       "of": 20
+      }
+     ]
+    },
+    "finetune": {
+     "track": "controlled",
+     "protocol": "finetune",
+     "rows": [
+      {
+       "encoder": "mae_5src",
+       "meta": {
+        "label": "InrtlWrist (ours)"
+       },
+       "label": "InrtlWrist (ours)",
+       "values": [
+        8.01,
+        88.1,
+        0.154,
+        54.2,
+        38.8,
+        51.9,
+        63.9
+       ],
+       "best": [
+        true,
+        true,
+        true,
+        false,
+        true,
+        true,
+        true
+       ],
+       "ranks": [
+        1.0,
+        1.0,
+        1.0,
+        4.0,
+        1.0,
+        1.0,
+        1.0
+       ],
+       "mean_rank": 1.43
+      },
+      {
+       "encoder": "limubert_5src",
+       "meta": {
+        "label": "LIMU-BERT"
+       },
+       "label": "LIMU-BERT",
+       "values": [
+        8.18,
+        89.7,
+        0.158,
+        57.3,
+        36.6,
+        46.0,
+        56.1
+       ],
+       "best": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+       ],
+       "ranks": [
+        2.0,
+        2.0,
+        2.0,
+        3.0,
+        2.0,
+        6.0,
+        3.5
+       ],
+       "mean_rank": 2.93
+      },
+      {
+       "encoder": "sslwear_5src",
+       "meta": {
+        "label": "SSL-Wearables"
+       },
+       "label": "SSL-Wearables",
+       "values": [
+        8.57,
+        90.6,
+        0.166,
+        58.3,
+        34.5,
+        48.7,
+        56.7
+       ],
+       "best": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+       ],
+       "ranks": [
+        5.0,
+        3.0,
+        4.0,
+        2.0,
+        3.0,
+        3.0,
+        2.0
+       ],
+       "mean_rank": 3.14
+      },
+      {
+       "encoder": "simmtm_5src",
+       "meta": {
+        "label": "SimMTM"
+       },
+       "label": "SimMTM",
+       "values": [
+        8.44,
+        92.9,
+        0.163,
+        61.9,
+        32.4,
+        46.8,
+        52.1
+       ],
+       "best": [
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false
+       ],
+       "ranks": [
+        3.0,
+        5.0,
+        3.0,
+        1.0,
+        4.0,
+        4.0,
+        6.0
+       ],
+       "mean_rank": 3.71
+      },
+      {
+       "encoder": "relcon_5src",
+       "meta": {
+        "label": "RelCon"
+       },
+       "label": "RelCon",
+       "values": [
+        8.55,
+        92.1,
+        0.167,
+        42.7,
+        30.0,
+        49.1,
+        52.8
+       ],
+       "best": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+       ],
+       "ranks": [
+        4.0,
+        4.0,
+        5.0,
+        5.0,
+        5.0,
+        2.0,
+        5.0
+       ],
+       "mean_rank": 4.29
+      },
+      {
+       "encoder": "focal_5src",
+       "meta": {
+        "label": "FOCAL"
+       },
+       "label": "FOCAL",
+       "values": [
+        8.66,
+        95.9,
+        0.177,
+        39.3,
+        22.4,
+        46.3,
+        56.1
+       ],
+       "best": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+       ],
+       "ranks": [
+        6.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0,
+        5.0,
+        3.5
+       ],
+       "mean_rank": 5.5
+      }
+     ],
+     "references": [
+      {
+       "encoder": "scratch",
+       "label": "Same backbone, trained from scratch",
+       "values": [
+        8.21,
+        92.7,
+        0.162,
+        60.8,
+        23.2,
+        29.9,
+        53.3
+       ]
+      }
+     ],
+     "pending": [
+      {
+       "encoder": "dino_5src",
+       "label": "DINO",
+       "cells": 10,
+       "of": 20
+      },
+      {
+       "encoder": "jepa_5src",
+       "label": "I-JEPA",
+       "cells": 4,
+       "of": 20
+      }
+     ]
+    }
+   }
+  },
+  "open": {
+   "title": "Open track",
+   "question": "What is the best wrist-IMU encoder that anyone can train or download, at any scale?",
+   "rules": [
+    "Any architecture, size, pretraining corpus and objective. Weights must be public, or released with the submission.",
+    "The pretraining corpus must not contain any recording from the evaluation splits of the ten tasks; declare it in the encoder card (pretrain_data) so it can be audited.",
+    "Same raw input, task cards and scorers as the controlled track. Input normalisation and other preprocessing inside the encoder are the submitter's choice (normalize_method in the card)."
+   ],
+   "tables": {
+    "probe": {
+     "track": "open",
+     "protocol": "probe",
+     "rows": [
+      {
+       "encoder": "mae_5src",
+       "meta": {
+        "label": "InrtlWrist (ours)",
+        "params": "21 M",
+        "data": "IMU-Bench corpus, 197,094 windows (recorded + simulated wrist motion)",
+        "weights": "official",
+        "url": "https://huggingface.co/YiquanLi/InrtlWrist"
+       },
+       "label": "InrtlWrist (ours)",
+       "values": [
+        8.14,
+        97.9,
+        0.2,
+        64.7,
+        27.9,
+        55.2,
+        57.8
+       ],
+       "best": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        false,
+        true
+       ],
+       "ranks": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        2.0,
+        1.0
+       ],
+       "mean_rank": 1.14
+      },
+      {
+       "encoder": "harnet5",
+       "meta": {
+        "label": "HarNet5 (Yuan et al., 2024)",
+        "params": "4.2 M",
+        "data": "UK Biobank wrist accelerometry, ~700,000 person-days; accelerometer only",
+        "weights": "official",
+        "url": "https://github.com/OxWearables/ssl-wearables"
+       },
+       "label": "HarNet5 (Yuan et al., 2024)",
+       "values": [
+        9.46,
+        106.5,
+        0.235,
+        21.5,
+        22.2,
+        25.4,
+        51.9
+       ],
+       "best": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+       ],
+       "ranks": [
+        3.0,
+        2.0,
+        2.0,
+        3.0,
+        2.0,
+        3.0,
+        2.0
+       ],
+       "mean_rank": 2.43
+      },
+      {
+       "encoder": "normwear_base",
+       "meta": {
+        "label": "NormWear (Luo et al., 2024)",
+        "params": "136 M",
+        "data": "~2.5 M segments of PPG, ECG, EEG, GSR and IMU signals",
+        "weights": "official",
+        "url": "https://github.com/Mobile-Sensing-and-UbiComp-Laboratory/NormWear",
+        "note": "five cells ran under a step cap (full-body fine-tune, both odometry cells and both Parkinson's cells)"
+       },
+       "label": "NormWear (Luo et al., 2024)",
+       "values": [
+        8.39,
+        107.7,
+        0.295,
+        43.8,
+        15.5,
+        56.6,
+        38.2
+       ],
+       "best": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false
+       ],
+       "ranks": [
+        2.0,
+        3.0,
+        3.0,
+        2.0,
+        3.0,
+        1.0,
+        3.0
+       ],
+       "mean_rank": 2.43
+      }
+     ],
+     "references": [
+      {
+       "encoder": "control_random",
+       "label": "Random frozen encoder",
+       "values": [
+        8.46,
+        105.0,
+        0.233,
+        36.4,
+        9.5,
+        51.7,
+        26.2
+       ]
+      },
+      {
+       "encoder": "scratch",
+       "label": "Same backbone, trained from scratch",
+       "values": [
+        8.21,
+        92.7,
+        0.162,
+        60.8,
+        23.2,
+        29.9,
+        53.3
+       ]
+      }
+     ],
+     "pending": [
+      {
+       "encoder": "inertia1_patchtst",
+       "label": "Inertia-1 PatchTST-S (Xu et al., 2026)",
+       "cells": 12,
+       "of": 20
+      },
+      {
+       "encoder": "inertia1_art",
+       "label": "Inertia-1 AR-Transformer-S (Xu et al., 2026)",
+       "cells": 12,
+       "of": 20
+      }
+     ]
+    },
+    "finetune": {
+     "track": "open",
+     "protocol": "finetune",
+     "rows": [
+      {
+       "encoder": "mae_5src",
+       "meta": {
+        "label": "InrtlWrist (ours)",
+        "params": "21 M",
+        "data": "IMU-Bench corpus, 197,094 windows (recorded + simulated wrist motion)",
+        "weights": "official",
+        "url": "https://huggingface.co/YiquanLi/InrtlWrist"
+       },
+       "label": "InrtlWrist (ours)",
+       "values": [
+        8.01,
+        88.1,
+        0.154,
+        54.2,
+        38.8,
+        51.9,
+        63.9
+       ],
+       "best": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        false
+       ],
+       "ranks": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        2.0
+       ],
+       "mean_rank": 1.14
+      },
+      {
+       "encoder": "harnet5",
+       "meta": {
+        "label": "HarNet5 (Yuan et al., 2024)",
+        "params": "4.2 M",
+        "data": "UK Biobank wrist accelerometry, ~700,000 person-days; accelerometer only",
+        "weights": "official",
+        "url": "https://github.com/OxWearables/ssl-wearables"
+       },
+       "label": "HarNet5 (Yuan et al., 2024)",
+       "values": [
+        8.63,
+        94.4,
+        0.174,
+        52.8,
+        37.5,
+        46.3,
+        73.5
+       ],
+       "best": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true
+       ],
+       "ranks": [
+        3.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        1.0
+       ],
+       "mean_rank": 2.0
+      },
+      {
+       "encoder": "normwear_base",
+       "meta": {
+        "label": "NormWear (Luo et al., 2024)",
+        "params": "136 M",
+        "data": "~2.5 M segments of PPG, ECG, EEG, GSR and IMU signals",
+        "weights": "official",
+        "url": "https://github.com/Mobile-Sensing-and-UbiComp-Laboratory/NormWear",
+        "note": "five cells ran under a step cap (full-body fine-tune, both odometry cells and both Parkinson's cells)"
+       },
+       "label": "NormWear (Luo et al., 2024)",
+       "values": [
+        8.54,
+        102.2,
+        0.297,
+        21.0,
+        15.7,
+        43.1,
+        27.8
+       ],
+       "best": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+       ],
+       "ranks": [
+        2.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0
+       ],
+       "mean_rank": 2.86
+      }
+     ],
+     "references": [
+      {
+       "encoder": "scratch",
+       "label": "Same backbone, trained from scratch",
+       "values": [
+        8.21,
+        92.7,
+        0.162,
+        60.8,
+        23.2,
+        29.9,
+        53.3
+       ]
+      }
+     ],
+     "pending": [
+      {
+       "encoder": "inertia1_patchtst",
+       "label": "Inertia-1 PatchTST-S (Xu et al., 2026)",
+       "cells": 12,
+       "of": 20
+      },
+      {
+       "encoder": "inertia1_art",
+       "label": "Inertia-1 AR-Transformer-S (Xu et al., 2026)",
+       "cells": 12,
+       "of": 20
+      }
+     ]
+    }
+   }
+  }
+ },
+ "watchlist": [
+  {
+   "model": "RelCon (Xu et al., ICLR 2025)",
+   "status": "weights not released (\"we cannot release the pre-training dataset or the associated model weights\", github.com/maxxu05/relcon); the objective is in the controlled track as relcon_5src"
+  },
+  {
+   "model": "Inertia-1 (Xu et al., 2026), official checkpoints",
+   "status": "code only as of 2026-10-14 (github.com/yang-ai-lab/Inertia-1); our NHANES reproduction is in the open track and will be replaced by the official weights once released"
+  },
+  {
+   "model": "IMUDINO",
+   "status": "no public code or weights found as of 2026-10-14"
+  }
+ ]
+}
