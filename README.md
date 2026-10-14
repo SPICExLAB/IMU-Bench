@@ -79,6 +79,8 @@ pip install -r requirements.txt      # install the CUDA build of PyTorch first i
 
 Python ≥ 3.9. Every run in the paper used one NVIDIA A100 or H100.
 
+The SLURM scripts that `python -m bench.launch` generates activate `imu-bench/` by default; set `IMUBENCH_VENV` to use another environment directory.
+
 ## Data
 
 The datasets are not redistributed. Download each from its source, then point the harness at them:

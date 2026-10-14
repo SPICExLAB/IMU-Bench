@@ -34,7 +34,12 @@ SUBMISSIONS = os.path.join(REPO, "bench", "generated", "submissions.tsv")
 # buy-in node qgpu2015 (4x A100, account b53017 -> QOS buyin; cannot be combined with gengpu).
 ACCOUNT = os.environ.get("BENCH_ACCOUNT", "p32139")
 PARTITION = os.environ.get("BENCH_PARTITION", "gengpu")
-VENV = "TransfHAR_env/bin/activate"
+# Virtual environment activated inside every generated SLURM script: IMUBENCH_VENV if set,
+# else the first of imu-bench/ (the documented name) and TransfHAR_env/ (our cluster's) that exists.
+_VENV_DIR = os.environ.get("IMUBENCH_VENV") or next(
+    (v for v in ("imu-bench", "TransfHAR_env") if os.path.exists(os.path.join(REPO, v, "bin", "activate"))),
+    "imu-bench")
+VENV = _VENV_DIR.rstrip("/") + "/bin/activate"
 
 _HEADER = """#!/bin/bash
 #SBATCH --account={account}
