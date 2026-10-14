@@ -69,6 +69,8 @@ def main():
     ap.add_argument("--windows", type=int, default=6)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--no-scratch", action="store_true", help="plot ground truth and InrtlWrist only")
+    ap.add_argument("--select", choices=["random", "best"], default="random",
+                    help="best: among windows with above-median motion, sample from the lowest-error quarter (ATE / path length)")
     a = ap.parse_args()
     device = torch.device("cpu")
     files = sorted(glob.glob(os.path.join(a.val_dir, "*.pkl")))
@@ -79,8 +81,19 @@ def main():
     (X, Y, GY, R0, POS), _ = _build_windows_by_session(lf, sess, cfg, T, ps, T // 2)
     plen = np.sum(np.linalg.norm(np.diff(POS, axis=1), axis=2), axis=1)
     cand = np.where(plen > np.percentile(plen, 75))[0]
-    rng = np.random.RandomState(a.seed); idx = np.sort(rng.choice(cand, size=a.windows, replace=False))
-    print(f"[odom] {len(X)} windows, {len(cand)} with path length above the 75th percentile; picked {idx.tolist()}")
+    rng = np.random.RandomState(a.seed)
+    if a.select == "best":
+        P_all, *_ = predict(a.run_ours, X[cand], device)
+        tr_all = trajectories(P_all, GY[cand], R0[cand], ps)
+        ate_all = np.sqrt(np.mean(np.sum((tr_all - POS[cand].astype(np.float64)) ** 2, axis=2), axis=1))
+        rel = ate_all / plen[cand]
+        keep = cand[rel <= np.percentile(rel, 25)]
+        long_ = keep[plen[keep] >= np.percentile(plen[keep], 50)]        # the longer half of the low-error windows
+        idx = np.sort(rng.choice(long_, size=a.windows, replace=False))
+        print(f"[odom] {len(X)} windows; {len(cand)} with above-median motion; {len(keep)} in the lowest-error quarter; picked {idx.tolist()}")
+    else:
+        idx = np.sort(rng.choice(cand, size=a.windows, replace=False))
+        print(f"[odom] {len(X)} windows, {len(cand)} with path length above the 75th percentile; picked {idx.tolist()}")
     P_ours, *_ = predict(a.run_ours, X[idx], device)
     P_scr, *_ = predict(a.run_scratch, X[idx], device)
     tr_ours = trajectories(P_ours, GY[idx], R0[idx], ps); tr_scr = trajectories(P_scr, GY[idx], R0[idx], ps); gt = POS[idx].astype(np.float64)
