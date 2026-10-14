@@ -1,0 +1,22 @@
+primus:
+  name: PRIMUS (Das et al. 2025, Nokia Bell Labs, released checkpoint)
+  short: PRIMUS
+  group: external_pretrained
+  track: open
+  order: 124
+  external_encoder: plugin
+  entry: imu_lm.models.baselines.primus_plugin:build
+  weights: /projects/b53017/vbc1591/SSL_baselines/baselines/SSL/PRIMUS/weights/primus_imu_encoder.pt
+  weights_url: https://zenodo.org/records/15147513
+  channels: 6
+  model_hz: 50
+  acc_units: m/s2
+  normalize_method: raw
+  params_m: 1.4
+  pretrain_data: Ego-Exo4D head-worn Aria IMU (6 channels, 50 Hz, 2.5 s windows) paired with video and narration text.
+    No IMU-Bench evaluation set.
+  pretrain_objective: IMU-text and IMU-video contrastive alignment + SSL + nearest-neighbour contrastive (NNCLR); the
+    authors' released best_model.ckpt (CC BY 4.0), IMU encoder keys only
+  note: window encoder (its GRU runs over channels, not time); tokens = 2.5 s crops slid across the window, pooled =
+    their mean (imu_lm/models/baselines/primus_plugin.py)
+  hide_in_summary: true

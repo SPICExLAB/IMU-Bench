@@ -97,6 +97,13 @@ tracks:
         url: https://huggingface.co/xiyuanz/UniMTS
         run_by: benchmark authors, from the released weights
         contaminated: [language_humanml3d]
+      primus:
+        label: PRIMUS (Das et al., 2025)
+        params: 1.4 M
+        data: Ego-Exo4D head-worn IMU paired with video and text
+        weights: official
+        url: https://zenodo.org/records/15147513
+        run_by: benchmark authors, from the released weights
       inertia1_patchtst:
         label: Inertia-1 PatchTST-S (Xu et al., 2026)
         params: 8.5 M
