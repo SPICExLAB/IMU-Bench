@@ -9,9 +9,10 @@ Yiquan Li\*, Aidan Bradshaw\*, Chenfeng Gao, Karan Ahuja (Northwestern Universit
 [![Model](https://img.shields.io/badge/%F0%9F%A4%97%20Model-InrtlWrist-blue)](https://huggingface.co/YiquanLi/InrtlWrist)
 [![Results](https://img.shields.io/badge/%F0%9F%A4%97%20Dataset-Results%20%26%20submissions-blue)](https://huggingface.co/datasets/YiquanLi/IMU-Bench-results)
 [![Collection](https://img.shields.io/badge/%F0%9F%A4%97%20Collection-IMU--Bench-blue)](https://huggingface.co/collections/YiquanLi/imu-bench-6acf98435ad7fb7337edd21f)
+[![arXiv](https://img.shields.io/badge/arXiv-2610.19481-b31b1b.svg)](https://arxiv.org/abs/2610.19481)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-Project website and leaderboard: **https://spicexlab.github.io/imubench/** · Paper: arXiv (link to follow)
+Project website and leaderboard: **https://spicexlab.github.io/imubench/** · Paper: **[arXiv:2610.19481](https://arxiv.org/abs/2610.19481)** ([PDF](https://arxiv.org/pdf/2610.19481))
 
 New here? The **[documentation site](https://spicexlab.github.io/imubench/docs/)** (sources in `docs/`, built with `./build_docs.sh`) takes you from a clone to a leaderboard submission.
 
@@ -295,7 +296,7 @@ Mix-Token and the PADS pipeline are ported in `baselines/mixtoken/` and `baselin
 @article{li2026imubench,
   title   = {IMU-Bench: Benchmarking Wrist IMU Representations Across Kinematic, Semantic and Clinical Tasks},
   author  = {Li, Yiquan and Bradshaw, Aidan and Gao, Chenfeng and Ahuja, Karan},
-  journal = {arXiv preprint},
+  journal = {arXiv preprint arXiv:2610.19481},
   year    = {2026}
 }
 ```

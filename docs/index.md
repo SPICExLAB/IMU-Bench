@@ -14,7 +14,7 @@ IMUs, and with the per-cell result files behind every number in the paper.
 [Code](https://github.com/SPICExLAB/IMU-Bench)
 [InrtlWrist weights](https://huggingface.co/YiquanLi/InrtlWrist)
 [Results and submissions](https://huggingface.co/datasets/YiquanLi/IMU-Bench-results)
-[Paper (arXiv, soon)](https://spicexlab.github.io/imubench/paper/index.html)
+[Paper: arXiv:2610.19481](https://arxiv.org/abs/2610.19481)
 </div>
 
 ## Overview
@@ -30,6 +30,7 @@ IMUs, and with the per-cell result files behind every number in the paper.
 
 ## Latest news
 
+- **Oct 2026.** Paper on arXiv: [2610.19481](https://arxiv.org/abs/2610.19481).
 - **Oct 2026.** `imu-bench` command line, plugin encoders and the open track; InrtlWrist weights and the results
   dataset on the Hugging Face Hub; website and leaderboard live.
 - **Sep 2026.** Paper submitted.
@@ -78,7 +79,7 @@ z = enc(zscore(torch.randn(2, 6, 512)))            # [2, 384] pooled embedding o
 @article{li2026imubench,
   title   = {IMU-Bench: Benchmarking Wrist IMU Representations Across Kinematic, Semantic and Clinical Tasks},
   author  = {Li, Yiquan and Bradshaw, Aidan and Gao, Chenfeng and Ahuja, Karan},
-  journal = {arXiv preprint},
+  journal = {arXiv preprint arXiv:2610.19481},
   year    = {2026}
 }
 ```

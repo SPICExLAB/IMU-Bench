@@ -12,6 +12,10 @@ authors:
     given-names: Karan
 year: 2026
 license: MIT
+identifiers:
+  - type: url
+    value: "https://arxiv.org/abs/2610.19481"
+    description: arXiv preprint
 repository-code: "https://github.com/SPICExLAB/IMU-Bench"
 url: "https://spicexlab.github.io/imubench/"
 preferred-citation:
@@ -26,5 +30,6 @@ preferred-citation:
       given-names: Chenfeng
     - family-names: Ahuja
       given-names: Karan
-  journal: "arXiv preprint"
+  journal: "arXiv preprint arXiv:2610.19481"
+  url: "https://arxiv.org/abs/2610.19481"
   year: 2026
